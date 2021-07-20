@@ -141,14 +141,8 @@ def query_object_form(base_element_type, obj_element_type, obj_key):
         raise MudderyError(ERR.no_table, "Can not find the element: %s" % base_element_type)
 
     if not obj_element_type:
-        if obj_key:
-            # Get the element type from the object's record
-            table_name = ELEMENT(base_element_type).model_name
-            record = general_query_mapper.get_record_by_key(table_name, obj_key)
-            obj_element_type = record.element_type
-        else:
-            # Or use the base element type
-            obj_element_type = base_element_type
+        # Or use the base element type
+        obj_element_type = base_element_type
 
     element = ELEMENT_SET.get(obj_element_type)
     if not element:
@@ -204,7 +198,7 @@ def delete_object_level_properties(object_key, level):
     ELEMENT_PROPERTIES.delete_properties(object_key, level)
 
 
-def save_object_form(tables, obj_typeclass, obj_key):
+def save_object_form(tables, obj_element_type, obj_key):
     """
     Save all data of an object.
 
@@ -214,7 +208,7 @@ def save_object_form(tables, obj_typeclass, obj_key):
                  "table": (string) table's name.
                  "record": (string, optional) record's id. If it is empty, add a new record.
                 }]
-        obj_typeclass: (string) object's typeclass.
+        obj_element_type: (string) object's element type.
         obj_key: (string) current object's key. If it is empty or changed, query an empty form.
     """
     if not tables:
@@ -229,7 +223,7 @@ def save_object_form(tables, obj_typeclass, obj_key):
     if not new_key:
         # Does not has a new key, generate a new key.
         index = SYSTEM_DATA.get_object_index()
-        new_key = "%s_auto_%s" % (obj_typeclass, index)
+        new_key = "%s_auto_%s" % (obj_element_type, index)
         for table in tables:
             table["values"]["key"] = new_key
 
@@ -297,18 +291,13 @@ def save_map_positions(area, rooms):
             record.save()
 
 
-def delete_object(obj_key, base_typeclass=None):
+def delete_object(obj_key, base_element_type=None):
     """
-    Delete an object from all tables under the base typeclass.
+    Delete an object from all tables under the base element type.
     """
-    if not base_typeclass:
-        table_name = ELEMENT("OBJECT").model_name
-        record = general_query_mapper.get_record_by_key(table_name, obj_key)
-        base_typeclass = record.typeclass
-
-    typeclasses = ELEMENT_SET.get_group(base_typeclass)
+    elements = ELEMENT_SET.get_group(base_element_type)
     tables = set()
-    for key, value in typeclasses.items():
+    for key, value in elements.items():
         tables.update(value.get_models())
 
     with transaction.atomic():
@@ -348,23 +337,23 @@ def query_event_action_forms(action_type, event_key):
     }
 
 
-def update_object_key(typeclass_key, old_key, new_key):
+def update_object_key(element_type, old_key, new_key):
     """
     Update an object's key in other tables.
 
     Args:
-        typeclass: (string) object's typeclass.
+        element_type: (string) object's element type.
         old_key: (string) object's old key.
         new_key: (string) object's new key
     """
     # The object's key has changed.
-    typeclass = ELEMENT(typeclass_key)
-    if issubclass(typeclass, ELEMENT("AREA")):
+    element = ELEMENT(element_type)
+    if issubclass(element_type, ELEMENT("AREA")):
         # Update relative room's location.
         model_name = ELEMENT("ROOM").model_name
         if model_name:
             general_query_mapper.filter_records(model_name, area=old_key).update(area=new_key)
-    elif issubclass(typeclass, ELEMENT("ROOM")):
+    elif issubclass(element_type, ELEMENT("ROOM")):
         # Update relative exit's location.
         model_name = ELEMENT("EXIT").model_name
         if model_name:

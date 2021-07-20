@@ -66,9 +66,6 @@ class TestEditor(TestCase):
         response = self.client.get('/worlddata/editor/worldmap/world_exits/form.html')
         self.failUnlessEqual(response.status_code, 200)
         
-        response = self.client.get('/worlddata/editor/worldmap/exit_locks/form.html')
-        self.failUnlessEqual(response.status_code, 200)
-        
         response = self.client.get('/worlddata/editor/worldmap/world_objects/form.html')
         self.failUnlessEqual(response.status_code, 200)
         

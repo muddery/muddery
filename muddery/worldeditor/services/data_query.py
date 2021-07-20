@@ -12,7 +12,7 @@ from muddery.worldeditor.dao import common_mappers as CM
 from muddery.worldeditor.dao.common_mappers import WORLD_AREAS
 from muddery.worldeditor.dao.world_rooms_mapper import WORLD_ROOMS_MAPPER
 from muddery.worldeditor.dao.world_exits_mapper import WORLD_EXITS_MAPPER
-from muddery.worldeditor.dao.general_query_mapper import get_record_by_key, get_record, get_all_from_tables, filter_records, get_all_records
+from muddery.worldeditor.dao import general_query_mapper as query
 from muddery.worldeditor.dao.element_properties_mapper import ELEMENT_PROPERTIES
 from muddery.worldeditor.dao.event_mapper import get_object_event
 from muddery.worldeditor.services.general_query import query_fields
@@ -34,13 +34,21 @@ def query_areas():
     """
     Query all areas and rooms.
     """
-    records = CM.WORLD_AREAS.all_with_base()
-    areas = {r["key"]: {"name": r["name"] + "(" + r["key"] + ")", "rooms": []} for r in records}
+    area_class = ELEMENT("AREA")
+    if not area_class:
+        raise MudderyError(ERR.no_table, "Can not find the element AREA")
 
-    rooms = CM.WORLD_ROOMS.all_with_base()
-    for record in rooms:
-        key = record["location"]
-        choice = (record["key"], record["name"] + " (" + record["key"] + ")")
+    room_class = ELEMENT("ROOM")
+    if not room_class:
+        raise MudderyError(ERR.no_table, "Can not find the element AREA")
+
+    records = query.get_all_records(area_class.model_name)
+    areas = {r.key: {"name": r.name + "(" + r.key + ")", "rooms": []} for r in records}
+
+    records = query.get_all_records(room_class.model_name)
+    for r in records:
+        key = r.area
+        choice = (r.key, r.name + " (" + r.key + ")")
         if key in areas:
             areas[key]["rooms"].append(choice)
         elif key:
@@ -48,7 +56,7 @@ def query_areas():
     return areas
 
 
-def query_element_properties(element_type):
+def query_element_type_properties(element_type):
     """
     Query an element's custom properties.
 
@@ -57,7 +65,7 @@ def query_element_properties(element_type):
     """
     table_name = "properties_dict"
     fields = query_fields(table_name)
-    records = filter_records(table_name, element_type=element_type)
+    records = query.filter_records(table_name, element_type=element_type)
     rows = []
     for record in records:
         line = [str(record.serializable_value(field["name"])) for field in fields]
@@ -70,13 +78,13 @@ def query_element_properties(element_type):
     return table
 
 
-def query_object_properties(element_type, object_key):
+def query_object_properties(element_type, element_key):
     """
     Query all properties of the given object.
 
     Args:
         element_type: (string) the object's element type.
-        object_key: (string) object' key.
+        element_key: (string) object's element key.
     """
     # Get fields.
     fields = []
@@ -88,9 +96,6 @@ def query_object_properties(element_type, object_key):
 
     properties_info = ELEMENT(element_type).get_properties_info()
     for key, info in properties_info.items():
-        if info["mutable"]:
-            continue
-
         fields.append({
             "name": key,
             "label": info["name"],
@@ -108,7 +113,7 @@ def query_object_properties(element_type, object_key):
     # Get rows.
     levels = []
     data = {}
-    records = ELEMENT_PROPERTIES.get_properties_all_levels(object_key)
+    records = ELEMENT_PROPERTIES.get_properties_all_levels(element_key)
     for record in records:
         if record.level not in levels:
             levels.append(record.level)
@@ -128,11 +133,12 @@ def query_object_properties(element_type, object_key):
     return table
 
 
-def query_object_level_properties(object_key, level):
+def query_object_level_properties(element_type, object_key, level):
     """
     Query properties of a level of the given object.
 
     Args:
+        element_type: (string) the object's type.
         object_key: (string) object' key.
         level: (number) object's level.
     """
@@ -159,12 +165,7 @@ def query_object_level_properties(object_key, level):
         "value": level
     })
 
-    # Get typeclass from the object's record
-    table_name = ELEMENT("OBJECT").model_name
-    record = get_record_by_key(table_name, object_key)
-    obj_typeclass = record.typeclass
-
-    properties_info = ELEMENT(obj_typeclass).get_properties_info()
+    properties_info = ELEMENT(element_type).get_properties_info()
 
     # Get properties.
     data = {}
@@ -174,9 +175,6 @@ def query_object_level_properties(object_key, level):
 
     # Set fields.
     for key, info in properties_info.items():
-        if info["mutable"]:
-            continue
-
         field = {
             "name": key,
             "label": info["name"],
@@ -246,7 +244,7 @@ def get_event_data_table(self, event_key):
     fields = query_fields(self.model_name)
     rows = []
 
-    record = get_record(self.model_name, event_key=event_key)
+    record = query.get_record(self.model_name, event_key=event_key)
     line = [str(record.serializable_value(field["name"])) for field in fields]
     rows.append(line)
 
@@ -281,7 +279,7 @@ def query_event_action_data(action_type, event_key):
 
 def query_element_table(element_type):
     """
-    Query a table of objects of the same typeclass.
+    Query all objects of the same element type.
 
     Args:
         element_type: (string) element's type
@@ -301,7 +299,7 @@ def query_element_table(element_type):
     fields = [field for field in table_fields if field["name"] != "id"]
 
     if len(tables) == 1:
-        records = get_all_records(tables[0])
+        records = query.get_all_records(tables[0])
         rows = []
         for record in records:
             line = [str(record.serializable_value(field["name"])) for field in fields]
@@ -313,7 +311,7 @@ def query_element_table(element_type):
             fields.extend([field for field in table_fields if field["name"] != "id" and field["name"] != "key"])
 
         # get all tables' data
-        records = get_all_from_tables(tables)
+        records = query.get_all_from_tables(tables)
         rows = []
         for record in records:
             line = [str(record[field["name"]]) for field in fields]
@@ -353,7 +351,7 @@ def query_map(area_key):
 
         info = {
             "key": record["key"],
-            "typeclass": record["typeclass"],
+            "element_type": record["element_type"],
             "name": record["name"],
             "location": record["location"],
             "position": position,
@@ -366,7 +364,7 @@ def query_map(area_key):
     for record in exit_records:
         info = {
             "key": record["key"],
-            "typeclass": record["typeclass"],
+            "element_type": record["element_type"],
             "location": record["location"],
             "destination": record["destination"]
         }
@@ -386,7 +384,7 @@ def query_dialogues_table():
     Query dialogues.
     """
     cursor = connections[settings.WORLD_DATA_APP].cursor()
-    query = "SELECT T1.*, T2.event event, T5.name npc_name, T5.npc npc_key " \
+    query_string = "SELECT T1.*, T2.event event, T5.name npc_name, T5.npc npc_key " \
                 "FROM (worlddata_dialogues T1 LEFT JOIN " \
                     "(SELECT MIN(T6.key) event, T6.trigger_obj FROM worlddata_event_data T6 " \
                          "WHERE T6.trigger_type='EVENT_TRIGGER_DIALOGUE' GROUP BY trigger_obj) T2 " \
@@ -394,7 +392,7 @@ def query_dialogues_table():
                 "LEFT JOIN (SELECT T3.npc, T3.dialogue, T4.name FROM worlddata_npc_dialogues T3 " \
                     "JOIN worlddata_objects T4 ON T3.npc=T4.key) T5 " \
                 "ON T1.key=T5.dialogue"
-    cursor.execute(query)
+    cursor.execute(query_string)
 
     fields = query_fields("dialogues")
     # add event and npc fields

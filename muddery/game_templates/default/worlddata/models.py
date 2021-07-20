@@ -523,16 +523,6 @@ class action_get_objects(BaseModels.action_get_objects):
 
 # ------------------------------------------------------------
 #
-# condition descriptions
-#
-# ------------------------------------------------------------
-class condition_desc(BaseModels.condition_desc):
-    "Object descriptions in different conditions."
-    pass
-
-
-# ------------------------------------------------------------
-#
 # localized strings
 #
 # ------------------------------------------------------------

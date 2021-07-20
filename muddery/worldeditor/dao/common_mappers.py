@@ -11,37 +11,39 @@ from muddery.worldeditor.dao.common_mapper_base import CommonMapper, ObjectsMapp
 #
 # ------------------------------------------------------------
 
-OBJECTS = ObjectsMapper("objects")
+WORLD_AREAS = ObjectsMapper("AREA")
 
-WORLD_AREAS = ObjectsMapper("world_areas")
+WORLD_EXITS = ObjectsMapper("EXIT")
 
-WORLD_EXITS = ObjectsMapper("world_exits")
+WORLD_NPCS = ObjectsMapper("WORLD_NPC")
 
-WORLD_NPCS = ObjectsMapper("world_npcs")
+WORLD_OBJECTS = ObjectsMapper("WORLD_OBJECT")
 
-WORLD_OBJECTS = ObjectsMapper("world_objects")
+OBJECT_CREATORS = ObjectsMapper("WORLD_OBJECT_CREATOR")
 
-WORLD_ROOMS = ObjectsMapper("world_rooms")
+WORLD_ROOMS = ObjectsMapper("ROOM")
 
-COMMON_OBJECTS = ObjectsMapper("common_objects")
+COMMON_OBJECTS = ObjectsMapper("COMMON_OBJECT")
 
-FOODS = ObjectsMapper("foods")
+POCKET_OBJECTS = ObjectsMapper("POCKET_OBJECT")
 
-SKILL_BOOKS = ObjectsMapper("skill_books")
+FOODS = ObjectsMapper("FOOD")
 
-EQUIPMENTS = ObjectsMapper("equipments")
+SKILL_BOOKS = ObjectsMapper("SKILL_BOOK")
 
-CHARACTERS = ObjectsMapper("characters")
+EQUIPMENTS = ObjectsMapper("EQUIPMENT")
 
-PLAYER_CHARACTERS = ObjectsMapper("player_characters")
+CHARACTERS = ObjectsMapper("CHARACTER")
 
-SHOPS = ObjectsMapper("shops")
+PLAYER_CHARACTERS = ObjectsMapper("PLAYER_CHARACTER")
 
-SHOP_GOODS = ObjectsMapper("shop_goods")
+SHOPS = ObjectsMapper("SHOP")
 
-SKILLS = ObjectsMapper("skills")
+SHOP_GOODS = ObjectsMapper("SHOP_GOODS")
 
-QUESTS = ObjectsMapper("quests")
+SKILLS = ObjectsMapper("SKILL")
+
+QUESTS = ObjectsMapper("QUEST")
 
 
 # ------------------------------------------------------------
@@ -54,13 +56,9 @@ EQUIPMENT_POSITIONS = CommonMapper("equipment_positions")
 
 EQUIPMENT_TYPES = CommonMapper("equipment_types")
 
-EXIT_LOCKS = CommonMapper("exit_locks")
-
 GAME_SETTINGS = CommonMapper("game_settings")
 
 HONOUR_SETTINGS = CommonMapper("honour_settings")
-
-OBJECT_CREATORS = ObjectsMapper("object_creators")
 
 CREATOR_LOOT_LIST = CommonMapper("creator_loot_list")
 
@@ -103,8 +101,6 @@ DIALOGUE_QUEST_DEPENDENCIES = CommonMapper("dialogue_quest_dependencies")
 DIALOGUE_RELATIONS = CommonMapper("dialogue_relations")
 
 NPC_DIALOGUES = CommonMapper("npc_dialogues")
-
-CONDITION_DESC = CommonMapper("condition_desc")
 
 LOCALIZED_STRINGS = CommonMapper("localized_strings")
 

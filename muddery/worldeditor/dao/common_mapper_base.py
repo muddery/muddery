@@ -5,7 +5,9 @@ This model translates default strings into localized strings.
 from evennia.utils import logger
 from django.apps import apps
 from django.conf import settings
-from muddery.worldeditor.dao.general_query_mapper import get_all_from_tables, get_tables_record_by_key
+from muddery.server.mappings.element_set import ELEMENT
+from muddery.worldeditor.dao import general_query_mapper as q
+
 
 class CommonMapper(object):
     """
@@ -30,14 +32,20 @@ class ObjectsMapper(CommonMapper):
     """
     Object data's mapper.
     """
-    def __init__(self, model_name):
-        super(ObjectsMapper, self).__init__(model_name)
+    def __init__(self, element_type):
+        element_class = ELEMENT(element_type)
+        super(ObjectsMapper, self).__init__(element_class.model_name)
+
+        self.base_model_name = element_class.get_base_model()
 
     def all_with_base(self):
         """
         Get all records with its base data.
         """
-        return get_all_from_tables(["objects", self.model_name])
+        if self.base_model_name == self.model_name:
+            return q.get_all_from_tables([self.model_name])
+        else:
+            return q.get_all_from_tables([self.base_model_name, self.model_name])
 
     def get_by_key_with_base(self, key):
         """
@@ -46,4 +54,7 @@ class ObjectsMapper(CommonMapper):
         Args:
             key: (string) object's key.
         """
-        return get_tables_record_by_key(["objects", self.model_name], key)
+        if self.base_model_name == self.model_name:
+            return q.get_tables_record_by_key([self.model_name], key)
+        else:
+            return q.get_tables_record_by_key([self.base_model_name, self.model_name], key)

@@ -247,8 +247,8 @@ CommonEditor.prototype.saveFormSuccess = function(data, context) {
     */
     var param = {};
     if (context) {
-        if ("typeclass" in context) {
-            param["typeclass"] = context["typeclass"]
+        if ("element_type" in context) {
+            param["element_type"] = context["element_type"]
         }
         if ("key" in context) {
             param["key"] = context["key"]

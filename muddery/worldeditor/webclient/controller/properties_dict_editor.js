@@ -7,7 +7,7 @@ PropertiesDictEditor = function() {
 
     this.table_name = "properties_dict";
     this.record_id = "";
-    this.typeclass = "";
+    this.element_type = "";
 }
 
 PropertiesDictEditor.prototype = prototype(CommonEditor.prototype);
@@ -15,7 +15,7 @@ PropertiesDictEditor.prototype.constructor = PropertiesDictEditor;
 
 
 PropertiesDictEditor.prototype.init = function() {
-    this.typeclass = utils.getQueryString("typeclass");
+    this.element_type = utils.getQueryString("element_type");
     this.record_id = utils.getQueryString("record");
     if (sessionStorage.page_param) {
         this.field_values = JSON.parse(sessionStorage.page_param);
@@ -42,8 +42,8 @@ PropertiesDictEditor.prototype.setFields = function() {
     for (var i = 0; i < this.fields.length; i++) {
         var field = this.fields[i];
 
-        if (field.name == "typeclass") {
-            field.value = this.typeclass;
+        if (field.name == "element_type") {
+            field.value = this.element_type;
             var controller = this.createFieldController(field, true);
         }
         else {

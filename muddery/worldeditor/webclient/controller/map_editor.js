@@ -3,9 +3,9 @@
  * Derive from the base class.
  */
 MapEditor = function() {
-    this.area_typeclass = "AREA";
-    this.room_typeclass = "ROOM";
-    this.exit_typeclass = "EXIT";
+    this.area_element_type = "AREA";
+    this.room_element_type = "ROOM";
+    this.exit_element_type = "EXIT";
 
     this.blank_map = "../images/blank_map.png";
     this.default_map_width = 400;
@@ -149,7 +149,7 @@ MapEditor.prototype.onEditArea = function() {
 
 MapEditor.prototype.saveForEditArea = function(data) {
     controller.changed = true;
-    window.parent.controller.editObject(controller.area_typeclass, controller.area_key, true);
+    window.parent.controller.editObject(controller.area_element_type, controller.area_key, true);
 }
 
 
@@ -810,11 +810,11 @@ MapEditor.prototype.dropPathOnRoom = function(event) {
 
     // Create a new path.
     var exit_info = {
-        typeclass: this.exit_typeclass,
+        element_type: this.exit_element_type,
         location: source_key,
         destination: target_key
     };
-    service.addExit(this.exit_typeclass,
+    service.addExit(this.exit_element_type,
                         source_key,
                         target_key,
                         this.addExitSuccess,
@@ -824,16 +824,18 @@ MapEditor.prototype.dropPathOnRoom = function(event) {
     if (new_path) {
         // Add a reverse exit.
         var exit_info = {
-            typeclass: this.exit_typeclass,
+            element_type: this.exit_element_type,
             location: target_key,
             destination: source_key
         };
-        service.addExit(this.exit_typeclass,
-                            target_key,
-                            source_key,
-                            this.addExitSuccess,
-                            this.addExitFailed,
-                            exit_info);
+        service.addExit(
+            this.exit_element_type,
+            target_key,
+            source_key,
+            this.addExitSuccess,
+            this.addExitFailed,
+            exit_info,
+        );
     }
 }
 
@@ -915,7 +917,7 @@ MapEditor.prototype.newRoomMouseUp = function(event) {
         x = Math.round(x / this.grid_size) * this.grid_size;
         y = Math.round(y / this.grid_size) * this.grid_size;
     }
-    service.addRoom(this.room_typeclass, this.area_key, [x, y], this.addRoomSuccess, this.addRoomFailed);
+    service.addRoom(this.room_element_type, this.area_key, [x, y], this.addRoomSuccess, this.addRoomFailed);
 }
 
 
@@ -930,7 +932,7 @@ MapEditor.prototype.addRoomSuccess = function(data) {
     var room_info = {
         key: room_key,
         name: "",
-        typeclass: controller.room_typeclass,
+        element_type: controller.room_element_type,
         position: [x, y]
     }
     controller.createRoom(room_info, x, y);
@@ -1094,8 +1096,8 @@ MapEditor.prototype.showRoomMenu = function(room_key) {
         .appendTo(menu);
 
     $("<div>")
-        .addClass("menu-room-typeclass")
-        .text("(" + room.info.typeclass + ")")
+        .addClass("menu-room-type")
+        .text("(" + room.info.element_type + ")")
         .appendTo(menu);
 
     var button_bar = $("<div>")
@@ -1173,7 +1175,7 @@ MapEditor.prototype.showPathMenu = function(path_id) {
 
         var name = $("<div>")
             .addClass("menu-exit-key")
-            .text(exit.key + " (" + exit.typeclass + ")")
+            .text(exit.key + " (" + exit.element_type + ")")
             .appendTo(menu_item);
 
         var source_name = "";
@@ -1266,7 +1268,7 @@ MapEditor.prototype.saveForEditRoom = function(data, context) {
     $(".room-menu").remove();
 
     var room_key = context.key;
-    window.parent.controller.editObject(controller.room_typeclass, room_key);
+    window.parent.controller.editObject(controller.room_element_type, room_key);
 }
 
 /*
@@ -1388,7 +1390,7 @@ MapEditor.prototype.onRoomExits = function(event) {
 
                 var name = $("<div>")
                     .addClass("menu-exit-key")
-                    .text(exit.key + " (" + exit.typeclass + ")")
+                    .text(exit.key + " (" + exit.element_type + ")")
                     .appendTo(menu_item);
 
                 var source_name = "";
@@ -1483,7 +1485,7 @@ MapEditor.prototype.saveForCreateExit = function(data, context) {
     var values = {
         location: context.room
     }
-    window.parent.controller.createObject(controller.exit_typeclass, values);
+    window.parent.controller.createObject(controller.exit_element_type, values);
 }
 
 
@@ -1506,7 +1508,7 @@ MapEditor.prototype.saveForEditExit = function(data, context) {
     controller.changed = true;
 
     var exit_key = context.key;
-    window.parent.controller.editObject(controller.exit_typeclass, exit_key);
+    window.parent.controller.editObject(controller.exit_element_type, exit_key);
 
     // Unselect all rooms.
     $(".element-room").removeClass("element-selected");
@@ -1547,11 +1549,13 @@ MapEditor.prototype.confirmDeleteExit = function(e) {
     window.parent.controller.hideWaiting();
 
     var context = e.data;
-    service.deleteObject(e.data.exit,
-                         controller.exit_typeclass,
-                         controller.deleteExitSuccess,
-                         controller.failedCallback,
-                         context);
+    service.deleteObject(
+        e.data.exit,
+        controller.exit_element_type,
+        controller.deleteExitSuccess,
+        controller.failedCallback,
+        context,
+    );
 }
 
 
@@ -1594,8 +1598,8 @@ MapEditor.prototype.deleteExitSuccess = function(data, context) {
 
 
 MapEditor.prototype.refresh = function(param) {
-    if (param && "typeclass" in param) {
-        if (param.typeclass == this.area_typeclass) {
+    if (param && "element_type" in param) {
+        if (param.element_type == this.area_element_type) {
             if ("key" in param) {
                 this.area_key = param.key;
             }
@@ -1606,11 +1610,13 @@ MapEditor.prototype.refresh = function(param) {
         service.queryMap(this.area_key, this.queryMapSuccess, this.failedCallback);
     }
     else {
-        service.addArea(this.area_typeclass,
-                        this.default_map_width,
-                        this.default_map_height,
-                        this.addAreaSuccess,
-                        this.addAreaFailed);
+        service.addArea(
+            this.area_element_type,
+            this.default_map_width,
+            this.default_map_height,
+            this.addAreaSuccess,
+            this.addAreaFailed,
+        );
     }
 }
 

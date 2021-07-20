@@ -1439,30 +1439,6 @@ class action_get_objects(BaseEventActionData):
 
 # ------------------------------------------------------------
 #
-# condition descriptions
-#
-# ------------------------------------------------------------
-class condition_desc(models.Model):
-    "Object descriptions in different conditions."
-
-    # The key of an object.
-    key = models.CharField(max_length=KEY_LENGTH)
-
-    # condition
-    condition = models.CharField(max_length=CONDITION_LENGTH, blank=True)
-
-    # exit's description for display
-    desc = models.TextField(blank=True)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
-        unique_together = ("key", "condition")
-
-
-# ------------------------------------------------------------
-#
 # localized strings
 #
 # ------------------------------------------------------------
