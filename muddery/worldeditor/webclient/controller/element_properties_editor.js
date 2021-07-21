@@ -2,20 +2,22 @@
 /*
  * Derive from the base class.
  */
-ObjectPropertiesEditor = function() {
+ElementPropertiesEditor = function() {
 	CommonEditor.call(this);
 
-    this.table_name = "object_properties";
-    this.obj_key = "";
+    this.table_name = "element_properties";
+    this.element_type = "";
+    this.element_key = "";
     this.level = 0;
 }
 
-ObjectPropertiesEditor.prototype = prototype(CommonEditor.prototype);
-ObjectPropertiesEditor.prototype.constructor = ObjectPropertiesEditor;
+ElementPropertiesEditor.prototype = prototype(CommonEditor.prototype);
+ElementPropertiesEditor.prototype.constructor = ElementPropertiesEditor;
 
 
-ObjectPropertiesEditor.prototype.init = function() {
-    this.obj_key = utils.getQueryString("obj_key");
+ElementPropertiesEditor.prototype.init = function() {
+    this.element_type = utils.getQueryString("element_type");
+    this.element_key = utils.getQueryString("element_key");
     this.level = utils.getQueryString("level");
     if (this.level) {
         this.level = parseInt(this.level);
@@ -41,13 +43,13 @@ ObjectPropertiesEditor.prototype.init = function() {
     this.refresh();
 }
 
-ObjectPropertiesEditor.prototype.refresh = function() {
+ElementPropertiesEditor.prototype.refresh = function() {
     var level = this.level || 0;
-    service.queryObjectLevelProperties(this.obj_key, level, this.queryFormSuccess, this.failedCallback);
+    service.queryElementLevelProperties(this.element_type, this.element_key, level, this.queryFormSuccess, this.failedCallback);
 }
 
 // Add form fields to the web page.
-ObjectPropertiesEditor.prototype.setFields = function() {
+ElementPropertiesEditor.prototype.setFields = function() {
     var container = $("#fields");
     container.children().remove();
 
@@ -55,7 +57,7 @@ ObjectPropertiesEditor.prototype.setFields = function() {
         var field = this.fields[i];
 
         if (field.name == "key") {
-            field.value = this.obj_key;
+            field.value = this.element_key;
             var controller = this.createFieldController(field, true);
         }
         else {
@@ -70,7 +72,7 @@ ObjectPropertiesEditor.prototype.setFields = function() {
     window.parent.controller.setFrameSize();
 }
 
-ObjectPropertiesEditor.prototype.saveForm = function(callback_success, callback_failed, context) {
+ElementPropertiesEditor.prototype.saveForm = function(callback_success, callback_failed, context) {
     var level = 0;
     var values = {};
     var fields = $("#fields .field-controller");
@@ -95,10 +97,13 @@ ObjectPropertiesEditor.prototype.saveForm = function(callback_success, callback_
         }
     }
 
-    service.saveObjectLevelProperties(this.obj_key,
-                                      level,
-                                      values,
-                                      callback_success,
-                                      callback_failed,
-                                      context);
+    service.saveElementLevelProperties(
+        this.element_type,
+        this.element_key,
+        level,
+        values,
+        callback_success,
+        callback_failed,
+        context
+    );
 }

@@ -126,7 +126,7 @@ def delete_records(table_name, **kwargs):
     general_query_mapper.delete_records(table_name, **kwargs)
 
 
-def query_object_form(base_element_type, obj_element_type, obj_key):
+def query_element_form(base_element_type, obj_element_type, element_key):
     """
     Query all data of an object.
 
@@ -134,7 +134,7 @@ def query_object_form(base_element_type, obj_element_type, obj_key):
         base_element_type: (string) the base element of the object.
         obj_element_type: (string, optional) object's element type. If it is empty, use the element type of the object
                         or use the base element type.
-        obj_key: (string) object's key. If it is empty, query an empty form.
+        element_key: (string) the element's key. If it is empty, query an empty form.
     """
     candidate_element_types = ELEMENT_SET.get_group(base_element_type)
     if not candidate_element_types:
@@ -151,8 +151,8 @@ def query_object_form(base_element_type, obj_element_type, obj_key):
 
     forms = []
     for table_name in table_names:
-        if obj_key:
-            object_form = query_form(table_name, key=obj_key)
+        if element_key:
+            object_form = query_form(table_name, key=element_key)
         else:
             object_form = query_form(table_name)
 
@@ -175,16 +175,17 @@ def query_object_form(base_element_type, obj_element_type, obj_key):
     return forms
 
 
-def save_object_level_properties(object_key, level, values):
+def save_element_level_properties(element_type, element_key, level, values):
     """
-    Save properties of an object.
+    Save properties of an element.
 
     Args:
-        object_key: (string) object' key.
+        element_type: (string) the element's type.
+        element_key: (string) the element's key.
         level: (number) object's level.
         values: (dict) values to save.
     """
-    ELEMENT_PROPERTIES.add_properties(object_key, level, values)
+    ELEMENT_PROPERTIES.add_properties(element_type, element_key, level, values)
 
 
 def delete_object_level_properties(object_key, level):

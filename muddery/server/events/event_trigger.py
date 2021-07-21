@@ -87,7 +87,7 @@ class EventTrigger(object):
             return False
 
         # Query events.
-        events = EventData.get_object_event(event_type.value, obj_key)
+        events = EventData.get_element_event(event_type.value, obj_key)
         if not events:
             return False
 

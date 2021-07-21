@@ -28,13 +28,13 @@ class CommonMapper(object):
         return self.objects.filter(*args, **kwargs)
 
 
-class ObjectsMapper(CommonMapper):
+class ElementsMapper(CommonMapper):
     """
     Object data's mapper.
     """
     def __init__(self, element_type):
         element_class = ELEMENT(element_type)
-        super(ObjectsMapper, self).__init__(element_class.model_name)
+        super(ElementsMapper, self).__init__(element_class.model_name)
 
         self.base_model_name = element_class.get_base_model()
 

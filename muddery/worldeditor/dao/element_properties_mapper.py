@@ -37,25 +37,27 @@ class ElementPropertiesMapper(object):
         """
         return self.objects.filter(element=element_key).order_by("level")
 
-    def add_properties(self, element_key, level, values):
+    def add_properties(self, element_type, element_key, level, values):
         """
         Add object's properties.
 
         Args:
-            element_key: (string) object's element key.
+            element_type: (string) the element's type
+            element_key: (string) the element's key.
             level: (number) object's level.
             values: (dict) values to save.
         """
         # import values
         for prop, value in values.items():
-            records = self.objects.filter(element=element_key, level=level, property=prop)
+            records = self.objects.filter(element=element_type, key=element_key, level=level, property=prop)
             if records:
                 # Update.
                 records.update(value=value)
             else:
                 # Create.
                 record = {
-                    "element": element_key,
+                    "element": element_type,
+                    "key": element_key,
                     "level": level,
                     "property": prop,
                     "value": value
@@ -63,15 +65,16 @@ class ElementPropertiesMapper(object):
                 data = self.model(**record)
                 data.save()
 
-    def delete_properties(self, element_key, level):
+    def delete_properties(self, element_type, element_key, level):
         """
         Delete object's properties.
 
         Args:
-            element_key: (string) object's element key.
+            element_type: (string) the element's type
+            element_key: (string) the element's key.
             level: (number) object's level.
         """
-        return self.objects.filter(element=element_key, level=level).delete()
+        return self.objects.filter(element=element_type, key=element_key, level=level).delete()
 
 
 ELEMENT_PROPERTIES = ElementPropertiesMapper()

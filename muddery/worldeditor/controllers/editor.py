@@ -147,57 +147,61 @@ class QueryElementProperties(BaseRequestProcesser):
         return success_response(data)
 
 
-class QueryObjectProperties(BaseRequestProcesser):
+class QueryElementProperties(BaseRequestProcesser):
     """
     Query an object's properties.
 
     Args:
-        element_type: (string) object's element type
-        obj_key: (string) object's key.
+        element_type: (string) element's type
+        element_key: (string) element's key.
     """
-    path = "query_object_properties"
+    path = "query_element_properties"
     name = ""
 
     def func(self, args, request):
         if 'element_type' not in args:
             raise MudderyError(ERR.missing_args, 'Missing the argument: "element_type".')
 
-        if 'obj_key' not in args:
-            raise MudderyError(ERR.missing_args, 'Missing the argument: "obj_key".')
+        if 'element_key' not in args:
+            raise MudderyError(ERR.missing_args, 'Missing the argument: "element_key".')
 
         element_type = args["element_type"]
-        obj_key = args["obj_key"]
+        element_key = args["element_key"]
 
-        data = data_query.query_object_properties(element_type, obj_key)
+        data = data_query.query_element_properties(element_type, element_key)
         return success_response(data)
 
 
-class QueryObjectLevelProperties(BaseRequestProcesser):
+class QueryElementLevelProperties(BaseRequestProcesser):
     """
     Query a level of an object's properties.
 
     Args:
-        obj_key: (string) object's key.
+        element_key: (string) the element's key.
         level: (number) level's number
     """
-    path = "query_object_level_properties"
+    path = "query_element_level_properties"
     name = ""
 
     def func(self, args, request):
-        if 'obj_key' not in args:
-            raise MudderyError(ERR.missing_args, 'Missing the argument: "obj_key".')
+        if 'element_type' not in args:
+            raise MudderyError(ERR.missing_args, 'Missing the argument: "element_type".')
+
+        if 'element_key' not in args:
+            raise MudderyError(ERR.missing_args, 'Missing the argument: "element_key".')
 
         if 'level' not in args:
             raise MudderyError(ERR.missing_args, 'Missing the argument: "level".')
 
-        obj_key = args["obj_key"]
+        element_type = args["element_type"]
+        element_key = args["element_key"]
         level = args["level"]
 
-        data = data_query.query_object_level_properties(obj_key, level)
+        data = data_query.query_element_level_properties(element_type, element_key, level)
         return success_response(data)
 
 
-class SaveObjectLevelProperties(BaseRequestProcesser):
+class SaveElementLevelProperties(BaseRequestProcesser):
     """
     Save properties of an object.
 
@@ -253,14 +257,14 @@ class DeleteObjectLevelProperties(BaseRequestProcesser):
         return success_response(data)
 
 
-class QueryObjectEventTriggers(BaseRequestProcesser):
+class QueryElementEventTriggers(BaseRequestProcesser):
     """
     Query all event triggers of the given element type.
 
     Args:
         element_type: (string) the element type.
     """
-    path = "query_object_event_triggers"
+    path = "query_element_event_triggers"
     name = ""
 
     def func(self, args, request):
@@ -269,7 +273,7 @@ class QueryObjectEventTriggers(BaseRequestProcesser):
 
         element_type = args["element_type"]
 
-        data = data_query.query_object_event_triggers(element_type)
+        data = data_query.query_element_event_triggers(element_type)
         return success_response(data)
 
 
@@ -285,23 +289,23 @@ class QueryDialogueEventTriggers(BaseRequestProcesser):
         return success_response(data)
 
 
-class QueryObjectEvents(BaseRequestProcesser):
+class QueryElementEvents(BaseRequestProcesser):
     """
-    Query all events of the given object.
+    Query all events of the given element.
 
     Args:
-        object: (string) object's key.
+        element_key: (string) the element's key.
     """
-    path = "query_object_events"
+    path = "query_element_events"
     name = ""
 
     def func(self, args, request):
-        if 'object' not in args:
-            raise MudderyError(ERR.missing_args, 'Missing the argument: "object".')
+        if 'element_key' not in args:
+            raise MudderyError(ERR.missing_args, 'Missing the argument: "element_key".')
 
-        object_key = args["object"]
+        element_key = args["element_key"]
 
-        data = data_query.query_object_events(object_key)
+        data = data_query.query_element_events(element_key)
         return success_response(data)
 
 
@@ -484,9 +488,9 @@ class QueryObjectForm(BaseRequestProcesser):
     Args:
         base_element_type: (string) the base type of the object
         obj_element_type: (string, optional) object's element type
-        obj_key: (string, optional) object's key. If it is empty, get a new object.
+        element_key: (string, optional) element's key. If it is empty, get a new object.
     """
-    path = "query_object_form"
+    path = "query_element_form"
     name = ""
 
     def func(self, args, request):
@@ -498,9 +502,9 @@ class QueryObjectForm(BaseRequestProcesser):
 
         base_element_type = args["base_element_type"]
         obj_element_type = args.get('obj_element_type', None)
-        obj_key = args.get('obj_key', None)
+        element_key = args.get('element_key', None)
 
-        data = data_edit.query_object_form(base_element_type, obj_element_type, obj_key)
+        data = data_edit.query_element_form(base_element_type, obj_element_type, element_key)
         return success_response(data)
 
 
@@ -595,7 +599,7 @@ class AddArea(BaseRequestProcesser):
         width = args.get("width", 0)
         height = args.get("height", 0)
 
-        forms = data_edit.query_object_form(element_type, element_type, None)
+        forms = data_edit.query_element_form(element_type, element_type, None)
         new_area = []
         for form in forms:
             values = {field["name"]: field["value"] for field in form["fields"] if "value" in field}
@@ -644,7 +648,7 @@ class AddRoom(BaseRequestProcesser):
         if position:
             position = json.dumps(position)
 
-        forms = data_edit.query_object_form(element_type, element_type, None)
+        forms = data_edit.query_element_form(element_type, element_type, None)
         new_room = []
         for form in forms:
             values = {field["name"]: field["value"] for field in form["fields"] if "value" in field}
@@ -715,7 +719,7 @@ class AddExit(BaseRequestProcesser):
         location = args["location"]
         destination = args["destination"]
 
-        forms = data_edit.query_object_form(element_type, element_type, None)
+        forms = data_edit.query_element_form(element_type, element_type, None)
         new_exit = []
         for form in forms:
             values = {field["name"]: field["value"] for field in form["fields"] if "value" in field}

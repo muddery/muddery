@@ -14,7 +14,7 @@ from muddery.worldeditor.dao.world_rooms_mapper import WORLD_ROOMS_MAPPER
 from muddery.worldeditor.dao.world_exits_mapper import WORLD_EXITS_MAPPER
 from muddery.worldeditor.dao import general_query_mapper as query
 from muddery.worldeditor.dao.element_properties_mapper import ELEMENT_PROPERTIES
-from muddery.worldeditor.dao.event_mapper import get_object_event
+from muddery.worldeditor.dao.event_mapper import get_element_event
 from muddery.worldeditor.services.general_query import query_fields
 from muddery.server.mappings.element_set import ELEMENT_SET, ELEMENT
 from muddery.server.mappings.event_action_set import EVENT_ACTION_SET
@@ -78,9 +78,9 @@ def query_element_type_properties(element_type):
     return table
 
 
-def query_object_properties(element_type, element_key):
+def query_element_properties(element_type, element_key):
     """
-    Query all properties of the given object.
+    Query all properties of the given element.
 
     Args:
         element_type: (string) the object's element type.
@@ -133,13 +133,13 @@ def query_object_properties(element_type, element_key):
     return table
 
 
-def query_object_level_properties(element_type, object_key, level):
+def query_element_level_properties(element_type, element_key, level):
     """
     Query properties of a level of the given object.
 
     Args:
         element_type: (string) the object's type.
-        object_key: (string) object' key.
+        element_key: (string) the element' key.
         level: (number) object's level.
     """
     # Get fields.
@@ -152,7 +152,7 @@ def query_object_level_properties(element_type, object_key, level):
         "disabled": True,
         "help_text": "",
         "type": "TextInput",
-        "value": object_key
+        "value": element_key
     })
 
     # Object's level.
@@ -169,7 +169,7 @@ def query_object_level_properties(element_type, object_key, level):
 
     # Get properties.
     data = {}
-    records = ELEMENT_PROPERTIES.get_properties(object_key, level)
+    records = ELEMENT_PROPERTIES.get_properties(element_key, level)
     for record in records:
         data[record.property] = record.value
 
@@ -189,7 +189,7 @@ def query_object_level_properties(element_type, object_key, level):
     return fields
 
 
-def query_object_event_triggers(element_type):
+def query_element_event_triggers(element_type):
     """
     Query all event triggers of the given element type.
 
@@ -209,15 +209,15 @@ def query_dialogue_event_triggers():
     return [EventType.EVENT_TRIGGER_DIALOGUE]
 
 
-def query_object_events(object_key):
+def query_element_events(element_key):
     """
-    Query all events of the given object.
+    Query all events of the given element.
 
     Args:
-        object_key: (string) object' key.
+        element_key: (string) the element' key.
     """
     fields = query_fields("event_data")
-    records = get_object_event(object_key)
+    records = get_element_event(element_key)
     rows = []
     for record in records:
         line = [str(record.serializable_value(field["name"])) for field in fields]

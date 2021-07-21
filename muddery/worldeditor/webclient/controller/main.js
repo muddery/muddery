@@ -265,13 +265,13 @@ controller = {
         controller.pushPage(name, url, null);
     },
 
-    editObject: function(element_type, object_key, no_delete) {
-        var url = "object_editor.html?element_type=" + element_type;
+    editElement: function(element_type, element_key, no_delete) {
+        var url = "element_editor.html?element_type=" + element_type;
 
         var name = "";
         if (object_key) {
             name = "Edit " + element_type;
-            url += "&object=" + object_key;
+            url += "&element_key=" + element_key;
             if (no_delete) {
                 url += "&no_delete=1";
             }
@@ -284,7 +284,7 @@ controller = {
     },
 
     createObject: function(element_type, field_values) {
-        var url = "object_editor.html?element_type=" + element_type;
+        var url = "element_editor.html?element_type=" + element_type;
         var name = "Add " + element_type;
 
         controller.pushPage(name, url, field_values);
@@ -319,16 +319,16 @@ controller = {
         controller.pushPage(name, url, null);
     },
 
-    editObjectProperties: function(obj_key, level) {
-        var url = "object_properties_editor.html?obj_key=" + obj_key;
+    editElementProperties: function(element_type, element_key, level) {
+        var url = "element_properties_editor.html?element_type=" + element_type + "&element_key=" + element_key;
 
         var name = "";
         if (level) {
-            name = "编辑对象属性";
+            name = "编辑元素属性";
             url += "&level=" + level;
         }
         else {
-            name = "添加对象属性";
+            name = "添加元素属性";
         }
 
         controller.pushPage(name, url, null);

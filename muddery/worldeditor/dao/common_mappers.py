@@ -2,7 +2,7 @@
 This model translates default strings into localized strings.
 """
 
-from muddery.worldeditor.dao.common_mapper_base import CommonMapper, ObjectsMapper
+from muddery.worldeditor.dao.common_mapper_base import CommonMapper, ElementsMapper
 
 
 # ------------------------------------------------------------
@@ -11,39 +11,39 @@ from muddery.worldeditor.dao.common_mapper_base import CommonMapper, ObjectsMapp
 #
 # ------------------------------------------------------------
 
-WORLD_AREAS = ObjectsMapper("AREA")
+WORLD_AREAS = ElementsMapper("AREA")
 
-WORLD_EXITS = ObjectsMapper("EXIT")
+WORLD_EXITS = ElementsMapper("EXIT")
 
-WORLD_NPCS = ObjectsMapper("WORLD_NPC")
+WORLD_NPCS = ElementsMapper("WORLD_NPC")
 
-WORLD_OBJECTS = ObjectsMapper("WORLD_OBJECT")
+WORLD_OBJECTS = ElementsMapper("WORLD_OBJECT")
 
-OBJECT_CREATORS = ObjectsMapper("WORLD_OBJECT_CREATOR")
+OBJECT_CREATORS = ElementsMapper("WORLD_OBJECT_CREATOR")
 
-WORLD_ROOMS = ObjectsMapper("ROOM")
+WORLD_ROOMS = ElementsMapper("ROOM")
 
-COMMON_OBJECTS = ObjectsMapper("COMMON_OBJECT")
+COMMON_OBJECTS = ElementsMapper("COMMON_OBJECT")
 
-POCKET_OBJECTS = ObjectsMapper("POCKET_OBJECT")
+POCKET_OBJECTS = ElementsMapper("POCKET_OBJECT")
 
-FOODS = ObjectsMapper("FOOD")
+FOODS = ElementsMapper("FOOD")
 
-SKILL_BOOKS = ObjectsMapper("SKILL_BOOK")
+SKILL_BOOKS = ElementsMapper("SKILL_BOOK")
 
-EQUIPMENTS = ObjectsMapper("EQUIPMENT")
+EQUIPMENTS = ElementsMapper("EQUIPMENT")
 
-CHARACTERS = ObjectsMapper("CHARACTER")
+CHARACTERS = ElementsMapper("CHARACTER")
 
-PLAYER_CHARACTERS = ObjectsMapper("PLAYER_CHARACTER")
+PLAYER_CHARACTERS = ElementsMapper("PLAYER_CHARACTER")
 
-SHOPS = ObjectsMapper("SHOP")
+SHOPS = ElementsMapper("SHOP")
 
-SHOP_GOODS = ObjectsMapper("SHOP_GOODS")
+SHOP_GOODS = ElementsMapper("SHOP_GOODS")
 
-SKILLS = ObjectsMapper("SKILL")
+SKILLS = ElementsMapper("SKILL")
 
-QUESTS = ObjectsMapper("QUEST")
+QUESTS = ElementsMapper("QUEST")
 
 
 # ------------------------------------------------------------

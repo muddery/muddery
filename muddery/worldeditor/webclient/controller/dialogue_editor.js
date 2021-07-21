@@ -49,9 +49,11 @@ DialogueEditor.prototype.queryAreasSuccess = function(data) {
     controller.setFields();
 
     // Query events.
-    service.queryObjectEvents(controller.dialogue_key,
-                              controller.queryEventTableSuccess,
-                              controller.failedCallback);
+    service.queryElementEvents(
+        controller.dialogue_key,
+        controller.queryEventTableSuccess,
+        controller.failedCallback
+    );
 }
 
 DialogueEditor.prototype.queryEventTableSuccess = function(data) {

@@ -2,12 +2,12 @@
 /*
  * Derive from the base class.
  */
-ObjectEditor = function() {
+ElementEditor = function() {
 	CommonEditor.call(this);
 
     this.base_element_type = "";
     this.obj_element_type = "";
-    this.obj_key = "";
+    this.element_key = "";
     this.table_fields = [];
 
     this.event_fields = [];
@@ -15,15 +15,15 @@ ObjectEditor = function() {
 
     this.properties_fields = [];
     this.properties_records = [];
-    this.properties_table = "object_properties"
+    this.properties_table = "element_properties"
 }
 
-ObjectEditor.prototype = prototype(CommonEditor.prototype);
-ObjectEditor.prototype.constructor = ObjectEditor;
+ElementEditor.prototype = prototype(CommonEditor.prototype);
+ElementEditor.prototype.constructor = ElementEditor;
 
-ObjectEditor.prototype.init = function() {
+ElementEditor.prototype.init = function() {
     this.base_element_type = utils.getQueryString("element_type");
-    this.obj_key = utils.getQueryString("object");
+    this.element_key = utils.getQueryString("element_key");
     this.no_delete = utils.getQueryString("no_delete");
 
     if (sessionStorage.page_param) {
@@ -35,7 +35,7 @@ ObjectEditor.prototype.init = function() {
 
     $("#exit-button").removeClass("hidden");
     $("#save-record").removeClass("hidden");
-    if (this.obj_key && !this.no_delete) {
+    if (this.element_key && !this.no_delete) {
         $("#delete-record").removeClass("hidden");
     }
 
@@ -51,7 +51,7 @@ ObjectEditor.prototype.init = function() {
  * Events
  *
  ***********************************/
-ObjectEditor.prototype.bindEvents = function() {
+ElementEditor.prototype.bindEvents = function() {
     CommonEditor.prototype.bindEvents.call(this);
 
     $("#add-event").on("click", this.onAddEvent);
@@ -63,11 +63,11 @@ ObjectEditor.prototype.bindEvents = function() {
     $("#properties-table").on("click", ".delete-row", this.onDeleteProperties);
 }
 
-ObjectEditor.prototype.onImageLoad = function() {
+ElementEditor.prototype.onImageLoad = function() {
     window.parent.controller.setFrameSize();
 }
 
-ObjectEditor.prototype.onSave = function() {
+ElementEditor.prototype.onSave = function() {
     // Upload images before submit the form.
     var upload_images = false;
     controller.file_fields = [];
@@ -89,45 +89,45 @@ ObjectEditor.prototype.onSave = function() {
     }
 }
 
-ObjectEditor.prototype.confirmDelete = function(e) {
+ElementEditor.prototype.confirmDelete = function(e) {
     window.parent.controller.hideWaiting();
 
-    service.deleteObject(
-        controller.obj_key,
+    service.deleteElement(
+        controller.element_key,
         controller.base_element_type,
         controller.deleteSuccess,
         controller.failedCallback
     );
 }
 
-ObjectEditor.prototype.onAddEvent = function(e) {
-    if (!controller.obj_key) {
-        window.parent.controller.notify("You should save this object first.");
+ElementEditor.prototype.onAddEvent = function(e) {
+    if (!controller.element_key) {
+        window.parent.controller.notify("You should save this element first.");
         return;
     }
 
-    var editor = "object_event";
+    var editor = "element_event";
     var record = "";
     var args = {
-        trigger: controller.obj_key,
+        trigger: controller.element_key,
         element_type: controller.obj_element_type,
     }
     window.parent.controller.editRecord(editor, controller.event_table, record, args);
 }
 
-ObjectEditor.prototype.onEditEvent = function(e) {
+ElementEditor.prototype.onEditEvent = function(e) {
     var record_id = $(this).attr("data-record-id");
     if (record_id) {
-        var editor = "object_event";
+        var editor = "element_event";
         var args = {
-            trigger: controller.obj_key,
+            trigger: controller.element_key,
             element_type: controller.obj_element_type,
         }
         window.parent.controller.editRecord(editor, controller.event_table, record_id, args);
     }
 }
 
-ObjectEditor.prototype.onDeleteEvent = function(e) {
+ElementEditor.prototype.onDeleteEvent = function(e) {
     var record_id = $(this).attr("data-record-id");
     window.parent.controller.confirm("",
                                      "Delete this record?",
@@ -135,14 +135,14 @@ ObjectEditor.prototype.onDeleteEvent = function(e) {
                                      {record: record_id});
 }
 
-ObjectEditor.prototype.confirmDeleteEvent = function(e) {
+ElementEditor.prototype.confirmDeleteEvent = function(e) {
     window.parent.controller.hideWaiting();
 
     var record_id = e.data.record;
     service.deleteRecord(controller.event_table, record_id, controller.deleteEventSuccess, controller.failedCallback);
 }
 
-ObjectEditor.prototype.deleteEventSuccess = function(data) {
+ElementEditor.prototype.deleteEventSuccess = function(data) {
     var record_id = data.record;
     $("#event-table").bootstrapTable("remove", {
         field: "id",
@@ -150,23 +150,23 @@ ObjectEditor.prototype.deleteEventSuccess = function(data) {
     });
 }
 
-ObjectEditor.prototype.onAddProperties = function(e) {
-    if (!controller.obj_key) {
-        window.parent.controller.notify("You should save this object first.");
+ElementEditor.prototype.onAddProperties = function(e) {
+    if (!controller.element_key) {
+        window.parent.controller.notify("You should save this element first.");
         return;
     }
 
-    window.parent.controller.editObjectProperties(controller.obj_key, null);
+    window.parent.controller.editElementProperties(controller.element_type, controller.element_key, null);
 }
 
-ObjectEditor.prototype.onEditProperties = function(e) {
+ElementEditor.prototype.onEditProperties = function(e) {
     var level = $(this).attr("data-level");
     if (level) {
-        window.parent.controller.editObjectProperties(controller.obj_key, level);
+        window.parent.controller.editElementProperties(controller.element_type, controller.element_key, level);
     }
 }
 
-ObjectEditor.prototype.onDeleteProperties = function(e) {
+ElementEditor.prototype.onDeleteProperties = function(e) {
     var level = $(this).attr("data-level");
     window.parent.controller.confirm("",
                                      "Delete this level?",
@@ -174,14 +174,14 @@ ObjectEditor.prototype.onDeleteProperties = function(e) {
                                      {level: level});
 }
 
-ObjectEditor.prototype.confirmDeleteProperties = function(e) {
+ElementEditor.prototype.confirmDeleteProperties = function(e) {
     window.parent.controller.hideWaiting();
 
     var level = e.data.level;
-    service.deleteObjectLevelProperties(controller.obj_key, level, controller.deletePropertiesSuccess, controller.failedCallback);
+    service.deleteElementLevelProperties(controller.element_key, level, controller.deletePropertiesSuccess, controller.failedCallback);
 }
 
-ObjectEditor.prototype.deletePropertiesSuccess = function(data) {
+ElementEditor.prototype.deletePropertiesSuccess = function(data) {
     var level = data.level;
     $("#properties-table").bootstrapTable("remove", {
         field: "level",
@@ -195,18 +195,18 @@ ObjectEditor.prototype.deletePropertiesSuccess = function(data) {
  * Queries.
  *
  ***********************************/
-ObjectEditor.prototype.refresh = function() {
-    // Query object form.
-    service.queryObjectForm(
+ElementEditor.prototype.refresh = function() {
+    // Query element form.
+    service.queryElementForm(
         this.base_element_type,
         this.obj_element_type,
-        this.obj_key,
+        this.element_key,
         this.queryFormSuccess,
         this.failedCallback
     );
 }
 
-ObjectEditor.prototype.uploadSuccess = function(field_name) {
+ElementEditor.prototype.uploadSuccess = function(field_name) {
     var callback = function(data) {
         var container = $("#fields");
         // Show images when upload images success.
@@ -231,10 +231,10 @@ ObjectEditor.prototype.uploadSuccess = function(field_name) {
     return callback;
 }
 
-ObjectEditor.prototype.queryFormSuccess = function(data) {
+ElementEditor.prototype.queryFormSuccess = function(data) {
     controller.table_fields = data;
     controller.obj_element_type = "";
-    controller.obj_key = "";
+    controller.element_key = "";
 
     // Get object's element type.
     for (var t = 0; t < data.length && !controller.obj_element_type; t++) {
@@ -251,13 +251,13 @@ ObjectEditor.prototype.queryFormSuccess = function(data) {
     }
 
     // Get object's key.
-    for (var t = 0; t < data.length && !controller.obj_key; t++) {
+    for (var t = 0; t < data.length && !controller.element_key; t++) {
         var fields = data[t].fields;
         for (var f = 0; f < fields.length; f++) {
             if (fields[f].name == "key") {
                 var value = fields[f].value;
                 if (value) {
-                    controller.obj_key = value;
+                    controller.element_key = value;
                 }
                 break;
             }
@@ -283,28 +283,28 @@ ObjectEditor.prototype.queryFormSuccess = function(data) {
     }
 
     // Query events.
-    service.queryObjectEventTriggers(
+    service.queryElementEventTriggers(
         controller.obj_element_type,
         controller.queryEventTriggersSuccess,
         controller.failedCallback
     );
 
-    service.queryObjectEvents(
-        controller.obj_key,
+    service.queryElementEvents(
+        controller.element_key,
         controller.queryEventTableSuccess,
         controller.failedCallback
     );
 
     // Query custom properties.
-    service.queryObjectProperties(
+    service.queryElementProperties(
         controller.obj_element_type,
-        controller.obj_key,
-        controller.queryObjectPropertiesSuccess,
+        controller.element_key,
+        controller.queryElementPropertiesSuccess,
         controller.failedCallback
     );
 }
 
-ObjectEditor.prototype.queryEventTriggersSuccess = function(data) {
+ElementEditor.prototype.queryEventTriggersSuccess = function(data) {
     // If can have events, show the events block.
     if (data && data.length > 0) {
         $("#events").show();
@@ -315,7 +315,7 @@ ObjectEditor.prototype.queryEventTriggersSuccess = function(data) {
     window.parent.controller.setFrameSize();
 }
 
-ObjectEditor.prototype.queryEventTableSuccess = function(data) {
+ElementEditor.prototype.queryEventTableSuccess = function(data) {
     controller.event_fields = data.fields;
 
     $("#event-table").bootstrapTable("destroy");
@@ -337,7 +337,7 @@ ObjectEditor.prototype.queryEventTableSuccess = function(data) {
     window.parent.controller.setFrameSize();
 }
 
-ObjectEditor.prototype.queryObjectPropertiesSuccess = function(data) {
+ElementEditor.prototype.queryElementPropertiesSuccess = function(data) {
     controller.properties_fields = data.fields;
     controller.properties_records = data.records;
 
@@ -401,7 +401,7 @@ ObjectEditor.prototype.queryObjectPropertiesSuccess = function(data) {
 }
 
 // Add form fields to the web page.
-ObjectEditor.prototype.setFields = function() {
+ElementEditor.prototype.setFields = function() {
     var container = $("#fields");
     container.children().remove();
 
@@ -432,7 +432,7 @@ ObjectEditor.prototype.setFields = function() {
     window.parent.controller.setFrameSize();
 }
 
-ObjectEditor.prototype.onElementTypeChanged = function(e) {
+ElementEditor.prototype.onElementTypeChanged = function(e) {
     var element_type = this.value;
 
     if (controller.obj_element_type != element_type) {
@@ -441,7 +441,7 @@ ObjectEditor.prototype.onElementTypeChanged = function(e) {
     }
 }
 
-ObjectEditor.prototype.saveForm = function(callback_success, callback_failed, context) {
+ElementEditor.prototype.saveForm = function(callback_success, callback_failed, context) {
     var table_blocks = $("#fields .table-block");
     var key = "";
     var tables = [];
@@ -484,11 +484,11 @@ ObjectEditor.prototype.saveForm = function(callback_success, callback_failed, co
     context["element_type"] = this.base_element_type;
     context["key"] = key;
 
-    service.saveObjectForm(
+    service.saveElementForm(
         tables,
         this.base_element_type,
         this.obj_element_type,
-        this.obj_key,
+        this.element_key,
         callback_success,
         callback_failed,
         context
@@ -496,7 +496,7 @@ ObjectEditor.prototype.saveForm = function(callback_success, callback_failed, co
 }
 
 // Parse fields data to table headers.
-ObjectEditor.prototype.propertiesFields = function(fields) {
+ElementEditor.prototype.propertiesFields = function(fields) {
     var cols = [{
         field: "operate",
         title: "Operate",
@@ -515,7 +515,7 @@ ObjectEditor.prototype.propertiesFields = function(fields) {
 }
 
 // Set table buttons.
-ObjectEditor.prototype.propertiesButton = function(value, row, index) {
+ElementEditor.prototype.propertiesButton = function(value, row, index) {
     var block = $("<div>");
 
     var content = $("<div>")

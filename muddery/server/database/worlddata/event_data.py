@@ -13,7 +13,7 @@ class EventData(BaseQuery):
     table_name = "event_data"
 
     @classmethod
-    def get_object_event(cls, trigger_type, trigger_obj):
+    def get_element_event(cls, trigger_type, trigger_obj):
         """
         Get object's event.
         """
