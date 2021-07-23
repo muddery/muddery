@@ -113,7 +113,7 @@ def query_element_properties(element_type, element_key):
     # Get rows.
     levels = []
     data = {}
-    records = ELEMENT_PROPERTIES.get_properties_all_levels(element_key)
+    records = ELEMENT_PROPERTIES.get_properties_all_levels(element_type, element_key)
     for record in records:
         if record.level not in levels:
             levels.append(record.level)
@@ -169,7 +169,7 @@ def query_element_level_properties(element_type, element_key, level):
 
     # Get properties.
     data = {}
-    records = ELEMENT_PROPERTIES.get_properties(element_key, level)
+    records = ELEMENT_PROPERTIES.get_properties(element_type, element_key, level)
     for record in records:
         data[record.property] = record.value
 

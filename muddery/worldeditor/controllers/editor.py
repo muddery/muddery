@@ -2,7 +2,7 @@
 Battle commands. They only can be used when a character is in a combat.
 """
 
-import json
+import json, traceback
 from evennia.utils import logger
 from evennia.server.sessionhandler import SESSIONS
 from muddery.worldeditor.services import data_query, data_edit, general_query
@@ -210,12 +210,15 @@ class SaveElementLevelProperties(BaseRequestProcesser):
         level: (number) level's number.
         values: (dict) values to save.
     """
-    path = "save_object_level_properties"
+    path = "save_element_level_properties"
     name = ""
 
     def func(self, args, request):
-        if 'obj_key' not in args:
-            raise MudderyError(ERR.missing_args, 'Missing the argument: "obj_key".')
+        if 'element_type' not in args:
+            raise MudderyError(ERR.missing_args, 'Missing the argument: "element_type".')
+
+        if 'element_key' not in args:
+            raise MudderyError(ERR.missing_args, 'Missing the argument: "element_key".')
 
         if 'level' not in args:
             raise MudderyError(ERR.missing_args, 'Missing the argument: "level".')
@@ -223,11 +226,12 @@ class SaveElementLevelProperties(BaseRequestProcesser):
         if 'values' not in args:
             raise MudderyError(ERR.missing_args, 'Missing the argument: "values".')
 
-        obj_key = args["obj_key"]
+        element_type = args["element_type"]
+        element_key = args["element_key"]
         level = args["level"]
         values = args["values"]
 
-        data_edit.save_object_level_properties(obj_key, level, values)
+        data_edit.save_element_level_properties(element_type, element_key, level, values)
         return success_response("success")
 
 
@@ -531,7 +535,7 @@ class QueryMap(BaseRequestProcesser):
         return success_response(data)
 
 
-class SaveObjectForm(BaseRequestProcesser):
+class SaveElementForm(BaseRequestProcesser):
     """
     Save a form.
 
@@ -545,7 +549,7 @@ class SaveObjectForm(BaseRequestProcesser):
         obj_element_type: (string) object's element type
         obj_key: (string) object's key. If it is empty or different from the current object's key, get a new object.
     """
-    path = "save_object_form"
+    path = "save_element_form"
     name = ""
 
     def func(self, args, request):
@@ -567,11 +571,11 @@ class SaveObjectForm(BaseRequestProcesser):
         tables = args["tables"]
         base_element_type = args["base_element_type"]
         obj_element_type = args["obj_element_type"]
-        obj_key = args["obj_key"]
+        element_key = args["obj_key"]
 
-        new_key = data_edit.save_object_form(tables, obj_element_type, obj_key)
-        if obj_key != new_key:
-            data_edit.update_object_key(obj_element_type, obj_key, new_key)
+        new_key = data_edit.save_element_form(tables, obj_element_type, element_key)
+        if element_key != new_key:
+            data_edit.update_element_key(obj_element_type, element_key, new_key)
 
         return success_response(new_key)
 
@@ -611,7 +615,7 @@ class AddArea(BaseRequestProcesser):
                 "values": values
             })
 
-        obj_key = data_edit.save_object_form(new_area, element_type, "")
+        obj_key = data_edit.save_element_form(new_area, element_type, "")
         data = {
             "key": obj_key,
             "width": width,
@@ -660,7 +664,7 @@ class AddRoom(BaseRequestProcesser):
                 "values": values
             })
 
-        obj_key = data_edit.save_object_form(new_room, element_type, "")
+        obj_key = data_edit.save_element_form(new_room, element_type, "")
         data = {"key": obj_key}
         return success_response(data)
 
@@ -731,7 +735,7 @@ class AddExit(BaseRequestProcesser):
                 "values": values
             })
 
-        obj_key = data_edit.save_object_form(new_exit, element_type, "")
+        obj_key = data_edit.save_element_form(new_exit, element_type, "")
         data = {"key": obj_key}
         return success_response(data)
 

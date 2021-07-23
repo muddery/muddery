@@ -645,6 +645,9 @@ class loot_list(models.Model):
     # the key of dropped object
     object = models.CharField(max_length=KEY_LENGTH)
 
+    # the level of dropped object
+    level = models.PositiveIntegerField(blank=True, null=True)
+
     # number of dropped object
     number = models.PositiveIntegerField(blank=True, default=0)
 
@@ -888,7 +891,7 @@ class default_objects(models.Model):
     object = models.CharField(max_length=KEY_LENGTH)
 
     # Object's level.
-    level = models.PositiveIntegerField(blank=True, default=0)
+    level = models.PositiveIntegerField(blank=True, null=True)
 
     # Object's number
     number = models.PositiveIntegerField(blank=True, default=0)
@@ -1236,8 +1239,8 @@ class action_attack(BaseEventActionData):
     mob = models.CharField(max_length=KEY_LENGTH)
 
     # mob's level
-    # Set the level of the mob. If it is 0, use the default level of the mob.
-    level = models.IntegerField(blank=True, default=0)
+    # Set the level of the mob.
+    level = models.IntegerField(blank=True, null=True)
 
     # event's odds ([0.0, 1.0])
     odds = models.FloatField(blank=True, default=0)
@@ -1417,6 +1420,9 @@ class action_get_objects(BaseEventActionData):
     """
     # The object's key.
     object = models.CharField(max_length=KEY_LENGTH)
+
+    # The object's level.
+    level = models.PositiveIntegerField(blank=True, null=True)
 
     # The object's number.
     number = models.PositiveIntegerField(blank=True, default=0)

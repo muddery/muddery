@@ -25,6 +25,7 @@ class LootHandler(object):
             for d in data:
                 loot_list.append({
                     "object_key": d.object,
+                    "level": d.level,
                     "number": d.number,
                     "odds": d.odds,
                     "multiple": d.multiple,
@@ -62,6 +63,7 @@ class LootHandler(object):
                             if item["object_key"] not in objects_dict:
                                 objects_dict[item["object_key"]] = {
                                     "message": item["message"],
+                                    "level": item["level"],
                                     "number": item["number"],
                                 }
                             else:
@@ -73,6 +75,7 @@ class LootHandler(object):
                                 if item["object_key"] not in objects_dict:
                                     objects_dict[item["object_key"]] = {
                                         "message": item["message"],
+                                        "level": item["level"],
                                         "number": item["number"],
                                     }
                                 else:
@@ -93,6 +96,7 @@ class LootHandler(object):
                         if item["object_key"] not in objects_dict:
                             objects_dict[item["object_key"]] = {
                                 "message": item["message"],
+                                "level": item["level"],
                                 "number": number,
                             }
                         else:
@@ -110,6 +114,7 @@ class LootHandler(object):
                             if item["object_key"] not in objects_dict:
                                 objects_dict[item["object_key"]] = {
                                     "message": item["message"],
+                                    "level": item["level"],
                                     "number": number,
                                 }
                             else:
@@ -117,7 +122,9 @@ class LootHandler(object):
 
         obj_list = [{
             "object_key": object_key,
+            "level": item["level"],
             "message": item["message"],
             "number": item["number"],
         } for object_key, item in objects_dict.items()]
+
         return obj_list

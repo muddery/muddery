@@ -229,8 +229,8 @@ controller = {
         if (editor_type == "event") {
             url = "event_editor.html?table=" + table_name;
         }
-        else if (editor_type == "object_event") {
-            url = "object_event_editor.html?table=" + table_name;
+        else if (editor_type == "element_event") {
+            url = "element_event_editor.html?table=" + table_name;
         }
         else if (editor_type == "dialogue_event") {
             url = "dialogue_event_editor.html?table=" + table_name;
@@ -269,7 +269,7 @@ controller = {
         var url = "element_editor.html?element_type=" + element_type;
 
         var name = "";
-        if (object_key) {
+        if (element_key) {
             name = "Edit " + element_type;
             url += "&element_key=" + element_key;
             if (no_delete) {

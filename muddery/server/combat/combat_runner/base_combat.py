@@ -331,6 +331,7 @@ class BaseCombat(object):
 
                         obj_list.append({
                             "object_key": obj_info["object_key"],
+                            "level": obj_info["level"],
                             "number": obj_info["number"],
                             "name": table_data.name,
                             "icon": table_data.icon,

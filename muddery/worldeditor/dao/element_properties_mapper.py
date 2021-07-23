@@ -18,24 +18,26 @@ class ElementPropertiesMapper(object):
         self.model = apps.get_model(settings.WORLD_DATA_APP, self.model_name)
         self.objects = self.model.objects
 
-    def get_properties(self, element_key, level):
+    def get_properties(self, element_type, element_key, level):
         """
         Get object's properties.
 
         Args:
-            element_key: (string) object's element key.
+            element_type: (string) element's type.
+            element_key: (string) element's key.
             level: (number) object's level.
         """
-        return self.objects.filter(element=element_key, level=level)
+        return self.objects.filter(element=element_type, key=element_key, level=level)
 
-    def get_properties_all_levels(self, element_key):
+    def get_properties_all_levels(self, element_type, element_key):
         """
         Get object's properties.
 
         Args:
-            element_key: (string) object's element key.
+            element_type: (string) the element's type.
+            element_key: (string) the element's key.
         """
-        return self.objects.filter(element=element_key).order_by("level")
+        return self.objects.filter(element=element_type, key=element_key).order_by("level")
 
     def add_properties(self, element_type, element_key, level, values):
         """

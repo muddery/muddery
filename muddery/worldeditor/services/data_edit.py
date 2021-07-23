@@ -199,7 +199,7 @@ def delete_object_level_properties(object_key, level):
     ELEMENT_PROPERTIES.delete_properties(object_key, level)
 
 
-def save_object_form(tables, obj_element_type, obj_key):
+def save_element_form(tables, element_type, element_key):
     """
     Save all data of an object.
 
@@ -209,8 +209,8 @@ def save_object_form(tables, obj_element_type, obj_key):
                  "table": (string) table's name.
                  "record": (string, optional) record's id. If it is empty, add a new record.
                 }]
-        obj_element_type: (string) object's element type.
-        obj_key: (string) current object's key. If it is empty or changed, query an empty form.
+        element_type: (string) element's type.
+        element_key: (string) current element's key. If it is empty or changed, query an empty form.
     """
     if not tables:
         raise MudderyError(ERR.invalid_form, "Invalid form.", data="Empty form.")
@@ -219,12 +219,12 @@ def save_object_form(tables, obj_element_type, obj_key):
     try:
         new_key = tables[0]["values"]["key"]
     except KeyError:
-        new_key = obj_key
+        new_key = element_key
 
     if not new_key:
         # Does not has a new key, generate a new key.
         index = SYSTEM_DATA.get_object_index()
-        new_key = "%s_auto_%s" % (obj_element_type, index)
+        new_key = "%s_auto_%s" % (element_type, index)
         for table in tables:
             table["values"]["key"] = new_key
 
@@ -235,10 +235,10 @@ def save_object_form(tables, obj_element_type, obj_key):
 
         form_class = FORM_SET.get(table_name)
         form = None
-        if obj_key:
+        if element_key:
             try:
                 # Query the current object's data.
-                record = general_query_mapper.get_record_by_key(table_name, obj_key)
+                record = general_query_mapper.get_record_by_key(table_name, element_key)
                 form = form_class(form_values, instance=record)
             except ObjectDoesNotExist:
                 form = None
@@ -338,9 +338,9 @@ def query_event_action_forms(action_type, event_key):
     }
 
 
-def update_object_key(element_type, old_key, new_key):
+def update_element_key(element_type, old_key, new_key):
     """
-    Update an object's key in other tables.
+    Update an element's key in relative tables.
 
     Args:
         element_type: (string) object's element type.
@@ -349,12 +349,12 @@ def update_object_key(element_type, old_key, new_key):
     """
     # The object's key has changed.
     element = ELEMENT(element_type)
-    if issubclass(element_type, ELEMENT("AREA")):
+    if issubclass(element, ELEMENT("AREA")):
         # Update relative room's location.
         model_name = ELEMENT("ROOM").model_name
         if model_name:
             general_query_mapper.filter_records(model_name, area=old_key).update(area=new_key)
-    elif issubclass(element_type, ELEMENT("ROOM")):
+    elif issubclass(element, ELEMENT("ROOM")):
         # Update relative exit's location.
         model_name = ELEMENT("EXIT").model_name
         if model_name:

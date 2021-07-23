@@ -156,13 +156,13 @@ ElementEditor.prototype.onAddProperties = function(e) {
         return;
     }
 
-    window.parent.controller.editElementProperties(controller.element_type, controller.element_key, null);
+    window.parent.controller.editElementProperties(controller.obj_element_type, controller.element_key, null);
 }
 
 ElementEditor.prototype.onEditProperties = function(e) {
     var level = $(this).attr("data-level");
     if (level) {
-        window.parent.controller.editElementProperties(controller.element_type, controller.element_key, level);
+        window.parent.controller.editElementProperties(controller.obj_element_type, controller.element_key, level);
     }
 }
 

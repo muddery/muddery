@@ -294,14 +294,14 @@ service = {
         this.sendRequest("save_form", "", args, callback_success, callback_failed, context);
     },
 
-    saveObjectForm: function(tables, base_element_type, obj_element_type, obj_key, callback_success, callback_failed, context) {
+    saveElementForm: function(tables, base_element_type, obj_element_type, obj_key, callback_success, callback_failed, context) {
         var args = {
             tables: tables,
             base_element_type: base_element_type,
             obj_element_type: obj_element_type,
             obj_key: obj_key
         };
-        this.sendRequest("save_object_form", "", args, callback_success, callback_failed, context);
+        this.sendRequest("save_element_form", "", args, callback_success, callback_failed, context);
     },
 
     saveEventActionForms: function(values, action_type, event_key, callback_success, callback_failed, context) {
