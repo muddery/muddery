@@ -177,9 +177,9 @@ service = {
         this.sendRequest("query_areas", "", {}, callback_success, callback_failed, context);
     },
 
-    /*  Query all events of the object.
+    /*  Query all events of the element.
      *  Args:
-     *      object_key: (string) the object's key.
+     *      element_key: (string) the element's key.
      */
     queryElementEventTriggers: function(element_type, callback_success, callback_failed, context) {
         var args = {
@@ -194,9 +194,9 @@ service = {
         this.sendRequest("query_dialogue_event_triggers", "", {}, callback_success, callback_failed, context);
     },
 
-    /*  Query all events of the object.
+    /*  Query all events of the element.
      *  Args:
-     *      object_key: (string) the object's key.
+     *      element_key: (string) the element's key.
      */
     queryElementEvents: function(element_key, callback_success, callback_failed, context) {
         var args = {
@@ -321,19 +321,19 @@ service = {
         this.sendRequest("delete_record", "", args, callback_success, callback_failed, context);
     },
 
-    deleteObject: function(obj_key, base_element_type, callback_success, callback_failed, context) {
+    deleteElement: function(element_key, base_element_type, callback_success, callback_failed, context) {
         var args = {
-            obj_key: obj_key,
+            element_key: element_key,
             base_element_type: base_element_type
         };
-        this.sendRequest("delete_object", "", args, callback_success, callback_failed, context);
+        this.sendRequest("delete_element", "", args, callback_success, callback_failed, context);
     },
 
-    deleteObjects: function(objects, callback_success, callback_failed, context) {
+    deleteElements: function(elements, callback_success, callback_failed, context) {
         var args = {
-            objects: objects
+            elements: elements
         };
-        this.sendRequest("delete_objects", "", args, callback_success, callback_failed, context);
+        this.sendRequest("delete_elements", "", args, callback_success, callback_failed, context);
     },
 
     queryTables: function(callback_success, callback_failed, context) {
@@ -415,7 +415,7 @@ service = {
             element_key: element_key,
             level: level
         };
-        this.sendRequest("delete_object_level_properties", "", args, callback_success, callback_failed, context);
+        this.sendRequest("delete_element_level_properties", "", args, callback_success, callback_failed, context);
     },
 
     downloadDataZip: function(file_type) {

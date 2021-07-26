@@ -8,7 +8,7 @@ ElementPropertiesEditor = function() {
     this.table_name = "element_properties";
     this.element_type = "";
     this.element_key = "";
-    this.level = 0;
+    this.level = "";
 }
 
 ElementPropertiesEditor.prototype = prototype(CommonEditor.prototype);
@@ -18,9 +18,12 @@ ElementPropertiesEditor.prototype.constructor = ElementPropertiesEditor;
 ElementPropertiesEditor.prototype.init = function() {
     this.element_type = utils.getQueryString("element_type");
     this.element_key = utils.getQueryString("element_key");
-    this.level = utils.getQueryString("level");
-    if (this.level) {
-        this.level = parseInt(this.level);
+    var level = utils.getQueryString("level");
+    if (level) {
+        this.level = parseInt(level);
+    }
+    else if (level === "") {
+        this.level = "";
     }
     else {
         this.level = null;
@@ -44,7 +47,7 @@ ElementPropertiesEditor.prototype.init = function() {
 }
 
 ElementPropertiesEditor.prototype.refresh = function() {
-    var level = this.level || 0;
+    var level = this.level === null? "": this.level;
     service.queryElementLevelProperties(this.element_type, this.element_key, level, this.queryFormSuccess, this.failedCallback);
 }
 
@@ -73,7 +76,7 @@ ElementPropertiesEditor.prototype.setFields = function() {
 }
 
 ElementPropertiesEditor.prototype.saveForm = function(callback_success, callback_failed, context) {
-    var level = 0;
+    var level = "";
     var values = {};
     var fields = $("#fields .field-controller");
     for (var f = 0; f < fields.length; f++) {
@@ -90,7 +93,9 @@ ElementPropertiesEditor.prototype.saveForm = function(callback_success, callback
                     values[name] = value;
 
                     if (name == "level") {
-                        level = parseInt(value);
+                        if (value) {
+                            level = parseInt(value);
+                        }
                     }
                 }
             }

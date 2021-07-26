@@ -140,10 +140,6 @@ def query_element_form(base_element_type, obj_element_type, element_key):
     if not candidate_element_types:
         raise MudderyError(ERR.no_table, "Can not find the element: %s" % base_element_type)
 
-    if not obj_element_type:
-        # Or use the base element type
-        obj_element_type = base_element_type
-
     element = ELEMENT_SET.get(obj_element_type)
     if not element:
         raise MudderyError(ERR.no_table, "Can not get the element: %s" % obj_element_type)
@@ -188,15 +184,16 @@ def save_element_level_properties(element_type, element_key, level, values):
     ELEMENT_PROPERTIES.add_properties(element_type, element_key, level, values)
 
 
-def delete_object_level_properties(object_key, level):
+def delete_element_level_properties(element_type, element_key, level):
     """
-    Delete properties of a level of the given object.
+    Delete properties of a level of the element.
 
     Args:
-        object_key: (string) object' key.
+        element_type: (string) the element's type.
+        element_key: (string) the element's key.
         level: (number) object's level.
     """
-    ELEMENT_PROPERTIES.delete_properties(object_key, level)
+    ELEMENT_PROPERTIES.delete_properties(element_type, element_key, level)
 
 
 def save_element_form(tables, element_type, element_key):
@@ -292,9 +289,9 @@ def save_map_positions(area, rooms):
             record.save()
 
 
-def delete_object(obj_key, base_element_type=None):
+def delete_element(element_key, base_element_type=None):
     """
-    Delete an object from all tables under the base element type.
+    Delete an element from all tables under the base element type.
     """
     elements = ELEMENT_SET.get_group(base_element_type)
     tables = set()
@@ -304,7 +301,7 @@ def delete_object(obj_key, base_element_type=None):
     with transaction.atomic():
         for table in tables:
             try:
-                general_query_mapper.delete_record_by_key(table, obj_key)
+                general_query_mapper.delete_record_by_key(table, element_key)
             except ObjectDoesNotExist:
                 pass
 

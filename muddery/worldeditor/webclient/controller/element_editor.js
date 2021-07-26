@@ -110,7 +110,7 @@ ElementEditor.prototype.onAddEvent = function(e) {
     var record = "";
     var args = {
         trigger: controller.element_key,
-        element_type: controller.obj_element_type,
+        element_type: controller.obj_element_type? controller.obj_element_type: controller.base_element_type,
     }
     window.parent.controller.editRecord(editor, controller.event_table, record, args);
 }
@@ -121,7 +121,7 @@ ElementEditor.prototype.onEditEvent = function(e) {
         var editor = "element_event";
         var args = {
             trigger: controller.element_key,
-            element_type: controller.obj_element_type,
+            element_type: controller.obj_element_type? controller.obj_element_type: controller.base_element_type,
         }
         window.parent.controller.editRecord(editor, controller.event_table, record_id, args);
     }
@@ -156,29 +156,43 @@ ElementEditor.prototype.onAddProperties = function(e) {
         return;
     }
 
-    window.parent.controller.editElementProperties(controller.obj_element_type, controller.element_key, null);
+    window.parent.controller.editElementProperties(
+        controller.obj_element_type? controller.obj_element_type: controller.base_element_type,
+        controller.element_key,
+        null
+    );
 }
 
 ElementEditor.prototype.onEditProperties = function(e) {
     var level = $(this).attr("data-level");
-    if (level) {
-        window.parent.controller.editElementProperties(controller.obj_element_type, controller.element_key, level);
-    }
+    window.parent.controller.editElementProperties(
+        controller.obj_element_type? controller.obj_element_type: controller.base_element_type,
+        controller.element_key,
+        level
+    );
 }
 
 ElementEditor.prototype.onDeleteProperties = function(e) {
     var level = $(this).attr("data-level");
-    window.parent.controller.confirm("",
-                                     "Delete this level?",
-                                     controller.confirmDeleteProperties,
-                                     {level: level});
+    window.parent.controller.confirm(
+        "",
+        "Delete this level?",
+        controller.confirmDeleteProperties,
+        {level: level}
+    );
 }
 
 ElementEditor.prototype.confirmDeleteProperties = function(e) {
     window.parent.controller.hideWaiting();
 
     var level = e.data.level;
-    service.deleteElementLevelProperties(controller.element_key, level, controller.deletePropertiesSuccess, controller.failedCallback);
+    service.deleteElementLevelProperties(
+        controller.obj_element_type? controller.obj_element_type: controller.base_element_type,
+        controller.element_key,
+        level,
+        controller.deletePropertiesSuccess,
+        controller.failedCallback
+    );
 }
 
 ElementEditor.prototype.deletePropertiesSuccess = function(data) {
@@ -199,7 +213,7 @@ ElementEditor.prototype.refresh = function() {
     // Query element form.
     service.queryElementForm(
         this.base_element_type,
-        this.obj_element_type,
+        this.obj_element_type? this.obj_element_type: this.base_element_type,
         this.element_key,
         this.queryFormSuccess,
         this.failedCallback
@@ -284,7 +298,7 @@ ElementEditor.prototype.queryFormSuccess = function(data) {
 
     // Query events.
     service.queryElementEventTriggers(
-        controller.obj_element_type,
+        controller.obj_element_type? controller.obj_element_type: controller.base_element_type,
         controller.queryEventTriggersSuccess,
         controller.failedCallback
     );
@@ -297,7 +311,7 @@ ElementEditor.prototype.queryFormSuccess = function(data) {
 
     // Query custom properties.
     service.queryElementProperties(
-        controller.obj_element_type,
+        controller.obj_element_type? controller.obj_element_type: controller.base_element_type,
         controller.element_key,
         controller.queryElementPropertiesSuccess,
         controller.failedCallback
@@ -487,7 +501,7 @@ ElementEditor.prototype.saveForm = function(callback_success, callback_failed, c
     service.saveElementForm(
         tables,
         this.base_element_type,
-        this.obj_element_type,
+        this.obj_element_type? this.obj_element_type: this.base_element_type,
         this.element_key,
         callback_success,
         callback_failed,
@@ -497,12 +511,7 @@ ElementEditor.prototype.saveForm = function(callback_success, callback_failed, c
 
 // Parse fields data to table headers.
 ElementEditor.prototype.propertiesFields = function(fields) {
-    var cols = [{
-        field: "operate",
-        title: "Operate",
-        formatter: this.propertiesButton,
-    }];
-
+    var cols = [];
     for (var i = 0; i < fields.length; i++) {
         cols.push({
             field: fields[i].name,
@@ -510,6 +519,12 @@ ElementEditor.prototype.propertiesFields = function(fields) {
             sortable: true,
         });
     }
+
+    cols.push({
+        field: "operate",
+        title: "Operate",
+        formatter: this.propertiesButton,
+    });
 
     return cols;
 }
@@ -522,17 +537,22 @@ ElementEditor.prototype.propertiesButton = function(value, row, index) {
         .addClass("btn-group")
         .appendTo(block);
 
+    var level = row["level"];
+    if (level === null) {
+        level = "";
+    }
+
     var edit = $("<button>")
         .addClass("btn-xs edit-row")
         .attr("type", "button")
-        .attr("data-level", row["level"])
+        .attr("data-level", level)
         .text("Edit")
         .appendTo(block);
 
     var edit = $("<button>")
         .addClass("btn-xs btn-danger delete-row")
         .attr("type", "button")
-        .attr("data-level", row["level"])
+        .attr("data-level", level)
         .text("Delete")
         .appendTo(block);
 

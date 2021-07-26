@@ -196,6 +196,8 @@ class QueryElementLevelProperties(BaseRequestProcesser):
         element_type = args["element_type"]
         element_key = args["element_key"]
         level = args["level"]
+        if level == "":
+            level = None
 
         data = data_query.query_element_level_properties(element_type, element_key, level)
         return success_response(data)
@@ -229,13 +231,16 @@ class SaveElementLevelProperties(BaseRequestProcesser):
         element_type = args["element_type"]
         element_key = args["element_key"]
         level = args["level"]
+        if level == "":
+            level = None
+
         values = args["values"]
 
         data_edit.save_element_level_properties(element_type, element_key, level, values)
         return success_response("success")
 
 
-class DeleteObjectLevelProperties(BaseRequestProcesser):
+class DeleteElementLevelProperties(BaseRequestProcesser):
     """
     Query a level of an object's properties.
 
@@ -243,20 +248,26 @@ class DeleteObjectLevelProperties(BaseRequestProcesser):
         obj_key: (string) object's key.
         level: (number) level's number
     """
-    path = "delete_object_level_properties"
+    path = "delete_element_level_properties"
     name = ""
 
     def func(self, args, request):
-        if 'obj_key' not in args:
-            raise MudderyError(ERR.missing_args, 'Missing the argument: "obj_key".')
+        if 'element_type' not in args:
+            raise MudderyError(ERR.missing_args, 'Missing the argument: "element_type".')
+
+        if 'element_key' not in args:
+            raise MudderyError(ERR.missing_args, 'Missing the argument: "element_key".')
 
         if 'level' not in args:
             raise MudderyError(ERR.missing_args, 'Missing the argument: "level".')
 
-        obj_key = args["obj_key"]
+        element_type = args["element_type"]
+        element_key = args["element_key"]
         level = args["level"]
+        if level == "":
+            level = None
 
-        data_edit.delete_object_level_properties(obj_key, level)
+        data_edit.delete_element_level_properties(element_type, element_key, level)
         data = {"level": level}
         return success_response(data)
 
@@ -669,27 +680,27 @@ class AddRoom(BaseRequestProcesser):
         return success_response(data)
 
 
-class DeleteObjects(BaseRequestProcesser):
+class DeleteElements(BaseRequestProcesser):
     """
     Delete a list of objects
 
     Args:
         objects: (list) a list of exit keys.
     """
-    path = "delete_objects"
+    path = "delete_elements"
     name = ""
 
     def func(self, args, request):
         if not args:
             raise MudderyError(ERR.missing_args, 'Missing arguments.')
 
-        if "objects" not in args:
-            raise MudderyError(ERR.missing_args, 'Missing the argument: "objects".')
+        if "elements" not in args:
+            raise MudderyError(ERR.missing_args, 'Missing the argument: "elements".')
 
-        objects = args["objects"]
+        elements = args["elements"]
 
-        for object_key in objects:
-            data_edit.delete_object(object_key)
+        for element_key in elements:
+            data_edit.delete_element(element_key)
 
         return success_response("success")
 
@@ -804,30 +815,30 @@ class DeleteRecord(BaseRequestProcesser):
         return success_response(data)
 
 
-class DeleteObject(BaseRequestProcesser):
+class DeleteElement(BaseRequestProcesser):
     """
-    Delete an object.
+    Delete an element.
 
     Args:
-        obj_key: (string) object's key.
+        element_key: (string) element's key.
         base_element_type: (string, optional) object's base type. Delete all records in all tables under this element type.
                         If its empty, get the element type of the object.
     """
-    path = "delete_object"
+    path = "delete_element"
     name = ""
 
     def func(self, args, request):
-        if 'obj_key' not in args:
-            raise MudderyError(ERR.missing_args, 'Missing the argument: "obj_key".')
+        if 'element_key' not in args:
+            raise MudderyError(ERR.missing_args, 'Missing the argument: "element_key".')
 
         if 'base_element_type' not in args:
             raise MudderyError(ERR.missing_args, 'Missing the argument: "base_element_type".')
 
-        obj_key = args["obj_key"]
+        element_key = args["element_key"]
         base_element_type = args.get("base_element_type", None)
 
-        data_edit.delete_object(obj_key, base_element_type)
-        data = {"obj_key": obj_key}
+        data_edit.delete_element(element_key, base_element_type)
+        data = {"element_key": element_key}
 
         return success_response(data)
 

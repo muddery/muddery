@@ -311,12 +311,7 @@ CommonEditor.prototype.deleteSuccess = function(data) {
 
 // Parse fields data to table headers.
 CommonEditor.prototype.parseFields = function(fields) {
-    var cols = [{
-        field: "operate",
-        title: "Operate",
-        formatter: this.operateButton,
-    }];
-
+    var cols = [];
     for (var i = 0; i < fields.length; i++) {
         cols.push({
             field: fields[i].name,
@@ -324,6 +319,12 @@ CommonEditor.prototype.parseFields = function(fields) {
             sortable: true,
         });
     }
+
+    cols.push({
+        field: "operate",
+        title: "Operate",
+        formatter: this.operateButton,
+    });
 
     return cols;
 }
