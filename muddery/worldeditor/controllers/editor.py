@@ -654,11 +654,11 @@ class AddRoom(BaseRequestProcesser):
         if 'element_type' not in args:
             raise MudderyError(ERR.missing_args, 'Missing the argument: "element_type".')
 
-        if 'location' not in args:
-            raise MudderyError(ERR.missing_args, 'Missing the argument: "location".')
+        if 'area' not in args:
+            raise MudderyError(ERR.missing_args, 'Missing the argument: "area".')
 
         element_type = args["element_type"]
-        location = args["location"]
+        area = args["area"]
         position = args.get("position", None)
         if position:
             position = json.dumps(position)
@@ -667,7 +667,7 @@ class AddRoom(BaseRequestProcesser):
         new_room = []
         for form in forms:
             values = {field["name"]: field["value"] for field in form["fields"] if "value" in field}
-            values["location"] = location
+            values["area"] = area
             values["position"] = position
 
             new_room.append({

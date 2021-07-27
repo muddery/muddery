@@ -341,21 +341,21 @@ def query_map(area_key):
     room_info = []
     room_keys = []
     for record in room_records:
-        room_keys.append(record["key"])
+        room_keys.append(record.key)
 
         try:
-            position = ast.literal_eval(record["position"])
+            position = ast.literal_eval(record.position)
         except SyntaxError as e:
             logger.log_errmsg("Parse map %s's position error: %s" % (record["key"], e))
             position = ()
 
         info = {
-            "key": record["key"],
-            "element_type": record["element_type"],
-            "name": record["name"],
-            "location": record["location"],
+            "key": record.key,
+            "element_type": record.element_type,
+            "name": record.name,
+            "area": record.area,
             "position": position,
-            "icon": record["icon"]
+            "icon": record.icon
         }
         room_info.append(info)
 
@@ -363,10 +363,10 @@ def query_map(area_key):
     exit_info = []
     for record in exit_records:
         info = {
-            "key": record["key"],
-            "element_type": record["element_type"],
-            "location": record["location"],
-            "destination": record["destination"]
+            "key": record.key,
+            "element_type": record.element_type,
+            "location": record.location,
+            "destination": record.destination
         }
         exit_info.append(info)
 

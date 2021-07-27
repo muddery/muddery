@@ -54,7 +54,7 @@ ElementTable.prototype.confirmDelete = function(e) {
 }
 
 ElementTable.prototype.deleteElement = function(element_key, element_type) {
-    service.deleteElement(element_key, element_type, this.deleteSuccess);
+    service.deleteElement(element_key, element_type, this.deleteSuccess, this.deleteFailed);
 }
 
 ElementTable.prototype.deleteSuccess = function(data) {
@@ -80,7 +80,7 @@ ElementTable.prototype.operateButton = function(value, row, index) {
         .text("Edit")
         .appendTo(block);
 
-    var edit = $("<button>")
+    var del = $("<button>")
         .addClass("btn-xs btn-danger delete-row")
         .attr("type", "button")
         .attr("data-element-key", row["key"])

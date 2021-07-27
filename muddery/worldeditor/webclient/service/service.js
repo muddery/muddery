@@ -264,7 +264,7 @@ service = {
     addRoom: function(element_type, area, position, callback_success, callback_failed, context) {
         var args = {
             element_type: element_type,
-            location: area,
+            area: area,
             position: position
         };
         this.sendRequest("add_room", "", args, callback_success, callback_failed, context);

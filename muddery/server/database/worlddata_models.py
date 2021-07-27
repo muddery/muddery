@@ -629,6 +629,7 @@ class shop_goods(models.Model):
         "Define Django meta options"
         abstract = True
         app_label = "worlddata"
+        unique_together = ("shop", "goods")
 
 
 # ------------------------------------------------------------

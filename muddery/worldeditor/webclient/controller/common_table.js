@@ -165,3 +165,7 @@ CommonTable.prototype.deleteSuccess = function(data) {
         values: [record_id]
     });
 }
+
+CommonTable.prototype.deleteFailed = function(code, message) {
+    window.parent.controller.notify("ERROR", code + ": " + message);
+}
