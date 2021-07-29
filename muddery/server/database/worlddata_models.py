@@ -152,33 +152,11 @@ class BaseObjects(models.Model):
         return self.key
 
 
-class objects(BaseObjects):
-    """
-    All objects.
-    """
-    # object's element type
-    element_type = models.CharField(max_length=KEY_LENGTH)
-
-    # object's name
-    name = models.CharField(max_length=NAME_LENGTH, blank=True)
-
-    # object's description for display
-    desc = models.TextField(blank=True)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
-
-    def __unicode__(self):
-        return self.name + " (" + self.key + ")"
-
-
 class world_areas(BaseObjects):
     "The game map is composed by areas."
 
     # area's element type
-    element_type = models.CharField(max_length=KEY_LENGTH)
+    element_type = models.CharField(max_length=KEY_LENGTH, default="AREA")
 
     # area's name
     name = models.CharField(max_length=NAME_LENGTH, blank=True)
@@ -208,7 +186,7 @@ class world_rooms(BaseObjects):
     "Defines all unique rooms."
 
     # room's element type
-    element_type = models.CharField(max_length=KEY_LENGTH)
+    element_type = models.CharField(max_length=KEY_LENGTH, default="ROOM")
 
     # room's name
     name = models.CharField(max_length=NAME_LENGTH, blank=True)
@@ -297,7 +275,7 @@ class common_objects(BaseObjects):
     "Store all common objects."
 
     # object's element type
-    element_type = models.CharField(max_length=KEY_LENGTH)
+    element_type = models.CharField(max_length=KEY_LENGTH, default="COMMON_OBJECT")
 
     # object's name
     name = models.CharField(max_length=NAME_LENGTH, blank=True)
@@ -380,7 +358,7 @@ class characters(BaseObjects):
     "Store common characters."
 
     # object's element type
-    element_type = models.CharField(max_length=KEY_LENGTH)
+    element_type = models.CharField(max_length=KEY_LENGTH, default="CHARACTER")
 
     # object's name
     name = models.CharField(max_length=NAME_LENGTH, blank=True)
@@ -454,7 +432,7 @@ class world_exits(models.Model):
     key = models.CharField(max_length=KEY_LENGTH, unique=True, blank=True)
 
     # object's element type
-    element_type = models.CharField(max_length=KEY_LENGTH)
+    element_type = models.CharField(max_length=KEY_LENGTH, default="EXIT")
 
     # The exit's name.
     name = models.CharField(max_length=NAME_LENGTH, blank=True)
@@ -578,7 +556,7 @@ class shops(BaseObjects):
     "Store all shops."
 
     # object's element type
-    element_type = models.CharField(max_length=KEY_LENGTH)
+    element_type = models.CharField(max_length=KEY_LENGTH, default="SHOP")
 
     # shop's name
     name = models.CharField(max_length=NAME_LENGTH, blank=True)
@@ -1377,37 +1355,6 @@ class action_message(BaseEventActionData):
         abstract = True
         app_label = "worlddata"
         unique_together = ("event_key", "message")
-
-
-# ------------------------------------------------------------
-#
-# action to trigger other actions at interval.
-#
-# ------------------------------------------------------------
-class action_room_interval(BaseEventActionData):
-    """
-    The action to trigger other actions at interval.
-    """
-    # The event action's key.
-    action = models.CharField(max_length=KEY_LENGTH)
-
-    # Repeat interval in seconds.
-    interval = models.PositiveIntegerField(blank=True, default=0)
-
-    # Can trigger events when the character is offline.
-    offline = models.BooleanField(blank=True, default=False)
-
-    # This message will be sent to the character when the interval begins.
-    begin_message = models.TextField(blank=True)
-
-    # This message will be sent to the character when the interval ends.
-    end_message = models.TextField(blank=True)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
-        unique_together = ("event_key", "action")
 
 
 # ------------------------------------------------------------

@@ -40,16 +40,6 @@ class honour_settings(BaseModels.honour_settings):
 
 # ------------------------------------------------------------
 #
-# all objects
-#
-# ------------------------------------------------------------
-class objects(BaseModels.objects):
-    "All objects in the game."
-    pass
-
-
-# ------------------------------------------------------------
-#
 # world areas
 #
 # ------------------------------------------------------------
@@ -500,15 +490,6 @@ class action_close_event(BaseModels.action_close_event):
 #
 # ------------------------------------------------------------
 class action_message(BaseModels.action_message):
-    pass
-
-
-# ------------------------------------------------------------
-#
-# action to trigger other actions at interval.
-#
-# ------------------------------------------------------------
-class action_room_interval(BaseModels.action_room_interval):
     pass
 
 
