@@ -55,9 +55,3 @@ COMMON_NPC,robot_mob_B,3,max_exp,0
 COMMON_NPC,robot_mob_B,3,give_exp,15
 COMMON_NPC,robot_mob_B,3,attack,10
 COMMON_NPC,robot_mob_B,3,defence,10
-COMMON_NPC,robot_mob_C,4,max_hp,40
-COMMON_NPC,robot_mob_C,4,max_mp,150
-COMMON_NPC,robot_mob_C,4,max_exp,0
-COMMON_NPC,robot_mob_C,4,give_exp,20
-COMMON_NPC,robot_mob_C,4,attack,15
-COMMON_NPC,robot_mob_C,4,defence,15

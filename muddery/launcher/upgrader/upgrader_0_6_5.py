@@ -67,8 +67,61 @@ class Upgrader(BaseUpgrader):
         django.core.management.call_command(*django_args, **django_kwargs)
 
         # character_states_dict
-        cursor.execute("""
-            INSERT INTO worlddata_character_states_dict (key, name, `default`, desc)
-            SELECT property, name, `default`, desc FROM worlddata_properties_dict_bak
-            WHERE typeclass="CHARACTER" AND mutable=1
-        """)
+        try:
+            cursor.execute("""
+                INSERT INTO worlddata_character_states_dict (key, name, `default`, desc)
+                SELECT property, name, `default`, desc FROM worlddata_properties_dict_bak
+                WHERE typeclass="CHARACTER" AND mutable=1
+            """)
+        except Exception as e:
+            print("character_states_dict: %s" % e)
+
+        # characters
+        try:
+            cursor.execute("""
+                UPDATE worlddata_characters
+                SET name=(SELECT name FROM worlddata_objects_bak t1 WHERE worlddata_characters.key=t1.key),
+                element_type=(SELECT typeclass FROM worlddata_objects_bak t2 WHERE worlddata_characters.key=t2.key),
+                desc=(SELECT desc FROM worlddata_objects_bak t3 WHERE worlddata_characters.key=t3.key)
+            """)
+        except Exception as e:
+            print("characters: %s" % e)
+
+        # common_objects
+        try:
+            cursor.execute("""
+                INSERT INTO worlddata_common_objects (key, icon, name, element_type, desc)
+                SELECT key, icon, '', '', '' FROM worlddata_world_objects_bak
+            """)
+        except Exception as e:
+            print("common_objects: %s" % e)
+
+        try:
+            cursor.execute("""
+                UPDATE worlddata_common_objects
+                SET name=(SELECT name FROM worlddata_objects_bak t1 WHERE worlddata_common_objects.key=t1.key),
+                element_type=(SELECT typeclass FROM worlddata_objects_bak t2 WHERE worlddata_common_objects.key=t2.key),
+                desc=(SELECT desc FROM worlddata_objects_bak t3 WHERE worlddata_common_objects.key=t3.key)
+            """)
+        except Exception as e:
+            print("common_objects: %s" % e)
+
+        # element_properties
+        try:
+            cursor.execute("""
+                INSERT INTO worlddata_element_properties (element, key, level, property, value)
+                SELECT '', object, level, property, value FROM worlddata_object_properties_bak
+            """)
+        except Exception as e:
+            print("element_properties: %s" % e)
+
+        try:
+            cursor.execute("""
+                UPDATE worlddata_element_properties
+                SET element=(
+                    SELECT typeclass
+                    FROM worlddata_objects_bak t1
+                    WHERE worlddata_element_properties.key=t1.key)
+            """)
+        except Exception as e:
+            print("element_properties: %s" % e)

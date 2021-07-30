@@ -832,7 +832,7 @@ class character_states_dict(models.Model):
 class element_properties(models.Model):
     "Store element's custom properties."
     # The type of an element.
-    element = models.CharField(max_length=KEY_LENGTH)
+    element = models.CharField(max_length=KEY_LENGTH, null=True)
 
     # The key of an element.
     key = models.CharField(max_length=KEY_LENGTH)
