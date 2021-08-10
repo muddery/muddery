@@ -207,9 +207,6 @@ class world_rooms(BaseObjects):
     # room's position which is used in maps
     position = models.CharField(max_length=POSITION_LENGTH, blank=True)
 
-    # room's icon resource
-    icon = models.CharField(max_length=KEY_LENGTH, blank=True)
-
     # room's background image resource
     background = models.CharField(max_length=KEY_LENGTH, blank=True)
 

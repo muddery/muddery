@@ -4,6 +4,7 @@ Upgrade custom's game dir to the latest version.
 
 import traceback
 import os
+import shutil
 from django.conf import settings
 from django.db import connections
 from django.db.utils import OperationalError
@@ -50,6 +51,7 @@ class Upgrader(BaseUpgrader):
             "worlddata_objects",
             "worlddata_world_objects",
             "worlddata_properties_dict",
+            "worlddata_action_room_interval",
         ]
         for table in to_copy:
             try:
@@ -65,6 +67,20 @@ class Upgrader(BaseUpgrader):
         django_args = ["migrate", "worlddata"]
         django_kwargs = {"database": "worlddata"}
         django.core.management.call_command(*django_args, **django_kwargs)
+
+        # make new migrations
+        django_args = ["makemigrations", "gamedata"]
+        django_kwargs = {}
+        django.core.management.call_command(*django_args, **django_kwargs)
+
+        django_args = ["migrate", "gamedata"]
+        django_kwargs = {"database": "gamedata"}
+        django.core.management.call_command(*django_args, **django_kwargs)
+
+        # copy typeclass path
+        source_path = os.path.join(muddery_lib, "game_templates", game_template, "elements")
+        target_path = os.path.join(game_dir, "elements")
+        shutil.copytree(source_path, target_path)
 
         # character_states_dict
         try:
@@ -125,3 +141,58 @@ class Upgrader(BaseUpgrader):
             """)
         except Exception as e:
             print("element_properties: %s" % e)
+
+        # pocket_objects
+        try:
+            cursor.execute("""
+                INSERT INTO worlddata_pocket_objects (key, max_stack, `unique`, can_remove, can_discard)
+                SELECT key, max_stack, `unique`, can_remove, can_discard FROM worlddata_common_objects_bak
+            """)
+        except Exception as e:
+            print("pocket_objects: %s" % e)
+
+        # profit_rooms
+        try:
+            cursor.execute("""
+                INSERT INTO worlddata_profit_rooms (key, interval, offline, begin_message, end_message, condition)
+                SELECT t1.trigger_obj, t2.interval, t2.offline, t2.begin_message, t2.end_message, ''
+                FROM worlddata_event_data t1, worlddata_action_room_interval_bak t2
+                WHERE t1.action='ACTION_ROOM_INTERVAL' and t1.key=t2.event_key
+            """)
+        except Exception as e:
+            print("profit_rooms: %s" % e)
+
+        # properties_dict
+        try:
+            cursor.execute("""
+                DELETE FROM worlddata_properties_dict
+                WHERE id IN (
+                    SELECT t1.id FROM worlddata_properties_dict t1
+                    INNER JOIN worlddata_properties_dict_bak t2
+                        ON t1.element_type=t2.typeclass AND t1.property = t2.property
+                    WHERE t2.mutable = 1)
+            """)
+        except Exception as e:
+            print("properties_dict: %s" % e)
+
+        # quests
+        try:
+            cursor.execute("""
+                UPDATE worlddata_quests
+                SET name=(SELECT name FROM worlddata_objects_bak t1 WHERE worlddata_quests.key=t1.key),
+                desc=(SELECT desc FROM worlddata_objects_bak t3 WHERE worlddata_quests.key=t3.key)
+            """)
+        except Exception as e:
+            print("quests: %s" % e)
+
+        # room_profit_list
+        try:
+            cursor.execute("""
+                INSERT INTO worlddata_room_profit_list (provider, object, level, number, odds, multiple, message, quest, condition)
+                SELECT t1.trigger_obj, t2.interval, t2.offline, t2.begin_message, t2.end_message, ''
+                FROM worlddata_event_data t1, worlddata_action_room_interval_bak t2, worlddata_action_get_objects t3
+                WHERE t1.action='ACTION_ROOM_INTERVAL' AND t1.key=t2.event_key AND t2.action='ACTION_GET_OBJECTS'
+                AND t2.event_key=t3.event_key
+            """)
+        except Exception as e:
+            print("profit_rooms: %s" % e)
