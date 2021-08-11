@@ -364,17 +364,17 @@ def create_database():
     Create the game's database.
     """
     # make migrations
+    django_args = ["makemigrations", "gamedata"]
+    django_kwargs = {}
     try:
-        django_args = ["makemigrations", "gamedata"]
-        django_kwargs = {}
         django.core.management.call_command(*django_args, **django_kwargs)
     except django.core.management.base.CommandError as exc:
         print(configs.ERROR_INPUT.format(traceback=exc, args=django_args, kwargs=django_kwargs))
         raise
 
+    django_args = ["makemigrations", "worlddata"]
+    django_kwargs = {}
     try:
-        django_args = ["makemigrations", "worlddata"]
-        django_kwargs = {}
         django.core.management.call_command(*django_args, **django_kwargs)
     except django.core.management.base.CommandError as exc:
         print(configs.ERROR_INPUT.format(traceback=exc, args=django_args, kwargs=django_kwargs))

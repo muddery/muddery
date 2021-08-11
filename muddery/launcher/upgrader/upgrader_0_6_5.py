@@ -38,8 +38,36 @@ class Upgrader(BaseUpgrader):
             game_template: (string) the game template used to upgrade the game dir.
             muddery_lib: (string) muddery's dir
         """
-        os.chdir(game_dir)
+        # copy typeclass path
+        source_path = os.path.join(muddery_lib, "game_templates", game_template, "elements")
+        target_path = os.path.join(game_dir, "elements")
+        shutil.copytree(source_path, target_path)
 
+        # copy model files
+        gamedata_model_old = os.path.join(game_dir, "gamedata", "models.py")
+        gamedata_model_bak = os.path.join(game_dir, "gamedata", "models_bak.py")
+        gamedata_model_default = os.path.join(muddery_lib, "game_templates", "default", "gamedata", "models.py")
+        gamedata_model_new = os.path.join(muddery_lib, "game_templates", game_template, "gamedata", "models.py")
+        os.rename(gamedata_model_old, gamedata_model_bak)
+        shutil.copyfile(gamedata_model_default, gamedata_model_old)
+        try:
+            shutil.copyfile(gamedata_model_new, gamedata_model_old)
+        except FileNotFoundError:
+            pass
+
+        worlddata_model_old = os.path.join(game_dir, "worlddata", "models.py")
+        worlddata_model_bak = os.path.join(game_dir, "worlddata", "models_bak.py")
+        worlddata_model_default = os.path.join(muddery_lib, "game_templates", "default", "worlddata", "models.py")
+        worlddata_model_new = os.path.join(muddery_lib, "game_templates", game_template, "worlddata", "models.py")
+        os.rename(worlddata_model_old, worlddata_model_bak)
+        shutil.copyfile(worlddata_model_default, worlddata_model_old)
+        try:
+            shutil.copyfile(worlddata_model_new, worlddata_model_old)
+        except FileNotFoundError:
+            pass
+        
+        # init game dir
+        os.chdir(game_dir)
         init_game_directory(game_dir, check_db=False)
 
         # copy current tables
@@ -52,6 +80,7 @@ class Upgrader(BaseUpgrader):
             "worlddata_world_objects",
             "worlddata_properties_dict",
             "worlddata_action_room_interval",
+            "worlddata_world_rooms",
         ]
         for table in to_copy:
             try:
@@ -77,10 +106,14 @@ class Upgrader(BaseUpgrader):
         django_kwargs = {"database": "gamedata"}
         django.core.management.call_command(*django_args, **django_kwargs)
 
-        # copy typeclass path
-        source_path = os.path.join(muddery_lib, "game_templates", game_template, "elements")
-        target_path = os.path.join(game_dir, "elements")
-        shutil.copytree(source_path, target_path)
+        # properties_dict
+        #try:
+        #    cursor.execute("""
+        #        UPDATE worlddata_properties_dict
+        #        SET element_type=(SELECT typeclass FROM worlddata_properties_dict_bak t1 WHERE worlddata_properties_dict.id=t1.id)
+        #    """)
+        #except Exception as e:
+        #    print("properties_dict: %s" % e)
 
         # character_states_dict
         try:
@@ -102,6 +135,15 @@ class Upgrader(BaseUpgrader):
             """)
         except Exception as e:
             print("characters: %s" % e)
+
+        # world_rooms
+        #try:
+        #    cursor.execute("""
+        #        UPDATE worlddata_world_rooms
+        #        SET area=(SELECT location FROM worlddata_world_rooms_bak t1 WHERE worlddata_world_rooms.key=t1.key),
+        #    """)
+        #except Exception as e:
+        #    print("characters: %s" % e)
 
         # common_objects
         try:
@@ -189,10 +231,26 @@ class Upgrader(BaseUpgrader):
         try:
             cursor.execute("""
                 INSERT INTO worlddata_room_profit_list (provider, object, level, number, odds, multiple, message, quest, condition)
-                SELECT t1.trigger_obj, t2.interval, t2.offline, t2.begin_message, t2.end_message, ''
+                SELECT t1.trigger_obj, t3.object, t3.level, t3.number, t3.odds, t3.multiple, t3.message, '', ''
                 FROM worlddata_event_data t1, worlddata_action_room_interval_bak t2, worlddata_action_get_objects t3
                 WHERE t1.action='ACTION_ROOM_INTERVAL' AND t1.key=t2.event_key AND t2.action='ACTION_GET_OBJECTS'
                 AND t2.event_key=t3.event_key
             """)
         except Exception as e:
-            print("profit_rooms: %s" % e)
+            print("room_profit_list: %s" % e)
+
+        # modify the setting file
+        settings_old_path = os.path.join(game_dir, "server", "conf", "settings.py")
+        settings_new_path = os.path.join(game_dir, "server", "conf", "new_settings.py")
+        with open(settings_new_path, "w") as settings_new:
+            with open(settings_old_path, "r") as settings_old:
+                for line in settings_old.readlines():
+                    if line.find("TYPECLASS") >= 0:
+                        continue
+                    settings_new.write(line)
+
+        settings_bak_path = os.path.join(game_dir, "server", "conf", "settings_bak.py")
+        os.rename(settings_old_path, settings_bak_path)
+        os.rename(settings_new_path, settings_old_path)
+
+
