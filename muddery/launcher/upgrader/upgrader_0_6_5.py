@@ -38,6 +38,16 @@ class Upgrader(BaseUpgrader):
             game_template: (string) the game template used to upgrade the game dir.
             muddery_lib: (string) muddery's dir
         """
+        print("""
+    您好，由于此次版本更新的内容过多，无法自动从旧版本升级到新版本。
+    该升级程序只能帮你升级游戏数据，但游戏代码需要手工处理。
+        
+        """)
+
+        answer = input("    您是否要继续？（Y/N）")
+        if answer.lower() != "y":
+            raise MudderyError(ERR.can_not_upgrade, "用户选择退出。")
+
         # copy typeclass path
         source_path = os.path.join(muddery_lib, "game_templates", game_template, "elements")
         target_path = os.path.join(game_dir, "elements")
@@ -87,6 +97,15 @@ class Upgrader(BaseUpgrader):
                 cursor.execute("CREATE TABLE %(table)s_bak AS SELECT * FROM %(table)s" % {"table": table})
             except OperationalError as e:
                 print("%s: %s" % (type(e), e))
+
+        print("""
+    数据库更新需要手动输入信息，请按以下方式选择：
+    Did you rename the worlddata.common_npcs model to staff_characters? [y/N] n
+    Did you rename the worlddata.base_npcs model to staff_characters? [y/N] n
+    Did you rename game_settings.default_home_key to game_settings.default_staff_character_key (a CharField)? [y/N] n
+    Did you rename properties_dict.typeclass to properties_dict.element_type (a CharField)? [y/N] y
+    Did you rename world_rooms.location to world_rooms.area (a CharField)? [y/N] y
+        """)
 
         # make new migrations
         django_args = ["makemigrations", "worlddata"]
@@ -253,4 +272,9 @@ class Upgrader(BaseUpgrader):
         os.rename(settings_old_path, settings_bak_path)
         os.rename(settings_new_path, settings_old_path)
 
+        print("""
+    您的游戏数据信息已经更新，但您的游戏代码无法自动更新，需要手工处理。
+    您可以加入QQ群：230774532 获取帮助。
+        """)
 
+        raise MudderyError(ERR.can_not_upgrade, "You should upgrade the game manually.")
