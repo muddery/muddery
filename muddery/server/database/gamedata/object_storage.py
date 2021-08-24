@@ -86,9 +86,10 @@ class BaseObjectStorage(object):
             obj_id: (number) object's id.
             value_dict: (dict) a dict of key-values.
         """
-        with cls.storage.atomic():
-            for key, value in value_dict.items():
-                cls.storage.save(obj_id, key, to_string(value))
+        if value_dict:
+            with cls.storage.atomic():
+                for key, value in value_dict.items():
+                    cls.storage.save(obj_id, key, to_string(value))
 
     @classmethod
     def has(cls, obj_id, key):

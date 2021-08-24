@@ -39,14 +39,11 @@ class FuncHit(StatementFunction):
         damage = float(self.caller.const.attack) / (self.caller.const.attack + self.obj.const.defence) * self.caller.const.attack
         damage = round(damage * effect)
 
-        # hurt target
-        hp = self.obj.states.load("hp")
-        new_hp = self.obj.validate_property("hp", hp - damage)
-        if new_hp != hp:
-            self.obj.states.save("hp", new_hp)
+        # hit the target
+        changed = self.obj.change_state("hp", -damage)
 
         # send skill result
-        return _("Hit %s by %d points.") % (target_name, hp - new_hp)
+        return _("Hit %s by %d points.") % (target_name, -changed)
 
 
 class FuncHeal(StatementFunction):
@@ -79,14 +76,11 @@ class FuncHeal(StatementFunction):
         # recover caller's hp
         heal = int(effect)
 
-        # hurt target
-        hp = self.obj.states.load("hp")
-        new_hp = self.obj.validate_property("hp", hp + heal)
-        if new_hp != hp:
-            self.obj.states.save("hp", new_hp)
+        # heal the target
+        changed = self.obj.change_state("hp", heal)
 
         # send skill result
-        return _("Healed %s by %d points.") % (self.obj.get_name(), new_hp - hp)
+        return _("Healed %s by %d points.") % (self.obj.get_name(), changed)
 
 
 class FuncIncreaseMaxHP(StatementFunction):
@@ -117,17 +111,13 @@ class FuncIncreaseMaxHP(StatementFunction):
 
         # increase max hp
         increase = int(effect)
+        changed = 0
+
         if increase > 0:
-            max_hp = self.obj.const.max_hp
-            new_max_hp = max_hp + increase
-            if new_max_hp != max_hp:
-                self.obj.const_data_handler.add("max_hp", new_max_hp)
+            changed = self.obj.change_const_property("max_hp", increase)
 
             # increase hp
-            hp = self.obj.states.load("hp")
-            new_hp = self.obj.validate_property("hp", hp + increase)
-            if new_hp != hp:
-                self.caller.states.save("hp", new_hp)
+            self.obj.change_state("hp", changed)
 
         # send skill result
-        return _("Raised %s's max HP by %d points.") % (self.obj.get_name(), increase)
+        return _("Raised %s's max HP by %d points.") % (self.obj.get_name(), changed)

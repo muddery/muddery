@@ -70,11 +70,6 @@ class CmdLook(BaseCommand):
             # this is likely due to us having a player instead
             looking_at_obj = looking_at_obj.character
 
-        if not looking_at_obj.access(caller, "view"):
-            # The caller does not have the permission to look.
-            caller.msg({"msg": _("Can not find '%s'.") % looking_at_obj.name})
-            return
-
         if looking_at_obj == caller.location:
             # Clear caller's target.
             caller.clear_target()
@@ -817,12 +812,12 @@ class CmdAttack(BaseCommand):
             return
 
         if target.is_in_combat():
-            # caller is in battle
+            # target is in battle
             message = {"alert": _("%s is in another combat." % target.name)}
             caller.msg(message)
             return
 
-        # create a new combat handler
+        # create a new combat
         try:
             COMBAT_HANDLER.create_combat(
                 combat_type=CombatType.NORMAL,
@@ -833,6 +828,7 @@ class CmdAttack(BaseCommand):
         except Exception as e:
             logger.log_err("Can not create combat: [%s] %s" % (type(e).__name__, e))
             caller.msg(_("You can not attack %s.") % target.get_name())
+            return
 
         caller.msg(_("You are attacking {R%s{n! You are in combat.") % target.get_name())
         target.msg(_("{R%s{n is attacking you! You are in combat.") % caller.get_name())

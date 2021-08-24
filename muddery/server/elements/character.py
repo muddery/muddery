@@ -806,3 +806,81 @@ class MudderyCharacter(BaseElement):
             value = min_value
 
         return value
+
+    def change_state(self, key, increment):
+        """
+        Change a state's value with validation.
+        :return:
+            the value that actually changed.
+        """
+        change = 0
+
+        if self.states.has(key):
+            current_value = self.states.load(key)
+            new_value = self.validate_property(key, current_value + increment)
+            if new_value != current_value:
+                change = new_value - current_value
+                self.states.save(key, new_value)
+
+        return change
+
+    def change_states(self, increments):
+        """
+        Change a dict of states with validation.
+
+        :return:
+            the values that actually changed.
+        """
+        changes = {}
+        state_values = {}
+
+        for key, increment in increments.items():
+            changes[key] = 0
+
+            if self.states.has(key):
+                current_value = self.states.load(key)
+                new_value = self.validate_property(key, current_value + increment)
+                if new_value != current_value:
+                    changes[key] = new_value - current_value
+                    state_values[key] = new_value
+
+        if state_values:
+            self.states.saves(state_values)
+
+        return changes
+
+    def change_const_property(self, key, increment):
+        """
+        Change a const property with validation.
+        :return:
+            the value that actually changed.
+        """
+        change = 0
+
+        if self.const_data_handler.has(key):
+            current_value = self.const_data_handler.get(key)
+            new_value = self.validate_property(key, current_value + increment)
+            change = new_value - current_value
+            self.const_data_handler.add(key, new_value)
+
+        return change
+
+    def change_const_properties(self, increments):
+        """
+        Change a dict of const properties with validation.
+
+        :return:
+            the values that actually changed.
+        """
+        changes = {}
+
+        for key, increment in increments.items():
+            changes[key] = 0
+
+            if self.const_data_handler.has(key):
+                current_value = self.const_data_handler.get(key)
+                new_value = self.validate_property(key, current_value + increment)
+                changes[key] = new_value - current_value
+                self.const_data_handler.add(key, new_value)
+
+        return changes

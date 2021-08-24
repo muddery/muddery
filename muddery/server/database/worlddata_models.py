@@ -583,7 +583,7 @@ class shop_goods(models.Model):
     shop = models.CharField(max_length=KEY_LENGTH, db_index=True)
 
     # the key of objects to sell
-    goods = models.CharField(max_length=KEY_LENGTH)
+    goods = models.CharField(max_length=KEY_LENGTH, db_index=True)
 
     # goods level
     level = models.PositiveIntegerField(blank=True, null=True)

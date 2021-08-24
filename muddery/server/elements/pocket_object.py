@@ -110,31 +110,9 @@ class MudderyFood(ELEMENT("POCKET_OBJECT")):
         if not number:
             return
 
-        values_merge = {key: self.const_data_handler.get(key) for key, info in self.get_properties_info().items()}
-
-        changes = {}
-        new_states = {}
-        for key, increment in values_merge.items():
-            if not increment:
-                continue
-
-            increment *= number
-
-            if user.states.has(key):
-                current_value = user.states.load(key)
-                new_value = user.validate_property(key, current_value + increment)
-                changes[key] = new_value - current_value
-                if new_value != current_value:
-                    new_states[key] = new_value
-            elif user.const_data_handler.has(key):
-                current_value = user.const_data_handler.get(key)
-                new_value = user.validate_property(key, current_value + increment)
-                changes[key] = new_value - current_value
-                user.const_data_handler.add(key, new_value)
-
-        if new_states:
-            user.states.saves(new_states)
-
+        properties = {key: self.const_data_handler.get(key) for key, info in self.get_properties_info().items()}
+        to_change = {key: value * number for key, value in properties.items() if value != 0}
+        changes = user.change_states(to_change)
         user.show_status()
 
         results = []
@@ -197,28 +175,9 @@ class MudderyEquipment(ELEMENT("POCKET_OBJECT")):
         if not user:
             return
 
-        values_merge = {key: self.const_data_handler.get(key) for key, info in self.get_properties_info().items()}
-
-        changes = {}
-        new_states = {}
-        for key, increment in values_merge.items():
-            if not increment:
-                continue
-
-            if user.states.has(key):
-                current_value = user.states.load(key)
-                new_value = user.validate_property(key, current_value + increment)
-                changes[key] = new_value - current_value
-                if new_value != current_value:
-                    new_states[key] = new_value
-            elif user.const_data_handler.has(key):
-                current_value = user.const_data_handler.get(key)
-                new_value = user.validate_property(key, current_value + increment)
-                changes[key] = new_value - current_value
-                user.const_data_handler.add(key, new_value)
-
-        if new_states:
-            user.states.saves(new_states)
+        properties = {key: self.const_data_handler.get(key) for key, info in self.get_properties_info().items()}
+        to_change = {key: value for key, value in properties.items() if value != 0}
+        user.change_const_properties(to_change)
 
     def get_available_commands(self, caller):
         """
