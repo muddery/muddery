@@ -1050,6 +1050,8 @@ class DefaultObject(ObjectDB, metaclass=TypeclassBase):
         if not self.pk or not self.at_object_delete():
             # This object has already been deleted,
             # or the pre-delete check return False
+            print("Can not delete.")
+            print(self.at_object_delete())
             return False
 
         # See if we need to kick the account off.

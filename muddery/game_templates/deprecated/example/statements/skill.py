@@ -45,7 +45,7 @@ class FuncHit(SkillFunction):
         self.obj.show_status()
 
         # character's status after skill casted
-        status = [{"dbref": self.obj.dbref,
+        status = [{"id": self.obj.get_id(),
                    "max_hp": self.obj.max_hp,
                    "hp": self.obj.db.hp}]
 

@@ -36,7 +36,11 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         #
 
         self.add(general.CmdLook())
-        self.add(general.CmdGoto())
+        self.add(general.CmdInventoryObject())
+        self.add(general.CmdEquipmentsObject())
+        self.add(general.CmdLookRoomObj())
+        self.add(general.CmdLookRoomChar())
+        self.add(general.CmdTraverse())
         self.add(general.CmdInventory())
         self.add(general.CmdTalk())
         self.add(general.CmdDialogue())
@@ -57,6 +61,12 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(general.CmdConfirmCombat())
         self.add(general.CmdRejectCombat())
         self.add(general.CmdGetRankings())
+        self.add(general.CmdQueryQuest())
+        self.add(general.CmdQuerySkill())
+
+        self.add(combat.CmdCastCombatSkill())
+        self.add(combat.CmdCombatInfo())
+        self.add(combat.CmdLeaveCombat())
 
         # Add empty login commands to the normal cmdset to
         # avoid showing wrong cmd messages.
@@ -131,19 +141,3 @@ class SessionCmdSet(default_cmds.SessionCmdSet):
         #
         # any commands you add below will overload the default ones.
         #
-
-
-class CombatCmdSet(CmdSet):
-    """
-    When players are in combat, the combat cmdset will replace the normal cmdset.
-    The normal cmdset will be recoverd when the combat is over.
-    """
-    key = "combat_cmdset"
-    mergetype = "Replace"
-    priority = 10 
-    no_exits = True
-
-    def at_cmdset_creation(self):
-        self.add(general.CmdLook())
-        self.add(general.CmdCastCombatSkill())
-        self.add(combat.CmdCombatInfo())

@@ -2,7 +2,7 @@
 This model translates default strings into localized strings.
 """
 
-from muddery.server.dao.condition_dict import ConditionDesc
+from muddery.server.database.worlddata.condition_dict import ConditionDesc
 
 
 class DescHandler(object):

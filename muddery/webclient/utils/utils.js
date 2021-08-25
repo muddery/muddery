@@ -109,7 +109,7 @@ MudderyDataHandler = function() {
 }
 
 MudderyDataHandler.prototype = {
-    character_dbref: "",
+    character_id: "",
     character_name: "",
     character_icon: "",
     character_level: 0,
@@ -131,7 +131,7 @@ MudderyDataHandler.prototype = {
             var key = skills[i]["key"];
 
             // cd_time in milliseconds
-            var cd_time = current_time + skills[i]["cd_remain"] * 1000;
+            var cd_time = current_time + skills[i]["cd"] * 1000;
             this.skill_cd_time[key] = cd_time;
         }
     },

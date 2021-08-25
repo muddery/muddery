@@ -40,16 +40,6 @@ class honour_settings(BaseModels.honour_settings):
 
 # ------------------------------------------------------------
 #
-# all objects
-#
-# ------------------------------------------------------------
-class objects(BaseModels.objects):
-    "All objects in the game."
-    pass
-
-
-# ------------------------------------------------------------
-#
 # world areas
 #
 # ------------------------------------------------------------
@@ -65,6 +55,16 @@ class world_areas(BaseModels.world_areas):
 #------------------------------------------------------------
 class world_rooms(BaseModels.world_rooms):
     "Store all unique rooms."
+    pass
+
+
+# ------------------------------------------------------------
+#
+# rooms that can give profits to characters in the room.
+#
+# ------------------------------------------------------------
+class profit_rooms(BaseModels.profit_rooms):
+    "rooms that can give profits to characters in the room."
     pass
 
 
@@ -125,6 +125,16 @@ class creator_loot_list(BaseModels.creator_loot_list):
 #------------------------------------------------------------
 class common_objects(BaseModels.common_objects):
     "Store all common objects."
+    pass
+
+
+#------------------------------------------------------------
+#
+# store all pocket objects
+#
+#------------------------------------------------------------
+class pocket_objects(BaseModels.pocket_objects):
+    "Store all pocket objects."
     pass
 
 
@@ -192,10 +202,21 @@ class properties_dict(BaseModels.properties_dict):
 
 # ------------------------------------------------------------
 #
-# Object's custom properties
+# Character's mutable states.
+# These states can change in the game.
 #
 # ------------------------------------------------------------
-class object_properties(BaseModels.object_properties):
+class character_states_dict(BaseModels.character_states_dict):
+    "Character's mutable states."
+    pass
+
+
+# ------------------------------------------------------------
+#
+# Element's custom properties
+#
+# ------------------------------------------------------------
+class element_properties(BaseModels.element_properties):
     "Store object's custom properties."
     pass
 
@@ -210,15 +231,11 @@ class world_npcs(BaseModels.world_npcs):
     pass
 
 
-class base_npcs(BaseModels.base_npcs):
-    pass
-
-
-class common_npcs(BaseModels.common_npcs):
-    pass
-
-
 class player_characters(BaseModels.player_characters):
+    pass
+
+
+class staff_characters(BaseModels.staff_characters):
     pass
 
 
@@ -328,6 +345,16 @@ class quests(BaseModels.quests):
 #
 #------------------------------------------------------------
 class quest_reward_list(BaseModels.quest_reward_list):
+    "Quest's reward list"
+    pass
+
+
+# ------------------------------------------------------------
+#
+# profit room's rewards
+#
+# ------------------------------------------------------------
+class room_profit_list(BaseModels.room_profit_list):
     "Quest's reward list"
     pass
 
@@ -468,29 +495,10 @@ class action_message(BaseModels.action_message):
 
 # ------------------------------------------------------------
 #
-# action to trigger other actions at interval.
-#
-# ------------------------------------------------------------
-class action_room_interval(BaseModels.action_room_interval):
-    pass
-
-
-# ------------------------------------------------------------
-#
 # action to add objects to characters
 #
 # ------------------------------------------------------------
 class action_get_objects(BaseModels.action_get_objects):
-    pass
-
-
-# ------------------------------------------------------------
-#
-# condition descriptions
-#
-# ------------------------------------------------------------
-class condition_desc(BaseModels.condition_desc):
-    "Object descriptions in different conditions."
     pass
 
 

@@ -41,6 +41,10 @@ MudderyService.prototype = {
         Evennia.msg("text", this.cmdString(cmd, args));
     },
 
+    leaveCombat: function() {
+        Evennia.msg("text", this.cmdString("leave_combat", ""));
+    },
+
     doQuickLogin: function(playername) {
         var args = {"playername" : playername};
         Evennia.msg("text", this.cmdString("quick_login", args));
@@ -86,14 +90,14 @@ MudderyService.prototype = {
     },
 
     // delete a character
-    deleteCharacter: function(dbref) {
-        var args = {"dbref": dbref};
+    deleteCharacter: function(obj_id) {
+        var args = {"id": obj_id};
 		Evennia.msg("text", this.cmdString("char_delete", args));
     },
     
     // puppet a character
-    puppetCharacter: function(dbref) {
-    	Evennia.msg("text", this.cmdString("puppet", dbref));
+    puppetCharacter: function(obj_id) {
+    	Evennia.msg("text", this.cmdString("puppet", obj_id));
     },
     
     // unpuppet current character
@@ -102,23 +106,48 @@ MudderyService.prototype = {
     },
     
     // look
-    look: function(dbref, context) {
-        Evennia.msg("text", this.cmdString("look", dbref, context));
+    look: function(odj_id, context) {
+        Evennia.msg("text", this.cmdString("look", odj_id, context));
+    },
+
+    inventoryObject: function(position, context) {
+        Evennia.msg("text", this.cmdString("inventory_obj", position, context));
+    },
+
+    equipmentsObject: function(obj_id, context) {
+        Evennia.msg("text", this.cmdString("equipments_obj", obj_id, context));
+    },
+
+    // look at an object in the room
+    look_room_obj: function(object_key) {
+        Evennia.msg("text", this.cmdString("look_room_obj", object_key));
+    },
+
+    // look at a character in the room
+    // args:
+    //  char_id: (int) character's id
+    //
+    look_room_char: function (char_id) {
+        Evennia.msg("text", this.cmdString("look_room_char", char_id));
     },
 
     // go to
-    doGoto : function(dbref) {
-        Evennia.msg("text", this.cmdString("goto", dbref));
+    traverse : function(exit_key) {
+        Evennia.msg("text", this.cmdString("traverse", exit_key));
     },
     
     // talk
-    doTalk : function(dbref) {
-        Evennia.msg("text", this.cmdString("talk", dbref));
+    doTalk : function(odj_id) {
+        Evennia.msg("text", this.cmdString("talk", odj_id));
     },
     
     // buy something
-    buyGoods: function(dbref) {
-    	Evennia.msg("text", this.cmdString("buy", dbref));
+    buyGoods: function(npc, shop, goods) {
+    	Evennia.msg("text", this.cmdString("buy", {
+    	    npc: npc,
+    	    shop: shop,
+    	    goods: goods,
+    	}));
     },
     
     // dialogue
@@ -185,7 +214,21 @@ MudderyService.prototype = {
     getRankings: function() {
     	Evennia.msg("text", this.cmdString("get_rankings", ""));
     },
-    
+
+    // query the quest's detail information
+    // args:
+    //     key: (string) a quest's key
+    queryQuest: function(key) {
+        Evennia.msg("text", this.cmdString("query_quest", {key: key}));
+    },
+
+    // query the skill's detail information
+    // args:
+    //     key: (string) a skill's key
+    querySkill: function(key) {
+        Evennia.msg("text", this.cmdString("query_skill", {key: key}));
+    },
+
     // do test
     doTest: function() {
         // test codes

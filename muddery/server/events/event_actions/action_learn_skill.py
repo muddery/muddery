@@ -2,8 +2,10 @@
 Event action.
 """
 
+import traceback
+from evennia.utils import logger
 from muddery.server.events.base_event_action import BaseEventAction
-from muddery.server.dao.worlddata import WorldData
+from muddery.server.database.worlddata.worlddata import WorldData
 from muddery.server.utils.localized_strings_handler import _
 
 
@@ -30,5 +32,9 @@ class ActionLearnSkill(BaseEventAction):
 
         # Learn skills.
         for record in records:
-            skill_key = record.skill
-            character.learn_skill(skill_key, False, False)
+            try:
+                character.learn_skill(record.skill, record.level, False)
+            except Exception as e:
+                traceback.print_exc()
+                logger.log_err("Can not learn skill %s %s" % (type(e).__name__, e))
+                pass

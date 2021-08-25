@@ -14,7 +14,6 @@ does what you expect it to.
 
 """
 
-import os
 from django.conf import settings
 from evennia.utils import search
 from muddery.server.utils import builder
@@ -25,6 +24,7 @@ LIMBO_DESC = "Welcome to your new {wMuddery{n-based game! " +\
              "Visit http://www.muddery.org if you need help, " +\
              "want to contribute, report issues or just join the community."
 
+
 def at_initial_setup():
     """
     Build up the default world and set default locations.
@@ -32,44 +32,13 @@ def at_initial_setup():
 
     try:
         # load data
-        from muddery.server.dao.worlddata import WorldData
+        from muddery.server.database.worlddata.worlddata import WorldData
         WorldData.reload()
         print("Reload world data.")
 
         # load game settings
         GAME_SETTINGS.reset()
         print("Reset game settings.")
-
-        # build world
-        builder.build_all()
-        print("Builder build all.")
-
-        # set limbo's desc
-        limbo_obj = search.search_object("#2", exact=True)
-        if limbo_obj:
-            limbo_obj[0].db.desc = LIMBO_DESC
-            limbo_obj[0].position = None
-        print("Set limbo object.")
-
-        # set default locations
-        builder.reset_default_locations()
-        print("Set default locations.")
-
-        superuser = search.search_object("#1", exact=True)
-        if superuser:
-            superuser = superuser[0]
-
-            # move the superuser to the start location
-            start_location = search.search_object(settings.START_LOCATION, exact=True)
-            if start_location:
-                start_location = start_location[0]
-                superuser.move_to(start_location, quiet=True)
-
-            # set superuser's data
-            superuser.set_data_key(GAME_SETTINGS.get("default_player_character_key"), 1)
-            superuser.set_nickname("superuser")
-
-            print("Set superuser.")
 
     except Exception as e:
         ostring = "Can't set initial data: %s" % e

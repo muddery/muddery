@@ -203,20 +203,22 @@ field_creator = {
             select_room.attr("disabled", "disabled");
         }
 
-        var room_area = areas[selected_area];
-        for (var i = 0; i < room_area.rooms.length; i++) {
-            var room = room_area.rooms[i];
+        if (selected_area in areas) {
+            var room_area = areas[selected_area];
+            for (var i = 0; i < room_area.rooms.length; i++) {
+                var room = room_area.rooms[i];
 
-            var option = $("<option>")
-                .text(room[1])
-                .attr("value", room[0])
-                .appendTo(select_room);
+                var option = $("<option>")
+                    .text(room[1])
+                    .attr("value", room[0])
+                    .appendTo(select_room);
 
-            if (room[0] == value) {
-                option.attr("selected", "selected");
+                if (room[0] == value) {
+                    option.attr("selected", "selected");
+                }
             }
+            select_room.appendTo(ctrl);
         }
-        select_room.appendTo(ctrl);
         
         return this.createControlGroup(name, ctrl, label, help_text);
     },

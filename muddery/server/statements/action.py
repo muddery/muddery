@@ -2,7 +2,8 @@
 Actions are used to do somethings.
 """
 
-from muddery.server.utils import utils
+from django.core.exceptions import ObjectDoesNotExist
+from muddery.server.utils.search import get_object_by_key
 from muddery.server.statements.statement_function import StatementFunction
 
 
@@ -28,7 +29,12 @@ class FuncLearnSkill(StatementFunction):
             return False
 
         skill_key = self.args[0]
-        return self.caller.learn_skill(skill_key, False, False)
+        skill_level = self.args[1] if len(self.args) > 1 else 0
+        try:
+            self.caller.learn_skill(skill_key, skill_level, False)
+            return True
+        except:
+            return False
 
 
 class FuncGiveObject(StatementFunction):
@@ -60,7 +66,7 @@ class FuncGiveObject(StatementFunction):
         if len(self.args) > 1:
             number = self.args[1]
 
-        obj_list = [{"object": obj_key,
+        obj_list = [{"object_key": obj_key,
                      "number": number}]
 
         objects = self.caller.receive_objects(obj_list)
@@ -122,10 +128,10 @@ class FuncTeleportTo(StatementFunction):
             return False
 
         room_key = self.args[0]
-        destination = utils.search_obj_data_key(room_key)
-        if not destination:
-            return
-        destination = destination[0]
+        try:
+            destination = get_object_by_key(room_key)
+        except ObjectDoesNotExist:
+            return False
 
         return self.caller.move_to(destination)
 
@@ -191,23 +197,4 @@ class FuncFightTarget(StatementFunction):
         if self.args:
             desc = self.args[0]
 
-        return self.caller.attack_temp_target(self.obj.get_data_key(), self.obj.db.level, desc)
-        
-        
-class FuncKillCaller(StatementFunction):
-    """
-    Kill the caller.
-
-    Returns:
-        (boolean) killed
-    """
-    key = "kill_caller"
-    const = False
-
-    def func(self):
-        """
-        Implement the function.
-        """
-        self.caller.db.hp = 0
-        self.caller.die(None)
-        return True
+        return self.caller.attack_temp_target(self.obj.get_element_key(), self.obj.get_level(), desc)

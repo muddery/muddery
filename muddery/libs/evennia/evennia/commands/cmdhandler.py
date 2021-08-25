@@ -320,6 +320,7 @@ def get_and_merge_cmdsets(caller, session, account, obj, callertype, raw_string)
                     location = obj.location
                 except Exception:
                     location = None
+                location = None
                 if location:
                     # Gather all cmdsets stored on objects in the room and
                     # also in the caller's inventory and the location itself
@@ -639,12 +640,14 @@ def cmdhandler(
             # post-command hook
             yield cmd.at_post_cmd()
 
-            if cmd.save_for_next:
-                # store a reference to this command, possibly
-                # accessible by the next command.
-                caller.ndb.last_cmd = yield copy(cmd)
-            else:
-                caller.ndb.last_cmd = None
+            """
+           if cmd.save_for_next:
+               # store a reference to this command, possibly
+               # accessible by the next command.
+               caller.ndb.last_cmd = yield copy(cmd)
+           else:
+               caller.ndb.last_cmd = None
+           """
 
             # return result to the deferred
             returnValue(ret)

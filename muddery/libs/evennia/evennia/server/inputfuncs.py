@@ -73,6 +73,8 @@ def text(session, *args, **kwargs):
     if txt.strip() in _IDLE_COMMAND:
         session.update_session_counters(idle=True)
         return
+
+    """
     if session.account:
         # nick replacement
         puppet = session.puppet
@@ -84,6 +86,7 @@ def text(session, *args, **kwargs):
             txt = session.account.nicks.nickreplace(
                 txt, categories=("inputline", "channel"), include_account=False
             )
+    """
     kwargs.pop("options", None)
     cmdhandler(session, txt, callertype="session", session=session, **kwargs)
     session.update_session_counters()

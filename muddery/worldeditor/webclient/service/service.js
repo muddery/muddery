@@ -142,11 +142,11 @@ service = {
         this.sendRequest("query_record", "", args, callback_success, callback_failed, context);
     },
 
-    queryTypeclassTable: function(typeclass, callback_success, callback_failed, context) {
+    queryElementTable: function(element_type, callback_success, callback_failed, context) {
         var args = {
-            typeclass: typeclass
+            element_type: element_type
         };
-        this.sendRequest("query_typeclass_table", "", args, callback_success, callback_failed, context);
+        this.sendRequest("query_element_table", "", args, callback_success, callback_failed, context);
     },
 
     queryForm: function(table_name, record_id, callback_success, callback_failed, context) {
@@ -164,28 +164,28 @@ service = {
         this.sendRequest("query_form_first_record", "", args, callback_success, callback_failed, context);
     },
 
-    queryObjectForm: function(base_typeclass, obj_typeclass, obj_key, callback_success, callback_failed, context) {
+    queryElementForm: function(base_element_type, obj_element_type, element_key, callback_success, callback_failed, context) {
         var args = {
-            base_typeclass: base_typeclass,
-            obj_typeclass: obj_typeclass,
-            obj_key: obj_key
+            base_element_type: base_element_type,
+            obj_element_type: obj_element_type,
+            element_key: element_key
         };
-        this.sendRequest("query_object_form", "", args, callback_success, callback_failed, context);
+        this.sendRequest("query_element_form", "", args, callback_success, callback_failed, context);
     },
 
     queryAreas: function(callback_success, callback_failed, context) {
         this.sendRequest("query_areas", "", {}, callback_success, callback_failed, context);
     },
 
-    /*  Query all events of the object.
+    /*  Query all events of the element.
      *  Args:
-     *      object_key: (string) the object's key.
+     *      element_key: (string) the element's key.
      */
-    queryObjectEventTriggers: function(typeclass_key, callback_success, callback_failed, context) {
+    queryElementEventTriggers: function(element_type, callback_success, callback_failed, context) {
         var args = {
-            typeclass: typeclass_key
+            element_type: element_type
         };
-        this.sendRequest("query_object_event_triggers", "", args, callback_success, callback_failed, context);
+        this.sendRequest("query_element_event_triggers", "", args, callback_success, callback_failed, context);
     },
 
     /*  Query all events of dialogues.
@@ -194,15 +194,15 @@ service = {
         this.sendRequest("query_dialogue_event_triggers", "", {}, callback_success, callback_failed, context);
     },
 
-    /*  Query all events of the object.
+    /*  Query all events of the element.
      *  Args:
-     *      object_key: (string) the object's key.
+     *      element_key: (string) the element's key.
      */
-    queryObjectEvents: function(object_key, callback_success, callback_failed, context) {
+    queryElementEvents: function(element_key, callback_success, callback_failed, context) {
         var args = {
-            object: object_key
+            element_key: element_key
         };
-        this.sendRequest("query_object_events", "", args, callback_success, callback_failed, context);
+        this.sendRequest("query_element_events", "", args, callback_success, callback_failed, context);
     },
 
     /*  Query all forms of the event action.
@@ -244,11 +244,11 @@ service = {
 
     /*  Add a new area.
      *  Args:
-     *      typeclass: (string) the area's typeclass.
+     *      element_type: (string) the area's element type.
      */
-    addArea: function(typeclass, width, height, callback_success, callback_failed, context) {
+    addArea: function(element_type, width, height, callback_success, callback_failed, context) {
         var args = {
-            typeclass: typeclass,
+            element_type: element_type,
             width: width,
             height: height
         };
@@ -257,14 +257,14 @@ service = {
 
     /*  Add a new room.
      *  Args:
-     *      typeclass: (string) the room's typeclass.
+     *      element_type: (string) the room's element type.
      *      area: (string) an area's key.
      *      position: (list) a list of position data.
      */
-    addRoom: function(typeclass, area, position, callback_success, callback_failed, context) {
+    addRoom: function(element_type, area, position, callback_success, callback_failed, context) {
         var args = {
-            typeclass: typeclass,
-            location: area,
+            element_type: element_type,
+            area: area,
             position: position
         };
         this.sendRequest("add_room", "", args, callback_success, callback_failed, context);
@@ -272,13 +272,13 @@ service = {
 
     /*  Add a new exit.
      *  Args:
-     *      typeclass: (string) the exit's typeclass.
+     *      element_type: (string) the exit's element type.
      *      location: (string) exit's location
      *      destination: (string) exit's destination
      */
-    addExit: function(typeclass, location, destination, callback_success, callback_failed, context) {
+    addExit: function(element_type, location, destination, callback_success, callback_failed, context) {
         var args = {
-            typeclass: typeclass,
+            element_type: element_type,
             location: location,
             destination: destination
         };
@@ -294,14 +294,14 @@ service = {
         this.sendRequest("save_form", "", args, callback_success, callback_failed, context);
     },
 
-    saveObjectForm: function(tables, base_typeclass, obj_typeclass, obj_key, callback_success, callback_failed, context) {
+    saveElementForm: function(tables, base_element_type, obj_element_type, obj_key, callback_success, callback_failed, context) {
         var args = {
             tables: tables,
-            base_typeclass: base_typeclass,
-            obj_typeclass: obj_typeclass,
+            base_element_type: base_element_type,
+            obj_element_type: obj_element_type,
             obj_key: obj_key
         };
-        this.sendRequest("save_object_form", "", args, callback_success, callback_failed, context);
+        this.sendRequest("save_element_form", "", args, callback_success, callback_failed, context);
     },
 
     saveEventActionForms: function(values, action_type, event_key, callback_success, callback_failed, context) {
@@ -321,19 +321,19 @@ service = {
         this.sendRequest("delete_record", "", args, callback_success, callback_failed, context);
     },
 
-    deleteObject: function(obj_key, base_typeclass, callback_success, callback_failed, context) {
+    deleteElement: function(element_key, base_element_type, callback_success, callback_failed, context) {
         var args = {
-            obj_key: obj_key,
-            base_typeclass: base_typeclass
+            element_key: element_key,
+            base_element_type: base_element_type
         };
-        this.sendRequest("delete_object", "", args, callback_success, callback_failed, context);
+        this.sendRequest("delete_element", "", args, callback_success, callback_failed, context);
     },
 
-    deleteObjects: function(objects, callback_success, callback_failed, context) {
+    deleteElements: function(elements, callback_success, callback_failed, context) {
         var args = {
-            objects: objects
+            elements: elements
         };
-        this.sendRequest("delete_objects", "", args, callback_success, callback_failed, context);
+        this.sendRequest("delete_elements", "", args, callback_success, callback_failed, context);
     },
 
     queryTables: function(callback_success, callback_failed, context) {
@@ -367,52 +367,55 @@ service = {
         this.sendRequest("query_data_file_types", "", {}, callback_success, callback_failed, context);
     },
 
-    queryAllTypeclasses: function(callback_success, callback_failed, context) {
-        this.sendRequest("query_all_typeclasses", "", {}, callback_success, callback_failed, context);
+    queryAllElements: function(callback_success, callback_failed, context) {
+        this.sendRequest("query_all_elements", "", {}, callback_success, callback_failed, context);
     },
 
-    queryTypeclassProperties: function(typeclass, callback_success, callback_failed, context) {
+    queryElementTypeProperties: function(element_type, callback_success, callback_failed, context) {
         var args = {
-            typeclass: typeclass
+            element_type: element_type
         };
-        this.sendRequest("query_typeclass_properties", "", args, callback_success, callback_failed, context);
+        this.sendRequest("query_element_type_properties", "", args, callback_success, callback_failed, context);
     },
 
-    queryObjectProperties: function(typeclass, obj_key, callback_success, callback_failed, context) {
+    queryElementProperties: function(element_type, element_key, callback_success, callback_failed, context) {
         var args = {
-            typeclass: typeclass,
-            obj_key: obj_key
+            element_type: element_type,
+            element_key: element_key
         };
-        this.sendRequest("query_object_properties", "", args, callback_success, callback_failed, context);
+        this.sendRequest("query_element_properties", "", args, callback_success, callback_failed, context);
     },
 
-    queryObjectLevelProperties: function(obj_key, level, callback_success, callback_failed, context) {
+    queryElementLevelProperties: function(element_type, element_key, level, callback_success, callback_failed, context) {
         var args = {
-            obj_key: obj_key,
+            element_type: element_type,
+            element_key: element_key,
             level: level
         };
-        this.sendRequest("query_object_level_properties", "", args, callback_success, callback_failed, context);
+        this.sendRequest("query_element_level_properties", "", args, callback_success, callback_failed, context);
     },
 
     queryDialoguesTable: function(callback_success, callback_failed, context) {
         this.sendRequest("query_dialogues_table", "", {}, callback_success, callback_failed, context);
     },
 
-    saveObjectLevelProperties: function(obj_key, level, values, callback_success, callback_failed, context) {
+    saveElementLevelProperties: function(element_type, element_key, level, values, callback_success, callback_failed, context) {
         var args = {
-            obj_key: obj_key,
+            element_type: element_type,
+            element_key: element_key,
             level: level,
             values: values
         };
-        this.sendRequest("save_object_level_properties", "", args, callback_success, callback_failed, context);
+        this.sendRequest("save_element_level_properties", "", args, callback_success, callback_failed, context);
     },
 
-    deleteObjectLevelProperties: function(obj_key, level, callback_success, callback_failed, context) {
+    deleteElementLevelProperties: function(element_type, element_key, level, callback_success, callback_failed, context) {
         var args = {
-            obj_key: obj_key,
+            element_type: element_type,
+            element_key: element_key,
             level: level
         };
-        this.sendRequest("delete_object_level_properties", "", args, callback_success, callback_failed, context);
+        this.sendRequest("delete_element_level_properties", "", args, callback_success, callback_failed, context);
     },
 
     downloadDataZip: function(file_type) {

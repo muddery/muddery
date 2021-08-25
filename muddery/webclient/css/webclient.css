@@ -53,6 +53,10 @@
     --character-equipments-body: url(../img/equipments_body_male.png);
     --character-equipment-icon-back: url(../img/equipment_icon_back.png);
     --character-data-back: url(../img/character_data_back.png);
+    --character-equipment-info-back: url(../img/info_back.png);
+    --character-equipment-info-left-back: url(../img/info_left_back.png);
+    --character-equipment-default-icon: url(../img/icon_default_middle.png);
+    --character-equipment-button: url(../img/button_small.png);
 
     --inventory-background: url(../img/main_background.png);
     --inventory-title-bar: url(../img/status_title_bar.png);
@@ -1164,6 +1168,172 @@ span.bgblack { background-color: black;}
 /************* message window end *************/
 
 
+/************* accessibility windows begin *************/
+#inventory-window,
+#skills-window,
+#quests-window,
+#honour-window,
+#shop-window,
+#map-window {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    background: no-repeat center;
+    background-size: 100% 100%;
+}
+
+#inventory-window .title-bar,
+#skills-window .title-bar,
+#quests-window .title-bar,
+#honour-window .title-bar,
+#shop-window .title-bar,
+#map-window .title-bar {
+    position: relative;
+    width: 100%;
+    height: 0.4rem;
+    line-height: 0.4rem;
+    color: #fec;
+    font-size: 0.2rem;
+    font-weight: 700;
+    text-align: center;
+    vertical-align: text-bottom;
+    background: no-repeat center;
+    background-size: 100% 100%;
+}
+
+#inventory-window .inventory-block,
+#skills-window .skills-block,
+#quests-window .quests-block,
+#honour-window .rank-block {
+    width: 100%;
+    height: 100%;
+    padding: 0.1rem 0.1rem 1.9rem 0.1rem;
+    text-align: center;
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+}
+
+#inventory-window .inventory-list,
+#skills-window .skills-list,
+#quests-window .quests-list,
+#honour-window .rank-list {
+    width: 100%;
+    height: 100%;
+    margin: 0 auto;
+    text-align: left;
+}
+
+#char-data-window .item-info-left .icon,
+#inventory-window .inventory-item,
+#inventory-window .item-info-left .icon,
+#skills-window .skill-info-left .icon {
+    position: relative;
+    width: 0.4rem;
+    height: 0.4rem;
+    line-height: 0.4rem;
+    background: no-repeat center;
+    background-size: 100% 100%;
+}
+
+#char-data-window .item-info-left .icon-image,
+#inventory-window .inventory-item .icon-image,
+#inventory-window .item-info-left .icon-image,
+#skills-window .skill-info-left .icon-image {
+    width: 0.4rem;
+    height: 0.4rem;
+}
+
+#inventory-window .item-info-block,
+#skills-window .skill-info-block,
+#quests-window .quest-info-block,
+#honour-window .action-block {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 2.4rem;
+    background: no-repeat center;
+    background-size: 100% 100%;
+}
+
+#char-data-window .item-info,
+#inventory-window .item-info,
+#skills-window .skill-info,
+#quests-window .quest-info {
+    width: 100%;
+    height: 100%;
+    text-align: left;
+}
+
+#char-data-window .item-info-left,
+#inventory-window .item-info-left,
+#skills-window .skill-info-left,
+#honour-window .action-block-left {
+    float: left;
+    width: 0.8rem;
+    height: 100%;
+    padding: 0.1rem;
+    text-align: center;
+    background: no-repeat center;
+    background-size: 100% 100%;
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+}
+
+#char-data-window .item-info-right,
+#inventory-window .item-info-right,
+#skills-window .skill-info-right,
+#honour-window .action-block-right {
+    height: 100%;
+    padding: 0.1rem;
+    margin-left: 0.8rem;
+}
+
+#char-data-window .item-info-left .icon,
+#inventory-window .item-info-left .icon,
+#skills-window .skill-info-left .icon {
+    margin: 0 auto 0.1rem auto;
+}
+
+#char-data-window .item-info .button,
+#inventory-window .item-info .button,
+#skills-window .skill-info .button,
+#quests-window .quest-info .button,
+#honour-window .action-block .button {
+    width: 0.6rem;
+    height: 0.3rem;
+    line-height: 0.3rem;
+    font-size: 0.12rem;
+    margin: 0.05rem auto;
+    color: #fec;
+    background: no-repeat center;
+    background-size: 100% 100%;
+}
+
+#char-data-window .item-info .name,
+#inventory-window .item-info .name,
+#skills-window .skill-info .name,
+#quests-window .quest-info .name {
+    width: 100%;
+    font-size: 0.13rem;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 0.05rem;
+}
+
+#char-data-window .item-info .desc,
+#inventory-window .item-info .desc,
+#skills-window .skill-info .desc,
+#quests-window .quest-info .desc {
+    width: 100%;
+    font-size: 0.13rem;
+    color: #333;
+}
+/************* accessibility windows end *************/
+
+
 /************* character data window begin *************/
 #char-data-window {
     position: relative;
@@ -1302,164 +1472,35 @@ span.bgblack { background-color: black;}
 #char-data-window .data-table {
     width: 100%;
 }
+
+#char-data-window .item-info {
+    background: no-repeat center;
+    background-size: 100% 100%;
+}
+
+#char-data-window .item-info-left {
+    background-image: var(--character-equipment-info-left-back);
+}
+
+#char-data-window .item-info-left .icon {
+    background-image: var(--character-equipment-default-icon);
+}
+
+#char-data-window .item-info-left .button {
+    background-image: var(--character-equipment-button);
+}
+
+#char-data-window .item-info-right .name {
+    font-size: 0.14rem;
+    font-weight: 700;
+}
+
+#char-data-window .item-info-right .number {
+    color: #555;
+    font-size: 0.14rem;
+    font-weight: 700;
+}
 /************* character data window end *************/
-
-
-/************* accessibility windows begin *************/
-#inventory-window,
-#skills-window,
-#quests-window,
-#honour-window,
-#shop-window,
-#map-window {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    text-align: center;
-    background: no-repeat center;
-    background-size: 100% 100%;
-}
-
-#inventory-window .title-bar,
-#skills-window .title-bar,
-#quests-window .title-bar,
-#honour-window .title-bar,
-#shop-window .title-bar,
-#map-window .title-bar {
-    position: relative;
-    width: 100%;
-    height: 0.4rem;
-    line-height: 0.4rem;
-    color: #fec;
-    font-size: 0.2rem;
-    font-weight: 700;
-    text-align: center;
-    vertical-align: text-bottom;
-    background: no-repeat center;
-    background-size: 100% 100%;
-}
-
-#inventory-window .inventory-block,
-#skills-window .skills-block,
-#quests-window .quests-block,
-#honour-window .rank-block {
-    width: 100%;
-    height: 100%;
-    padding: 0.1rem 0.1rem 1.9rem 0.1rem;
-    text-align: center;
-    box-sizing: border-box;
-    -moz-box-sizing: border-box;
-    -webkit-box-sizing: border-box;
-}
-
-#inventory-window .inventory-list,
-#skills-window .skills-list,
-#quests-window .quests-list,
-#honour-window .rank-list {
-    width: 100%;
-    height: 100%;
-    margin: 0 auto;
-    text-align: left;
-}
-
-#inventory-window .inventory-item,
-#inventory-window .item-info-left .icon,
-#skills-window .skill-info-left .icon {
-    position: relative;
-    width: 0.4rem;
-    height: 0.4rem;
-    line-height: 0.4rem;
-    background: no-repeat center;
-    background-size: 100% 100%;
-}
-
-#inventory-window .inventory-item .icon-image,
-#inventory-window .item-info-left .icon-image,
-#skills-window .skill-info-left .icon-image {
-    width: 0.4rem;
-    height: 0.4rem;
-}
-
-#inventory-window .item-info-block,
-#skills-window .skill-info-block,
-#quests-window .quest-info-block,
-#honour-window .action-block {
-    position: absolute;
-    bottom: 0;
-    width: 100%;
-    height: 2.4rem;
-    background: no-repeat center;
-    background-size: 100% 100%;
-}
-
-#inventory-window .item-info,
-#skills-window .skill-info,
-#quests-window .quest-info {
-    width: 100%;
-    height: 100%;
-    text-align: left;
-}
-
-#inventory-window .item-info-left,
-#skills-window .skill-info-left,
-#honour-window .action-block-left {
-    float: left;
-    width: 0.8rem;
-    height: 100%;
-    padding: 0.1rem;
-    text-align: center;
-    background: no-repeat center;
-    background-size: 100% 100%;
-    box-sizing: border-box;
-    -moz-box-sizing: border-box;
-    -webkit-box-sizing: border-box;
-}
-
-#inventory-window .item-info-right,
-#skills-window .skill-info-right,
-#honour-window .action-block-right {
-    height: 100%;
-    padding: 0.1rem;
-    margin-left: 0.8rem;
-}
-
-#inventory-window .item-info-left .icon,
-#skills-window .skill-info-left .icon {
-    margin: 0 auto 0.1rem auto;
-}
-
-#inventory-window .item-info .button,
-#skills-window .skill-info .button,
-#quests-window .quest-info .button,
-#honour-window .action-block .button {
-    width: 0.6rem;
-    height: 0.3rem;
-    line-height: 0.3rem;
-    font-size: 0.12rem;
-    margin: 0.05rem auto;
-    color: #fec;
-    background: no-repeat center;
-    background-size: 100% 100%;
-}
-
-#inventory-window .item-info .name,
-#skills-window .skill-info .name,
-#quests-window .quest-info .name {
-    width: 100%;
-    font-size: 0.13rem;
-    font-weight: 700;
-    color: #333;
-    margin-bottom: 0.05rem;
-}
-
-#inventory-window .item-info .desc,
-#skills-window .skill-info .desc,
-#quests-window .quest-info .desc {
-    width: 100%;
-    font-size: 0.13rem;
-    color: #333;
-}
-/************* accessibility windows end *************/
 
 
 /************* inventory window begin *************/
@@ -1536,13 +1577,6 @@ span.bgblack { background-color: black;}
     color: #555;
     font-size: 0.14rem;
     font-weight: 700;
-}
-
-#inventory-window .item-info-right .equipped {
-    color: #822;
-    font-size: 0.12rem;
-    font-weight: 700;
-    margin-left: 0.05rem;
 }
 
 /************* inventory window end *************/

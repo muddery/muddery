@@ -1,2 +1,2 @@
-key,level,reborn_time,friendly,icon,clone
-player,1,10,100,,
+key,element_type,name,desc,icon,level,reborn_time,friendly,clone
+player,PLAYER_CHARACTER,PLAYER,,,1,10,100,

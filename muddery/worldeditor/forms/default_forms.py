@@ -6,16 +6,9 @@ from muddery.server.mappings.quest_status_set import QUEST_STATUS_SET
 from muddery.server.mappings.event_action_set import EVENT_ACTION_SET
 from muddery.server.mappings.event_trigger_set import EVENT_TRIGGER_SET
 from muddery.worldeditor.dao import common_mappers as CM
+from muddery.worldeditor.dao.general_query_mapper import get_element_base_data
 from muddery.worldeditor.forms.location_field import LocationField
 from muddery.worldeditor.forms.image_field import ImageField
-
-
-def get_all_objects():
-    """
-    Get all objects.
-    """
-    records = CM.OBJECTS.all()
-    return [(r.key, r.name + " (" + r.key + ")") for r in records]
 
 
 def get_all_pocketable_objects():
@@ -53,17 +46,20 @@ class GameSettingsForm(forms.ModelForm):
         super(GameSettingsForm, self).__init__(*args, **kwargs)
         
         choices = [("", "---------")]
-        objects = CM.WORLD_ROOMS.all_with_base()
-        choices.extend([(obj["key"], obj["name"] + " (" + obj["key"] + ")") for obj in objects])
-        self.fields['default_home_key'] = forms.ChoiceField(choices=choices, required=False)
+        records = get_element_base_data("ROOM")
+        choices.extend([(record.key, record.name + " (" + record.key + ")") for record in records])
         self.fields['start_location_key'] = forms.ChoiceField(choices=choices, required=False)
         self.fields['default_player_home_key'] = forms.ChoiceField(choices=choices, required=False)
 
         choices = [("", "---------")]
-        objects = CM.CHARACTERS.all_with_base()
-        choices.extend([(obj["key"], obj["name"] + " (" + obj["key"] + ")") for obj in objects
-                            if obj["typeclass"]=="PLAYER_CHARACTER"])
+        records = get_element_base_data("PLAYER_CHARACTER")
+        choices.extend([(record.key, record.name + " (" + record.key + ")") for record in records])
         self.fields['default_player_character_key'] = forms.ChoiceField(choices=choices, required=False)
+
+        choices = [("", "---------")]
+        records = get_element_base_data("STAFF_CHARACTER")
+        choices.extend([(record.key, record.name + " (" + record.key + ")") for record in records])
+        self.fields['default_staff_character_key'] = forms.ChoiceField(choices=choices, required=False)
 
         localize_form_fields(self)
 
@@ -107,20 +103,7 @@ class EquipmentPositionsForm(forms.ModelForm):
         fields = '__all__'
 
 
-class ObjectsForm(forms.ModelForm):
-    """
-    Objects base form.
-    """
-    def __init__(self, *args, **kwargs):
-        super(ObjectsForm, self).__init__(*args, **kwargs)
-        localize_form_fields(self)
-
-    class Meta:
-        model = CM.OBJECTS.model
-        fields = '__all__'
-
-
-class WorldAreasForm(ObjectsForm):
+class WorldAreasForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(WorldAreasForm, self).__init__(*args, **kwargs)
 
@@ -133,14 +116,14 @@ class WorldAreasForm(ObjectsForm):
         fields = '__all__'
         
 
-class WorldRoomsForm(ObjectsForm):
+class WorldRoomsForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(WorldRoomsForm, self).__init__(*args, **kwargs)
 
         choices = [("", "---------")]
         objects = CM.WORLD_AREAS.all_with_base()
         choices.extend([(obj["key"], obj["name"] + " (" + obj["key"] + ")") for obj in objects])
-        self.fields['location'] = forms.ChoiceField(choices=choices)
+        self.fields['area'] = forms.ChoiceField(choices=choices)
 
         self.fields['icon'] = ImageField(image_type="icon", required=False)
 
@@ -153,7 +136,7 @@ class WorldRoomsForm(ObjectsForm):
         fields = '__all__'
 
 
-class WorldExitsForm(ObjectsForm):
+class WorldExitsForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(WorldExitsForm, self).__init__(*args, **kwargs)
 
@@ -169,22 +152,7 @@ class WorldExitsForm(ObjectsForm):
         fields = '__all__'
 
 
-class ExitLocksForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
-        super(ExitLocksForm, self).__init__(*args, **kwargs)
-
-        #objects = models.world_exits.objects.filter(typeclass="CLASS_LOCKED_EXIT")
-        #choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]
-        #self.fields['key'] = forms.ChoiceField(choices=choices)
-
-        localize_form_fields(self)
-
-    class Meta:
-        model = CM.EXIT_LOCKS.model
-        fields = '__all__'
-
-
-class WorldObjectsForm(ObjectsForm):
+class WorldObjectsForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(WorldObjectsForm, self).__init__(*args, **kwargs)
 
@@ -201,7 +169,7 @@ class WorldObjectsForm(ObjectsForm):
         fields = '__all__'
 
 
-class WorldNPCsForm(ObjectsForm):
+class WorldNPCsForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(WorldNPCsForm, self).__init__(*args, **kwargs)
         
@@ -220,11 +188,6 @@ class WorldNPCsForm(ObjectsForm):
 class ObjectCreatorsForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(ObjectCreatorsForm, self).__init__(*args, **kwargs)
-
-        #objects = models.world_objects.objects.filter(typeclass="CLASS_OBJECT_CREATOR")
-        #choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]
-        #self.fields['key'] = forms.ChoiceField(choices=choices)
-
         localize_form_fields(self)
 
     class Meta:
@@ -314,7 +277,7 @@ class QuestRewardListForm(forms.ModelForm):
         fields = '__all__'
 
 
-class CommonObjectsForm(ObjectsForm):
+class CommonObjectsForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(CommonObjectsForm, self).__init__(*args, **kwargs)
         
@@ -327,7 +290,18 @@ class CommonObjectsForm(ObjectsForm):
         fields = '__all__'
 
 
-class FoodsForm(ObjectsForm):
+class PocketObjectsForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(PocketObjectsForm, self).__init__(*args, **kwargs)
+
+        localize_form_fields(self)
+
+    class Meta:
+        model = CM.POCKET_OBJECTS.model
+        fields = '__all__'
+
+
+class FoodsForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(FoodsForm, self).__init__(*args, **kwargs)
 
@@ -338,7 +312,7 @@ class FoodsForm(ObjectsForm):
         fields = '__all__'
         
 
-class SkillBooksForm(ObjectsForm):
+class SkillBooksForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(SkillBooksForm, self).__init__(*args, **kwargs)
         
@@ -364,7 +338,7 @@ class PropertiesDictForm(forms.ModelForm):
         fields = '__all__'
 
 
-class CharactersForm(ObjectsForm):
+class CharactersForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(CharactersForm, self).__init__(*args, **kwargs)
 
@@ -382,27 +356,7 @@ class CharactersForm(ObjectsForm):
         fields = '__all__'
 
 
-class BaseNPCsForm(ObjectsForm):
-    def __init__(self, *args, **kwargs):
-        super(BaseNPCsForm, self).__init__(*args, **kwargs)
-        localize_form_fields(self)
-
-    class Meta:
-        model = CM.BASE_NPCS.model
-        fields = '__all__'
-
-
-class CommonNPCsForm(ObjectsForm):
-    def __init__(self, *args, **kwargs):
-        super(CommonNPCsForm, self).__init__(*args, **kwargs)
-        localize_form_fields(self)
-
-    class Meta:
-        model = CM.COMMON_NPCS.model
-        fields = '__all__'
-
-
-class PlayerCharactersForm(ObjectsForm):
+class PlayerCharactersForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(PlayerCharactersForm, self).__init__(*args, **kwargs)
         localize_form_fields(self)
@@ -432,7 +386,7 @@ class DefaultObjectsForm(forms.ModelForm):
         fields = '__all__'
 
 
-class ShopsForm(ObjectsForm):
+class ShopsForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(ShopsForm, self).__init__(*args, **kwargs)
         
@@ -445,7 +399,7 @@ class ShopsForm(ObjectsForm):
         fields = '__all__'
 
 
-class ShopGoodsForm(ObjectsForm):
+class ShopGoodsForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(ShopGoodsForm, self).__init__(*args, **kwargs)
 
@@ -491,7 +445,7 @@ class NPCShopsForm(forms.ModelForm):
         fields = '__all__'
 
 
-class SkillsForm(ObjectsForm):
+class SkillsForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(SkillsForm, self).__init__(*args, **kwargs)
         
@@ -560,7 +514,7 @@ class NPCDialoguesForm(forms.ModelForm):
         fields = '__all__'
 
 
-class QuestsForm(ObjectsForm):
+class QuestsForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(QuestsForm, self).__init__(*args, **kwargs)
 
@@ -630,7 +584,7 @@ class DialogueQuestDependenciesForm(forms.ModelForm):
         fields = '__all__'
 
 
-class EquipmentsForm(ObjectsForm):
+class EquipmentsForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(EquipmentsForm, self).__init__(*args, **kwargs)
 
@@ -804,20 +758,6 @@ class ActionMessageForm(forms.ModelForm):
         fields = '__all__'
 
 
-class ActionRoomIntervalForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
-        super(ActionRoomIntervalForm, self).__init__(*args, **kwargs)
-
-        choices = EVENT_ACTION_SET.choice_repeatedly()
-        self.fields['action'] = forms.ChoiceField(choices=choices)
-
-        localize_form_fields(self)
-
-    class Meta:
-        model = EVENT_ACTION_SET.get("ACTION_ROOM_INTERVAL").model()
-        fields = '__all__'
-
-
 class ActionGetObjectsForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(ActionGetObjectsForm, self).__init__(*args, **kwargs)
@@ -866,20 +806,6 @@ class DialogueRelationsForm(forms.ModelForm):
         model = CM.DIALOGUE_RELATIONS.model
         fields = '__all__'
 
-
-class ConditionDescForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
-        super(ConditionDescForm, self).__init__(*args, **kwargs)
-
-        choices = get_all_objects()
-        self.fields['key'] = forms.ChoiceField(choices=choices)
-
-        localize_form_fields(self)
-
-    class Meta:
-        model = CM.CONDITION_DESC.model
-        fields = '__all__'
-        
 
 class LocalizedStringsForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):

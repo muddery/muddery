@@ -16,6 +16,8 @@ at_server_cold_stop()
 
 """
 
+import traceback
+
 
 def at_server_start():
     """
@@ -23,7 +25,7 @@ def at_server_start():
     how it was shut down.
     """
     # load data
-    from muddery.server.dao.worlddata import WorldData
+    from muddery.server.database.worlddata.worlddata import WorldData
     WorldData.reload()
 
     # reset settings
@@ -34,10 +36,6 @@ def at_server_start():
     from muddery.server.utils.localized_strings_handler import LOCALIZED_STRINGS_HANDLER
     LOCALIZED_STRINGS_HANDLER.reload()
 
-    # reset default locations
-    from muddery.server.utils import builder
-    builder.reset_default_locations()
-    
     # clear dialogues
     from muddery.server.utils.dialogue_handler import DIALOGUE_HANDLER
     DIALOGUE_HANDLER.clear()
@@ -55,8 +53,16 @@ def at_server_start():
     DESC_HANDLER.reload()
 
     # load honours
-    from muddery.server.dao.honours_mapper import HONOURS_MAPPER
+    from muddery.server.database.gamedata.honours_mapper import HONOURS_MAPPER
     HONOURS_MAPPER.reload()
+
+    # create the world
+    try:
+        from muddery.server.server import Server
+        Server.create_the_world()
+        print("The world has been created.")
+    except Exception as e:
+        traceback.print_exc()
 
 
 def at_server_stop():

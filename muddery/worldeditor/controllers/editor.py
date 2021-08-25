@@ -2,31 +2,30 @@
 Battle commands. They only can be used when a character is in a combat.
 """
 
-import json
+import json, traceback
 from evennia.utils import logger
 from evennia.server.sessionhandler import SESSIONS
 from muddery.worldeditor.services import data_query, data_edit, general_query
 from muddery.server.utils.exception import MudderyError, ERR
 from muddery.worldeditor.utils.response import success_response
-from muddery.server.utils.builder import build_all
 from muddery.worldeditor.controllers.base_request_processer import BaseRequestProcesser
 from muddery.worldeditor.dao import general_query_mapper
 from muddery.server.mappings.event_action_set import EVENT_ACTION_SET
-from muddery.server.dao.worlddata import WorldData
+from muddery.server.database.worlddata.worlddata import WorldData
 
 
-class QueryAllTypeclasses(BaseRequestProcesser):
+class QueryAllElements(BaseRequestProcesser):
     """
-    Query all typeclasses.
+    Query all elements.
 
     Args:
         None.
     """
-    path = "query_all_typeclasses"
+    path = "query_all_elements"
     name = ""
 
     def func(self, args, request):
-        data = data_query.query_all_typeclasses()
+        data = data_query.query_all_elements()
         return success_response(data)
 
 
@@ -70,24 +69,24 @@ class QueryTable(BaseRequestProcesser):
         return success_response(data)
 
 
-class QueryTypeclassTable(BaseRequestProcesser):
+class QueryElementTable(BaseRequestProcesser):
     """
-    Query a table of objects of the same typeclass.
+    Query a table of objects of the same element type.
 
     Args:
-        typeclass: (string) typeclass's key.
+        element_type: (string) element type.
     """
-    path = "query_typeclass_table"
+    path = "query_element_table"
     name = ""
 
     def func(self, args, request):
-        if 'typeclass' not in args:
-            raise MudderyError(ERR.missing_args, 'Missing the argument: "typeclass".')
+        if 'element_type' not in args:
+            raise MudderyError(ERR.missing_args, 'Missing the argument: "element_type".')
 
-        typeclass_key = args["typeclass"]
+        element_type = args["element_type"]
 
         # Query data.
-        data = data_query.query_typeclass_table(typeclass_key)
+        data = data_query.query_element_table(element_type)
         return success_response(data)
 
 
@@ -128,77 +127,83 @@ class QueryAreas(BaseRequestProcesser):
         return success_response(data)
 
 
-class QueryTypeclassProperties(BaseRequestProcesser):
+class QueryElementProperties(BaseRequestProcesser):
     """
-    Query a typeclass's properties.
+    Query an element's properties.
 
     Args:
-        typeclass: (string) typeclass's key.
+        element: (string) element's type.
     """
-    path = "query_typeclass_properties"
+    path = "query_element_type_properties"
     name = ""
 
     def func(self, args, request):
-        if 'typeclass' not in args:
-            raise MudderyError(ERR.missing_args, 'Missing the argument: "typeclass".')
+        if 'element_type' not in args:
+            raise MudderyError(ERR.missing_args, 'Missing the argument: "element_type".')
 
-        typeclass = args["typeclass"]
+        element_type = args["element_type"]
 
-        data = data_query.query_typeclass_properties(typeclass)
+        data = data_query.query_element_type_properties(element_type)
         return success_response(data)
 
 
-class QueryObjectProperties(BaseRequestProcesser):
+class QueryElementProperties(BaseRequestProcesser):
     """
-    Query a typeclass's properties.
+    Query an object's properties.
 
     Args:
-        typeclass: (string) object's typeclass
-        obj_key: (string) object's key.
+        element_type: (string) element's type
+        element_key: (string) element's key.
     """
-    path = "query_object_properties"
+    path = "query_element_properties"
     name = ""
 
     def func(self, args, request):
-        if 'typeclass' not in args:
-            raise MudderyError(ERR.missing_args, 'Missing the argument: "typeclass".')
+        if 'element_type' not in args:
+            raise MudderyError(ERR.missing_args, 'Missing the argument: "element_type".')
 
-        if 'obj_key' not in args:
-            raise MudderyError(ERR.missing_args, 'Missing the argument: "obj_key".')
+        if 'element_key' not in args:
+            raise MudderyError(ERR.missing_args, 'Missing the argument: "element_key".')
 
-        typeclass_key = args["typeclass"]
-        obj_key = args["obj_key"]
+        element_type = args["element_type"]
+        element_key = args["element_key"]
 
-        data = data_query.query_object_properties(typeclass_key, obj_key)
+        data = data_query.query_element_properties(element_type, element_key)
         return success_response(data)
 
 
-class QueryObjectLevelProperties(BaseRequestProcesser):
+class QueryElementLevelProperties(BaseRequestProcesser):
     """
     Query a level of an object's properties.
 
     Args:
-        obj_key: (string) object's key.
+        element_key: (string) the element's key.
         level: (number) level's number
     """
-    path = "query_object_level_properties"
+    path = "query_element_level_properties"
     name = ""
 
     def func(self, args, request):
-        if 'obj_key' not in args:
-            raise MudderyError(ERR.missing_args, 'Missing the argument: "obj_key".')
+        if 'element_type' not in args:
+            raise MudderyError(ERR.missing_args, 'Missing the argument: "element_type".')
+
+        if 'element_key' not in args:
+            raise MudderyError(ERR.missing_args, 'Missing the argument: "element_key".')
 
         if 'level' not in args:
             raise MudderyError(ERR.missing_args, 'Missing the argument: "level".')
 
-        obj_key = args["obj_key"]
+        element_type = args["element_type"]
+        element_key = args["element_key"]
         level = args["level"]
+        if level == "":
+            level = None
 
-        data = data_query.query_object_level_properties(obj_key, level)
+        data = data_query.query_element_level_properties(element_type, element_key, level)
         return success_response(data)
 
 
-class SaveObjectLevelProperties(BaseRequestProcesser):
+class SaveElementLevelProperties(BaseRequestProcesser):
     """
     Save properties of an object.
 
@@ -207,12 +212,15 @@ class SaveObjectLevelProperties(BaseRequestProcesser):
         level: (number) level's number.
         values: (dict) values to save.
     """
-    path = "save_object_level_properties"
+    path = "save_element_level_properties"
     name = ""
 
     def func(self, args, request):
-        if 'obj_key' not in args:
-            raise MudderyError(ERR.missing_args, 'Missing the argument: "obj_key".')
+        if 'element_type' not in args:
+            raise MudderyError(ERR.missing_args, 'Missing the argument: "element_type".')
+
+        if 'element_key' not in args:
+            raise MudderyError(ERR.missing_args, 'Missing the argument: "element_key".')
 
         if 'level' not in args:
             raise MudderyError(ERR.missing_args, 'Missing the argument: "level".')
@@ -220,15 +228,19 @@ class SaveObjectLevelProperties(BaseRequestProcesser):
         if 'values' not in args:
             raise MudderyError(ERR.missing_args, 'Missing the argument: "values".')
 
-        obj_key = args["obj_key"]
+        element_type = args["element_type"]
+        element_key = args["element_key"]
         level = args["level"]
+        if level == "":
+            level = None
+
         values = args["values"]
 
-        data_edit.save_object_level_properties(obj_key, level, values)
+        data_edit.save_element_level_properties(element_type, element_key, level, values)
         return success_response("success")
 
 
-class DeleteObjectLevelProperties(BaseRequestProcesser):
+class DeleteElementLevelProperties(BaseRequestProcesser):
     """
     Query a level of an object's properties.
 
@@ -236,41 +248,47 @@ class DeleteObjectLevelProperties(BaseRequestProcesser):
         obj_key: (string) object's key.
         level: (number) level's number
     """
-    path = "delete_object_level_properties"
+    path = "delete_element_level_properties"
     name = ""
 
     def func(self, args, request):
-        if 'obj_key' not in args:
-            raise MudderyError(ERR.missing_args, 'Missing the argument: "obj_key".')
+        if 'element_type' not in args:
+            raise MudderyError(ERR.missing_args, 'Missing the argument: "element_type".')
+
+        if 'element_key' not in args:
+            raise MudderyError(ERR.missing_args, 'Missing the argument: "element_key".')
 
         if 'level' not in args:
             raise MudderyError(ERR.missing_args, 'Missing the argument: "level".')
 
-        obj_key = args["obj_key"]
+        element_type = args["element_type"]
+        element_key = args["element_key"]
         level = args["level"]
+        if level == "":
+            level = None
 
-        data_edit.delete_object_level_properties(obj_key, level)
+        data_edit.delete_element_level_properties(element_type, element_key, level)
         data = {"level": level}
         return success_response(data)
 
 
-class QueryObjectEventTriggers(BaseRequestProcesser):
+class QueryElementEventTriggers(BaseRequestProcesser):
     """
-    Query all event triggers of the given typeclass.
+    Query all event triggers of the given element type.
 
     Args:
-        typeclass: (string) the object's typeclass.
+        element_type: (string) the element type.
     """
-    path = "query_object_event_triggers"
+    path = "query_element_event_triggers"
     name = ""
 
     def func(self, args, request):
-        if 'typeclass' not in args:
-            raise MudderyError(ERR.missing_args, 'Missing the argument: "typeclass".')
+        if 'element_type' not in args:
+            raise MudderyError(ERR.missing_args, 'Missing the argument: "element_type".')
 
-        typeclass = args["typeclass"]
+        element_type = args["element_type"]
 
-        data = data_query.query_object_event_triggers(typeclass)
+        data = data_query.query_element_event_triggers(element_type)
         return success_response(data)
 
 
@@ -286,23 +304,23 @@ class QueryDialogueEventTriggers(BaseRequestProcesser):
         return success_response(data)
 
 
-class QueryObjectEvents(BaseRequestProcesser):
+class QueryElementEvents(BaseRequestProcesser):
     """
-    Query all events of the given object.
+    Query all events of the given element.
 
     Args:
-        object: (string) object's key.
+        element_key: (string) the element's key.
     """
-    path = "query_object_events"
+    path = "query_element_events"
     name = ""
 
     def func(self, args, request):
-        if 'object' not in args:
-            raise MudderyError(ERR.missing_args, 'Missing the argument: "object".')
+        if 'element_key' not in args:
+            raise MudderyError(ERR.missing_args, 'Missing the argument: "element_key".')
 
-        object_key = args["object"]
+        element_key = args["element_key"]
 
-        data = data_query.query_object_events(object_key)
+        data = data_query.query_element_events(element_key)
         return success_response(data)
 
 
@@ -483,25 +501,25 @@ class QueryObjectForm(BaseRequestProcesser):
     Query a record of an object which may include several tables.
 
     Args:
-        base_typeclass: (string) candidate typeclass name
-        obj_typeclass: (string, optional) object's typeclass name
-        obj_key: (string, optional) object's key. If it is empty, get a new object.
+        base_element_type: (string) the base type of the object
+        obj_element_type: (string, optional) object's element type
+        element_key: (string, optional) element's key. If it is empty, get a new object.
     """
-    path = "query_object_form"
+    path = "query_element_form"
     name = ""
 
     def func(self, args, request):
         if not args:
             raise MudderyError(ERR.missing_args, 'Missing arguments.')
 
-        if 'base_typeclass' not in args:
-            raise MudderyError(ERR.missing_args, 'Missing the argument: "base_typeclass".')
+        if 'base_element_type' not in args:
+            raise MudderyError(ERR.missing_args, 'Missing the argument: "base_element_type".')
 
-        base_typeclass = args["base_typeclass"]
-        obj_typeclass = args.get('obj_typeclass', None)
-        obj_key = args.get('obj_key', None)
+        base_element_type = args["base_element_type"]
+        obj_element_type = args.get('obj_element_type', None)
+        element_key = args.get('element_key', None)
 
-        data = data_edit.query_object_form(base_typeclass, obj_typeclass, obj_key)
+        data = data_edit.query_element_form(base_element_type, obj_element_type, element_key)
         return success_response(data)
 
 
@@ -528,7 +546,7 @@ class QueryMap(BaseRequestProcesser):
         return success_response(data)
 
 
-class SaveObjectForm(BaseRequestProcesser):
+class SaveElementForm(BaseRequestProcesser):
     """
     Save a form.
 
@@ -538,11 +556,11 @@ class SaveObjectForm(BaseRequestProcesser):
                  "table": (string) table's name.
                  "values": (string, optional) record's value.
                 }]
-        base_typeclass: (string) candidate typeclass name
-        obj_typeclass: (string) object's typeclass name
+        base_element_type: (string) object's base type
+        obj_element_type: (string) object's element type
         obj_key: (string) object's key. If it is empty or different from the current object's key, get a new object.
     """
-    path = "save_object_form"
+    path = "save_element_form"
     name = ""
 
     def func(self, args, request):
@@ -552,23 +570,23 @@ class SaveObjectForm(BaseRequestProcesser):
         if 'tables' not in args:
             raise MudderyError(ERR.missing_args, 'Missing the argument: "tables".')
 
-        if 'base_typeclass' not in args:
-            raise MudderyError(ERR.missing_args, 'Missing the argument: "base_typeclass".')
+        if 'base_element_type' not in args:
+            raise MudderyError(ERR.missing_args, 'Missing the argument: "base_element_type".')
 
-        if 'obj_typeclass' not in args:
-            raise MudderyError(ERR.missing_args, 'Missing the argument: "obj_typeclass".')
+        if 'obj_element_type' not in args:
+            raise MudderyError(ERR.missing_args, 'Missing the argument: "obj_element_type".')
 
         if 'obj_key' not in args:
             raise MudderyError(ERR.missing_args, 'Missing the argument: "obj_key".')
 
         tables = args["tables"]
-        base_typeclass = args["base_typeclass"]
-        obj_typeclass = args["obj_typeclass"]
-        obj_key = args["obj_key"]
+        base_element_type = args["base_element_type"]
+        obj_element_type = args["obj_element_type"]
+        element_key = args["obj_key"]
 
-        new_key = data_edit.save_object_form(tables, obj_typeclass, obj_key)
-        if obj_key != new_key:
-            data_edit.update_object_key(obj_typeclass, obj_key, new_key)
+        new_key = data_edit.save_element_form(tables, obj_element_type, element_key)
+        if element_key != new_key:
+            data_edit.update_element_key(obj_element_type, element_key, new_key)
 
         return success_response(new_key)
 
@@ -578,7 +596,7 @@ class AddArea(BaseRequestProcesser):
     Save a new area.
 
     Args:
-        typeclass: (string) the area's typeclass.
+        element_type: (string) the area's element type.
         width: (number, optional) the area's width.
         height: (number, optional) the area's height.
     """
@@ -589,14 +607,14 @@ class AddArea(BaseRequestProcesser):
         if not args:
             raise MudderyError(ERR.missing_args, 'Missing arguments.')
 
-        if 'typeclass' not in args:
-            raise MudderyError(ERR.missing_args, 'Missing the argument: "typeclass".')
+        if 'element_type' not in args:
+            raise MudderyError(ERR.missing_args, 'Missing the argument: "element_type".')
 
-        typeclass = args["typeclass"]
+        element_type = args["element_type"]
         width = args.get("width", 0)
         height = args.get("height", 0)
 
-        forms = data_edit.query_object_form(typeclass, typeclass, None)
+        forms = data_edit.query_element_form(element_type, element_type, None)
         new_area = []
         for form in forms:
             values = {field["name"]: field["value"] for field in form["fields"] if "value" in field}
@@ -608,10 +626,12 @@ class AddArea(BaseRequestProcesser):
                 "values": values
             })
 
-        obj_key = data_edit.save_object_form(new_area, typeclass, "")
-        data = {"key": obj_key,
-                "width": width,
-                "height": height}
+        obj_key = data_edit.save_element_form(new_area, element_type, "")
+        data = {
+            "key": obj_key,
+            "width": width,
+            "height": height,
+        }
         return success_response(data)
 
 
@@ -620,7 +640,7 @@ class AddRoom(BaseRequestProcesser):
     Save a new room.
 
     Args:
-        typeclass: (string) room's typeclass.
+        element_type: (string) room's element type.
         area: (string) room's area.
         position: (string) room's position string.
     """
@@ -631,23 +651,23 @@ class AddRoom(BaseRequestProcesser):
         if not args:
             raise MudderyError(ERR.missing_args, 'Missing arguments.')
 
-        if 'typeclass' not in args:
-            raise MudderyError(ERR.missing_args, 'Missing the argument: "typeclass".')
+        if 'element_type' not in args:
+            raise MudderyError(ERR.missing_args, 'Missing the argument: "element_type".')
 
-        if 'location' not in args:
-            raise MudderyError(ERR.missing_args, 'Missing the argument: "location".')
+        if 'area' not in args:
+            raise MudderyError(ERR.missing_args, 'Missing the argument: "area".')
 
-        typeclass = args["typeclass"]
-        location = args["location"]
+        element_type = args["element_type"]
+        area = args["area"]
         position = args.get("position", None)
         if position:
             position = json.dumps(position)
 
-        forms = data_edit.query_object_form(typeclass, typeclass, None)
+        forms = data_edit.query_element_form(element_type, element_type, None)
         new_room = []
         for form in forms:
             values = {field["name"]: field["value"] for field in form["fields"] if "value" in field}
-            values["location"] = location
+            values["area"] = area
             values["position"] = position
 
             new_room.append({
@@ -655,32 +675,32 @@ class AddRoom(BaseRequestProcesser):
                 "values": values
             })
 
-        obj_key = data_edit.save_object_form(new_room, typeclass, "")
+        obj_key = data_edit.save_element_form(new_room, element_type, "")
         data = {"key": obj_key}
         return success_response(data)
 
 
-class DeleteObjects(BaseRequestProcesser):
+class DeleteElements(BaseRequestProcesser):
     """
     Delete a list of objects
 
     Args:
         objects: (list) a list of exit keys.
     """
-    path = "delete_objects"
+    path = "delete_elements"
     name = ""
 
     def func(self, args, request):
         if not args:
             raise MudderyError(ERR.missing_args, 'Missing arguments.')
 
-        if "objects" not in args:
-            raise MudderyError(ERR.missing_args, 'Missing the argument: "objects".')
+        if "elements" not in args:
+            raise MudderyError(ERR.missing_args, 'Missing the argument: "elements".')
 
-        objects = args["objects"]
+        elements = args["elements"]
 
-        for object_key in objects:
-            data_edit.delete_object(object_key)
+        for element_key in elements:
+            data_edit.delete_element(element_key)
 
         return success_response("success")
 
@@ -690,7 +710,7 @@ class AddExit(BaseRequestProcesser):
     Save a new exit.
 
     Args:
-        typeclass: (string) the exit's typeclass.
+        element_type: (string) the exit's element type.
         location: (string) exit's location.
         destination: (string) exit's destination.
     """
@@ -701,8 +721,8 @@ class AddExit(BaseRequestProcesser):
         if not args:
             raise MudderyError(ERR.missing_args, 'Missing arguments.')
 
-        if 'typeclass' not in args:
-            raise MudderyError(ERR.missing_args, 'Missing the argument: "typeclass".')
+        if 'element_type' not in args:
+            raise MudderyError(ERR.missing_args, 'Missing the argument: "element_type".')
 
         if 'location' not in args:
             raise MudderyError(ERR.missing_args, 'Missing the argument: "location".')
@@ -710,11 +730,11 @@ class AddExit(BaseRequestProcesser):
         if 'destination' not in args:
             raise MudderyError(ERR.missing_args, 'Missing the argument: "destination".')
 
-        typeclass = args["typeclass"]
+        element_type = args["element_type"]
         location = args["location"]
         destination = args["destination"]
 
-        forms = data_edit.query_object_form(typeclass, typeclass, None)
+        forms = data_edit.query_element_form(element_type, element_type, None)
         new_exit = []
         for form in forms:
             values = {field["name"]: field["value"] for field in form["fields"] if "value" in field}
@@ -726,7 +746,7 @@ class AddExit(BaseRequestProcesser):
                 "values": values
             })
 
-        obj_key = data_edit.save_object_form(new_exit, typeclass, "")
+        obj_key = data_edit.save_element_form(new_exit, element_type, "")
         data = {"key": obj_key}
         return success_response(data)
 
@@ -795,30 +815,31 @@ class DeleteRecord(BaseRequestProcesser):
         return success_response(data)
 
 
-class DeleteObject(BaseRequestProcesser):
+class DeleteElement(BaseRequestProcesser):
     """
-    Delete an object.
+    Delete an element.
 
     Args:
-        obj_key: (string) object's key.
-        base_typeclass: (string, optional) object's base typeclass. Delete all records in all tables under this typeclass.
-                        If its empty, get the typeclass of the object.
+        element_key: (string) element's key.
+        base_element_type: (string, optional) object's base type. Delete all records in all tables under this element type.
+                        If its empty, get the element type of the object.
     """
-    path = "delete_object"
+    path = "delete_element"
     name = ""
 
     def func(self, args, request):
-        if 'obj_key' not in args:
-            raise MudderyError(ERR.missing_args, 'Missing the argument: "obj_key".')
+        if 'element_key' not in args:
+            raise MudderyError(ERR.missing_args, 'Missing the argument: "element_key".')
 
-        if 'base_typeclass' not in args:
-            raise MudderyError(ERR.missing_args, 'Missing the argument: "base_typeclass".')
+        if 'base_element_type' not in args:
+            raise MudderyError(ERR.missing_args, 'Missing the argument: "base_element_type".')
 
-        obj_key = args["obj_key"]
-        base_typeclass = args.get("base_typeclass", None)
+        element_key = args["element_key"]
+        base_element_type = args.get("base_element_type", None)
 
-        data_edit.delete_object(obj_key, base_typeclass)
-        data = {"obj_key": obj_key}
+        data_edit.delete_element(element_key, base_element_type)
+        data = {"element_key": element_key}
+
         return success_response(data)
 
 
@@ -837,7 +858,7 @@ class QueryTables(BaseRequestProcesser):
         return success_response(data)
 
 
-class QueryDiallguesTable(BaseRequestProcesser):
+class QueryDialoguesTable(BaseRequestProcesser):
     """
     Query all records of dialogues.
 
@@ -872,9 +893,6 @@ class ApplyChanges(BaseRequestProcesser):
 
             # reload data
             WorldData.reload()
-
-            # rebuild the world
-            build_all()
 
             # restart the server
             SESSIONS.announce_all("Server restarting ...")

@@ -32,7 +32,7 @@ class FuncIsQuestAccepted(StatementFunction):
 
 class FuncIsQuestAccomplished(StatementFunction):
     """
-    If the caller has accepted or finished the quest
+    All objectives of this quest are accomplished.
 
     Args:
         args[0]: (string) quest's key
@@ -152,11 +152,7 @@ class FuncHasObject(StatementFunction):
             return False
 
         obj_key = self.args[0]
-
-        for item in self.caller.contents:
-            if item.get_data_key() == obj_key:
-                return True
-        return False
+        return self.caller.has_object(obj_key)
 
 
 class FuncObjectsEqualTo(StatementFunction):
@@ -184,10 +180,7 @@ class FuncObjectsEqualTo(StatementFunction):
         obj_key = self.args[0]
         number = self.args[1]
 
-        total = 0
-        for item in self.caller.contents:
-            if item.get_data_key() == obj_key:
-                total += item.get_number()
+        total = self.caller.total_object_number(obj_key)
         return total == number
 
 
@@ -216,10 +209,7 @@ class FuncObjectsMoreThan(StatementFunction):
         obj_key = self.args[0]
         number = self.args[1]
 
-        total = 0
-        for item in self.caller.contents:
-            if item.get_data_key() == obj_key:
-                total += item.get_number()
+        total = self.caller.total_object_number(obj_key)
         return total > number
 
 
@@ -248,10 +238,7 @@ class FuncObjectsLessThan(StatementFunction):
         obj_key = self.args[0]
         number = self.args[1]
 
-        total = 0
-        for item in self.caller.contents:
-            if item.get_data_key() == obj_key:
-                total += item.get_number()
+        total = self.caller.total_object_number(obj_key)
         return total < number
 
 
@@ -278,7 +265,7 @@ class FuncHasSkill(StatementFunction):
 
         skill_key = self.args[0]
 
-        return skill_key in self.caller.db.skills
+        return self.caller.get_skill(skill_key) is not None
 
 
 class FuncSkillEqualTo(StatementFunction):
@@ -306,10 +293,10 @@ class FuncSkillEqualTo(StatementFunction):
         skill_key = self.args[0]
         level = self.args[1]
 
-        if skill_key not in self.caller.db.skills:
+        skill = self.caller.get_skill(skill_key)
+        if not skill:
             return False
 
-        skill = self.caller.db.skills[skill_key]
         return skill.level == level
 
 
@@ -338,10 +325,10 @@ class FuncSkillMoreThan(StatementFunction):
         skill_key = self.args[0]
         level = self.args[1]
 
-        if skill_key not in self.caller.db.skills:
+        skill = self.caller.get_skill(skill_key)
+        if not skill:
             return False
 
-        skill = self.caller.db.skills[skill_key]
         return skill.level > level
 
 
@@ -370,10 +357,10 @@ class FuncSkillLessThan(StatementFunction):
         skill_key = self.args[0]
         level = self.args[1]
 
-        if skill_key not in self.caller.db.skills:
+        skill = self.caller.get_skill(skill_key)
+        if not skill:
             return False
 
-        skill = self.caller.db.skills[skill_key]
         return skill.level < level
 
 
@@ -402,10 +389,13 @@ class FuncAttributeEqualTo(StatementFunction):
         attr_key = self.args[0]
         number = self.args[1]
 
-        if not self.caller.custom_properties_handler.has(attr_key):
-            return False
+        if self.caller.states.has(attr_key):
+            value = self.caller.states.get(attr_key)
+        elif self.caller.const_data_handler.has(attr_key):
+            value = self.caller.const_data_handler.get(attr_key)
+        else:
+            return
 
-        value = getattr(self.caller.prop, attr_key)
         return value == number
 
 
@@ -434,10 +424,13 @@ class FuncAttributeMoreThan(StatementFunction):
         attr_key = self.args[0]
         number = self.args[1]
 
-        if not self.caller.custom_properties_handler.has(attr_key):
-            return False
+        if self.caller.states.has(attr_key):
+            value = self.caller.states.get(attr_key)
+        elif self.caller.const_data_handler.has(attr_key):
+            value = self.caller.const_data_handler.get(attr_key)
+        else:
+            return
 
-        value = getattr(self.caller.prop, attr_key)
         return value > number
 
 
@@ -466,8 +459,11 @@ class FuncAttributeLessThan(StatementFunction):
         attr_key = self.args[0]
         number = self.args[1]
 
-        if not self.caller.custom_properties_handler.has(attr_key):
-            return False
+        if self.caller.states.has(attr_key):
+            value = self.caller.states.get(attr_key)
+        elif self.caller.const_data_handler.has(attr_key):
+            value = self.caller.const_data_handler.get(attr_key)
+        else:
+            return
 
-        value = getattr(self.caller.prop, attr_key)
         return value < number

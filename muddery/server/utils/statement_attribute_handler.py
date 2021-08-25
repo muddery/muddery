@@ -2,6 +2,8 @@
 Handles a character's attributes used in statements.
 """
 
+import weakref
+
 
 class StatementAttributeHandler(object):
     """
@@ -11,23 +13,25 @@ class StatementAttributeHandler(object):
         """
         Initialize handler.
         """
-        self.owner = owner
-        self.attributes = owner.db.attributes
+        self.owner = self.owner = weakref.proxy(owner)
 
     def set(self, key, value=None):
         """
         Set an attribute.
         """
-        self.attributes[key] = value
+        attributes = self.owner.load("attributes", {})
+        attributes[key] = value
+        self.owner.save("attributes", attributes)
 
     def get(self, key, default=None):
         """
         Get an attribute. If the key does not exist, returns default.
         """
-        if not key in self.attributes:
+        attributes = self.owner.load("attributes", {})
+        if key not in attributes:
             return default
 
-        return self.attributes[key]
+        return attributes[key]
 
     def remove(self, key):
         """
@@ -36,23 +40,27 @@ class StatementAttributeHandler(object):
         Returns:
             Can remove.
         """
-        if not key in self.attributes:
+        attributes = self.owner.load("attributes", {})
+        if key not in attributes:
             return False
 
-        del self.attributes[key]
+        del attributes[key]
+        self.owner.save("attributes", attributes)
         return True
 
     def has(self, key):
         """
         Does this attribute exist.
         """
-        return key in self.attributes
+        attributes = self.owner.load("attributes", {})
+        return key in attributes
 
     def check_value(self, key, value):
         """
         Does this attribute match the value.
         """
-        if not key in self.attributes:
+        attributes = self.owner.load("attributes", {})
+        if key not in attributes:
             return False
 
-        return self.attributes[key] == value
+        return attributes[key] == value

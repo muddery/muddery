@@ -72,15 +72,18 @@ DATABASES = {
         'PASSWORD': '',
         'HOST': '',
         'PORT': ''
-        },
+    },
     'gamedata': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': os.path.join(GAME_DIR, "server", "gamedata.db3"),
         'USER': '',
         'PASSWORD': '',
         'HOST': '',
-        'PORT': ''
-        },
+        'PORT': '',
+        'OPTIONS': {
+            'timeout': 20,      # solve the sqlite's problem of database is locked.
+        }
+    },
     'worlddata': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': os.path.join(GAME_DIR, "server", "worlddata.db3"),
@@ -88,8 +91,8 @@ DATABASES = {
         'PASSWORD': '',
         'HOST': '',
         'PORT': ''
-        }}
-
+    }
+}
 
 # Database's router
 DATABASE_ROUTERS = ['muddery.server.database.database_router.DatabaseAppsRouter']
@@ -98,6 +101,13 @@ DATABASE_APPS_MAPPING = {
     'gamedata': 'gamedata',
     'worlddata': 'worlddata',
 }
+
+# Database Access Object
+DATABASE_ACCESS_OBJECT = 'muddery.server.database.storage.kv_table_write_back.KeyValueWriteBackTable'
+
+# Object's default runtime table. If a typeclass's own runtime table does
+# not exist, will use this table instead.
+DEFAULT_OBJECT_RUNTIME_TABLE = "object_attributes"
 
 # Cache all Attributes, Tags, Nicks, Aliases.
 TYPECLASS_FULL_CACHE = True
@@ -284,7 +294,7 @@ SERVER_SESSION_CLASS = "muddery.server.conf.serversession.ServerSession"
 # immediately entered path fail to find a typeclass. It allows for
 # shorter input strings. They must either base off the game directory
 # or start from the evennia library.
-TYPECLASS_PATHS = ["muddery.server.typeclasses"]
+TYPECLASS_PATHS = ["muddery.server.elements"]
 
 # Typeclass for account objects (linked to a character) (fallback)
 BASE_ACCOUNT_TYPECLASS = "muddery.server.typeclasses.accounts.MudderyAccount"
@@ -293,29 +303,42 @@ BASE_ACCOUNT_TYPECLASS = "muddery.server.typeclasses.accounts.MudderyAccount"
 BASE_GUEST_TYPECLASS = "muddery.server.typeclasses.accounts.Guest"
 
 # Typeclass and base for all objects (fallback)
-BASE_OBJECT_TYPECLASS = "muddery.server.typeclasses.object.MudderyBaseObject"
+BASE_OBJECT_TYPECLASS = "evennia.objects.objects.DefaultObject"
 
 # Typeclass for character objects linked to a player (fallback)
-BASE_CHARACTER_TYPECLASS = "muddery.server.typeclasses.player_character.MudderyPlayerCharacter"
-
-# Typeclass for general characters, include NPCs, mobs and player characters.
-BASE_GENERAL_CHARACTER_TYPECLASS = "muddery.server.typeclasses.character.MudderyCharacter"
-
-# Typeclass for player characters.
-BASE_PLAYER_CHARACTER_TYPECLASS = "muddery.server.typeclasses.player_character.MudderyPlayerCharacter"
+BASE_CHARACTER_TYPECLASS = "evennia.objects.objects.DefaultCharacter"
 
 # Typeclass for rooms (fallback)
-BASE_ROOM_TYPECLASS = "muddery.server.typeclasses.room.MudderyRoom"
+BASE_ROOM_TYPECLASS = "evennia.objects.objects.DefaultRoom"
 
 # Typeclass for Exit objects (fallback).
-BASE_EXIT_TYPECLASS = "muddery.server.typeclasses.exit.MudderyExit"
+BASE_EXIT_TYPECLASS = "evennia.objects.objects.DefaultExit"
 
 # Typeclass for Channel (fallback).
 BASE_CHANNEL_TYPECLASS = "muddery.server.typeclasses.channels.MudderyChannel"
 
 # Typeclass for Scripts (fallback). You usually don't need to change this
 # but create custom variations of scripts on a per-case basis instead.
-BASE_SCRIPT_TYPECLASS = "muddery.server.typeclasses.scripts.MudderyScript"
+BASE_SCRIPT_TYPECLASS = "evennia.scripts.scripts.DefaultScript"
+
+# Element type for general characters, include NPCs, mobs and player characters.
+CHARACTER_ELEMENT_TYPE = "CHARACTER"
+
+# Element type for player characters.
+PLAYER_CHARACTER_ELEMENT_TYPE = "PLAYER_CHARACTER"
+
+# Element type for player characters.
+STAFF_CHARACTER_ELEMENT_TYPE = "STAFF_CHARACTER"
+
+# Element type for rooms.
+ROOM_ELEMENT_TYPE = "ROOM"
+
+# Element type for Exit objects.
+EXIT_ELEMENT_TYPE = "EXIT"
+
+# Typeclass for Scripts (fallback). You usually don't need to change this
+# but create custom variations of scripts on a per-case basis instead.
+SCRIPT_ELEMENT_TYPE = "SCRIPT"
 
 # Path of base world data forms.
 PATH_DATA_FORMS_BASE = "muddery.worldeditor.forms"
@@ -323,11 +346,11 @@ PATH_DATA_FORMS_BASE = "muddery.worldeditor.forms"
 # Path of base request processers.
 PATH_REQUEST_PROCESSERS_BASE = "muddery.worldeditor.controllers"
 
-# Path of base typeclasses.
-PATH_TYPECLASSES_BASE = "muddery.server.typeclasses"
+# Path of base elements.
+PATH_ELEMENTS_BASE = "muddery.server.elements"
 
-# Path of custom typeclasses.
-PATH_TYPECLASSES_CUSTOM = "typeclasses"
+# Path of custom elements.
+PATH_ELEMENTS_CUSTOM = "elements"
 
 # Path of base event actions.
 PATH_EVENT_ACTION_BASE = "muddery.server.events.event_actions"
@@ -416,17 +439,11 @@ WORLD_DATA_FOLDER = os.path.join("worlddata", "data")
 # World data features
 ######################################################################
 
-# attribute's category for data info
-DATA_KEY_CATEGORY = "data_key"
-
 # data app name
 WORLD_EDITOR_APP = "worldeditor"
 
 # add data app
 INSTALLED_APPS = INSTALLED_APPS + [WORLD_EDITOR_APP, ]
-
-# Character's typeclass key.
-GENERAL_CHARACTER_TYPECLASS_KEY = "CHARACTER"
 
 # Localized string data's folder.
 LOCALIZED_STRINGS_FOLDER = "languages"
@@ -460,9 +477,9 @@ DEFUALT_FORM_TEMPLATE = "common_form.html"
 # combat settings
 ###################################
 # Handler of the combat
-NORMAL_COMBAT_HANDLER = "muddery.server.combat.normal_combat_handler.NormalCombatHandler"
+NORMAL_COMBAT_HANDLER = "muddery.server.combat.combat_runner.normal_combat.NormalCombat"
 
-HONOUR_COMBAT_HANDLER = "muddery.server.combat.honour_combat_handler.HonourCombatHandler"
+HONOUR_COMBAT_HANDLER = "muddery.server.combat.combat_runner.honour_combat.HonourCombat"
 
 #HONOUR_COMBAT_HANDLER = "muddery.server.combat.honour_auto_combat_handler.HonourAutoCombatHandler"
 
@@ -473,4 +490,3 @@ AUTO_COMBAT_TIMEOUT = 60
 # AI modules
 ###################################
 AI_CHOOSE_SKILL = "muddery.server.ai.choose_skill.ChooseSkill"
-

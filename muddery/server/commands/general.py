@@ -4,9 +4,8 @@ General Character commands usually availabe to all characters
 This is adapt from evennia/evennia/commands/default/general.py.
 The licence of Evennia can be found in evennia/LICENSE.txt.
 """
+import traceback
 
-import math
-import random
 from django.conf import settings
 from evennia.utils import logger
 from evennia import create_script
@@ -14,12 +13,13 @@ from evennia.comms.models import ChannelDB
 from muddery.server.commands.base_command import BaseCommand
 from muddery.server.utils.localized_strings_handler import _
 from muddery.server.utils.exception import MudderyError
-from muddery.server.utils.utils import search_obj_data_key
+from muddery.server.utils.search import get_object_by_key, get_object_by_id
 from muddery.server.utils.defines import ConversationType
-from muddery.server.combat.match_pvp_handler import MATCH_COMBAT_HANDLER
-from muddery.server.dao.honours_mapper import HONOURS_MAPPER
-from muddery.server.dao.honour_settings import HonourSettings
 from muddery.server.utils.defines import CombatType
+from muddery.server.combat.combat_handler import COMBAT_HANDLER
+from muddery.server.combat.match_pvp import MATCH_COMBAT_HANDLER
+from muddery.server.database.worlddata.honour_settings import HonourSettings
+from muddery.server.server import Server
 
 
 class CmdLook(BaseCommand):
@@ -28,7 +28,7 @@ class CmdLook(BaseCommand):
 
     Usage:
         {"cmd":"look",
-         "args":<object's dbref>
+         "args":<object's id>
         }
 
     Observes your location or objects in your vicinity.
@@ -49,7 +49,13 @@ class CmdLook(BaseCommand):
 
         if args:
             # Use search to handle duplicate/nonexistant results.
-            looking_at_obj = caller.search_dbref(args)
+            try:
+                obj_id = int(args)
+            except:
+                caller.msg({"alert": _("Can not find it.")})
+                return
+
+            looking_at_obj = get_object_by_id(obj_id)
             if not looking_at_obj:
                 caller.msg({"alert": _("Can not find it.")})
                 return
@@ -64,17 +70,13 @@ class CmdLook(BaseCommand):
             # this is likely due to us having a player instead
             looking_at_obj = looking_at_obj.character
 
-        if not looking_at_obj.access(caller, "view"):
-            # The caller does not have the permission to look.
-            caller.msg({"msg": _("Can not find '%s'.") % looking_at_obj.name})
-            return
-
         if looking_at_obj == caller.location:
             # Clear caller's target.
             caller.clear_target()
             caller.show_location()
-            
-            if caller.is_in_combat():
+
+            combat = caller.get_combat()
+            if combat:
                 # If the caller is in combat, add combat info.
                 # This happens when a player is in combat and he logout and login again.
 
@@ -82,7 +84,8 @@ class CmdLook(BaseCommand):
                 caller.msg({"joined_combat": True})
                 
                 # Send combat infos.
-                appearance = caller.ndb.combat_handler.get_appearance()
+
+                appearance = combat.get_appearance()
                 message = {"combat_info": appearance,
                            "combat_commands": caller.get_combat_commands()}
                 caller.msg(message)
@@ -118,6 +121,72 @@ class CmdInventory(BaseCommand):
         self.caller.msg({"inventory":inv})
 
 
+class CmdInventoryObject(BaseCommand):
+    """
+    look at an object in the inventory
+
+    Usage:
+        {
+            "cmd": "inventory_obj",
+            "args": <inventory's position>
+        }
+
+    Observes your location or objects in your vicinity.
+    """
+    key = "inventory_obj"
+    locks = "cmd:all()"
+
+    def func(self):
+        """
+        Handle the looking.
+        """
+        caller = self.caller
+        args = self.args
+
+        if not args:
+            caller.msg({"alert": _("You should select something in your inventory.")})
+            return
+
+        appearance = caller.return_inventory_object(args)
+        if appearance:
+            caller.msg({"inventory_obj": appearance}, context=self.context)
+        else:
+            caller.msg({"alert": _("Can not find it in your inventory.")})
+
+
+class CmdEquipmentsObject(BaseCommand):
+    """
+    look at an object in the equipments
+
+    Usage:
+        {
+            "cmd": "equipments_obj",
+            "args": <object's id>
+        }
+
+    Observes your location or objects in your vicinity.
+    """
+    key = "equipments_obj"
+    locks = "cmd:all()"
+
+    def func(self):
+        """
+        Handle the looking.
+        """
+        caller = self.caller
+        args = self.args
+
+        if not args:
+            caller.msg({"alert": _("You should select something in your equipments.")})
+            return
+
+        appearance = caller.return_equipments_object(args)
+        if appearance:
+            caller.msg({"equipments_obj": appearance}, context=self.context)
+        else:
+            caller.msg({"alert": _("Can not find it in your equipments.")})
+
+
 #------------------------------------------------------------
 # Say something in the room.
 #------------------------------------------------------------
@@ -127,7 +196,7 @@ class CmdSay(BaseCommand):
 
     Usage:
         {"cmd":"say",
-         "args":{"target": <target's dbref>,
+         "args":{"target": <target's id>,
                  "msg": <message>
         }
 
@@ -162,11 +231,11 @@ class CmdSay(BaseCommand):
         try:
             if target_type == ConversationType.CHANNEL.value:
                 obj = ChannelDB.objects.filter(db_key=target)
+                obj = obj[0]
             elif target_type == ConversationType.LOCAL.value:
-                obj = search_obj_data_key(target)
+                obj = Server.world.get_room(target)
             elif target_type == ConversationType.PRIVATE.value:
-                obj = caller.search_dbref(target)
-            obj = obj[0]
+                obj = Server.world.get_character(int(target))
         except Exception as e:
             ostring = "Can not find %s %s: %s" % (target_type, target, e)
             logger.log_tracemsg(ostring)
@@ -179,159 +248,133 @@ class CmdSay(BaseCommand):
 
 
 #------------------------------------------------------------
-# goto exit
+# look at an object in the room
 #------------------------------------------------------------
-
-class CmdGoto(BaseCommand):
+class CmdLookRoomObj(BaseCommand):
     """
-    tranvese an exit
+    look at an object in the room
 
-    Usage:
-        {"cmd":"goto",
-         "args": <exit's dbref> or <direction (n, s, w, e, ne, nw, sw, se)>
-        }
-
-    Tranvese an exit, go to the destination of the exit.
+    Usage: {
+        "cmd": "look_room_obj",
+        "args": <object's key>
+    }
     """
-    key = "goto"
+    key = "look_room_obj"
     locks = "cmd:all()"
     help_cateogory = "General"
 
+    def func(self):
+        caller = self.caller
 
-    def get_degree(self, from_room, to_room):
-        # get the direction's degree of the exit
-        # from 0 to 360
-
-        from_area = from_room.location
-        to_area = to_room.location
-
-        if from_area.dbref != to_area.dbref:
+        if not caller.is_alive():
+            caller.msg({"alert": _("You are died.")})
             return
 
-        from_pos = from_room.position
-        to_pos = to_room.position
-
-        if not from_pos or not to_pos:
+        if not self.args:
+            caller.msg({"alert": _("You should appoint an object.")})
             return
 
-        dx = to_pos[0] - from_pos[0]
-        dy = to_pos[1] - from_pos[1]
-        degree = 0
-        if dx == 0:
-            if dy < 0:
-                degree = 90
-            elif dy > 0:
-                degree = 270
-        else:
-            degree = math.atan(-dy / dx) / math.pi * 180
-            if dx < 0:
-                degree += 180
-
-        return degree
-
-    def get_direction(self, degree):
-        if degree is None:
+        try:
+            room = self.caller.get_location()
+            obj = room.get_object(self.args)
+        except Exception as e:
+            caller.msg({"alert": _("Can not find the object.")})
             return
 
-        direction = ""
-        degree = degree - math.floor(degree / 360) * 360
-        if degree < 22.5:
-            direction = "e"
-        elif degree < 67.5:
-            direction = "ne"
-        elif degree < 112.5:
-            direction = "n"
-        elif degree < 157.5:
-            direction = "nw"
-        elif degree < 202.5:
-            direction = "w"
-        elif degree < 247.5:
-            direction = "sw"
-        elif degree < 292.5:
-            direction = "s"
-        elif degree < 337.5:
-            direction = "se"
-        elif degree < 360:
-            direction = "e"
+        appearance = obj.get_appearance(caller)
+        caller.msg({"look_obj": appearance})
 
-        return direction
+
+#------------------------------------------------------------
+# look at a character in the room
+#------------------------------------------------------------
+class CmdLookRoomChar(BaseCommand):
+    """
+    look at a character in the room
+
+    Usage: {
+        "cmd": "look_room_char",
+        "args": <character's id>
+    }
+    """
+    key = "look_room_char"
+    locks = "cmd:all()"
+    help_cateogory = "General"
+
+    def func(self):
+        caller = self.caller
+
+        if not caller.is_alive():
+            caller.msg({"alert": _("You are died.")})
+            return
+
+        if not self.args:
+            caller.msg({"alert": _("You should appoint a character.")})
+            return
+
+        try:
+            char_id = int(self.args)
+            room = self.caller.get_location()
+            obj = room.get_character(char_id)
+        except Exception as e:
+            caller.msg({"alert": _("Can not find the object.")})
+            return
+
+        appearance = obj.get_appearance(caller)
+        caller.msg({"look_obj": appearance})
+
+
+#------------------------------------------------------------
+# traverse an exit
+#------------------------------------------------------------
+class CmdTraverse(BaseCommand):
+    """
+    tranvese an exit
+
+    Usage: {
+        "cmd": "traverse",
+        "args": <exit's key>
+    }
+
+    Tranvese an exit, go to the destination of the exit.
+    """
+    key = "traverse"
+    locks = "cmd:all()"
+    help_cateogory = "General"
 
     def func(self):
         "Move caller to the exit."
         caller = self.caller
 
         if not caller.is_alive():
-            caller.msg({"alert":_("You are died.")})
+            caller.msg({"alert": _("You are died.")})
             return
 
         if not self.args:
-            caller.msg({"alert":_("Should appoint an exit to go.")})
+            caller.msg({"alert": _("Should appoint an exit to go.")})
             return
 
-        obj = caller.search_dbref(self.args, location=caller.location)
+        try:
+            room = self.caller.get_location()
+            exit = room.get_exit(self.args)
+        except:
+            caller.msg({"alert": _("Can not find the exit.")})
+            return
 
-        if not obj:
-            # try to goto direction
-            target = self.args.strip().lower()
-
-            if target in {"n", "s", "w", "e", "ne", "nw", "sw", "se"}:
-                # get exits in directions
-                exits = caller.location.get_exits()
-                candidate_exits = []
-
-                from_room = caller.location
-                for e in exits:
-                    exit_obj = search_obj_data_key(e)
-                    if not exit_obj:
-                        continue
-
-                    exit_obj = exit_obj[0]
-                    to_room = exit_obj.destination
-                    degree = self.get_degree(from_room, to_room)
-                    direction = self.get_direction(degree)
-                    if direction == target:
-                        candidate_exits.append(exit_obj)
-
-                if len(candidate_exits) == 1:
-                    obj = candidate_exits[0]
-                elif len(candidate_exits) > 1:
-                    # There is more than one exit in that direction.
-                    caller.msg({"alert": _("There is more than one exit in that direction.")})
-                    return
-
-        if obj:
-            # goto this exit
-            if obj.access(self.caller, 'traverse'):
-                # we may traverse the exit.
-                # MudderyLockedExit handles locks in at_before_traverse().
-                if obj.at_before_traverse(self.caller):
-                    obj.at_traverse(caller, obj.destination)
-            else:
-                # exit is locked
-                if obj.db.err_traverse:
-                    # if exit has a better error message, let's use it.
-                    caller.msg({"alert": self.obj.db.err_traverse})
-                else:
-                    # No shorthand error message. Call hook.
-                    obj.at_failed_traverse(caller)
-        else:
-            # Can not find exit.
-            caller.msg({"alert": _("Can not go there.")})
-        return
+        exit.traverse(caller)
 
 
 #------------------------------------------------------------
 # talk to npc
 #------------------------------------------------------------
-
 class CmdTalk(BaseCommand):
     """
     Talk to an NPC.
 
-    Usage:
-        {"cmd":"talk",
-         "args":<NPC's dbref>
-        }
+    Usage: {
+        "cmd": "talk",
+        "args": <NPC's id>
+    }
 
     Begin a talk with an NPC. Show all available dialogues of this NPC.
     """
@@ -347,8 +390,11 @@ class CmdTalk(BaseCommand):
             caller.msg({"alert":_("You should talk to someone.")})
             return
 
-        npc = caller.search_dbref(self.args, location=caller.location)
-        if not npc:
+        try:
+            npc_id = int(self.args)
+            room = self.caller.get_location()
+            npc = room.get_character(npc_id)
+        except:
             # Can not find the NPC in the caller's location.
             caller.msg({"alert":_("Can not find the one to talk.")})
             return
@@ -367,7 +413,7 @@ class CmdDialogue(BaseCommand):
     Usage:
         {"cmd":"dialogue",
          "args":{"dialogue":<current dialogue>,
-                 "npc":<npc's dbref>,
+                 "npc":<npc's id>,
                 }
         }
 
@@ -381,24 +427,25 @@ class CmdDialogue(BaseCommand):
     def func(self):
         "Continue a dialogue."
         caller = self.caller
+        args = self.args
 
-        if not self.args:
+        if not args:
             caller.msg({"alert":_("You should talk to someone.")})
             return
 
         # Get the dialogue.
-        if "dialogue" not in self.args:
+        if "dialogue" not in args:
             caller.msg({"alert": _("You should say something.")})
             return
-        dlg_key = self.args["dialogue"]
+        dlg_key = args["dialogue"]
 
-        npc = None
-        if "npc" in self.args and self.args["npc"]:
+        try:
             # get NPC
-            npc = caller.search_dbref(self.args["npc"], location=caller.location)
-            if not npc:
-                caller.msg({"msg": _("Can not find it.")})
-                return
+            npc_id = int(args["npc"])
+            room = caller.get_location()
+            npc = room.get_character(npc_id)
+        except:
+            npc = None
 
         caller.finish_dialogue(dlg_key, npc)
 
@@ -406,15 +453,14 @@ class CmdDialogue(BaseCommand):
 #------------------------------------------------------------
 # loot objects
 #------------------------------------------------------------
-
 class CmdLoot(BaseCommand):
     """
     Loot from a specified object.
 
-    Usage:
-        {"cmd":"loot",
-         "args":<object's dbref>
-        }
+    Usage: {
+        "cmd": "loot",
+        "args": <object's key>
+    }
 
     This command pick out random objects from the loot list and give
     them to the character.
@@ -431,17 +477,18 @@ class CmdLoot(BaseCommand):
             caller.msg({"alert":_("You should loot something.")})
             return
 
-        obj = caller.search_dbref(self.args, location=caller.location)
-        if not obj:
-            # Can not find the specified object.
-            caller.msg({"alert":_("Can not find the object to loot.")})
+        try:
+            room = self.caller.get_location()
+            obj = room.get_object(self.args)
+        except:
+            caller.msg({"alert": _("Can not find the object.")})
             return
 
         try:
             # do loot
             obj.loot(caller)
         except Exception as e:
-            ostring = "Can not loot %s: %s" % (obj.get_data_key(), e)
+            ostring = "Can not loot %s: %s" % (obj.get_element_key(), e)
             logger.log_tracemsg(ostring)
             
         caller.show_location()
@@ -457,7 +504,7 @@ class CmdUse(BaseCommand):
 
     Usage:
         {"cmd":"use",
-         "args":<object's dbref>
+         "args":<object's id>
         }
 
     Call caller's use_object function with specified object.
@@ -472,26 +519,21 @@ class CmdUse(BaseCommand):
         caller = self.caller
 
         if not caller.is_alive():
-            caller.msg({"alert":_("You are died.")})
+            caller.msg({"alert": _("You are died.")})
             return
 
-        if not self.args:
-            caller.msg({"alert":_("You should use something.")})
+        if not self.args or "position" not in self.args:
+            caller.msg({"alert": _("You should use something.")})
             return
-
-        obj = caller.search_dbref(self.args, location=caller)
-        if not obj:
-            # If the caller does not have this object.
-            caller.msg({"alert":_("You don't have this object.")})
-            return
+        position = self.args["position"]
 
         result = ""
         try:
             # Use the object and get the result.
-            result = caller.use_object(obj)
+            result = caller.use_object(int(position))
             caller.show_location()
         except Exception as e:
-            ostring = "Can not use %s: %s" % (obj.get_data_key(), e)
+            ostring = "Can not use %s: %s" % (self.args, e)
             logger.log_tracemsg(ostring)
 
         # Send result to the player.
@@ -511,7 +553,8 @@ class CmdDiscard(BaseCommand):
 
     Usage:
         {"cmd":"discard",
-         "args":<object's dbref>
+         "args": {
+            position: <object's position in the inventory>
         }
 
     Call caller's remove_objects function with specified object.
@@ -528,23 +571,19 @@ class CmdDiscard(BaseCommand):
             caller.msg({"alert":_("You are died.")})
             return
 
-        if not self.args:
+        if not self.args or "position" not in self.args:
             caller.msg({"alert":_("You should discard something.")})
             return
+        position = self.args["position"]
 
-        obj = caller.search_dbref(self.args, location=caller)
-        if not obj:
-            # If the caller does not have this object.
-            caller.msg({"alert":_("You don't have this object.")})
-            return
-
-        # remove used object
+        # remove object
         try:
-            caller.remove_object(obj.get_data_key(), 1)
+            caller.remove_object_position_all(int(position))
             caller.show_location()
         except Exception as e:
+            # If the caller does not have this object.
             caller.msg({"alert": _("Can not discard this object.")})
-            logger.log_tracemsg("Can not discard object %s: %s" % (obj.get_data_key(), e))
+            logger.log_tracemsg("Can not discard object %s: %s" % (self.args, e))
             return
 
 
@@ -558,7 +597,7 @@ class CmdEquip(BaseCommand):
 
     Usage:
         {"cmd":"equip",
-         "args":<object's dbref>
+         "args":<object's id>
         }
     Put on an equipment and add its attributes to the character.
     """
@@ -570,25 +609,17 @@ class CmdEquip(BaseCommand):
         "Put on an equipment."
         caller = self.caller
 
-        if not self.args:
+        if not self.args or "position" not in self.args:
             caller.msg({"alert": _("You should equip something.")})
             return
-
-        obj = caller.search_dbref(self.args, location=caller)
-        if not obj:
-            # If the caller does not have this equipment.
-            caller.msg({"alert": _("You don't have this equipment.")})
-            return
+        position = self.args["position"]
 
         try:
             # equip
-            caller.equip_object(obj)
-        except MudderyError as e:
-            caller.msg({"alert": str(e)})
-            return
+            caller.equip_object(int(position))
         except Exception as e:
             caller.msg({"alert": _("Can not use this equipment.")})
-            logger.log_tracemsg("Can not use equipment %s: %s" % (obj.get_data_key(), e))
+            logger.log_tracemsg("Can not use equipment %s: %s" % (self.args, e))
             return
 
         # Send lastest status to the player.
@@ -606,7 +637,7 @@ class CmdTakeOff(BaseCommand):
 
     Usage:
         {"cmd":"takeoff",
-         "args":<object's dbref>
+         "args":<object's id>
         }
     Take off an equipment and remove its attributes from the character.
     """
@@ -618,25 +649,20 @@ class CmdTakeOff(BaseCommand):
         "Take off an equipment."
         caller = self.caller
 
-        if not self.args:
+        if not self.args or "position" not in self.args:
             caller.msg({"alert":_("You should take off something.")})
             return
-
-        obj = caller.search_dbref(self.args, location=caller)
-        if not obj:
-            # If the caller does not have this equipment.
-            caller.msg({"alert":_("You don't have this equipment.")})
-            return
+        position = self.args["position"]
 
         try:
             # Take off the equipment.
-            caller.take_off_equipment(obj)
+            caller.take_off_equipment(position)
         except MudderyError as e:
             caller.msg({"alert": str(e)})
             return
         except Exception as e:
             caller.msg({"alert": _("Can not take off this equipment.")})
-            logger.log_tracemsg("Can not take off %s: %s" % (obj.get_data_key(), e))
+            logger.log_tracemsg("Can not take off %s: %s" % (self.args, e))
             return
 
         # Send lastest status to the player.
@@ -704,90 +730,17 @@ class CmdCastSkill(BaseCommand):
             skill_key = args["skill"]
 
             # Get target
-            if "target" in args:
-                target = caller.search_dbref(args["target"])
+            try:
+                target_id = int(args["target"])
+                room = caller.get_location()
+                target = room.get_character(target_id)
+            except:
+                target = None
 
         try:
             caller.cast_skill(skill_key, target)
         except Exception as e:
             caller.msg({"alert":_("Can not cast this skill.")})
-            logger.log_tracemsg("Can not cast skill %s: %s" % (skill_key, e))
-            return
-
-
-# ------------------------------------------------------------
-# cast a skill in combat
-# ------------------------------------------------------------
-
-class CmdCastCombatSkill(BaseCommand):
-    """
-    Cast a skill when the caller is in combat.
-
-    Usage:
-        {
-            "cmd": "cast_combat_skill",
-            "args": <skill's key>,
-        }
-
-        or:
-
-        {
-            "cmd": "cast_combat_skill",
-            "args":
-                {
-                    "skill": <skill's key>,
-                    "target": <skill's target>,
-            }
-        }
-
-    """
-    key = "cast_combat_skill"
-    locks = "cmd:all()"
-    help_cateogory = "General"
-
-    def func(self):
-        "Cast a skill in a combat."
-        caller = self.caller
-        args = self.args
-
-        if not caller.is_alive():
-            caller.msg({"alert": _("You are died.")})
-            return
-
-        if not caller.is_in_combat():
-            caller.msg({"alert": _("You can only cast this skill in a combat.")})
-            return
-
-        if caller.is_auto_cast_skill():
-            caller.msg({"alert": _("You can not cast skills manually.")})
-            return
-
-        if not args:
-            caller.msg({"alert": _("You should select a skill to cast.")})
-            return
-
-        # get skill and target
-        skill_key = None
-        target = None
-        if isinstance(args, str):
-            # If the args is a skill's key.
-            skill_key = args
-        else:
-            # If the args is skill's key and target.
-            if not "skill" in args:
-                caller.msg({"alert": _("You should select a skill to cast.")})
-                return
-            skill_key = args["skill"]
-
-            # Get target
-            if "target" in args:
-                target = caller.search_dbref(args["target"])
-
-        try:
-            # cast this skill.
-            caller.cast_combat_skill(skill_key, target)
-        except Exception as e:
-            caller.msg({"alert": _("Can not cast this skill.")})
             logger.log_tracemsg("Can not cast skill %s: %s" % (skill_key, e))
             return
 
@@ -801,7 +754,7 @@ class CmdAttack(BaseCommand):
 
     Usage:
         {"cmd":"attack",
-         "args":<object's dbref>}
+         "args":<object's id>}
         }
 
     This will initiate a combat with the target. If the target is
@@ -815,6 +768,8 @@ class CmdAttack(BaseCommand):
         "Handle command"
 
         caller = self.caller
+        args = self.args
+
         if not caller:
             return
 
@@ -822,19 +777,21 @@ class CmdAttack(BaseCommand):
             caller.msg({"alert":_("You are died.")})
             return
 
-        if not self.args:
+        if not args:
             caller.msg({"alert":_("You should select a target.")})
             return
 
-        target = caller.search_dbref(self.args)
-        if not target:
-            caller.msg({"alert":_("You should select a target.")})
+        try:
+            target_id = int(args)
+            room = caller.get_location()
+            target = room.get_character(target_id)
+        except:
+            caller.msg({"alert": _("You should select a target.")})
             return
 
         if not caller.location or caller.location.peaceful:
-            if target.has_account:
-                caller.msg({"alert":_("You can not attack in this place.")})
-                return
+            caller.msg({"alert": _("You can not attack in this place.")})
+            return
 
         if not target.is_alive():
             caller.msg({"alert": _("%s is died." % target.get_name())})
@@ -855,22 +812,24 @@ class CmdAttack(BaseCommand):
             return
 
         if target.is_in_combat():
-            # caller is in battle
+            # target is in battle
             message = {"alert": _("%s is in another combat." % target.name)}
             caller.msg(message)
             return
 
-        # create a new combat handler
-        chandler = create_script(settings.NORMAL_COMBAT_HANDLER)
-        
-        # set combat team and desc
-        chandler.set_combat(
-            combat_type=CombatType.NORMAL,
-            teams={1: [target], 2:[caller]},
-            desc="",
-            timeout=0
-        )
-        
+        # create a new combat
+        try:
+            COMBAT_HANDLER.create_combat(
+                combat_type=CombatType.NORMAL,
+                teams={1: [target], 2: [caller]},
+                desc="",
+                timeout=0
+            )
+        except Exception as e:
+            logger.log_err("Can not create combat: [%s] %s" % (type(e).__name__, e))
+            caller.msg(_("You can not attack %s.") % target.get_name())
+            return
+
         caller.msg(_("You are attacking {R%s{n! You are in combat.") % target.get_name())
         target.msg(_("{R%s{n is attacking you! You are in combat.") % caller.get_name())
 
@@ -898,7 +857,7 @@ class CmdQueueUpCombat(BaseCommand):
             return
 
         honour_settings = HonourSettings.get_first_data()
-        if caller.db.level < honour_settings.min_honour_level:
+        if caller.get_level() < honour_settings.min_honour_level:
             caller.msg({"alert": _("You need to reach level %s." % honour_settings.min_honour_level)})
             return
 
@@ -1071,7 +1030,7 @@ class CmdUnlockExit(BaseCommand):
 
     Usage:
         {"cmd":"unlock_exit",
-         "args":<object's dbref>
+         "args":<object's id>
         }
     A character must unlock a LockedExit before tranvese it.
     """
@@ -1084,28 +1043,20 @@ class CmdUnlockExit(BaseCommand):
         caller = self.caller
 
         if not self.args:
-            caller.msg({"alert":_("You should unlock something.")})
+            caller.msg({"alert": _("You should unlock something.")})
             return
 
-        obj = caller.search_dbref(self.args, location=caller.location)
-        if not obj:
-            caller.msg({"alert":_("Can not find this exit.")})
-            return
+        exit_key = self.args
 
         try:
             # Unlock the exit.
-            if not caller.unlock_exit(obj):
-                caller.msg({"alert":_("Can not open this exit.") % obj.name})
+            if not caller.unlock_exit(exit_key):
+                caller.msg({"alert": _("Can not open this exit.")})
                 return
         except Exception as e:
             caller.msg({"alert": _("Can not open this exit.")})
-            logger.log_tracemsg("Can not open exit %s: %s" % (obj.name, e))
+            logger.log_tracemsg("Can not open exit %s: %s" % (exit_key, e))
             return
-
-        # The exit may have different appearance after unlocking.
-        # Send the lastest appearance to the caller.
-        appearance = obj.get_appearance(caller)
-        caller.msg({"look_obj": appearance})
 
 
 #------------------------------------------------------------
@@ -1116,8 +1067,12 @@ class CmdShopping(BaseCommand):
     Open a shop.
 
     Usage:
-        {"cmd":"shopping",
-         "args":<shop's dbref>
+        {
+            "cmd":"shopping",
+            "args": {
+                npc: <npc's id>,
+                shop: <shop's key>,
+            }
         }
     """
     key = "shopping"
@@ -1127,17 +1082,23 @@ class CmdShopping(BaseCommand):
     def func(self):
         "Do shopping."
         caller = self.caller
+        args = self.args
 
-        if not self.args:
-            caller.msg({"alert":_("You should shopping in someplace.")})
+        if not args or "npc" not in args or "shop" not in args:
+            caller.msg({"alert": _("You should shopping in someplace.")})
             return
 
-        shop = caller.search_dbref(self.args)
-        if not shop:
-            caller.msg({"alert":_("Can not find this shop.")})
+        shop_key = args["shop"]
+
+        try:
+            npc_id = int(args["npc"])
+            room = caller.get_location()
+            npc = room.get_character(npc_id)
+        except:
+            caller.msg({"alert": _("Can not find this NPC.")})
             return
 
-        shop.show_shop(caller)
+        caller.msg({"shop": npc.get_shop_info(shop_key, caller)})
 
 
 #------------------------------------------------------------
@@ -1148,8 +1109,13 @@ class CmdBuy(BaseCommand):
     Buy a goods.
 
     Usage:
-        {"cmd":"buy",
-         "args":<goods' dbref>}
+        {
+            "cmd": "buy",
+            "args": {
+                "npc": <npc's id>,
+                "shop": <shop's key>,
+                "goods": <goods' index>,
+            }
         }
     """
     key = "buy"
@@ -1159,23 +1125,103 @@ class CmdBuy(BaseCommand):
     def func(self):
         "Buy a goods."
         caller = self.caller
+        args = self.args
 
-        if not self.args:
-            caller.msg({"alert":_("You should buy something.")})
+        if not args or "npc" not in args or "shop" not in args or "goods" not in args:
+            caller.msg({"alert": _("You should buy something.")})
             return
 
-        goods = caller.search_dbref(self.args)
-        if not goods:
-            caller.msg({"alert":_("Can not find this goods.")})
+        try:
+            npc_id = int(args["npc"])
+            room = self.caller.get_location()
+            npc = room.get_character(npc_id)
+        except:
+            caller.msg({"alert": _("Can not find this NPC.")})
             return
+
+        shop = args["shop"]
+        goods = args["goods"]
 
         # buy goods
         try:
-            goods.sell_to(caller)
+            npc.sell_goods(shop, int(goods), caller)
         except Exception as e:
-            caller.msg({"alert":_("Can not buy this goods.")})
-            logger.log_err("Can not buy %s: %s" % (goods.get_data_key(), e))
+            traceback.print_exc()
+            caller.msg({"alert": _("Can not buy this goods.")})
+            logger.log_err("Can not buy %s %s %s: %s" % (args["npc"], shop, goods, e))
             return
+
+
+class CmdQueryQuest(BaseCommand):
+    """
+    Query a quest's detail information.
+
+    Usage:
+        {
+            "cmd": "query_quest",
+            "args": {
+                "key": <quest's key>
+            }
+        }
+
+    Observes your location or objects in your vicinity.
+    """
+    key = "query_quest"
+    locks = "cmd:all()"
+
+    def func(self):
+        """
+        Handle the looking.
+        """
+        caller = self.caller
+        args = self.args
+
+        if not args or "key" not in args:
+            caller.msg({"alert": _("Can not find it.")})
+            return
+
+        quest_key = args["key"]
+
+        try:
+            caller.msg({"quest_info": caller.get_quest_info(quest_key)})
+        except Exception as e:
+            logger.log_err("Can not get %s's quest %s." % (caller.id, quest_key))
+
+
+class CmdQuerySkill(BaseCommand):
+    """
+    Query a skill's detail information.
+
+    Usage:
+        {
+            "cmd": "query_skill",
+            "args": {
+                "key": <skill's key>
+            }
+        }
+
+    Observes your location or objects in your vicinity.
+    """
+    key = "query_skill"
+    locks = "cmd:all()"
+
+    def func(self):
+        """
+        Handle the looking.
+        """
+        caller = self.caller
+        args = self.args
+
+        if not args or "key" not in args:
+            caller.msg({"alert": _("Can not find it.")})
+            return
+
+        skill_key = args["key"]
+
+        try:
+            caller.msg({"skill_info": caller.get_skill_info(skill_key)})
+        except Exception as e:
+            logger.log_err("Can not get %s's skill %s." % (caller.id, skill_key))
 
 
 #------------------------------------------------------------

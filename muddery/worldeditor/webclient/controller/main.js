@@ -229,8 +229,8 @@ controller = {
         if (editor_type == "event") {
             url = "event_editor.html?table=" + table_name;
         }
-        else if (editor_type == "object_event") {
-            url = "object_event_editor.html?table=" + table_name;
+        else if (editor_type == "element_event") {
+            url = "element_event_editor.html?table=" + table_name;
         }
         else if (editor_type == "dialogue_event") {
             url = "dialogue_event_editor.html?table=" + table_name;
@@ -265,27 +265,27 @@ controller = {
         controller.pushPage(name, url, null);
     },
 
-    editObject: function(typeclass, object_key, no_delete) {
-        var url = "object_editor.html?typeclass=" + typeclass;
+    editElement: function(element_type, element_key, no_delete) {
+        var url = "element_editor.html?element_type=" + element_type;
 
         var name = "";
-        if (object_key) {
-            name = "Edit " + typeclass;
-            url += "&object=" + object_key;
+        if (element_key) {
+            name = "Edit " + element_type;
+            url += "&element_key=" + element_key;
             if (no_delete) {
                 url += "&no_delete=1";
             }
         }
         else {
-            name = "Add " + typeclass;
+            name = "Add " + element_type;
         }
 
         controller.pushPage(name, url, null);
     },
 
-    createObject: function(typeclass, field_values) {
-        var url = "object_editor.html?typeclass=" + typeclass;
-        var name = "Add " + typeclass;
+    createObject: function(element_type, field_values) {
+        var url = "element_editor.html?element_type=" + element_type;
+        var name = "Add " + element_type;
 
         controller.pushPage(name, url, field_values);
     },
@@ -304,8 +304,8 @@ controller = {
         controller.pushPage(name, url, null);
     },
 
-    editPropertiesDict: function(typeclass, record_id) {
-        var url = "properties_dict_editor.html?typeclass=" + typeclass;
+    editPropertiesDict: function(element_type, record_id) {
+        var url = "properties_dict_editor.html?element_type=" + element_type;
 
         var name = "";
         if (record_id) {
@@ -319,16 +319,16 @@ controller = {
         controller.pushPage(name, url, null);
     },
 
-    editObjectProperties: function(obj_key, level) {
-        var url = "object_properties_editor.html?obj_key=" + obj_key;
+    editElementProperties: function(element_type, element_key, level) {
+        var url = "element_properties_editor.html?element_type=" + element_type + "&element_key=" + element_key;
 
         var name = "";
         if (level) {
-            name = "编辑对象属性";
+            name = "编辑元素属性";
             url += "&level=" + level;
         }
         else {
-            name = "添加对象属性";
+            name = "添加元素属性";
         }
 
         controller.pushPage(name, url, null);

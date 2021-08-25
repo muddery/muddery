@@ -22,7 +22,7 @@ class FuncHit(StatementFunction):
     def func(self):
         """
         Implement the function.
-        """        
+        """
         if not self.args:
             return
 
@@ -36,13 +36,88 @@ class FuncHit(StatementFunction):
         target_name = self.obj.get_name()
 
         # calculate the damage
-        damage = float(self.caller.prop.attack) / (self.caller.prop.attack + self.obj.prop.defence) * self.caller.prop.attack
+        damage = float(self.caller.const.attack) / (self.caller.const.attack + self.obj.const.defence) * self.caller.const.attack
         damage = round(damage * effect)
 
-        # hurt target
-        increments = {"hp": -damage}
-        changes = self.obj.change_properties(increments)
+        # hit the target
+        changed = self.obj.change_state("hp", -damage)
 
         # send skill result
-        return _("Hit %s by %d points.") % (target_name, int(-changes["hp"]))
+        return _("Hit %s by %d points.") % (target_name, -changed)
 
+
+class FuncHeal(StatementFunction):
+    """
+    Heal the caller.
+
+    Args:
+        args[0]: (int) the hp value to increase.
+
+    Returns:
+        None
+    """
+
+    key = "heal"
+    const = False
+
+    def func(self):
+        """
+        Implement the function.
+        """
+        if not self.args:
+            return
+
+        effect = self.args[0]
+        if effect <= 0:
+            return
+
+        self.obj = self.caller
+
+        # recover caller's hp
+        heal = int(effect)
+
+        # heal the target
+        changed = self.obj.change_state("hp", heal)
+
+        # send skill result
+        return _("Healed %s by %d points.") % (self.obj.get_name(), changed)
+
+
+class FuncIncreaseMaxHP(StatementFunction):
+    """
+    Passive skill, increase the caller's max_hp.
+
+    Args:
+        args[0]: (int) the max_hp value to increase.
+
+    Returns:
+        None
+    """
+    key = "max_hp"
+    const = False
+
+    def func(self):
+        """
+        Implement the function.
+        """
+        if not self.args:
+            return
+
+        effect = self.args[0]
+        if effect <= 0:
+            return
+
+        self.obj = self.caller
+
+        # increase max hp
+        increase = int(effect)
+        changed = 0
+
+        if increase > 0:
+            changed = self.obj.change_const_property("max_hp", increase)
+
+            # increase hp
+            self.obj.change_state("hp", changed)
+
+        # send skill result
+        return _("Raised %s's max HP by %d points.") % (self.obj.get_name(), changed)

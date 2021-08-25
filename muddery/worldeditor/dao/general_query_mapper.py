@@ -6,6 +6,7 @@ from django.apps import apps
 from django.conf import settings
 from django.db import connections
 from django.core.exceptions import ObjectDoesNotExist
+from muddery.server.mappings.element_set import ELEMENT
 
 
 def get_all_fields(table_name):
@@ -143,17 +144,22 @@ def get_all_from_tables(tables):
     Return:
         a dict of values.
     """
-    if not tables or len(tables) <= 1:
+    if not tables:
         return
 
     # Get table's full name
     tables = [settings.WORLD_DATA_APP + "_" + table for table in tables]
 
-    # join tables
-    from_tables = ", ".join(tables)
-    conditions = [tables[0] + ".key=" + t + ".key" for t in tables[1:]]
-    conditions = " and ".join(conditions)
-    query = "select * from %s where %s" % (from_tables, conditions)
+    if len(tables) == 1:
+        # only one table
+        query = "select * from %s" % tables[0]
+    else:
+        # join tables
+        from_tables = ", ".join(tables)
+        conditions = [tables[0] + ".key=" + t + ".key" for t in tables[1:]]
+        conditions = " and ".join(conditions)
+        query = "select * from %s where %s" % (from_tables, conditions)
+
     cursor = connections[settings.WORLD_DATA_APP].cursor()
     cursor.execute(query)
     columns = [col[0] for col in cursor.description]
@@ -176,20 +182,24 @@ def get_tables_record_by_key(tables, key):
     Return:
         a dict of values.
     """
-    if not tables or len(tables) <= 1:
+    if not tables:
         return
 
     # Get table's full name
     tables = [settings.WORLD_DATA_APP + "_" + table for table in tables]
 
-    # join tables
-    from_tables = ", ".join(tables)
-    conditions = [tables[0] + ".key=" + t + ".key" for t in tables[1:]]
-    conditions = " and ".join(conditions)
-    query = "select * from %(tables)s where %(first_table)s.key=%%s and %(join)s" %\
-                {"tables": from_tables,
-                 "first_table": tables[0],
-                 "join": conditions}
+    if len(tables) == 1:
+        query = "select * from %(tables)s where %(tables)s.key=%%s" % {"tables": tables[0]}
+    else:
+        # join tables
+        from_tables = ", ".join(tables)
+        conditions = [tables[0] + ".key=" + t + ".key" for t in tables[1:]]
+        conditions = " and ".join(conditions)
+        query = "select * from %(tables)s where %(first_table)s.key=%%s and %(join)s" %\
+                    {"tables": from_tables,
+                     "first_table": tables[0],
+                     "join": conditions}
+
     cursor = connections[settings.WORLD_DATA_APP].cursor()
     cursor.execute(query, [key])
     columns = [col[0] for col in cursor.description]
@@ -200,3 +210,14 @@ def get_tables_record_by_key(tables, key):
         return dict(zip(columns, record))
     else:
         raise ObjectDoesNotExist
+
+
+def get_element_base_data(element_type):
+    """
+    Query the base data of an element_type.
+
+    :param element_type:
+    :return:
+    """
+    base_model = ELEMENT(element_type).get_base_model()
+    return filter_records(base_model, element_type=element_type)

@@ -6,8 +6,7 @@ PropertiesDictTable = function() {
 	CommonTable.call(this);
 
 	this.table_name = "properties_dict";
-
-	this.typeclass = "";
+	this.element_type = "";
 }
 
 PropertiesDictTable.prototype = prototype(CommonTable.prototype);
@@ -16,8 +15,8 @@ PropertiesDictTable.prototype.constructor = PropertiesDictTable;
 PropertiesDictTable.prototype.init = function() {
     this.bindEvents();
 
-    service.queryAllTypeclasses(this.queryAllTypeclassesSuccess, this.queryTableFailed);
-    service.queryTypeclassProperties(this.typeclass, this.queryTableSuccess);
+    service.queryAllElements(this.queryAllElementsSuccess, this.queryTableFailed);
+    service.queryElementProperties(this.element_type, this.queryTableSuccess);
 }
 
 
@@ -29,17 +28,17 @@ PropertiesDictTable.prototype.init = function() {
 PropertiesDictTable.prototype.bindEvents = function() {
     CommonTable.prototype.bindEvents.call(this);
 
-    $("#select-typeclass").on("change", this.onSelectTypeclassChange);
+    $("#select-element").on("change", this.onSelectElementChange);
 }
 
-PropertiesDictTable.prototype.onSelectTypeclassChange = function(e) {
-    controller.typeclass = $(this).val();
+PropertiesDictTable.prototype.onSelectElementChange = function(e) {
+    controller.element_type = $(this).val();
 
-    service.queryTypeclassProperties(controller.typeclass, controller.refreshTableSuccess);
+    service.queryElementProperties(controller.element_type, controller.refreshTableSuccess);
 }
 
-PropertiesDictTable.prototype.queryAllTypeclassesSuccess = function(data) {
-    var container = $("#select-typeclass");
+PropertiesDictTable.prototype.queryAllElementsSuccess = function(data) {
+    var container = $("#select-element");
     container.children().remove();
 
     $("<option>")
@@ -90,18 +89,20 @@ PropertiesDictTable.prototype.setTreeLevel = function(source, target, node, leve
 }
 
 PropertiesDictTable.prototype.refresh = function() {
-    service.queryTypeclassProperties(this.typeclass,
-                                     this.refreshTableSuccess,
-                                     this.failedCallback);
+    service.queryElementProperties(
+        this.element_type,
+        this.refreshTableSuccess,
+        this.failedCallback
+    );
 }
 
 PropertiesDictTable.prototype.onAdd = function(e) {
-    window.parent.controller.editPropertiesDict(controller.typeclass);
+    window.parent.controller.editPropertiesDict(controller.element_type);
 }
 
 PropertiesDictTable.prototype.onEdit = function(e) {
     var record_id = $(this).attr("data-record-id");
     if (record_id) {
-        window.parent.controller.editPropertiesDict(controller.typeclass, record_id);
+        window.parent.controller.editPropertiesDict(controller.element_type, record_id);
     }
 }

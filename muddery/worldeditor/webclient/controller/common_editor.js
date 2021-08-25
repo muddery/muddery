@@ -247,8 +247,8 @@ CommonEditor.prototype.saveFormSuccess = function(data, context) {
     */
     var param = {};
     if (context) {
-        if ("typeclass" in context) {
-            param["typeclass"] = context["typeclass"]
+        if ("element_type" in context) {
+            param["element_type"] = context["element_type"]
         }
         if ("key" in context) {
             param["key"] = context["key"]
@@ -311,12 +311,7 @@ CommonEditor.prototype.deleteSuccess = function(data) {
 
 // Parse fields data to table headers.
 CommonEditor.prototype.parseFields = function(fields) {
-    var cols = [{
-        field: "operate",
-        title: "Operate",
-        formatter: this.operateButton,
-    }];
-
+    var cols = [];
     for (var i = 0; i < fields.length; i++) {
         cols.push({
             field: fields[i].name,
@@ -324,6 +319,12 @@ CommonEditor.prototype.parseFields = function(fields) {
             sortable: true,
         });
     }
+
+    cols.push({
+        field: "operate",
+        title: "Operate",
+        formatter: this.operateButton,
+    });
 
     return cols;
 }

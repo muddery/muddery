@@ -93,7 +93,7 @@ class MudderyChannel(DefaultChannel):
             "conversation": {
                 "type": ConversationType.CHANNEL.value,
                 "channel": _(self.key, category="channels"),
-                "from_dbref": caller.dbref,
+                "from_id": caller.get_id(),
                 "from_name": caller.get_name(),
                 "msg": message,
             }

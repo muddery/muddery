@@ -165,19 +165,20 @@ MudderyClient.prototype = {
                     mud.main_frame.playerOffline(data[key]);
                 }
                 else if (key == "look_obj") {
-                    if (context == "inventory") {
-                        mud.inventory_window.showObject(data[key]);
-                    }
-                    else if (context == "skills") {
-                        mud.skills_window.showSkill(data[key]);
-                    }
-                    else if (context == "quests") {
-                        mud.quests_window.showQuest(data[key]);
-                    }
-                    else {
-        			    mud.popup_object.setObject(data[key]);
-        			    mud.popup_object.show();
-        			}
+        			mud.popup_object.setObject(data[key]);
+        			mud.popup_object.show();
+        		}
+                else if (key == "skill_info") {
+                    mud.skills_window.showSkill(data[key]);
+                }
+                else if (key == "quest_info") {
+                    mud.quests_window.showQuest(data[key]);
+                }
+                else if (key == "inventory_obj") {
+                    mud.inventory_window.showObject(data[key]);
+                }
+                else if (key == "equipments_obj") {
+                    mud.char_data_window.showEquipment(data[key]);
                 }
                 else if (key == "dialogue") {
                     mud.popup_dialogue.setDialogue(data[key]);
@@ -219,7 +220,7 @@ MudderyClient.prototype = {
                     mud.combat_window.setCombat(info["desc"],
                                                 info["timeout"],
                                                 info["characters"],
-                                                core.data_handler.character_dbref);
+                                                core.data_handler.character_id);
                     }
                 else if (key == "combat_commands") {
 	                mud.combat_window.setCommands(data[key]);

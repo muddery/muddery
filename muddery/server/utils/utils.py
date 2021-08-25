@@ -7,12 +7,11 @@ be of use when designing your own game.
 """
 
 import os, re, inspect
-from importlib import import_module
+import importlib
 from pkgutil import iter_modules
 from django.conf import settings
-from evennia.utils import search, logger
 from muddery.launcher import configs
-from muddery.server.dao.localized_strings import LocalizedStrings
+from muddery.server.database.worlddata.localized_strings import LocalizedStrings
 
 
 def get_muddery_version():
@@ -21,82 +20,6 @@ def get_muddery_version():
     """
     import muddery
     return muddery.__version__
-    
-
-def set_obj_data_key(obj, key):
-    """
-    Set data key. Put it info into an object's attributes.
-            
-    Args:
-        obj: (object) object to be set
-        key: (string) key of the data.
-    """
-    obj.attributes.add("key", key, category=settings.DATA_KEY_CATEGORY, strattr=True)
-
-
-def search_obj_data_key(key):
-    """
-    Search objects which have the given key.
-
-    Args:
-        key: (string) Data's key.
-    """
-    if not key:
-        return None
-
-    return search.search_object_attribute(key="key", strvalue=key, category=settings.DATA_KEY_CATEGORY)
-    
-    
-def search_db_data_type(key, value, typeclass):
-    """
-    Search objects of the given typeclass which have the given value.
-    """
-    objs = search.search_object_attribute(key=key, value=value)
-    return [obj for obj in objs if obj.is_typeclass(typeclass, exact=False)]
-
-
-def set_obj_unique_type(obj, type):
-    """
-    Set unique object's type.
-
-    Args:
-        obj: (object) object to be set
-        type: (string) unique object's type.
-    """
-    obj.attributes.add("type", type, category=settings.DATA_KEY_CATEGORY, strattr=True)
-
-
-def search_obj_unique_type(type):
-    """
-    Search objects which have the given unique type.
-
-    Args:
-        type: (string) unique object's type.
-    """
-    obj = search.search_object_attribute(key="type", strvalue=type, category=settings.DATA_KEY_CATEGORY)
-    return obj
-
-
-def is_child(child, parent):
-    """
-    Check if the child class is inherited from the parent.
-
-    Args:
-        child: child class
-        parent: parent class
-
-    Returns:
-        boolean
-    """
-    for base in child.__bases__:
-        if base is parent:
-            return True
-
-    for base in child.__bases__:
-        if is_child(base, parent):
-            return True
-
-    return False
 
 
 def file_iterator(file, erase=False, chunk_size=512):
@@ -276,6 +199,19 @@ def all_unlocalized_js_strings(filter):
     return strings
 
 
+def class_from_path(path):
+    """
+    Get a class from its path
+    :param path:
+    :return:
+    """
+    class_path, class_name = path.rsplit(".", 1)
+
+    mod = importlib.import_module(class_path)
+    cls = getattr(mod, class_name)
+    return cls
+
+
 def load_modules(path):
     """
     Load all modules ans sub modules in the path.
@@ -284,14 +220,14 @@ def load_modules(path):
         path: (string) modules' path
     """
     modules = []
-    m = import_module(path)
+    m = importlib.import_module(path)
     if hasattr(m, '__path__'):
         for _, subpath, ispkg in iter_modules(m.__path__):
             fullpath = path + '.' + subpath
             if ispkg:
                 modules += load_modules(fullpath)
             else:
-                modules.append(import_module(fullpath))
+                modules.append(importlib.import_module(fullpath))
 
     return modules
 
@@ -310,6 +246,7 @@ def classes_in_path(path, cls):
             if inspect.isclass(obj) and issubclass(obj, cls) and obj is not cls:
                 yield obj
 
+
 def get_module_path(path):
     """
     Transform a normal path to a python module style path.
@@ -324,3 +261,9 @@ def get_module_path(path):
     else:
         return name
 
+
+def is_player(element):
+    """
+    If the element is a player character, return True.
+    """
+    return element.is_element(settings.PLAYER_CHARACTER_ELEMENT_TYPE)

@@ -2,7 +2,7 @@
 This model translates default strings into localized strings.
 """
 
-from muddery.worldeditor.dao.common_mapper_base import CommonMapper, ObjectsMapper
+from muddery.worldeditor.dao.common_mapper_base import CommonMapper, ElementsMapper
 
 
 # ------------------------------------------------------------
@@ -11,41 +11,39 @@ from muddery.worldeditor.dao.common_mapper_base import CommonMapper, ObjectsMapp
 #
 # ------------------------------------------------------------
 
-OBJECTS = ObjectsMapper("objects")
+WORLD_AREAS = ElementsMapper("AREA")
 
-WORLD_AREAS = ObjectsMapper("world_areas")
+WORLD_EXITS = ElementsMapper("EXIT")
 
-WORLD_EXITS = ObjectsMapper("world_exits")
+WORLD_NPCS = ElementsMapper("WORLD_NPC")
 
-WORLD_NPCS = ObjectsMapper("world_npcs")
+WORLD_OBJECTS = ElementsMapper("WORLD_OBJECT")
 
-WORLD_OBJECTS = ObjectsMapper("world_objects")
+OBJECT_CREATORS = ElementsMapper("WORLD_OBJECT_CREATOR")
 
-WORLD_ROOMS = ObjectsMapper("world_rooms")
+WORLD_ROOMS = ElementsMapper("ROOM")
 
-COMMON_OBJECTS = ObjectsMapper("common_objects")
+COMMON_OBJECTS = ElementsMapper("COMMON_OBJECT")
 
-FOODS = ObjectsMapper("foods")
+POCKET_OBJECTS = ElementsMapper("POCKET_OBJECT")
 
-SKILL_BOOKS = ObjectsMapper("skill_books")
+FOODS = ElementsMapper("FOOD")
 
-EQUIPMENTS = ObjectsMapper("equipments")
+SKILL_BOOKS = ElementsMapper("SKILL_BOOK")
 
-CHARACTERS = ObjectsMapper("characters")
+EQUIPMENTS = ElementsMapper("EQUIPMENT")
 
-BASE_NPCS = ObjectsMapper("base_npcs")
+CHARACTERS = ElementsMapper("CHARACTER")
 
-COMMON_NPCS = ObjectsMapper("common_npcs")
+PLAYER_CHARACTERS = ElementsMapper("PLAYER_CHARACTER")
 
-PLAYER_CHARACTERS = ObjectsMapper("player_characters")
+SHOPS = ElementsMapper("SHOP")
 
-SHOPS = ObjectsMapper("shops")
+SHOP_GOODS = ElementsMapper("SHOP_GOODS")
 
-SHOP_GOODS = ObjectsMapper("shop_goods")
+SKILLS = ElementsMapper("SKILL")
 
-SKILLS = ObjectsMapper("skills")
-
-QUESTS = ObjectsMapper("quests")
+QUESTS = ElementsMapper("QUEST")
 
 
 # ------------------------------------------------------------
@@ -58,13 +56,9 @@ EQUIPMENT_POSITIONS = CommonMapper("equipment_positions")
 
 EQUIPMENT_TYPES = CommonMapper("equipment_types")
 
-EXIT_LOCKS = CommonMapper("exit_locks")
-
 GAME_SETTINGS = CommonMapper("game_settings")
 
 HONOUR_SETTINGS = CommonMapper("honour_settings")
-
-OBJECT_CREATORS = ObjectsMapper("object_creators")
 
 CREATOR_LOOT_LIST = CommonMapper("creator_loot_list")
 
@@ -107,8 +101,6 @@ DIALOGUE_QUEST_DEPENDENCIES = CommonMapper("dialogue_quest_dependencies")
 DIALOGUE_RELATIONS = CommonMapper("dialogue_relations")
 
 NPC_DIALOGUES = CommonMapper("npc_dialogues")
-
-CONDITION_DESC = CommonMapper("condition_desc")
 
 LOCALIZED_STRINGS = CommonMapper("localized_strings")
 

@@ -24,8 +24,8 @@ class FuncEscape(StatementFunction):
         """
         Implement the function.
         """
-        combat_handler = self.caller.ndb.combat_handler
-        if not combat_handler:
+        combat = self.caller.get_combat()
+        if not combat:
             # caller is not in combat.
             return
 
@@ -40,120 +40,5 @@ class FuncEscape(StatementFunction):
             # escape failed
             return _("Failed.")
 
-        combat_handler.escape_combat(self.caller)
+        combat.escape_combat(self.caller)
         return _("Succeeded!")
-
-
-class FuncHeal(StatementFunction):
-    """
-    Heal the caller.
-
-    Args:
-        args[0]: (int) the hp value to increase.
-
-    Returns:
-        None
-    """
-
-    key = "heal"
-    const = False
-
-    def func(self):
-        """
-        Implement the function.
-        """
-        if not self.args:
-            return
-
-        effect = self.args[0]
-        if effect <= 0:
-            return
-
-        self.obj = self.caller
-
-        # recover caller's hp
-        increments = {"hp": int(effect)}
-        changes = self.caller.change_properties(increments)
-
-        # send skill result
-        return _("Healed %s by %d points.") % (self.obj.get_name(), int(changes["hp"]))
-
-
-class FuncHit(StatementFunction):
-    """
-    Hit the target.
-
-    Args:
-        args[0]: (int) the ratio of the damage.
-
-    Returns:
-        None
-    """
-    key = "hit"
-    const = False
-
-    def func(self):
-        """
-        Implement the function.
-        """
-        if not self.args:
-            return
-
-        effect = self.args[0]
-        if effect <= 0:
-            return
-
-        if not self.obj:
-            return
-
-        target_name = self.obj.get_name()
-
-        # calculate the damage
-        # damage = float(self.caller.attack) / (self.caller.attack + self.obj.defence) * self.caller.attack
-        damage = round(effect)
-
-        # hurt target
-        increments = {"hp": -damage}
-        changes = self.obj.change_properties(increments)
-
-        # send skill result
-        return _("Hit %s by %d points.") % (target_name, int(-changes["hp"]))
-
-
-class FuncIncreaseMaxHP(StatementFunction):
-    """
-    Passive skill, increase the caller's max_hp.
-
-    Args:
-        args[0]: (int) the max_hp value to increase.
-
-    Returns:
-        None
-    """
-    key = "max_hp"
-    const = False
-
-    def func(self):
-        """
-        Implement the function.
-        """
-        if not self.args:
-            return
-
-        effect = self.args[0]
-        if effect <= 0:
-            return
-            
-        self.obj = self.caller
-
-        # increase max hp
-        # recover caller's hp
-        increments = {"max_hp": int(effect)}
-        changes = self.caller.change_properties(increments)
-
-        # increase hp
-        increments_hp = {"hp": changes["max_hp"]}
-        self.caller.change_properties(increments_hp)
-
-        # send skill result
-        return _("Raised %s's max HP by %d points.") % (self.obj.get_name(), int(changes["max_hp"]))

@@ -27,7 +27,6 @@ class ActionFuncSet(BaseStatementFuncSet):
         self.add(action.FuncTeleportTo)
         self.add(action.FuncFightMob)
         self.add(action.FuncFightTarget)
-        self.add(action.FuncKillCaller)
 
 
 class ConditionFuncSet(BaseStatementFuncSet):
@@ -76,6 +75,3 @@ class SkillFuncSet(BaseStatementFuncSet):
         Load statement functions here.
         """
         self.add(skill.FuncEscape)
-        self.add(skill.FuncHeal)
-        self.add(skill.FuncHit)
-        self.add(skill.FuncIncreaseMaxHP)

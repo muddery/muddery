@@ -25,6 +25,7 @@ your settings file:
 import json
 from evennia.utils import logger
 import evennia.commands.cmdparser as evennia_cmdparser
+from evennia.objects.objects import DefaultObject
 
 
 CMD_LOGINSTART = "__unloggedin_look_command"

@@ -1,4 +1,4 @@
-key,background,width,height
-area_intro,,,
-area_hole,,,
-area_park,image/background/park_map.png,800,600
+key,name,element_type,desc,background,width,height
+area_intro,起始界面,AREA,,,,
+area_hole,未知区域,AREA,,,,
+area_park,公园,AREA,,image/background/park_map.png,800,600

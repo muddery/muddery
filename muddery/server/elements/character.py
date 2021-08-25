@@ -1,0 +1,886 @@
+"""
+Characters
+
+Characters are (by default) Objects setup to be puppeted by Players.
+They are what you "see" in game. The Character class in this module
+is setup to be the "default" character type created by the default
+creation commands.
+
+"""
+
+import time, datetime, traceback, ast
+from apscheduler.schedulers.background import BackgroundScheduler
+from django.conf import settings
+from django.core.exceptions import ObjectDoesNotExist
+from evennia.objects.objects import DefaultCharacter
+from evennia.utils import logger
+from evennia.utils.utils import lazy_property, class_from_module
+from muddery.server.elements.base_element import BaseElement
+from muddery.server.combat.combat_handler import COMBAT_HANDLER
+from muddery.server.mappings.element_set import ELEMENT
+from muddery.server.database.worlddata.loot_list import CharacterLootList
+from muddery.server.database.worlddata.default_skills import DefaultSkills
+from muddery.server.database.worlddata.worlddata import WorldData
+from muddery.server.database.worlddata.character_states_dict import CharacterStatesDict
+from muddery.server.database.gamedata.object_storage import DBObjectStorage
+from muddery.server.utils.loot_handler import LootHandler
+from muddery.server.utils import search
+from muddery.server.utils.game_settings import GAME_SETTINGS
+from muddery.server.utils.search import get_object_by_key
+from muddery.server.utils.localized_strings_handler import _
+from muddery.server.utils.defines import CombatType, EventType
+from muddery.server.utils.object_states_handler import ObjectStatesHandler
+from muddery.server.database.gamedata.object_storage import MemoryObjectStorage
+
+
+CHARACTER_LAST_ID = 0
+
+
+class MudderyCharacter(BaseElement):
+    """
+    Characters can move in rooms.
+    """
+    element_type = "CHARACTER"
+    element_name = _("Character", "elements")
+    model_name = "characters"
+
+    last_id = 0
+
+    skill_scheduler_id = "skill"
+    reborn_scheduler_id = "reborn"
+
+    @lazy_property
+    def states(self):
+        return ObjectStatesHandler(self.get_id(), MemoryObjectStorage)
+
+    @staticmethod
+    def generate_id():
+        """
+        Generate an id.
+        :return:
+        """
+        global CHARACTER_LAST_ID
+        CHARACTER_LAST_ID += 1
+        return CHARACTER_LAST_ID
+
+    def __init__(self):
+        """
+        Initial the object.
+        """
+        super(MudderyCharacter, self).__init__()
+
+        self.set_id(self.generate_id())
+
+        self.location = None
+        self.scheduler = None
+
+        # character's skills
+        # self.skills = {
+        #    skill's key: {
+        #       "obj": skill's object,
+        #       "cd_finish": skill's cd time,
+        #    }
+        # }
+        self.skills = {}
+
+    def __del__(self):
+        """
+        Called when this object is deleted from the memory.
+        :return:
+        """
+        # stop auto casting
+        self.stop_auto_combat_skill()
+
+    # initialize loot handler in a lazy fashion
+    @lazy_property
+    def loot_handler(self):
+        return LootHandler(CharacterLootList.get(self.get_element_key()))
+
+    def set_id(self, char_id):
+        """
+        Set the character's id.
+        """
+        self.id = char_id
+
+    def get_id(self):
+        """
+        Get the character's id.
+        :return:
+        """
+        return self.id
+
+    def get_scheduler(self):
+        # get the apscheduler
+        if not self.scheduler:
+            self.scheduler = BackgroundScheduler()
+            self.scheduler.start()
+        return self.scheduler
+
+    def at_element_setup(self, first_time):
+        """
+        Called when the object is loaded and initialized.
+
+        """
+        super(MudderyCharacter, self).at_element_setup(first_time)
+
+        self.set_name(self.const.name)
+        self.set_desc(self.const.desc)
+        self.set_icon(self.const.icon)
+
+        # friendly
+        self.friendly = self.const.friendly if self.const.friendly else 0
+
+        # skill's ai
+        ai_choose_skill_class = class_from_module(settings.AI_CHOOSE_SKILL)
+        self.ai_choose_skill = ai_choose_skill_class()
+
+        # skill's gcd
+        self.skill_gcd = GAME_SETTINGS.get("global_cd")
+        self.auto_cast_skill_cd = GAME_SETTINGS.get("auto_cast_skill_cd")
+
+        time_now = time.time()
+        self.gcd_finish_time = time_now + self.skill_gcd
+
+        # clear target
+        self.target = None
+
+        # set reborn time
+        self.reborn_time = self.const.reborn_time if self.const.reborn_time else 0
+
+        self.combat_id = None
+
+        # load default skills
+        self.load_skills()
+
+    def after_element_setup(self, first_time):
+        """
+        Called after the element is setting up.
+
+        :arg
+            first_time: (bool) the first time to setup the element.
+        """
+        super(MudderyCharacter, self).after_element_setup(first_time)
+
+        self.refresh_states(not first_time)
+
+    def refresh_states(self, keep_states):
+        """
+        Refresh character's states.
+
+        Args:
+            keep_states (boolean): states values keep last values.
+        """
+        # set states
+        records = CharacterStatesDict.all()
+        for record in records:
+            if keep_states and self.states.has(record.key):
+                # Do not change existent states.
+                continue
+
+            # set new states
+            if self.const_data_handler.has(record.default):
+                # the value of another const
+                value = self.const_data_handler.get(record.default)
+            else:
+                try:
+                    value = ast.literal_eval(record.default)
+                except (SyntaxError, ValueError) as e:
+                    # treat as a raw string
+                    value = record.default
+
+            # set the value.
+            self.states.save(record.key, value)
+
+    def set_level(self, level):
+        """
+        Set element's level.
+        :param level:
+        :return:
+        """
+        self.level = level
+        self.load_custom_level_data(level)
+
+        self.refresh_states(True)
+
+    def set_name(self, name):
+        """
+        Set object's name.
+
+        Args:
+        name: (string) Name of the object.
+        """
+        self.name = name
+
+    def get_name(self):
+        """
+        Get player character's name.
+        """
+        name = self.name
+        if not self.is_alive():
+            name += _(" [DEAD]")
+
+        return name
+
+    def set_desc(self, desc):
+        """
+        Set object's description.
+
+        Args:
+        desc: (string) Description.
+        """
+        self.desc = desc
+
+    def get_desc(self):
+        """
+        Get the element's description.
+        :return:
+        """
+        return self.desc
+
+    def set_icon(self, icon_key):
+        """
+        Set object's icon.
+        Args:
+            icon_key: (String)icon's resource key.
+
+        Returns:
+            None
+        """
+        self.icon = icon_key
+
+    def get_icon(self):
+        """
+        Get object's icon.
+        :return:
+        """
+        return self.icon
+
+    def is_visible(self, caller):
+        """
+        If this object is visible to the caller.
+
+        Return:
+            boolean: visible
+        """
+        return True
+
+    def get_appearance(self, caller):
+        """
+        This is a convenient hook for a 'look'
+        command to call.
+        """
+        info = {
+            "id": self.get_id(),
+            "name": self.get_name(),
+            "desc": self.get_desc(),
+            "icon": self.get_icon(),
+            "key": self.get_element_key(),
+            "cmds": self.get_available_commands(caller),
+        }
+        return info
+
+    def get_available_commands(self, caller):
+        """
+        This returns a list of available commands.
+        "args" must be a string without ' and ", usually it is self.id.
+        """
+        return []
+
+    @classmethod
+    def get_event_trigger_types(cls):
+        """
+        Get an object's available event triggers.
+        """
+        return [
+            EventType.EVENT_TRIGGER_KILL,
+            EventType.EVENT_TRIGGER_DIE
+        ]
+
+    def get_combat_status(self):
+        """
+        Get character status used in combats.
+        """
+        return {}
+
+    def load_skills(self):
+        """
+        Load character's skills.
+        """
+        self.skills = {}
+
+        # default skills
+        default_skills = DefaultSkills.get(self.get_element_key())
+
+        for item in default_skills:
+            key = item.skill
+            try:
+                # Create skill object.
+                skill_obj = ELEMENT("SKILL")()
+                skill_obj.setup_element(key, item.level)
+            except Exception as e:
+                logger.log_err("Can not load skill %s: (%s) %s" % (key, type(e).__name__, e))
+                continue
+
+            # Store new skill.
+            self.skills[key] = {
+                "obj": skill_obj,
+                "cd_finish": 0,
+            }
+
+    def set_location(self, location):
+        """
+        Set the character's location(room).
+        :param location: a room
+        :return:
+        """
+        if self.location:
+            self.location.at_character_leave(self)
+
+        self.location = location
+
+        if self.location:
+            self.location.at_character_arrive(self)
+
+    def get_location(self):
+        """
+        Get the character's location room.
+        :return:
+        """
+        return self.location
+
+    def msg(self, content):
+        """
+        Send a message to the character's player if it has.
+        :param content:
+        :return:
+        """
+        pass
+
+    ########################################
+    #
+    # Skill methods.
+    #
+    ########################################
+
+    def get_skills(self):
+        """
+        Get all skills.
+        :return:
+        """
+        return self.skills
+
+    def get_available_skills(self):
+        """
+        Get current available skills of a character.
+        :param caller:
+        :return: skills
+        """
+        time_now = time.time()
+        if time_now < self.gcd_finish_time:
+            return
+
+        skills = [skill["obj"] for skill in self.skills.values() if time_now >= skill["cd_finish"] and
+                  skill["obj"].is_available(self, passive=False)]
+        return skills
+
+    def get_skill(self, key):
+        """
+        Get all skills.
+
+        :arg
+        key: (string) skill's key
+
+        :return:
+        skill object
+        """
+        return self.skills.get(key, None)
+
+    def cast_skill(self, skill_key, target):
+        """
+        Cast a skill.
+
+        Args:
+            skill_key: (string) skill's key.
+            target: (object) skill's target.
+        """
+        skill_info = self.skills[skill_key]
+        skill_obj = skill_info["obj"]
+
+        if not skill_obj.is_available(self, False):
+            return
+
+        time_now = time.time()
+        if time_now < self.gcd_finish_time and time_now < skill_info["cd_finish"]:
+            # In cd.
+            return
+
+        cast_result = skill_obj.cast(self, target)
+
+        if self.skill_gcd > 0:
+            # set GCD
+            self.gcd_finish_time = time_now + self.skill_gcd
+
+        # save cd finish time
+        self.skills[skill_key]["cd_finish"] = time_now + skill_obj.get_cd()
+
+        skill_cd = {
+            "skill_cd": {
+                "skill": skill_key,  # skill's key
+                "cd": skill_obj.get_cd(),  # skill's cd
+                "gcd": self.skill_gcd
+            }
+        }
+
+        skill_result = {
+            "skill_cast": cast_result
+        }
+
+        self.msg(skill_cd)
+
+        # send skill result to the player's location
+        combat = self.get_combat()
+        if combat:
+            combat.msg_all(skill_result)
+        else:
+            if self.location:
+                # send skill result to its location
+                self.location.msg_characters(skill_result)
+            else:
+                self.msg(skill_result)
+
+        return
+
+    def cast_combat_skill(self, skill_key, target_id):
+        """
+        Cast a skill in combat.
+        """
+        combat = self.get_combat()
+        if combat:
+            combat.prepare_skill(skill_key, self, target_id)
+        else:
+            logger.log_err("Character %s is not in combat." % self.id)
+
+    def auto_cast_skill(self):
+        """
+        Cast a new skill automatically.
+        """
+        if not self.is_alive():
+            return
+
+        if not self.is_in_combat():
+            # combat is finished, stop ticker
+            self.stop_auto_combat_skill()
+            return
+
+        # Choose a skill and the skill's target.
+        result = self.ai_choose_skill.choose(self)
+        if result:
+            skill, target = result
+            self.cast_combat_skill(skill, target)
+
+    def is_auto_cast_skill(self):
+        """
+        If the character is casting skills automatically.
+        """
+        scheduler = self.get_scheduler()
+        return scheduler.get_job(self.skill_scheduler_id) is not None
+                
+    def start_auto_combat_skill(self):
+        """
+        Start auto cast skill.
+        """
+        # Cast a skill immediately
+        # self.auto_cast_skill()
+
+        # Set timer of auto cast.
+        scheduler = self.get_scheduler()
+        if scheduler.get_job(self.skill_scheduler_id):
+            # auto cast job already exists
+            return
+
+        scheduler.add_job(self.auto_cast_skill, "interval", seconds=self.auto_cast_skill_cd, id=self.skill_scheduler_id)
+
+    def stop_auto_combat_skill(self):
+        """
+        Stop auto cast skill.
+        """
+        scheduler = self.get_scheduler()
+        if not scheduler.get_job(self.skill_scheduler_id):
+            # auto cast job already removed
+            return
+
+        scheduler.remove_job(self.skill_scheduler_id)
+
+
+    ########################################
+    #
+    # Attack a target.
+    #
+    ########################################
+    def set_target(self, target):
+        """
+        Set character's target.
+
+        Args:
+            target: (object) character's target
+
+        Returns:
+            None
+        """
+        self.target = target
+
+    def clear_target(self):
+        """
+        Clear character's target.
+        """
+        self.target = None
+
+    def attack_target(self, target, desc=""):
+        """
+        Attack a target.
+
+        Args:
+            target: (object) the target object.
+            desc: (string) string to describe this attack
+
+        Returns:
+            (boolean) attack begins
+        """
+        if self.is_in_combat():
+            # already in battle
+            logger.log_errmsg("%s is already in battle." % self.get_id())
+            return False
+
+        # search target
+        if not target:
+            logger.log_errmsg("Can not find the target.")
+            return False
+
+        if not target.is_element(settings.CHARACTER_ELEMENT_TYPE):
+            # Target is not a character.
+            logger.log_errmsg("Can not attack the target %s." % target.get_id())
+            return False
+
+        if target.is_in_combat():
+            # obj is already in battle
+            logger.log_errmsg("%s is already in battle." % target.get_id())
+            return False
+
+        # create a new combat handler
+        try:
+            COMBAT_HANDLER.create_combat(
+                combat_type=CombatType.NORMAL,
+                teams={1: [target], 2: [self]},
+                desc=desc,
+                timeout=0
+            )
+        except Exception as e:
+            logger.log_err("Can not create combat: [%s] %s" % (type(e).__name__, e))
+            self.msg(_("You can not attack %s.") % target.get_name())
+
+        return True
+
+    def attack_target_by_id(self, target_id, desc=""):
+        """
+        Attack a target by id.
+
+        Args:
+            target_id: (int) the it of the target.
+            desc: (string) string to describe this attack
+
+        Returns:
+            None
+        """
+        target = search.get_object_by_id(target_id)
+        self.attack_target(target, desc)
+
+    def attack_temp_target(self, target_key, target_level, desc=""):
+        """
+        Attack a temporary clone of a target. This creates a new character object for attack.
+        The origin target will not be affected.
+
+        Args:
+            target_key: (string) the info key of the target object.
+            target_level: (int) target object's level
+            desc: (string) string to describe this attack
+
+        Returns:
+            (boolean) fight begins
+        """
+        # Create a target.
+        base_model = ELEMENT("CHARACTER").get_base_model()
+        table_data = WorldData.get_table_data(base_model, key=target_key)
+        table_data = table_data[0]
+
+        target = ELEMENT(table_data.element_type)()
+        target.setup_element(target_key, level=target_level, first_time=True, temp=True)
+        if not target:
+            logger.log_errmsg("Can not create the target %s." % target_key)
+            return False
+
+        return self.attack_target(target, desc)
+
+    def join_combat(self, combat_id):
+        """
+        The character joins a combat.
+
+        :param combat_id: (int) combat's id.
+        :return:
+        """
+        self.combat_id = combat_id
+
+    def is_in_combat(self):
+        """
+        Check if the character is in combat.
+
+        Returns:
+            (boolean) is in combat or not
+        """
+        return self.combat_id is not None
+
+    def get_combat(self):
+        """
+        Get the character's combat. If the character is not in combat, return None.
+        :return:
+        """
+        if not hasattr(self, "combat_id") or self.combat_id is None:
+            return None
+
+        combat = COMBAT_HANDLER.get_combat(self.combat_id)
+        if combat is None:
+            # Combat is finished.
+            self.combat_id = None
+
+        return combat
+
+    def combat_result(self, combat_type, result, opponents=None, rewards=None):
+        """
+        Set the combat result.
+
+        :param combat_type: combat's type
+        :param result: defines.COMBAT_WIN, defines.COMBAT_LOSE, or defines.COMBAT_DRAW
+        :param opponents: combat opponents
+        :param rewards: combat rewards
+        """
+        pass
+
+    def remove_from_combat(self):
+        """
+        Leave the current combat.
+        """
+        self.combat_id = None
+
+    def is_alive(self):
+        """
+        Check if the character is alive.
+
+        Returns:
+            (boolean) the character is alive or not
+        """
+        return True
+
+    def die(self, killers):
+        """
+        This character die.
+
+        Args:
+            killers: (list of objects) characters who kill this
+
+        Returns:
+            None
+        """
+        if not self.is_temp and self.reborn_time > 0:
+            # Set reborn timer.
+            reborn_time = datetime.datetime.fromtimestamp(time.time() + self.reborn_time)
+            scheduler = self.get_scheduler()
+            scheduler.add_job(self.reborn, "date", run_date=reborn_time, id=self.reborn_scheduler_id)
+
+    def reborn(self):
+        """
+        Reborn after being killed.
+        """
+        # Recover properties.
+        self.recover()
+
+        # Reborn at its default location.
+        home = None
+
+        location_key = self.const.location
+        if location_key:
+            try:
+                home = get_object_by_key(location_key)
+            except ObjectDoesNotExist:
+                pass
+
+        if home:
+            self.set_location(home)
+
+    def recover(self):
+        """
+        Recover properties.
+        """
+        pass
+        
+    def get_combat_commands(self):
+        """
+        This returns a list of combat commands.
+
+        Returns:
+            (list) available commands for combat
+        """
+        commands = []
+        for key, skill in self.skills.items():
+            if skill["obj"].is_passive():
+                # exclude passive skills
+                continue
+
+            command = {
+                "key": key,
+                "name": skill["obj"].get_name(),
+                "icon": skill["obj"].get_icon(),
+            }
+
+            commands.append(command)
+
+        return commands
+
+    def provide_exp(self, killer):
+        """
+        Calculate the exp provide to the killer.
+        Args:
+            killer: (object) the character who kills it.
+
+        Returns:
+            (int) experience give to the killer
+        """
+        return 0
+
+    def add_exp(self, exp):
+        """
+        Add character's exp.
+        Args:
+            exp: the exp value to add.
+
+        Returns:
+            None
+        """
+        pass
+
+    def show_status(self):
+        """
+        Show character's status.
+        """
+        pass
+
+    def validate_property(self, key, value):
+        """
+        Check a property's value limit, return a validated value.
+
+        Args:
+            key: (string) values's key.
+            value: (number) the value
+
+        Return:
+            (number) validated values.
+        """
+        # check limits
+        max_value = None
+        max_key = "max_" + key
+        if self.states.has(max_key):
+            max_value = self.states.load(max_key)
+        elif self.const_data_handler.has(max_key):
+            max_value = self.const_data_handler.get(max_key)
+
+        if max_value is not None:
+            if value > max_value:
+                value = max_value
+
+        min_value = 0
+        min_key = "min_" + key
+        if self.states.has(min_key):
+            min_value = self.states.load(min_key)
+        elif self.const_data_handler.has(min_key):
+            min_value = self.const_data_handler.get(min_key)
+
+        if value < min_value:
+            value = min_value
+
+        return value
+
+    def change_state(self, key, increment):
+        """
+        Change a state's value with validation.
+        :return:
+            the value that actually changed.
+        """
+        change = 0
+
+        if self.states.has(key):
+            current_value = self.states.load(key)
+            new_value = self.validate_property(key, current_value + increment)
+            if new_value != current_value:
+                change = new_value - current_value
+                self.states.save(key, new_value)
+
+        return change
+
+    def change_states(self, increments):
+        """
+        Change a dict of states with validation.
+
+        :return:
+            the values that actually changed.
+        """
+        changes = {}
+        state_values = {}
+
+        for key, increment in increments.items():
+            changes[key] = 0
+
+            if self.states.has(key):
+                current_value = self.states.load(key)
+                new_value = self.validate_property(key, current_value + increment)
+                if new_value != current_value:
+                    changes[key] = new_value - current_value
+                    state_values[key] = new_value
+
+        if state_values:
+            self.states.saves(state_values)
+
+        return changes
+
+    def change_const_property(self, key, increment):
+        """
+        Change a const property with validation.
+        :return:
+            the value that actually changed.
+        """
+        change = 0
+
+        if self.const_data_handler.has(key):
+            current_value = self.const_data_handler.get(key)
+            new_value = self.validate_property(key, current_value + increment)
+            change = new_value - current_value
+            self.const_data_handler.add(key, new_value)
+
+        return change
+
+    def change_const_properties(self, increments):
+        """
+        Change a dict of const properties with validation.
+
+        :return:
+            the values that actually changed.
+        """
+        changes = {}
+
+        for key, increment in increments.items():
+            changes[key] = 0
+
+            if self.const_data_handler.has(key):
+                current_value = self.const_data_handler.get(key)
+                new_value = self.validate_property(key, current_value + increment)
+                changes[key] = new_value - current_value
+                self.const_data_handler.add(key, new_value)
+
+        return changes

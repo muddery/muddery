@@ -2,7 +2,7 @@
 Set the game's configuration.
 """
 
-from muddery.server.dao.game_settings import GameSettings as GameSettingsData
+from muddery.server.database.worlddata.game_settings import GameSettings as GameSettingsData
 
 
 class GameSettings(object):
@@ -63,16 +63,17 @@ class GameSettings(object):
         return self.values
 
 
-GAME_SETTINGS = GameSettings({"game_name": "Muddery",
-                              "connection_screen": "",
-                              "solo_mode": False,
-                              "global_cd": 1.0,
-                              "auto_cast_skill_cd": 1.5,
-                              "can_give_up_quests": True,
-                              "can_close_dialogue": False,
-                              "auto_resume_dialogues": True,
-                              "default_home_key": "",
-                              "start_location_key": "",
-                              "default_player_home_key": "",
-                              "default_player_character_key": "",
-                              })
+GAME_SETTINGS = GameSettings({
+    "game_name": "Muddery",
+    "connection_screen": "",
+    "solo_mode": False,
+    "global_cd": 1.0,
+    "auto_cast_skill_cd": 1.5,
+    "can_give_up_quests": True,
+    "can_close_dialogue": False,
+    "auto_resume_dialogues": True,
+    "start_location_key": "",
+    "default_player_home_key": "",
+    "default_player_character_key": "",
+    "default_staff_character_key": "",
+})

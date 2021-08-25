@@ -8,7 +8,6 @@ from django.conf import settings
 
 KEY_LENGTH = 255
 NAME_LENGTH = 80
-TYPECLASS_LENGTH = 80
 POSITION_LENGTH = 80
 VALUE_LENGTH = 80
 CONDITION_LENGTH = 255
@@ -34,8 +33,6 @@ class system_data(models.Model):
         "Define Django meta options"
         abstract = True
         app_label = "worlddata"
-        verbose_name = "System Data"
-        verbose_name_plural = "System Data"
 
 
 # ------------------------------------------------------------
@@ -65,9 +62,7 @@ class game_settings(models.Model):
 
     # The CD of auto casting a skill. It must be bigger than GLOBAL_CD
     # They can not be equal!
-    auto_cast_skill_cd = models.FloatField(blank=True,
-                                           default=1.5,
-                                           validators=[MinValueValidator(0.0)])
+    auto_cast_skill_cd = models.PositiveIntegerField(blank=True, default=1)
 
     # Allow players to give up quests.
     can_give_up_quests = models.BooleanField(blank=True, default=True)
@@ -77,13 +72,6 @@ class game_settings(models.Model):
 
     # Can resume unfinished dialogues automatically.
     auto_resume_dialogues = models.BooleanField(blank=True, default=True)
-
-    # The key of a world room.
-    # It is the default home location used for all objects. This is used as a
-    # fallback if an object's normal home location is deleted. It is the
-    # key of the room. If it is empty, the home will be set to the first
-    # room in WORLD_ROOMS.
-    default_home_key = models.CharField(max_length=KEY_LENGTH, blank=True)
 
     # The key of a world room.
     # The start position for new characters. It is the key of the room.
@@ -98,12 +86,14 @@ class game_settings(models.Model):
     # Default character of players.
     default_player_character_key = models.CharField(max_length=KEY_LENGTH, blank=True)
 
+    # The key of a character.
+    # Default character of staffs.
+    default_staff_character_key = models.CharField(max_length=KEY_LENGTH, blank=True)
+
     class Meta:
         "Define Django meta options"
         abstract = True
         app_label = "worlddata"
-        verbose_name = "Game Setting"
-        verbose_name_plural = "Game Settings"
 
 
 # ------------------------------------------------------------
@@ -141,8 +131,6 @@ class honour_settings(models.Model):
         "Define Django meta options"
         abstract = True
         app_label = "worlddata"
-        verbose_name = "Honour Setting"
-        verbose_name_plural = "Honour Settings"
 
 
 # ------------------------------------------------------------
@@ -164,30 +152,20 @@ class BaseObjects(models.Model):
         return self.key
 
 
-class objects(BaseObjects):
-    """
-    All objects.
-    """
-    # object's typeclass
-    typeclass = models.CharField(max_length=KEY_LENGTH)
-
-    # object's name
-    name = models.CharField(max_length=NAME_LENGTH, blank=True)
-
-    # object's description for display
-    desc = models.TextField(blank=True)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
-
-    def __unicode__(self):
-        return self.name + " (" + self.key + ")"
-
-
 class world_areas(BaseObjects):
     "The game map is composed by areas."
+
+    # area's element type
+    element_type = models.CharField(max_length=KEY_LENGTH, default="AREA")
+
+    # area's name
+    name = models.CharField(max_length=NAME_LENGTH, blank=True)
+
+    # area's description for display
+    desc = models.TextField(blank=True)
+
+    # area's icon resource
+    icon = models.CharField(max_length=KEY_LENGTH, blank=True)
 
     # area's map background image resource
     background = models.CharField(max_length=KEY_LENGTH, blank=True)
@@ -202,25 +180,32 @@ class world_areas(BaseObjects):
         "Define Django meta options"
         abstract = True
         app_label = "worlddata"
-        verbose_name = "World Area"
-        verbose_name_plural = "World Areas"
 
 
 class world_rooms(BaseObjects):
     "Defines all unique rooms."
 
-    # players can not fight in peaceful romms
-    peaceful = models.BooleanField(blank=True, default=False)
+    # room's element type
+    element_type = models.CharField(max_length=KEY_LENGTH, default="ROOM")
 
-    # The key of a world area.
-    # The room's location, it must be a area.
-    location = models.CharField(max_length=KEY_LENGTH, blank=True, db_index=True)
+    # room's name
+    name = models.CharField(max_length=NAME_LENGTH, blank=True)
 
-    # room's position which is used in maps
-    position = models.CharField(max_length=POSITION_LENGTH, blank=True)
+    # room's description for display
+    desc = models.TextField(blank=True)
 
     # room's icon resource
     icon = models.CharField(max_length=KEY_LENGTH, blank=True)
+
+    # The key of a world area.
+    # The room's location, it must be a area.
+    area = models.CharField(max_length=KEY_LENGTH, blank=True, db_index=True)
+
+    # players can not fight in peaceful romms
+    peaceful = models.BooleanField(blank=True, default=False)
+
+    # room's position which is used in maps
+    position = models.CharField(max_length=POSITION_LENGTH, blank=True)
 
     # room's background image resource
     background = models.CharField(max_length=KEY_LENGTH, blank=True)
@@ -229,34 +214,36 @@ class world_rooms(BaseObjects):
         "Define Django meta options"
         abstract = True
         app_label = "worlddata"
-        verbose_name = "Room"
-        verbose_name_plural = "Rooms"
 
 
-class world_exits(BaseObjects):
-    "Defines all unique exits."
+# ------------------------------------------------------------
+#
+# rooms that can give profits to characters in the room.
+#
+# ------------------------------------------------------------
+class profit_rooms(BaseObjects):
+    """
+    The action to trigger other actions at interval.
+    """
+    # Repeat interval in seconds.
+    interval = models.PositiveIntegerField(blank=True, default=0)
 
-    # the action verb to enter the exit (optional)
-    verb = models.CharField(max_length=NAME_LENGTH, blank=True)
+    # Can trigger events when the character is offline.
+    offline = models.BooleanField(blank=True, default=False)
 
-    # The key of a world room.
-    # The exit's location, it must be a room.
-    # Players can see and enter an exit from this room.
-    location = models.CharField(max_length=KEY_LENGTH, db_index=True)
+    # This message will be sent to the character when the interval begins.
+    begin_message = models.TextField(blank=True)
 
-    # The key of a world room.
-    # The exits's destination.
-    destination = models.CharField(max_length=KEY_LENGTH, db_index=True)
+    # This message will be sent to the character when the interval ends.
+    end_message = models.TextField(blank=True)
 
-    # the condition to show the exit
+    # the condition for getting profits
     condition = models.CharField(max_length=CONDITION_LENGTH, blank=True)
 
     class Meta:
         "Define Django meta options"
         abstract = True
         app_label = "worlddata"
-        verbose_name = "Exit"
-        verbose_name_plural = "Exits"
 
 
 class world_objects(BaseObjects):
@@ -279,12 +266,31 @@ class world_objects(BaseObjects):
         "Define Django meta options"
         abstract = True
         app_label = "worlddata"
-        verbose_name = "World Object"
-        verbose_name_plural = "World Objects"
 
 
 class common_objects(BaseObjects):
     "Store all common objects."
+
+    # object's element type
+    element_type = models.CharField(max_length=KEY_LENGTH, default="COMMON_OBJECT")
+
+    # object's name
+    name = models.CharField(max_length=NAME_LENGTH, blank=True)
+
+    # object's description for display
+    desc = models.TextField(blank=True)
+
+    # object's icon resource
+    icon = models.CharField(max_length=KEY_LENGTH, blank=True)
+
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        app_label = "worlddata"
+
+
+class pocket_objects(BaseObjects):
+    "Store all pocket objects."
 
     # the max number of this object in one pile, must above 1
     max_stack = models.PositiveIntegerField(blank=True, default=1)
@@ -298,15 +304,10 @@ class common_objects(BaseObjects):
     # if this object can discard
     can_discard = models.BooleanField(blank=True, default=True)
 
-    # object's icon resource
-    icon = models.CharField(max_length=KEY_LENGTH, blank=True)
-
     class Meta:
         "Define Django meta options"
         abstract = True
         app_label = "worlddata"
-        verbose_name = "Common Object"
-        verbose_name_plural = "Common Objects"
 
 
 class foods(BaseObjects):
@@ -316,8 +317,6 @@ class foods(BaseObjects):
         "Define Django meta options"
         abstract = True
         app_label = "worlddata"
-        verbose_name = "Food"
-        verbose_name_plural = "Foods"
 
 
 class skill_books(BaseObjects):
@@ -326,12 +325,13 @@ class skill_books(BaseObjects):
     # skill's key
     skill = models.CharField(max_length=KEY_LENGTH)
 
+    # skill's level
+    level = models.PositiveIntegerField(blank=True, null=True)
+
     class Meta:
         "Define Django meta options"
         abstract = True
         app_label = "worlddata"
-        verbose_name = "Skill Book"
-        verbose_name_plural = "Skill Books"
 
 
 class equipments(BaseObjects):
@@ -349,12 +349,22 @@ class equipments(BaseObjects):
         "Define Django meta options"
         abstract = True
         app_label = "worlddata"
-        verbose_name = "Equipment"
-        verbose_name_plural = "Equipments"
 
 
 class characters(BaseObjects):
     "Store common characters."
+
+    # object's element type
+    element_type = models.CharField(max_length=KEY_LENGTH, default="CHARACTER")
+
+    # object's name
+    name = models.CharField(max_length=NAME_LENGTH, blank=True)
+
+    # object's description for display
+    desc = models.TextField(blank=True)
+
+    # object's icon resource
+    icon = models.CharField(max_length=KEY_LENGTH, blank=True)
 
     # Character's level.
     level = models.PositiveIntegerField(blank=True, default=1)
@@ -365,9 +375,6 @@ class characters(BaseObjects):
     # Friendly of this character.
     friendly = models.IntegerField(blank=True, default=0)
 
-    # Character's icon resource.
-    icon = models.CharField(max_length=KEY_LENGTH, blank=True)
-
     # Clone another character's custom properties if this character's data is empty.
     clone = models.CharField(max_length=KEY_LENGTH, blank=True)
 
@@ -375,30 +382,6 @@ class characters(BaseObjects):
         "Define Django meta options"
         abstract = True
         app_label = "worlddata"
-        verbose_name = "Common Character List"
-        verbose_name_plural = "Common Character List"
-
-
-class base_npcs(BaseObjects):
-    "The base of all NPCs."
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
-        verbose_name = "Base NPC"
-        verbose_name_plural = "Base NPCs"
-
-
-class common_npcs(BaseObjects):
-    "Common NPCs."
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
-        verbose_name = "Common NPC"
-        verbose_name_plural = "Common NPCs"
 
 
 class world_npcs(BaseObjects):
@@ -414,8 +397,6 @@ class world_npcs(BaseObjects):
         "Define Django meta options"
         abstract = True
         app_label = "worlddata"
-        verbose_name = "World NPC"
-        verbose_name_plural = "World NPCs"
 
 
 class player_characters(BaseObjects):
@@ -425,64 +406,121 @@ class player_characters(BaseObjects):
         "Define Django meta options"
         abstract = True
         app_label = "worlddata"
-        verbose_name = "Player Character"
-        verbose_name_plural = "Player Characters"
 
 
-class shops(BaseObjects):
-    "Store all shops."
+class staff_characters(BaseObjects):
+    "Staff's character."
 
-    # the verb to open the shop
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        app_label = "worlddata"
+
+
+# ------------------------------------------------------------
+#
+# exits connecting between rooms.
+#
+# ------------------------------------------------------------
+class world_exits(models.Model):
+    "Defines all unique exits."
+
+    # object's key
+    key = models.CharField(max_length=KEY_LENGTH, unique=True, blank=True)
+
+    # object's element type
+    element_type = models.CharField(max_length=KEY_LENGTH, default="EXIT")
+
+    # The exit's name.
+    name = models.CharField(max_length=NAME_LENGTH, blank=True)
+
+    # The key of a world room.
+    # The exit's location, it must be a room.
+    # Players can see and enter an exit from this room.
+    location = models.CharField(max_length=KEY_LENGTH, db_index=True)
+
+    # The key of a world room.
+    # The exits's destination.
+    destination = models.CharField(max_length=KEY_LENGTH)
+
+    # the action verb to enter the exit (optional)
     verb = models.CharField(max_length=NAME_LENGTH, blank=True)
 
-    # condition of the shop
+    # the condition to show the exit
     condition = models.CharField(max_length=CONDITION_LENGTH, blank=True)
-
-    # shop's icon resource
-    icon = models.CharField(max_length=KEY_LENGTH, blank=True)
 
     class Meta:
         "Define Django meta options"
         abstract = True
         app_label = "worlddata"
-        verbose_name = "Shop"
-        verbose_name_plural = "Shops"
 
 
-class shop_goods(BaseObjects):
-    "All goods that sold in shops."
+# ------------------------------------------------------------
+#
+# exit lock's additional data
+#
+# ------------------------------------------------------------
+class exit_locks(BaseObjects):
+    "Locked exit's additional data"
+
+    # condition of the lock
+    unlock_condition = models.CharField(max_length=CONDITION_LENGTH, blank=True)
+
+    # action to unlock the exit (optional)
+    unlock_verb = models.CharField(max_length=NAME_LENGTH, blank=True)
+
+    # description when locked
+    locked_desc = models.TextField(blank=True)
+
+    # description when unlocked
+    unlocked_desc = models.TextField(blank=True)
+
+    # if the exit can be unlocked automatically
+    auto_unlock = models.BooleanField(blank=True, default=False)
+
+    # when a character unlocked an exit, the exit is unlocked for this character forever.
+    unlock_forever = models.BooleanField(blank=True, default=True)
+
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        app_label = "worlddata"
+
+
+# ------------------------------------------------------------
+#
+# object creator's additional data
+#
+# ------------------------------------------------------------
+class object_creators(BaseObjects):
+    "Players can get new objects from an object_creator."
+
+    # related object's key
+    relation = models.CharField(max_length=KEY_LENGTH, db_index=True, blank=True)
+
+    # loot's verb
+    loot_verb = models.CharField(max_length=NAME_LENGTH, blank=True)
+
+    # loot's condition
+    loot_condition = models.CharField(max_length=CONDITION_LENGTH, blank=True)
+
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        app_label = "worlddata"
+
+
+class skills(models.Model):
+    "Store all skills."
 
     # shop's key
-    shop = models.CharField(max_length=KEY_LENGTH, db_index=True)
+    key = models.CharField(max_length=KEY_LENGTH, db_index=True)
 
-    # the key of objects to sell
-    goods = models.CharField(max_length=KEY_LENGTH)
+    # shop's name
+    name = models.CharField(max_length=NAME_LENGTH, blank=True)
 
-    # goods level
-    level = models.PositiveIntegerField(blank=True, default=0)
-
-    # number of shop goods
-    number = models.PositiveIntegerField(blank=True, default=1)
-
-    # the price of the goods
-    price = models.PositiveIntegerField(blank=True, default=1)
-
-    # the unit of the goods price
-    unit = models.CharField(max_length=KEY_LENGTH)
-
-    # visible condition of the goods
-    condition = models.CharField(max_length=CONDITION_LENGTH, blank=True)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
-        verbose_name = "Shop Object"
-        verbose_name_plural = "Shop Objects"
-
-
-class skills(BaseObjects):
-    "Store all skills."
+    # shop's description
+    desc = models.TextField(blank=True)
 
     # skill's message when casting
     message = models.TextField(blank=True)
@@ -509,84 +547,64 @@ class skills(BaseObjects):
         "Define Django meta options"
         abstract = True
         app_label = "worlddata"
-        verbose_name = "Skill"
-        verbose_name_plural = "Skills"
 
 
-class quests(BaseObjects):
-    "Store all quests."
+class shops(BaseObjects):
+    "Store all shops."
 
-    # experience that the character get
-    exp = models.PositiveIntegerField(blank=True, default=0)
+    # object's element type
+    element_type = models.CharField(max_length=KEY_LENGTH, default="SHOP")
 
-    # the condition to accept this quest.
+    # shop's name
+    name = models.CharField(max_length=NAME_LENGTH, blank=True)
+
+    # shop's description
+    desc = models.TextField(blank=True)
+
+    # the verb to open the shop
+    verb = models.CharField(max_length=NAME_LENGTH, blank=True)
+
+    # condition of the shop
     condition = models.CharField(max_length=CONDITION_LENGTH, blank=True)
 
-    # will do this action after a quest completed
-    action = models.TextField(blank=True)
+    # shop's icon resource
+    icon = models.CharField(max_length=KEY_LENGTH, blank=True)
 
     class Meta:
         "Define Django meta options"
         abstract = True
         app_label = "worlddata"
-        verbose_name = "Quest"
-        verbose_name_plural = "Quests"
 
 
-# ------------------------------------------------------------
-#
-# exit lock's additional data
-#
-# ------------------------------------------------------------
-class exit_locks(BaseObjects):
-    "Locked exit's additional data"
+class shop_goods(models.Model):
+    "All goods that sold in shops."
 
-    # condition of the lock
-    unlock_condition = models.CharField(max_length=CONDITION_LENGTH, blank=True)
+    # shop's key
+    shop = models.CharField(max_length=KEY_LENGTH, db_index=True)
 
-    # action to unlock the exit (optional)
-    unlock_verb = models.CharField(max_length=NAME_LENGTH, blank=True)
+    # the key of objects to sell
+    goods = models.CharField(max_length=KEY_LENGTH, db_index=True)
 
-    # description when locked
-    locked_desc = models.TextField(blank=True)
+    # goods level
+    level = models.PositiveIntegerField(blank=True, null=True)
 
-    # if the exit can be unlocked automatically
-    auto_unlock = models.BooleanField(blank=True, default=False)
+    # number of shop goods
+    number = models.PositiveIntegerField(blank=True, default=1)
 
-    # when a character unlocked an exit, the exit is unlocked for this character forever.
-    unlock_forever = models.BooleanField(blank=True, default=True)
+    # the price of the goods
+    price = models.PositiveIntegerField(blank=True, default=1)
 
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
-        verbose_name = "Exit Lock"
-        verbose_name_plural = "Exit Locks"
+    # the unit of the goods price
+    unit = models.CharField(max_length=KEY_LENGTH)
 
-
-# ------------------------------------------------------------
-#
-# object creator's additional data
-#
-# ------------------------------------------------------------
-class object_creators(BaseObjects):
-    "Players can get new objects from an object_creator."
-
-    # related object's key
-    relation = models.CharField(max_length=KEY_LENGTH, db_index=True, blank=True)
-
-    # loot's verb
-    loot_verb = models.CharField(max_length=NAME_LENGTH, blank=True)
-
-    # loot's condition
-    loot_condition = models.CharField(max_length=CONDITION_LENGTH, blank=True)
+    # visible condition of the goods
+    condition = models.CharField(max_length=CONDITION_LENGTH, blank=True)
 
     class Meta:
         "Define Django meta options"
         abstract = True
         app_label = "worlddata"
-        verbose_name = "Object Creator"
-        verbose_name_plural = "Object Creators"
+        unique_together = ("shop", "goods")
 
 
 # ------------------------------------------------------------
@@ -603,14 +621,23 @@ class loot_list(models.Model):
     # the key of dropped object
     object = models.CharField(max_length=KEY_LENGTH)
 
+    # the level of dropped object
+    level = models.PositiveIntegerField(blank=True, null=True)
+
     # number of dropped object
     number = models.PositiveIntegerField(blank=True, default=0)
 
     # odds of drop, from 0.0 to 1.0
     odds = models.FloatField(blank=True, default=0)
 
+    # Can get another object after this one.
+    multiple = models.BooleanField(blank=True, default=True)
+
+    # This message will be sent to the character when get objects.
+    message = models.TextField(blank=True)
+
     # The key of a quest.
-    # if it is not empty, the player must have this quest, or will not drop
+    # if it is not empty, the player must have this quest but not accomplish this quest.
     quest = models.CharField(max_length=KEY_LENGTH, blank=True)
 
     # condition of the drop
@@ -620,8 +647,6 @@ class loot_list(models.Model):
         "Define Django meta options"
         abstract = True
         app_label = "worlddata"
-        verbose_name = "Loot List"
-        verbose_name_plural = "Loot Lists"
         unique_together = ("provider", "object")
 
 
@@ -637,8 +662,6 @@ class creator_loot_list(loot_list):
         "Define Django meta options"
         abstract = True
         app_label = "worlddata"
-        verbose_name = "Object Creator's Loot List"
-        verbose_name_plural = "Object Creator's Loot Lists"
         unique_together = ("provider", "object")
 
 
@@ -654,8 +677,6 @@ class character_loot_list(loot_list):
         "Define Django meta options"
         abstract = True
         app_label = "worlddata"
-        verbose_name = "Character's Loot List"
-        verbose_name_plural = "Character's Loot Lists"
         unique_together = ("provider", "object")
 
 
@@ -665,14 +686,27 @@ class character_loot_list(loot_list):
 #
 # ------------------------------------------------------------
 class quest_reward_list(loot_list):
-    "Quest reward's list."
+    "Quest's rewards list."
 
     class Meta:
         "Define Django meta options"
         abstract = True
         app_label = "worlddata"
-        verbose_name = "Quest's reward List"
-        verbose_name_plural = "Quest's reward Lists"
+        unique_together = ("provider", "object")
+
+
+# ------------------------------------------------------------
+#
+# profit room's rewards
+#
+# ------------------------------------------------------------
+class room_profit_list(loot_list):
+    "Profit room's rewards list."
+
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        app_label = "worlddata"
         unique_together = ("provider", "object")
 
 
@@ -697,8 +731,6 @@ class equipment_types(models.Model):
         "Define Django meta options"
         abstract = True
         app_label = "worlddata"
-        verbose_name = "Equipment's Type"
-        verbose_name_plural = "Equipment's Types"
 
     def __unicode__(self):
         return self.name
@@ -725,8 +757,6 @@ class equipment_positions(models.Model):
         "Define Django meta options"
         abstract = True
         app_label = "worlddata"
-        verbose_name = "Equipment's Position"
-        verbose_name_plural = "Equipment's Positions"
 
     def __unicode__(self):
         return self.name
@@ -741,8 +771,8 @@ class properties_dict(models.Model):
     """
     Object's custom properties.
     """
-    # The key of a typeclass.
-    typeclass = models.CharField(max_length=KEY_LENGTH, db_index=True)
+    # The key of a element type.
+    element_type = models.CharField(max_length=KEY_LENGTH, db_index=True)
 
     # The key of the property.
     property = models.CharField(max_length=KEY_LENGTH)
@@ -750,8 +780,34 @@ class properties_dict(models.Model):
     # The name of the property.
     name = models.CharField(max_length=NAME_LENGTH)
 
-    # Whether this property will be changed or not.
-    mutable = models.BooleanField(blank=True, default=False)
+    # The description of the property.
+    desc = models.TextField(blank=True)
+
+    # Default value.
+    default = models.CharField(max_length=VALUE_LENGTH, blank=True)
+
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        app_label = "worlddata"
+        unique_together = ("element_type", "property")
+
+
+# ------------------------------------------------------------
+#
+# Character's mutable states.
+# These states can change in the game.
+#
+# ------------------------------------------------------------
+class character_states_dict(models.Model):
+    """
+    Character's mutable states.
+    """
+    # The key of the state.
+    key = models.CharField(max_length=KEY_LENGTH, unique=True)
+
+    # The name of the property.
+    name = models.CharField(max_length=NAME_LENGTH)
 
     # Default value.
     default = models.CharField(max_length=VALUE_LENGTH, blank=True)
@@ -763,23 +819,23 @@ class properties_dict(models.Model):
         "Define Django meta options"
         abstract = True
         app_label = "worlddata"
-        verbose_name = "Properties Dict"
-        verbose_name_plural = "Properties Dict"
-        unique_together = ("typeclass", "property")
 
 
 # ------------------------------------------------------------
 #
-# Object's custom properties
+# element's custom properties
 #
 # ------------------------------------------------------------
-class object_properties(models.Model):
-    "Store object's custom properties."
-    # The key of an object.
-    object = models.CharField(max_length=KEY_LENGTH)
+class element_properties(models.Model):
+    "Store element's custom properties."
+    # The type of an element.
+    element = models.CharField(max_length=KEY_LENGTH, null=True)
 
-    # The level of the object.
-    level = models.PositiveIntegerField(blank=True, default=0)
+    # The key of an element.
+    key = models.CharField(max_length=KEY_LENGTH)
+
+    # The level of the element.
+    level = models.PositiveIntegerField(blank=True, null=True)
 
     # The key of the property.
     property = models.CharField(max_length=KEY_LENGTH)
@@ -791,10 +847,8 @@ class object_properties(models.Model):
         "Define Django meta options"
         abstract = True
         app_label = "worlddata"
-        verbose_name = "Object's Property"
-        verbose_name_plural = "Object's Properties"
-        unique_together = ("object", "level", "property")
-        index_together = [("object", "level")]
+        unique_together = ("element", "key", "level", "property")
+        index_together = [("element", "key", "level")]
 
 
 # ------------------------------------------------------------
@@ -813,7 +867,7 @@ class default_objects(models.Model):
     object = models.CharField(max_length=KEY_LENGTH)
 
     # Object's level.
-    level = models.PositiveIntegerField(blank=True, default=0)
+    level = models.PositiveIntegerField(blank=True, null=True)
 
     # Object's number
     number = models.PositiveIntegerField(blank=True, default=0)
@@ -822,8 +876,6 @@ class default_objects(models.Model):
         "Define Django meta options"
         abstract = True
         app_label = "worlddata"
-        verbose_name = "Character's Default Object"
-        verbose_name_plural = "Character's Default Objects"
         unique_together = ("character", "object")
 
 
@@ -847,8 +899,6 @@ class npc_shops(models.Model):
         "Define Django meta options"
         abstract = True
         app_label = "worlddata"
-        verbose_name = "NPC Shop"
-        verbose_name_plural = "NPC Shops"
         unique_together = ("npc", "shop")
 
 
@@ -875,8 +925,6 @@ class skill_types(models.Model):
         "Define Django meta options"
         abstract = True
         app_label = "worlddata"
-        verbose_name = "Skill's Type"
-        verbose_name_plural = "Skill's Types"
 
     def __unicode__(self):
         return self.name + " (" + self.key + ")"
@@ -897,13 +945,40 @@ class default_skills(models.Model):
     # skill's key
     skill = models.CharField(max_length=KEY_LENGTH)
 
+    # skill's level
+    level = models.PositiveIntegerField(blank=True, null=True)
+
     class Meta:
         "Define Django meta options"
         abstract = True
         app_label = "worlddata"
-        verbose_name = "Character's Skill"
-        verbose_name_plural = "Character's Skills"
         unique_together = ("character", "skill")
+
+
+class quests(models.Model):
+    "Store all quests."
+    # quest's key
+    key = models.CharField(max_length=KEY_LENGTH, db_index=True)
+
+    # quest's name
+    name = models.CharField(max_length=NAME_LENGTH, blank=True)
+
+    # quest's description for display
+    desc = models.TextField(blank=True)
+
+    # experience that the character get
+    exp = models.PositiveIntegerField(blank=True, default=0)
+
+    # the condition to accept this quest.
+    condition = models.CharField(max_length=CONDITION_LENGTH, blank=True)
+
+    # will do this action after a quest completed
+    action = models.TextField(blank=True)
+
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        app_label = "worlddata"
 
 
 # ------------------------------------------------------------
@@ -917,9 +992,6 @@ class quest_objectives(models.Model):
     # The key of a quest.
     # quest's key
     quest = models.CharField(max_length=KEY_LENGTH, db_index=True)
-
-    # objective's ordinal
-    ordinal = models.IntegerField(blank=True, default=0)
 
     # The key of an objetive type.
     # objective's type
@@ -938,9 +1010,7 @@ class quest_objectives(models.Model):
         "Define Django meta options"
         abstract = True
         app_label = "worlddata"
-        verbose_name = "Quest Objective"
-        verbose_name_plural = "Quest Objectives"
-        unique_together = ("quest", "ordinal")
+        unique_together = ("quest", "type", "object")
 
 
 # ------------------------------------------------------------
@@ -967,8 +1037,6 @@ class quest_dependencies(models.Model):
         "Define Django meta options"
         abstract = True
         app_label = "worlddata"
-        verbose_name = "Quest Dependency"
-        verbose_name_plural = "Quest Dependency"
         unique_together = ("quest", "dependency", "type")
 
 
@@ -1008,8 +1076,6 @@ class event_data(models.Model):
         "Define Django meta options"
         abstract = True
         app_label = "worlddata"
-        verbose_name = "Event"
-        verbose_name_plural = "Events"
         index_together = [("trigger_obj", "trigger_type")]
 
     def __unicode__(self):
@@ -1040,8 +1106,6 @@ class dialogues(models.Model):
         "Define Django meta options"
         abstract = True
         app_label = "worlddata"
-        verbose_name = "Dialogue"
-        verbose_name_plural = "Dialogues"
 
     def __unicode__(self):
         return self.name + " (" + self.key + ")"
@@ -1071,8 +1135,6 @@ class dialogue_quest_dependencies(models.Model):
         "Define Django meta options"
         abstract = True
         app_label = "worlddata"
-        verbose_name = "Dialogue Quest Dependency"
-        verbose_name_plural = "Dialogue Quest Dependencies"
         unique_together = ("dialogue", "dependency", "type")
 
 
@@ -1096,8 +1158,6 @@ class dialogue_relations(models.Model):
         "Define Django meta options"
         abstract = True
         app_label = "worlddata"
-        verbose_name = "Dialogue Relation"
-        verbose_name_plural = "Dialogue Relations"
         unique_together = ("dialogue", "next_dlg")
 
 
@@ -1124,8 +1184,6 @@ class npc_dialogues(models.Model):
         "Define Django meta options"
         abstract = True
         app_label = "worlddata"
-        verbose_name = "NPC Dialogue"
-        verbose_name_plural = "NPC Dialogues"
         unique_together = ("npc", "dialogue")
 
 
@@ -1157,8 +1215,8 @@ class action_attack(BaseEventActionData):
     mob = models.CharField(max_length=KEY_LENGTH)
 
     # mob's level
-    # Set the level of the mob. If it is 0, use the default level of the mob.
-    level = models.IntegerField(blank=True, default=0)
+    # Set the level of the mob.
+    level = models.IntegerField(blank=True, null=True)
 
     # event's odds ([0.0, 1.0])
     odds = models.FloatField(blank=True, default=0)
@@ -1170,8 +1228,6 @@ class action_attack(BaseEventActionData):
         "Define Django meta options"
         abstract = True
         app_label = "worlddata"
-        verbose_name = "Event Mob"
-        verbose_name_plural = "Event Mobs"
         unique_together = ("event_key", "mob", "level")
 
 
@@ -1198,8 +1254,6 @@ class action_dialogue(BaseEventActionData):
         "Define Django meta options"
         abstract = True
         app_label = "worlddata"
-        verbose_name = "Event Dialogues"
-        verbose_name_plural = "Event Dialogues"
         unique_together = ("event_key", "dialogue", "npc")
 
 
@@ -1215,12 +1269,13 @@ class action_learn_skill(BaseEventActionData):
     # skill's key
     skill = models.CharField(max_length=KEY_LENGTH)
 
+    # skill's level
+    level = models.PositiveIntegerField(blank=True, null=True)
+
     class Meta:
         "Define Django meta options"
         abstract = True
         app_label = "worlddata"
-        verbose_name = "Action Learn Skill"
-        verbose_name_plural = "Action Learn Skills"
         unique_together = ("event_key", "skill")
 
 
@@ -1240,8 +1295,6 @@ class action_accept_quest(BaseEventActionData):
         "Define Django meta options"
         abstract = True
         app_label = "worlddata"
-        verbose_name = "Action Accept Quest"
-        verbose_name_plural = "Action Accept Quests"
         unique_together = ("event_key", "quest")
 
 
@@ -1261,8 +1314,6 @@ class action_turn_in_quest(BaseEventActionData):
         "Define Django meta options"
         abstract = True
         app_label = "worlddata"
-        verbose_name = "Action Turn in Quest"
-        verbose_name_plural = "Action Turn in Quests"
         unique_together = ("event_key", "quest")
 
 
@@ -1281,8 +1332,6 @@ class action_close_event(BaseEventActionData):
         "Define Django meta options"
         abstract = True
         app_label = "worlddata"
-        verbose_name = "Event Close"
-        verbose_name_plural = "Event Closes"
         unique_together = ("event_key", "event")
 
 
@@ -1302,42 +1351,7 @@ class action_message(BaseEventActionData):
         "Define Django meta options"
         abstract = True
         app_label = "worlddata"
-        verbose_name = "Event Message"
-        verbose_name_plural = "Event Messages"
         unique_together = ("event_key", "message")
-
-
-# ------------------------------------------------------------
-#
-# action to trigger other actions at interval.
-#
-# ------------------------------------------------------------
-class action_room_interval(BaseEventActionData):
-    """
-    The action to trigger other actions at interval.
-    """
-    # The event action's key.
-    action = models.CharField(max_length=KEY_LENGTH)
-
-    # Repeat interval in seconds.
-    interval = models.PositiveIntegerField(blank=True, default=0)
-
-    # Can trigger events when the character is offline.
-    offline = models.BooleanField(blank=True, default=False)
-
-    # This message will be sent to the character when the interval begins.
-    begin_message = models.TextField(blank=True)
-
-    # This message will be sent to the character when the interval ends.
-    end_message = models.TextField(blank=True)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
-        verbose_name = "Event Room Interval"
-        verbose_name_plural = "Event Room Intervals"
-        unique_together = ("event_key", "action")
 
 
 # ------------------------------------------------------------
@@ -1351,6 +1365,9 @@ class action_get_objects(BaseEventActionData):
     """
     # The object's key.
     object = models.CharField(max_length=KEY_LENGTH)
+
+    # The object's level.
+    level = models.PositiveIntegerField(blank=True, null=True)
 
     # The object's number.
     number = models.PositiveIntegerField(blank=True, default=0)
@@ -1368,35 +1385,7 @@ class action_get_objects(BaseEventActionData):
         "Define Django meta options"
         abstract = True
         app_label = "worlddata"
-        verbose_name = "Event Get Object"
-        verbose_name_plural = "Event Get Objects"
         unique_together = ("event_key", "object")
-
-
-# ------------------------------------------------------------
-#
-# condition descriptions
-#
-# ------------------------------------------------------------
-class condition_desc(models.Model):
-    "Object descriptions in different conditions."
-
-    # The key of an object.
-    key = models.CharField(max_length=KEY_LENGTH)
-
-    # condition
-    condition = models.CharField(max_length=CONDITION_LENGTH, blank=True)
-
-    # exit's description for display
-    desc = models.TextField(blank=True)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
-        verbose_name = "Condition Description"
-        verbose_name_plural = "Condition Descriptions"
-        unique_together = ("key", "condition")
 
 
 # ------------------------------------------------------------
@@ -1423,8 +1412,6 @@ class localized_strings(models.Model):
         "Define Django meta options"
         abstract = True
         app_label = "worlddata"
-        verbose_name = "Localized String"
-        verbose_name_plural = "Localized Strings"
         unique_together = ("category", "origin")
 
 
@@ -1452,8 +1439,6 @@ class image_resources(models.Model):
         "Define Django meta options"
         abstract = True
         app_label = "worlddata"
-        verbose_name = "Image Resource"
-        verbose_name_plural = "Image Resources"
 
     def __unicode__(self):
         return self.resource

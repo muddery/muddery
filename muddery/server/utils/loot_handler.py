@@ -3,6 +3,7 @@ LootHandler handles matters of loots.
 """
 
 import random
+import math
 from evennia.utils import logger
 from muddery.server.statements.statement_handler import STATEMENT_HANDLER
 
@@ -12,71 +13,118 @@ class LootHandler(object):
     Handles matters of loots.
     """
 
-    def __init__(self, owner, data):
+    def __init__(self, data):
         """
         Initialize handler
         """
-        self.owner = owner
         self.loot_list = []
-
-        if not owner:
-            return
 
         # load loot data
         loot_list = []
         try:
-            for loot_record in data:
-                loot_object = {"object": loot_record.object,
-                               "number": loot_record.number,
-                               "odds": loot_record.odds,
-                               "quest": loot_record.quest,
-                               "condition": loot_record.condition}
-                loot_list.append(loot_object)
+            for d in data:
+                loot_list.append({
+                    "object_key": d.object,
+                    "level": d.level,
+                    "number": d.number,
+                    "odds": d.odds,
+                    "multiple": d.multiple,
+                    "message": d.message,
+                    "quest": d.quest,
+                    "condition": d.condition
+                })
         except Exception as e:
-            logger.log_errmsg("Can't load loot info %s: %s" % (self.owner.get_data_key(), e))
+            logger.log_errmsg("Can't load loot info %s" % e)
 
         self.loot_list = loot_list
 
-    def get_obj_list(self, looter):
+    def get_obj_list(self, looter, times=1):
         """
-        Get a list of objects that dropped.
-        
-        Returns:
-            (list) a list of object's information
+        Get loot objects list.
+
+        :param looter:
+        :param times:
+        :return:
         """
+        # get available loot list
+        available_list = [item for item in self.loot_list
+            if (not item["quest"] or looter.quest_handler.is_not_accomplished(item["quest"]))
+                and STATEMENT_HANDLER.match_condition(item["condition"], looter, None)]
 
-        def can_loot(self, looter, obj):
-            """
-            help function to decide which objects can be looted.
-            """
-            rand = random.random()
-            if obj["odds"] < rand:
-                return False
+        # get object list
+        objects_dict = {}
+        if times <= 100:
+            # Trigger the event only one time.
+            for i in range(times):
+                rand = random.random()
+                for item in available_list:
+                    if item["multiple"]:
+                        if rand < item["odds"]:
+                            if item["object_key"] not in objects_dict:
+                                objects_dict[item["object_key"]] = {
+                                    "message": item["message"],
+                                    "level": item["level"],
+                                    "number": item["number"],
+                                }
+                            else:
+                                objects_dict[item["object_key"]]["number"] += item["number"]
+                        rand = random.random()
+                    else:
+                        if rand < item["odds"]:
+                            if item["object_key"] not in objects_dict:
+                                if item["object_key"] not in objects_dict:
+                                    objects_dict[item["object_key"]] = {
+                                        "message": item["message"],
+                                        "level": item["level"],
+                                        "number": item["number"],
+                                    }
+                                else:
+                                    objects_dict[item["object_key"]]["number"] += item["number"]
+                            break
+                        rand -= item["odds"]
+        else:
+            # If the number of times is too large, simplify the calculation.
+            remain_odds = 1.0
+            for item in available_list:
+                if item["multiple"]:
+                    # using normal distribution to simulate binomial distribution
+                    mean = item["odds"] * times
+                    standard_deviation = math.sqrt(item["odds"] * times * (1 - item["odds"]))
+                    rand = random.normalvariate(mean, standard_deviation)
+                    number = round(rand * remain_odds) * item["number"]
+                    if number > 0:
+                        if item["object_key"] not in objects_dict:
+                            objects_dict[item["object_key"]] = {
+                                "message": item["message"],
+                                "level": item["level"],
+                                "number": number,
+                            }
+                        else:
+                            objects_dict[item["object_key"]]["number"] += number
+                else:
+                    odds = item["odds"]
+                    if odds > remain_odds:
+                        odds = remain_odds
+                    remain_odds -= odds
+                    mean = odds * times
+                    standard_deviation = math.sqrt(odds * times * (1 - odds))
+                    number = round(random.normalvariate(mean, standard_deviation)) * item["number"]
+                    if number > 0:
+                        if item["object_key"] not in objects_dict:
+                            if item["object_key"] not in objects_dict:
+                                objects_dict[item["object_key"]] = {
+                                    "message": item["message"],
+                                    "level": item["level"],
+                                    "number": number,
+                                }
+                            else:
+                                objects_dict[item["object_key"]]["number"] += number
 
-            if obj["quest"]:
-                if looter.quest_handler:
-                    if not looter.quest_handler.is_not_accomplished(obj["quest"]):
-                        return False
-
-            if not STATEMENT_HANDLER.match_condition(obj["condition"], looter, self.owner):
-                return False
-
-            return True
-
-        # Get objects that matches odds and conditions .
-        obj_list = [obj for obj in self.loot_list if can_loot(self, looter, obj)]
+        obj_list = [{
+            "object_key": object_key,
+            "level": item["level"],
+            "message": item["message"],
+            "number": item["number"],
+        } for object_key, item in objects_dict.items()]
 
         return obj_list
-
-    def loot(self, looter):
-        """
-        Loot objects.
-        """
-        if not looter:
-            return
-
-        # Get objects that matches odds and conditions .
-        obj_list = self.get_obj_list(looter)
-
-        # Add objects to the looter.
-        looter.receive_objects(obj_list)

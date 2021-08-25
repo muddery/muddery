@@ -18,6 +18,7 @@ black
 pypiwin32;platform_system=="Windows"
 
 # Muddery dependencies
+apscheduler >= 3.7.0
 
 # world editor
 pillow

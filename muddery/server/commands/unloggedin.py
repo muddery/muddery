@@ -11,14 +11,14 @@ from random import getrandbits
 from django.conf import settings
 from evennia.accounts.models import AccountDB
 from evennia.server.models import ServerConfig
-from evennia.utils import logger, utils, class_from_module
+from evennia.utils import logger, class_from_module
 from evennia.commands.cmdhandler import CMD_LOGINSTART
 from muddery.server.commands.base_command import BaseCommand
 from muddery.server.utils.builder import create_player, create_character
 from muddery.server.utils.localized_strings_handler import _
 from muddery.server.utils.game_settings import GAME_SETTINGS
-from muddery.server.dao.equipment_positions import EquipmentPositions
-from muddery.server.dao.honour_settings import HonourSettings
+from muddery.server.database.worlddata.equipment_positions import EquipmentPositions
+from muddery.server.database.worlddata.honour_settings import HonourSettings
 
 
 # limit symbol import for API
@@ -298,8 +298,15 @@ class CmdUnconnectedConnect(BaseCommand):
             #   player.at_first_login()  # only once, for player-centric setup
             #   player.at_pre_login()
             #   player.at_post_login(session=session)
-            session.msg({"login":{"name": playername, "dbref": player.dbref}})
             session.sessionhandler.login(session, player)
+
+            session.msg({
+                "login": {
+                    "name": playername,
+                    "dbref": player.dbref,
+                },
+                "char_all": player.get_all_nicknames()
+            })
 
 
 class CmdUnconnectedConnectT(BaseCommand):

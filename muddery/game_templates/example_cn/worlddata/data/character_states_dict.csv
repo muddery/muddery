@@ -1,0 +1,4 @@
+key,name,default,desc
+hp,生命,max_hp,角色的生命值。
+mp,法力,max_mp,角色的法力值。
+exp,经验,0,角色的经验值。

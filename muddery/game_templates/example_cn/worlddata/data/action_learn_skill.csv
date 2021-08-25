@@ -1,2 +1,2 @@
-event_key,skill
-event_learn_skill,skill_normal_heal
+event_key,skill,level
+event_learn_skill,skill_normal_heal,
