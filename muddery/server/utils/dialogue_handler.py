@@ -119,32 +119,22 @@ class DialogueHandler(object):
             "dialogues": dialogues,
         }
 
-    def get_dialogues_by_key(self, dlg_key, npc):
+    def get_dialogues_by_key(self, dlg_key):
         """
         Get a dialogue by its key.
 
         Args:
             dlg_key: (string) the key of the current dialogue.
-            npc: (object) the NPC that the character want to talk to.
 
         Returns:
             sentences: (list) a list of available sentences.
         """
-        target = {}
-        if npc:
-            target = {
-                "id": npc.get_id(),
-                "name": npc.get_name(),
-                "icon": getattr(npc, "icon", None),
-            }
-
         # Get current dialogue.
         dialogue = self.get_dialogue(dlg_key)
         if not dialogue:
             return
 
         return {
-            "target": target,
             "dialogues": [{
                 "key": dlg_key,
                 "content": dialogue.get_content(),

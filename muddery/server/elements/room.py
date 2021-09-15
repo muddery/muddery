@@ -125,6 +125,8 @@ class MudderyRoom(BaseElement):
             new_obj = ELEMENT(tables_data.element_type)()
             new_obj.setup_element(tables_data.key, level=tables_data.level, first_time=True)
 
+            # Set the character's location.
+            new_obj.set_location(self)
             self.all_characters[new_obj.get_id()] = new_obj
 
     def load_exits(self):

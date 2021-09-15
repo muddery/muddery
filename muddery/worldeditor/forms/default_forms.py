@@ -346,7 +346,7 @@ class CharactersForm(forms.ModelForm):
 
         choices = [("", "---------")]
         characters = CM.CHARACTERS.all_with_base()
-        choices.extend([(obj["key"], obj["name"] + " (" + obj["key"] + ")") for obj in characters])
+        choices.extend([(obj["key"], obj["name"] + " (" + obj["element_type"] + " - " + obj["key"] + ")") for obj in characters])
         self.fields['clone'] = forms.ChoiceField(choices=choices, required=False)
 
         localize_form_fields(self)

@@ -3,8 +3,8 @@ Actions are used to do somethings.
 """
 
 from django.core.exceptions import ObjectDoesNotExist
-from muddery.server.utils.search import get_object_by_key
 from muddery.server.statements.statement_function import StatementFunction
+from muddery.server.server import Server
 
 
 class FuncLearnSkill(StatementFunction):
@@ -129,8 +129,8 @@ class FuncTeleportTo(StatementFunction):
 
         room_key = self.args[0]
         try:
-            destination = get_object_by_key(room_key)
-        except ObjectDoesNotExist:
+            destination = Server.world.get_room(room_key)
+        except KeyError:
             return False
 
         return self.caller.move_to(destination)

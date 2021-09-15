@@ -223,7 +223,6 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
             return
 
         CharacterInfo.set_level(self.get_db_id(), level)
-
         super(MudderyPlayerCharacter, self).set_level(level)
 
     def setup_element(self, key, level=None, first_time=False, temp=False):
@@ -275,35 +274,16 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         # load combat id
         self.combat_id = CharacterCombat.load(self.get_db_id(), None)
 
-    def load_custom_level_data(self, level):
+    def load_custom_level_data(self, element_type, element_key, level):
         """
         Load body properties from db.
         """
         # Get object level.
-        if level is None:
-            level = self.get_level()
-
-        # Load values from db.
-        element_key = self.const.clone if self.const.clone else self.get_element_key()
-
-        values = {}
-        for record in ElementProperties.get_properties(self.element_type, element_key, level):
-            key = record.property
-            serializable_value = record.value
-            if serializable_value == "":
-                value = None
-            else:
-                try:
-                    value = ast.literal_eval(serializable_value)
-                except (SyntaxError, ValueError) as e:
-                    # treat as a raw string
-                    value = serializable_value
-            values[key] = value
+        super(MudderyPlayerCharacter, self).load_custom_level_data(element_type, element_key, level)
 
         # Set body values.
         for key, info in self.get_properties_info().items():
-            value = values.get(key, ast.literal_eval(info["default"]))
-            self.const_data_handler.add(key, value)
+            value = self.const_data_handler.get(key)
             self.body_data_handler.add(key, value)
 
     def set_session(self, session):
@@ -329,7 +309,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         """
         return self.account_id
 
-    def set_location(self, location):
+    def move_to(self, location):
         """
         Set the character's location(room).
         :param location: location's object
@@ -346,7 +326,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         if self.location:
             self.location.at_character_leave(self)
 
-        self.location = location
+        self.set_location(location)
 
         # Send new location's data to the character.
         location_name = self.location.name if location else ""
@@ -1768,7 +1748,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
                 pass;
 
         if home:
-            self.set_location(home)
+            self.move_to(home)
 
         # Recover properties.
         self.recover()
@@ -1840,19 +1820,18 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         self.save_current_dialogues(dialogues)
         self.msg({"dialogue": dialogues})
 
-    def show_dialogue(self, dlg_key, npc):
+    def show_dialogue(self, dlg_key):
         """
         Show a dialogue.
 
         Args:
             dlg_key: dialogue's key.
-            npc: (optional) NPC's object.
 
         Returns:
             None
         """
         # Get next sentences_list.
-        dialogue = DIALOGUE_HANDLER.get_dialogues_by_key(dlg_key, npc)
+        dialogue = DIALOGUE_HANDLER.get_dialogues_by_key(dlg_key)
 
         # Send the dialogue to the player.
         self.save_current_dialogues(dialogue)

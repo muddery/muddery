@@ -150,32 +150,32 @@ class BaseElement(object):
         """
         return isinstance(self, ELEMENT(element_type))
 
-    def setup_element(self, key, level=None, first_time=False, temp=False):
+    def setup_element(self, element_key, level=None, first_time=False, temp=False):
         """
         Set element data's key.
 
         Args:
-            key: (string) the key of the data.
+            element_key: (string) the key of the data.
             level: (int) element's level.
             first_time: (bool) the first time to setup the element.
             temp: (bool) template element.
         """
-        self.element_key = key
+        self.element_key = element_key
         self.level = level
         self.is_temp = temp
 
-        self.load_data(key, level)
+        self.load_data(element_key, level)
 
         self.at_element_setup(first_time)
 
         self.after_element_setup(first_time)
 
-    def load_data(self, key, level=None):
+    def load_data(self, element_key, level=None):
         """
         Load the object's data.
 
         :arg
-            key: (string) the key of the data.
+            element_key: (string) the key of the data.
             level: (int) element's level.
 
         :return:
@@ -184,18 +184,18 @@ class BaseElement(object):
         try:
             # Load db data.
             base_model = self.get_base_model()
-            self.load_base_data(base_model, key)
+            self.load_base_data(base_model, element_key)
 
             # check element type
             if self.const_data_handler.has("element_type") and self.const.element_type != self.element_type:
-                logger.log_errmsg("Wrong element type %s: %s" % (key, self.element_type))
+                logger.log_errmsg("Wrong element type %s: %s" % (element_key, self.element_type))
 
             # Load extend data.
-            self.load_extend_data(base_model, key)
+            self.load_extend_data(base_model, element_key)
         except Exception as e:
-            logger.log_errmsg("%s %s can not load data:%s" % (self.model_name, key, e))
+            logger.log_errmsg("%s %s can not load data:%s" % (self.model_name, element_key, e))
 
-        self.load_custom_level_data(level)
+        self.load_custom_level_data(self.element_type, element_key, level)
 
     def load_base_data(self, model, key):
         """
@@ -257,7 +257,7 @@ class BaseElement(object):
         :return:
         """
         self.level = level
-        self.load_custom_level_data(level)
+        self.load_custom_level_data(self.element_type, self.element_key, level)
 
     def get_level(self):
         """
@@ -276,7 +276,7 @@ class BaseElement(object):
         level = self.get_level()
         self.set_level(level + 1)
 
-    def load_custom_level_data(self, level):
+    def load_custom_level_data(self, element_type, element_key, level):
         """
         Load custom's level data.
 
@@ -285,7 +285,7 @@ class BaseElement(object):
         """
         # Get custom data.
         values = {}
-        for record in ElementProperties.get_properties(self.element_type, self.element_key, level):
+        for record in ElementProperties.get_properties(element_type, element_key, level):
             key = record.property
             serializable_value = record.value
             if serializable_value == "":

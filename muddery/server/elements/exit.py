@@ -59,7 +59,7 @@ class MudderyExit(BaseElement):
             self.destination_obj = weakref.ref(Server.world.get_room(self.const.destination))
 
         try:
-            character.set_location(self.destination_obj())
+            character.move_to(self.destination_obj())
         except Exception as e:
             traceback.print_exc()
             logger.log_err("%s cannot set location: (%s)%s." % (character.get_id(), type(e).__name__, e))

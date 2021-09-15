@@ -256,7 +256,7 @@ class MudderyAccount(DefaultAccount):
         try:
             location_key = CharacterLocation.load(char_db_id)
             location = Server.world.get_room(location_key)
-            new_char.set_location(location)
+            new_char.move_to(location)
         except KeyError:
             pass
 

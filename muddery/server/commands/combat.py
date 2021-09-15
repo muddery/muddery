@@ -5,7 +5,6 @@ Battle commands. They only can be used when a character is in a combat.
 from evennia.utils import logger
 from muddery.server.commands.base_command import BaseCommand
 from muddery.server.utils.localized_strings_handler import _
-from muddery.server.utils.search import get_object_by_id
 
 
 class CmdCombatInfo(BaseCommand):

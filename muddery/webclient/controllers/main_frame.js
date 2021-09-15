@@ -877,7 +877,7 @@ MudderyPopupDialogue.prototype.setDialogue = function(dialogue) {
         return;
     }
 
-    this.target = dialogue.target;
+    this.target = dialogue.target? dialogue.target: {};
 
     this.dialogues = dialogue.dialogues;
     var escapes = core.data_handler.getEscapes();

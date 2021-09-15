@@ -13,7 +13,6 @@ from evennia.comms.models import ChannelDB
 from muddery.server.commands.base_command import BaseCommand
 from muddery.server.utils.localized_strings_handler import _
 from muddery.server.utils.exception import MudderyError
-from muddery.server.utils.search import get_object_by_key, get_object_by_id
 from muddery.server.utils.defines import ConversationType
 from muddery.server.utils.defines import CombatType
 from muddery.server.combat.combat_handler import COMBAT_HANDLER
@@ -24,11 +23,11 @@ from muddery.server.server import Server
 
 class CmdLook(BaseCommand):
     """
-    look at location or object
+    look around
 
     Usage:
-        {"cmd":"look",
-         "args":<object's id>
+        {
+            "cmd":"look",
         }
 
     Observes your location or objects in your vicinity.
@@ -41,64 +40,35 @@ class CmdLook(BaseCommand):
         Handle the looking.
         """
         caller = self.caller
-        args = self.args
 
         if not caller.is_alive():
             caller.msg({"alert": _("You are died.")})
             return
 
-        if args:
-            # Use search to handle duplicate/nonexistant results.
-            try:
-                obj_id = int(args)
-            except:
-                caller.msg({"alert": _("Can not find it.")})
-                return
+        # Observes the caller's location
+        looking_at_obj = caller.location
+        if not looking_at_obj:
+            caller.msg({"msg": _("You have nothing to look at!")})
+            return
 
-            looking_at_obj = get_object_by_id(obj_id)
-            if not looking_at_obj:
-                caller.msg({"alert": _("Can not find it.")})
-                return
-        else:
-            # Observes the caller's location
-            looking_at_obj = caller.location
-            if not looking_at_obj:
-                caller.msg({"msg": _("You have no location to look at!")})
-                return
+        # Clear caller's target.
+        caller.show_location()
 
-        if not hasattr(looking_at_obj, 'return_appearance'):
-            # this is likely due to us having a player instead
-            looking_at_obj = looking_at_obj.character
+        combat = caller.get_combat()
+        if combat:
+            # If the caller is in combat, add combat info.
+            # This happens when a player is in combat and he logout and login again.
 
-        if looking_at_obj == caller.location:
-            # Clear caller's target.
-            caller.clear_target()
-            caller.show_location()
+            # Send "joined_combat" message first. It will set the player to combat status.
+            caller.msg({"joined_combat": True})
 
-            combat = caller.get_combat()
-            if combat:
-                # If the caller is in combat, add combat info.
-                # This happens when a player is in combat and he logout and login again.
-
-                # Send "joined_combat" message first. It will set the player to combat status.
-                caller.msg({"joined_combat": True})
-                
-                # Send combat infos.
-
-                appearance = combat.get_appearance()
-                message = {"combat_info": appearance,
-                           "combat_commands": caller.get_combat_commands()}
-                caller.msg(message)
-        else:
-            # Set caller's target
-            caller.set_target(looking_at_obj)
-
-            # Get the object's appearance.
-            appearance = looking_at_obj.get_appearance(caller)
-            caller.msg({"look_obj": appearance}, context=self.context)
-
-        # the object's at_desc() method.
-        looking_at_obj.at_desc(looker=caller)
+            # Send combat infos.
+            appearance = combat.get_appearance()
+            message = {
+                "combat_info": appearance,
+                "combat_commands": caller.get_combat_commands(),
+            }
+            caller.msg(message)
 
 
 class CmdInventory(BaseCommand):
@@ -798,7 +768,7 @@ class CmdAttack(BaseCommand):
             return
 
         if caller.location != target.location:
-            caller.msg({"alert": _("You can not attack %s." % target.get_name())})
+            caller.msg({"alert": _("You can not attack %s.") % target.get_name()})
             return
 
         # Set caller's target.

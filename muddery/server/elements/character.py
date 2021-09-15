@@ -22,15 +22,13 @@ from muddery.server.database.worlddata.loot_list import CharacterLootList
 from muddery.server.database.worlddata.default_skills import DefaultSkills
 from muddery.server.database.worlddata.worlddata import WorldData
 from muddery.server.database.worlddata.character_states_dict import CharacterStatesDict
-from muddery.server.database.gamedata.object_storage import DBObjectStorage
 from muddery.server.utils.loot_handler import LootHandler
-from muddery.server.utils import search
 from muddery.server.utils.game_settings import GAME_SETTINGS
-from muddery.server.utils.search import get_object_by_key
 from muddery.server.utils.localized_strings_handler import _
 from muddery.server.utils.defines import CombatType, EventType
 from muddery.server.utils.object_states_handler import ObjectStatesHandler
 from muddery.server.database.gamedata.object_storage import MemoryObjectStorage
+from muddery.server.server import Server
 
 
 CHARACTER_LAST_ID = 0
@@ -191,6 +189,21 @@ class MudderyCharacter(BaseElement):
             # set the value.
             self.states.save(record.key, value)
 
+    def load_custom_level_data(self, element_type, element_key, level):
+        """
+        Load custom's level data.
+
+        :param level:
+        :return:
+        """
+        # Get object level.
+        if level is None:
+            level = self.get_level()
+
+        # Clone another element's values.
+        element_key = self.const.clone if self.const.clone else element_key
+        super(MudderyCharacter, self).load_custom_level_data(self.element_type, element_key, level)
+
     def set_level(self, level):
         """
         Set element's level.
@@ -198,7 +211,7 @@ class MudderyCharacter(BaseElement):
         :return:
         """
         self.level = level
-        self.load_custom_level_data(level)
+        self.load_custom_level_data(self.element_type, self.element_key, level)
 
         self.refresh_states(True)
 
@@ -329,14 +342,22 @@ class MudderyCharacter(BaseElement):
 
     def set_location(self, location):
         """
-        Set the character's location(room).
+        Set the character's location (room) directly.
+        :param location: a room
+        :return:
+        """
+        self.location = location
+
+    def move_to(self, location):
+        """
+        The character moves from a room to another.
         :param location: a room
         :return:
         """
         if self.location:
             self.location.at_character_leave(self)
 
-        self.location = location
+        self.set_location(location)
 
         if self.location:
             self.location.at_character_arrive(self)
@@ -580,20 +601,6 @@ class MudderyCharacter(BaseElement):
 
         return True
 
-    def attack_target_by_id(self, target_id, desc=""):
-        """
-        Attack a target by id.
-
-        Args:
-            target_id: (int) the it of the target.
-            desc: (string) string to describe this attack
-
-        Returns:
-            None
-        """
-        target = search.get_object_by_id(target_id)
-        self.attack_target(target, desc)
-
     def attack_temp_target(self, target_key, target_level, desc=""):
         """
         Attack a temporary clone of a target. This creates a new character object for attack.
@@ -703,17 +710,13 @@ class MudderyCharacter(BaseElement):
         self.recover()
 
         # Reborn at its default location.
-        home = None
-
         location_key = self.const.location
         if location_key:
             try:
-                home = get_object_by_key(location_key)
-            except ObjectDoesNotExist:
+                home = Server.world.get_room(location_key)
+                self.move_to(home)
+            except KeyError:
                 pass
-
-        if home:
-            self.set_location(home)
 
     def recover(self):
         """

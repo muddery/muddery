@@ -8,12 +8,8 @@ creation commands.
 
 """
 
-from django.conf import settings
-from django.core.exceptions import ObjectDoesNotExist
 from muddery.server.mappings.element_set import ELEMENT
 from muddery.server.statements.statement_handler import STATEMENT_HANDLER
-from muddery.server.utils.search import get_object_by_key
-from muddery.server.utils import search
 from muddery.server.utils.localized_strings_handler import _
 
 
@@ -35,16 +31,6 @@ class MudderyWorldNPC(ELEMENT("BASE_NPC")):
             # if it is dead, reborn at init.
             if not self.is_alive() and self.reborn_time > 0:
                 self.reborn()
-
-            home = None
-            location_key = self.const.location
-            if location_key:
-                try:
-                    home = get_object_by_key(location_key)
-                except ObjectDoesNotExist:
-                    pass
-
-            self.set_location(home)
 
     def is_visible(self, caller):
         """
