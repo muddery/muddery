@@ -656,6 +656,16 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         inventory = CharacterInventory.get_character(self.get_db_id())
         self.inventory = [{"position": pos, **inventory[pos]} for pos in sorted(inventory)]
 
+        # load object's data
+        common_models = ELEMENT("POCKET_OBJECT").get_models()
+        for item in self.inventory:
+            object_record = WorldData.get_tables_data(common_models, key=item["object_key"])
+            object_record = object_record[0]
+            item.update({
+                "element_type": object_record.element_type,
+                "can_remove": object_record.can_remove,
+            })
+
         # default objects
         object_records = DefaultObjects.get(self.get_element_key())
 
@@ -729,7 +739,6 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
             try:
                 object_record = WorldData.get_tables_data(common_models, key=object_key)
                 object_record = object_record[0]
-                element_type = object_record.element_type
             except Exception as e:
                 logger.log_err("Can not find object %s: %s" % (object_key, e))
                 continue
@@ -754,10 +763,11 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
 
                 new_obj = {
                     "position": position,
-                    "element_type": element_type,
                     "object_key": object_key,
-                    "number": number,
                     "level": level,
+                    "number": number,
+                    "element_type": object_record.element_type,
+                    "can_remove": object_record.can_remove,
                 }
                 self.inventory.append(new_obj)
                 CharacterInventory.add(self.get_db_id(), position, object_key, number, level)
@@ -795,10 +805,11 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
 
                         new_obj = {
                             "position": position,
-                            "element_type": element_type,
                             "object_key": object_key,
-                            "number": add,
                             "level": level,
+                            "number": add,
+                            "element_type": object_record.element_type,
+                            "can_remove": object_record.can_remove,
                         }
                         self.inventory.append(new_obj)
                         CharacterInventory.add(self.get_db_id(), position, object_key, add, level)
@@ -847,10 +858,11 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
 
                         new_obj = {
                             "position": position,
-                            "element_type": element_type,
                             "object_key": object_key,
-                            "number": add,
                             "level": level,
+                            "number": add,
+                            "element_type": object_record.element_type,
+                            "can_remove": object_record.can_remove,
                         }
                         self.inventory.append(new_obj)
                         CharacterInventory.add(self.get_db_id(), position, object_key, add, level)
@@ -914,6 +926,16 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
 
         return False
 
+    def create_pocket_obj(self, element_type, object_key, level):
+        """
+        Create a pocket object.
+        :param item:
+        :return:
+        """
+        new_obj = ELEMENT(element_type)()
+        new_obj.setup_element(object_key, level)
+        return new_obj
+
     def use_object(self, position, number=1):
         """
         Use an object.
@@ -939,9 +961,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         # take effect
         try:
             if "obj" not in item or not item["obj"]:
-                new_obj = ELEMENT(item["element_type"])()
-                new_obj.setup_element(item["object_key"], item["level"])
-                item["obj"] = new_obj
+                item["obj"] = self.create_pocket_obj(item["element_type"], item["object_key"], item["level"])
 
             result, used = item["obj"].take_effect(self, number)
             if used > 0:
@@ -966,11 +986,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         """
         for index, item in enumerate(self.inventory):
             if item["position"] == position:
-                common_models = ELEMENT("POCKET_OBJECT").get_models()
-                object_record = WorldData.get_tables_data(common_models, key=item["object_key"])
-                object_record = object_record[0]
-
-                if object_record.can_remove:
+                if item["can_remove"]:
                     CharacterInventory.remove_object(self.get_db_id(), position)
                     del self.inventory[index]
                 else:
@@ -1000,11 +1016,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
                         CharacterInventory.set_dict(self.get_db_id(), position, {"number": obj_num - number})
                         item["number"] = obj_num - number
                     else:
-                        common_models = ELEMENT("POCKET_OBJECT").get_models()
-                        object_record = WorldData.get_tables_data(common_models, key=item["object_key"])
-                        object_record = object_record[0]
-
-                        if object_record.can_remove:
+                        if item["can_remove"]:
                             CharacterInventory.remove_object(self.get_db_id(), position)
                             del self.inventory[index]
                         else:
@@ -1073,11 +1085,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
                         to_remove = 0
                     else:
                         # Remove this object.
-                        common_models = ELEMENT("POCKET_OBJECT").get_models()
-                        object_record = WorldData.get_tables_data(common_models, key=item["object_key"])
-                        object_record = object_record[0]
-
-                        if object_record.can_remove:
+                        if item["can_remove"]:
                             CharacterInventory.remove_object(self.get_db_id(), item["position"])
                             del self.inventory[index]
                         else:
@@ -1132,22 +1140,23 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         """
         inv = []
 
+        # load object's data
         common_models = ELEMENT("POCKET_OBJECT").get_models()
+
         for item in self.inventory:
             object_record = WorldData.get_tables_data(common_models, key=item["object_key"])
             object_record = object_record[0]
+
             info = {
-                "position": item["position"],      # item's position
+                "position": item["position"],       # item's position
                 "number": item["number"],           # item's number
-                "name": object_record.name,             # item's name
+                "level": item["level"],             # item's level
+                "can_remove": item["can_remove"],
+                "name": object_record.name,         # item's name
                 "desc": object_record.desc,         # item's desc
-                "can_remove": object_record.can_remove,
-                "icon": object_record.icon,             # item's icon
+                "icon": object_record.icon,         # item's icon
             }
             inv.append(info)
-
-        # sort by created time
-        # inv.sort(key=lambda x: x["id"])
 
         return inv
 

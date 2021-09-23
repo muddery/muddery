@@ -156,28 +156,6 @@ class character_location(models.Model):
 
 # ------------------------------------------------------------
 #
-# player character's location
-#
-# ------------------------------------------------------------
-class character_location(models.Model):
-    "player character's location"
-
-    # player character's id
-    char_id = models.PositiveIntegerField(unique=True)
-
-    # location (room's key)
-    location = models.CharField(max_length=KEY_LENGTH)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "gamedata"
-        verbose_name = "Player Location"
-        verbose_name_plural = "Players Location"
-
-
-# ------------------------------------------------------------
-#
 # player character's inventory
 #
 # ------------------------------------------------------------
