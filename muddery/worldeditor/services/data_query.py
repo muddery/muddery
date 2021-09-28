@@ -390,7 +390,7 @@ def query_dialogues_table():
                          "WHERE T6.trigger_type='EVENT_TRIGGER_DIALOGUE' GROUP BY trigger_obj) T2 " \
                     "ON T1.key=T2.trigger_obj) " \
                 "LEFT JOIN (SELECT T3.npc, T3.dialogue, T4.name FROM worlddata_npc_dialogues T3 " \
-                    "JOIN worlddata_objects T4 ON T3.npc=T4.key) T5 " \
+                    "JOIN worlddata_characters T4 ON T3.npc=T4.key) T5 " \
                 "ON T1.key=T5.dialogue"
     cursor.execute(query_string)
 
