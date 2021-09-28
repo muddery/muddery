@@ -78,6 +78,7 @@ category,origin,local
 ,"%s is died.","%s已经死了。"
 ,"You can not attack %s.","你无法攻击%s。"
 ,"Kill","杀死"
+,"Arrive","到达"
 ,"{C%s upgraded to level %s.{n","{C%s升到%s级。{n"
 ,"No effect.","没有效果。"
 ,"Can not find this quest.","无法找到该任务。"

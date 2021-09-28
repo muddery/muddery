@@ -109,7 +109,7 @@ class MudderyQuest(BaseElement):
                 accomplished = all_accomplished.get(character_quest, 0)
                 
                 if item["type"] == defines.OBJECTIVE_TALK:
-                    # talking
+                    # talk to a character
                     target = _("Talk to")
                     name = ""
 
@@ -133,7 +133,7 @@ class MudderyQuest(BaseElement):
                     })
 
                 elif item["type"] == defines.OBJECTIVE_OBJECT:
-                    # getting
+                    # get objects
                     target = _("Get")
                     
                     # Get the name of the objective object.
@@ -157,12 +157,35 @@ class MudderyQuest(BaseElement):
                     })
 
                 elif item["type"] == defines.OBJECTIVE_KILL:
-                    # getting
+                    # kill someone
                     target = _("Kill")
 
                     # Get the name of the objective character.
                     object_key = item["object"]
                     model_name = ELEMENT("CHARACTER").model_name
+
+                    # Get record.
+                    try:
+                        record = WorldData.get_table_data(model_name, key=object_key)
+                        record = record[0]
+                        name = record.name
+                    except Exception as e:
+                        logger.log_err("Can not find the quest object: %s" % object_key)
+                        continue
+
+                    output.append({
+                        "target": target,
+                        "object": name,
+                        "accomplished": accomplished,
+                        "total": obj_num,
+                    })
+                elif item["type"] == defines.OBJECTIVE_ARRIVE:
+                    # arrive some place
+                    target = _("Arrive")
+
+                    # Get the name of the objective character.
+                    object_key = item["object"]
+                    model_name = ELEMENT("ROOM").model_name
 
                     # Get record.
                     try:
