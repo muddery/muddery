@@ -253,6 +253,22 @@ def check_version():
     return True
 
 
+def check_database():
+    """
+    Check so the database exists.
+
+    Returns:
+        exists (bool): `True` if the database exists, otherwise `False`.
+    """
+    # Check so a database exists and is accessible
+    from django.db import connection
+
+    tables = connection.introspection.get_table_list(connection.cursor())
+    if not tables or not isinstance(tables[0], str):  # django 1.8+
+        tables = [tableinfo.name for tableinfo in tables]
+    return tables and "accounts_accountdb" in tables
+
+
 def create_config_file(game_dir, template):
     """
     Create game's config file. Set version and template info.

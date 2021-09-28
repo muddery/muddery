@@ -39,12 +39,6 @@ def init_game(game_name, template=None, port=None):
     evennia_launcher.GAMEDIR = gamedir
     evennia_launcher.init_game_directory(gamedir, check_db=False)
 
-    try:
-        utils.create_database()
-    except Exception as e:
-        traceback.print_exc()
-        raise
-
     print(configs.CREATED_NEW_GAMEDIR.format(gamedir=game_name,
                                              settings_path=os.path.join(game_name, configs.SETTINGS_PATH),
                                              port=port if port else 8000))
@@ -201,7 +195,16 @@ def run_evennia(option):
         print(configs.NEED_UPGRADE)
         raise Exception
 
-    evennia_launcher.set_gamedir(configs.CURRENT_DIR)
+    gamedir = os.path.abspath(configs.CURRENT_DIR)
+    os.chdir(gamedir)
+    evennia_launcher.init_game_directory(gamedir, check_db=False)
+
+    if not utils.check_database():
+        try:
+            utils.create_database()
+        except Exception as e:
+            traceback.print_exc()
+            raise
 
     # pass-through to evennia
     try:
