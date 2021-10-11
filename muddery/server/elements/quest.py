@@ -251,7 +251,7 @@ class MudderyQuest(BaseElement):
                     "number": item["number"]
                 })
         if obj_list:
-            caller.remove_objects(obj_list)
+            caller.remove_objects_by_list(obj_list)
 
         # remove quest objectives records
         QUEST_OBJECTIVES_DATA.remove(self.character_id, self.const.key)

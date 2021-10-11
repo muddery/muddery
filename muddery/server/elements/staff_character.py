@@ -65,7 +65,7 @@ class MudderyStaffCharacter(ELEMENT("PLAYER_CHARACTER")):
         message = {
             "status": self.return_status(),
             "equipments": self.return_equipments(),
-            "inventory": self.return_inventory(),
+            "inventory": self.get_inventory_appearance(),
             "skills": self.return_skills(),
             "quests": self.quest_handler.return_quests(),
             "revealed_map": self.get_revealed_map(),

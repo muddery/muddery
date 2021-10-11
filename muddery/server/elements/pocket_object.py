@@ -52,6 +52,7 @@ class MudderyPocketObject(ELEMENT("COMMON_OBJECT")):
         # Get name, description and available commands.
         info = super(MudderyPocketObject, self).get_appearance(caller)
         info["can_remove"] = self.const.can_remove
+        info["can_discard"] = self.const.can_discard
 
         return info
 

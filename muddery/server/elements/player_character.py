@@ -84,6 +84,18 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         self.session = None
         self.account_id = None
 
+        # character's inventory
+        # inventory: {
+        #     position: {
+        #         "position": position in the inventory,
+        #         "object_key": object's key,
+        #         "number": object's number,
+        #         "level": object's level,
+        #         "obj": object's instance,
+        #     }
+        # }
+        self.inventory = {}
+
         # character's equipments
         # equipments: {
         #    equipment position: {
@@ -353,7 +365,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         message = {
             "status": self.return_status(),
             "equipments": self.return_equipments(),
-            "inventory": self.return_inventory(),
+            "inventory": self.get_inventory_appearance(),
             "skills": self.return_skills(),
             "quests": self.quest_handler.return_quests(),
             "revealed_map": self.get_revealed_map(),
@@ -535,24 +547,6 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
 
         return {"rooms": rooms, "exits": exits}
 
-    def total_object_number(self, obj_key):
-        """
-        Search specified object in the inventory.
-        """
-        objects = [item["number"] for item in self.inventory if item["object_key"] == obj_key]
-        total = sum(objects)
-        for item in self.equipments.values():
-            if item["object_key"] == obj_key:
-                total += 1
-
-        return total
-
-    def has_object(self, obj_key):
-        """
-        Check specified object in the inventory.
-        """
-        return self.total_object_number(obj_key) > 0
-
     def wear_equipments(self):
         """
         Add equipment's attributes to the character
@@ -639,26 +633,34 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
 
         self.msg(msg)
 
+    ################################################
+    #
+    # INVENTORY
+    #   load_inventory: Load character's inventory from db and check default objects.
+    #   total_object_number: get the object's number by key.
+    #   has_object: Check the specified object in the inventory.
+    #
+    ################################################
     def load_inventory(self):
         """
-        Load character's default objects.
+        Load character's inventory from db and check default objects.
 
-        inventory: [
-            {
+        inventory: {
+            position: {
                 "position": position in the inventory,
                 "object_key": object's key,
                 "number": object's number,
                 "level": object's level,
                 "obj": object's instance,
             }
-        ]
+        }
         """
         inventory = CharacterInventory.get_character(self.get_db_id())
-        self.inventory = [{"position": pos, **inventory[pos]} for pos in sorted(inventory)]
+        self.inventory = {pos: {"position": pos, **inventory[pos]} for pos in sorted(inventory)}
 
         # load object's data
         common_models = ELEMENT("POCKET_OBJECT").get_models()
-        for item in self.inventory:
+        for item in self.inventory.values():
             object_record = WorldData.get_tables_data(common_models, key=item["object_key"])
             object_record = object_record[0]
             item.update({
@@ -673,7 +675,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         obj_list = []
         for object_record in object_records:
             found = False
-            for item in self.inventory:
+            for item in self.inventory.values():
                 if object_record.object == item["object_key"]:
                     found = True
                     break
@@ -686,6 +688,24 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
 
         if obj_list:
             self.receive_objects(obj_list, mute=True)
+
+    def total_object_number(self, obj_key):
+        """
+        Get the object's number by key.
+        """
+        objects = [item["number"] for item in self.inventory.values() if item["object_key"] == obj_key]
+        total = sum(objects)
+        for item in self.equipments.values():
+            if item["object_key"] == obj_key:
+                total += 1
+
+        return total
+
+    def has_object(self, obj_key):
+        """
+        Check the specified object in the inventory.
+        """
+        return self.total_object_number(obj_key) > 0
 
     def receive_object(self, object_key, number, level, mute=False):
         """
@@ -705,7 +725,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
 
     def receive_objects(self, obj_list, mute=False, show=True):
         """
-        Add objects to the inventory.
+        Add a list of objects to the inventory.
 
         Args:
             obj_list: (list) a list of object keys and there numbers.
@@ -725,6 +745,25 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
                 "reject": reason,
             }]
         """
+        def add_new_object(object_key, level, number, element_type, can_remove):
+            """
+            Add a new content to the inventory
+            """
+            if len(self.inventory) > 0:
+                new_position = sorted(self.inventory)[-1] + 1
+            else:
+                new_position = 1
+
+            self.inventory[new_position] = {
+                "position": new_position,
+                "object_key": object_key,
+                "level": level,
+                "number": number,
+                "element_type": element_type,
+                "can_remove": can_remove,
+            }
+            CharacterInventory.add(self.get_db_id(), new_position, object_key, number, level)
+
         common_models = ELEMENT("POCKET_OBJECT").get_models()
 
         objects = []           # objects that have been accepted
@@ -743,7 +782,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
                 logger.log_err("Can not find object %s: %s" % (object_key, e))
                 continue
 
-            inventory_obj_list = [index for index, item in enumerate(self.inventory) if item["object_key"] == object_key]
+            inventory_obj_list = [pos for pos, item in self.inventory.items() if item["object_key"] == object_key]
 
             if number == 0:
                 # it is an empty object
@@ -755,22 +794,9 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
                     # remove this empty object
                     continue
 
-                # add a new content
-                if len(self.inventory) > 0:
-                    position = self.inventory[-1]["position"] + 1
-                else:
-                    position = 1
+                # add a new object to the inventory
+                add_new_object(object_key, level, number, object_record.element_type, object_record.can_remove)
 
-                new_obj = {
-                    "position": position,
-                    "object_key": object_key,
-                    "level": level,
-                    "number": number,
-                    "element_type": object_record.element_type,
-                    "can_remove": object_record.can_remove,
-                }
-                self.inventory.append(new_obj)
-                CharacterInventory.add(self.get_db_id(), position, object_key, number, level)
             else:
                 # common number
                 if object_record.unique:
@@ -798,21 +824,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
                             add = object_record.max_stack
 
                         # add a new object to the inventory
-                        if len(self.inventory) > 0:
-                            position = self.inventory[-1]["position"] + 1
-                        else:
-                            position = 1
-
-                        new_obj = {
-                            "position": position,
-                            "object_key": object_key,
-                            "level": level,
-                            "number": add,
-                            "element_type": object_record.element_type,
-                            "can_remove": object_record.can_remove,
-                        }
-                        self.inventory.append(new_obj)
-                        CharacterInventory.add(self.get_db_id(), position, object_key, add, level)
+                        add_new_object(object_key, level, add, object_record.element_type, object_record.can_remove)
 
                         number -= add
                         accepted += add
@@ -851,21 +863,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
                             add = object_record.max_stack
 
                         # add a new object to the inventory
-                        if len(self.inventory) > 0:
-                            position = self.inventory[-1]["position"] + 1
-                        else:
-                            position = 1
-
-                        new_obj = {
-                            "position": position,
-                            "object_key": object_key,
-                            "level": level,
-                            "number": add,
-                            "element_type": object_record.element_type,
-                            "can_remove": object_record.can_remove,
-                        }
-                        self.inventory.append(new_obj)
-                        CharacterInventory.add(self.get_db_id(), position, object_key, add, level)
+                        add_new_object(object_key, level, add, object_record.element_type, object_record.can_remove)
 
                         number -= add
                         accepted += add
@@ -914,7 +912,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         except Exception as e:
             return False
 
-        total = sum([item["number"] for item in self.inventory if obj_key == item["object_key"]])
+        total = self.total_object_number(obj_key)
         if not total:
             return True
 
@@ -926,15 +924,41 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
 
         return False
 
-    def create_pocket_obj(self, element_type, object_key, level):
+    def get_inventory_obj_by_pos(self, position):
         """
-        Create a pocket object.
-        :param item:
+        Get an object in the inventory
+        :param position:
         :return:
         """
-        new_obj = ELEMENT(element_type)()
-        new_obj.setup_element(object_key, level)
-        return new_obj
+        if position not in self.inventory:
+            return None
+
+        item = self.inventory[position]
+        if "obj" in item and item["obj"]:
+            return item["obj"]
+        else:
+            new_obj = ELEMENT(item["element_type"])()
+            new_obj.setup_element(item["object_key"], item["level"])
+            item["obj"] = new_obj
+            return new_obj
+
+    def get_inventory_obj_by_key(self, obj_key):
+        """
+        Get an object in the inventory
+        :param obj_key: (string) the key of an object in the inventory
+        :return:
+        """
+        for item in self.inventory.values():
+            if item["object_key"] == obj_key:
+                if "obj" in item and item["obj"]:
+                    return item["obj"]
+                else:
+                    new_obj = ELEMENT(item["element_type"])()
+                    new_obj.setup_element(item["object_key"], item["level"])
+                    item["obj"] = new_obj
+                    return new_obj
+
+        return None
 
     def use_object(self, position, number=1):
         """
@@ -947,26 +971,21 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         Returns:
             result: (string) the description of the result
         """
-        item = None
-        for value in self.inventory:
-            if value["position"] == position:
-                item = value
-                break
-        if not item:
+        if position not in self.inventory:
             raise MudderyError(_("Can not find this object."))
 
+        item = self.inventory[position]
         if item["number"] < number:
             return _("Not enough number.")
 
+        item_obj = self.get_inventory_obj_by_pos(position)
+
         # take effect
         try:
-            if "obj" not in item or not item["obj"]:
-                item["obj"] = self.create_pocket_obj(item["element_type"], item["object_key"], item["level"])
-
-            result, used = item["obj"].take_effect(self, number)
+            result, used = item_obj.take_effect(self, number)
             if used > 0:
                 # remove used object
-                self.remove_object_by_position(position, used, True)
+                self.remove_objects_by_position(position, used, True)
 
             self.show_inventory()
             return result
@@ -976,61 +995,128 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
 
         return _("No effect.")
 
-    def remove_object_position_all(self, position, mute=False):
+    def remove_all_objects_by_position(self, position, mute=False):
         """
-        Remove an object by its id.
+        Remove all objects by its position.
 
         :param position:
         :param mute:
         :return:
         """
-        for index, item in enumerate(self.inventory):
-            if item["position"] == position:
-                if item["can_remove"]:
-                    CharacterInventory.remove_object(self.get_db_id(), position)
-                    del self.inventory[index]
-                else:
-                    CharacterInventory.set_dict(self.get_db_id(), position, {"number": 0})
-                    item["number"] = 0
+        if position not in self.inventory:
+            raise MudderyError(_("Can not find this object."))
 
-                if not mute:
-                    self.show_inventory()
+        item = self.inventory[position]
+        if item["can_remove"]:
+            CharacterInventory.remove_object(self.get_db_id(), position)
+            del self.inventory[position]
+        else:
+            CharacterInventory.set_dict(self.get_db_id(), position, {"number": 0})
+            item["number"] = 0
 
-                return
+        if not mute:
+            self.show_inventory()
 
-        raise(MudderyError(_("Can not remove this object.")))
+        return
 
-    def remove_object_by_position(self, position, number, mute=False):
+    def remove_objects_by_position(self, position, number, mute=False):
         """
-        Remove an object by its id.
+        Remove objects by its position.
 
         :param obj_id:
         :param mute:
         :return:
         """
-        for index, item in enumerate(self.inventory):
-            if item["position"] == position:
-                obj_num = item["number"]
-                if obj_num > 0:
-                    if obj_num > number:
-                        CharacterInventory.set_dict(self.get_db_id(), position, {"number": obj_num - number})
-                        item["number"] = obj_num - number
-                    else:
-                        if item["can_remove"]:
-                            CharacterInventory.remove_object(self.get_db_id(), position)
-                            del self.inventory[index]
-                        else:
-                            CharacterInventory.set_dict(self.get_db_id(), position, {"number": 0})
-                            item["number"] = 0
+        if position not in self.inventory:
+            raise MudderyError(_("Can not find this object."))
 
-                    if not mute:
-                        self.show_inventory()
+        if number <= 0:
+            raise MudderyError(_("Can not remove by %s.") % number)
 
-                return
+        item = self.inventory[position]
+        obj_num = item["number"]
+        if obj_num > number:
+            CharacterInventory.set_dict(self.get_db_id(), position, {"number": obj_num - number})
+            item["number"] = obj_num - number
+        elif obj_num == number:
+            if item["can_remove"]:
+                CharacterInventory.remove_object(self.get_db_id(), position)
+                del self.inventory[position]
+            else:
+                CharacterInventory.set_dict(self.get_db_id(), position, {"number": 0})
+                item["number"] = 0
+        else:
+            raise (MudderyError(_("Can not remove this object.")))
 
-        raise(MudderyError(_("Can not remove this object.")))
+        if not mute:
+            self.show_inventory()
 
-    def remove_objects(self, obj_list, mute=False, show=True):
+        return
+
+    def remove_all_objects_by_key(self, obj_key, mute=False):
+        """
+        Remove all objects of this object_key.
+        """
+        to_remove = []
+        for position, item in self.inventory.items():
+            if item["object_key"] == obj_key:
+                to_remove.append(position)
+
+        for position in to_remove:
+            if self.inventory[position]["can_remove"]:
+                CharacterInventory.remove_object(self.get_db_id(), position)
+                del self.inventory[position]
+            else:
+                CharacterInventory.set_dict(self.get_db_id(), position, {"number": 0})
+                self.inventory[position]["number"] = 0
+
+        if not mute:
+            self.show_inventory()
+
+        return
+
+    def remove_objects_by_key(self, obj_key, number, mute=False):
+        """
+        Remove all objects of this object_key.
+        """
+        if number <= 0:
+            raise MudderyError(_("Can not remove by %s.") % number)
+
+        # Count objects in the inventory.
+        total = sum([item["number"] for item in self.inventory.values() if obj_key == item["object_key"]])
+        if total < number:
+            raise (MudderyError(_("Can not remove this object.")))
+
+        to_remove = []
+        for position, item in self.inventory.items():
+            if item["object_key"] == obj_key:
+                to_remove.append(position)
+
+        for position in to_remove:
+            item = self.inventory[position]
+            obj_num = item["number"]
+            if obj_num > number:
+                CharacterInventory.set_dict(self.get_db_id(), position, {"number": obj_num - number})
+                item["number"] = obj_num - number
+                number = 0
+            else:
+                number -= obj_num
+                if item["can_remove"]:
+                    CharacterInventory.remove_object(self.get_db_id(), position)
+                    del self.inventory[position]
+                else:
+                    CharacterInventory.set_dict(self.get_db_id(), position, {"number": 0})
+                    item["number"] = 0
+
+            if number == 0:
+                break
+
+        if not mute:
+            self.show_inventory()
+
+        return
+
+    def remove_objects_by_list(self, obj_list, mute=False, show=True):
         """
         Remove objects from the inventory.
 
@@ -1043,73 +1129,9 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
             boolean: success
         """
         for item in obj_list:
-            self.remove_object(item["object_key"], item["number"], True)
+            self.remove_objects_by_key(item["object_key"], item["number"], True)
 
         if show:
-            self.show_inventory()
-
-    def remove_object(self, obj_key, number, mute=False):
-        """
-        Remove objects from the inventory.
-
-        Args:
-            obj_key: object's key
-            number: object's number
-            mute: send inventory information
-
-        Returns:
-            boolean: success
-        """
-        # Count objects in the inventory.
-        total = sum([item["number"] for item in self.inventory if obj_key == item["object_key"]])
-        if total < number:
-            raise (MudderyError(_("Can not remove this object.")))
-
-        # remove objects
-        to_remove = number
-        try:
-            index = 0
-            while index < len(self.inventory):
-                item = self.inventory[index]
-                if item["object_key"] != obj_key:
-                    index += 1
-                    continue
-
-                deleted = False
-                obj_num = item["number"]
-                if obj_num > 0:
-                    if obj_num > to_remove:
-                        # Reduce the object's number.
-                        CharacterInventory.set_dict(self.get_db_id(), item["position"], {"number": obj_num - to_remove})
-                        item["number"] = obj_num - to_remove
-                        to_remove = 0
-                    else:
-                        # Remove this object.
-                        if item["can_remove"]:
-                            CharacterInventory.remove_object(self.get_db_id(), item["position"])
-                            del self.inventory[index]
-                        else:
-                            CharacterInventory.set_dict(self.get_db_id(), item["position"], {"number": 0})
-                            item["number"] = 0
-
-                        to_remove -= obj_num
-                        deleted = True
-
-                if to_remove == 0:
-                    break
-
-                if not deleted:
-                    index += 1
-
-        except Exception as e:
-            logger.log_tracemsg("Can not remove object %s: %s" % (obj_key, e))
-            raise (MudderyError(_("Can not remove this object.")))
-
-        if to_remove > 0:
-            logger.log_err("Remove object error: %s" % obj_key)
-            raise (MudderyError(_("Can not remove this object.")))
-
-        if not mute:
             self.show_inventory()
 
     def exchange_objects(self, remove_list, receive_list, mute=False, show=True):
@@ -1122,7 +1144,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         :return:
         """
         with self.states.atomic():
-            self.remove_objects(remove_list, mute=True, show=False)
+            self.remove_objects_by_list(remove_list, mute=True, show=False)
             self.receive_objects(receive_list, mute=True, show=False)
 
         if show:
@@ -1132,18 +1154,18 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         """
         Send inventory data to player.
         """
-        self.msg({"inventory": self.return_inventory()})
+        self.msg({"inventory": self.get_inventory_appearance()})
 
-    def return_inventory(self):
+    def get_inventory_appearance(self):
         """
-        Get inventory's data.
+        Get the inventory's appearance to the player.
         """
         inv = []
 
         # load object's data
         common_models = ELEMENT("POCKET_OBJECT").get_models()
 
-        for item in self.inventory:
+        for position, item in self.inventory.items():
             object_record = WorldData.get_tables_data(common_models, key=item["object_key"])
             object_record = object_record[0]
 
@@ -1160,29 +1182,26 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
 
         return inv
 
-    def return_inventory_object(self, position):
+    def get_inventory_object_appearance(self, position):
         """
         Get inventory's data.
         """
-        for item in self.inventory:
-            if item["position"] == position:
-                if "obj" not in item or not item["obj"]:
-                    new_obj = ELEMENT(item["element_type"])()
-                    new_obj.setup_element(item["object_key"], item["level"])
-                    item["obj"] = new_obj
+        if position in self.inventory:
+            item = self.inventory[position]
+            item_obj = self.get_inventory_obj_by_pos(position)
 
-                appearance = item["obj"].get_appearance(self)
-                appearance["number"] = item["number"]
-                appearance["position"] = position
+            appearance = item_obj.get_appearance(self)
+            appearance["number"] = item["number"]
+            appearance["position"] = position
 
-                # add a discard command
-                if item["obj"].can_discard():
-                    appearance["cmds"].append({
-                        "name": _("Discard"),
-                        "cmd": "discard",
-                        "confirm": _("Discard this object?"),
-                    })
-                return appearance
+            # add a discard command
+            if item_obj.can_discard():
+                appearance["cmds"].append({
+                    "name": _("Discard"),
+                    "cmd": "discard",
+                    "confirm": _("Discard this object?"),
+                })
+            return appearance
 
     def return_equipments_object(self, position):
         """
@@ -1307,13 +1326,10 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         Equip an object.
         args: position: (int) position in the inventory
         """
-        item = None
-        for value in self.inventory:
-            if value["position"] == position:
-                item = value
-                break
-        if item is None:
+        if position not in self.inventory:
             raise MudderyError(_("Can not find this equipment."))
+
+        item = self.inventory[position]
 
         body_position = item["obj"].get_body_position()
         available_positions = set([r.key for r in EquipmentPositions.all()])
@@ -1335,7 +1351,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         self.equipments[body_position] = item
 
         # Remove from the inventory
-        self.remove_object_by_position(position, 1, True)
+        self.remove_objects_by_position(position, 1, True)
 
         # reset character's attributes
         self.refresh_states(True)
@@ -1343,7 +1359,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         message = {
             "status": self.return_status(),
             "equipments": self.return_equipments(),
-            "inventory": self.return_inventory()
+            "inventory": self.get_inventory_appearance()
         }
         self.msg(message)
 
@@ -1371,7 +1387,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
             message = {
                 "status": self.return_status(),
                 "equipments": self.return_equipments(),
-                "inventory": self.return_inventory()
+                "inventory": self.get_inventory_appearance()
             }
             self.msg(message)
 

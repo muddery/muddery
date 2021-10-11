@@ -87,7 +87,7 @@ class CmdInventory(BaseCommand):
 
     def func(self):
         "check inventory"
-        inv = self.caller.return_inventory()
+        inv = self.caller.get_inventory_appearance()
         self.caller.msg({"inventory":inv})
 
 
@@ -117,7 +117,7 @@ class CmdInventoryObject(BaseCommand):
             caller.msg({"alert": _("You should select something in your inventory.")})
             return
 
-        appearance = caller.return_inventory_object(args)
+        appearance = caller.get_inventory_object_appearance(args)
         if appearance:
             caller.msg({"inventory_obj": appearance}, context=self.context)
         else:
@@ -548,7 +548,7 @@ class CmdDiscard(BaseCommand):
 
         # remove object
         try:
-            caller.remove_object_position_all(int(position))
+            caller.remove_all_objects_by_position(int(position))
             caller.show_location()
         except Exception as e:
             # If the caller does not have this object.

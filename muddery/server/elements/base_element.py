@@ -150,7 +150,7 @@ class BaseElement(object):
         """
         return isinstance(self, ELEMENT(element_type))
 
-    def setup_element(self, element_key, level=None, first_time=False, temp=False):
+    def setup_element(self, element_key="", level=None, first_time=False, temp=False):
         """
         Set element data's key.
 

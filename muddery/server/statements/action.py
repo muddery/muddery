@@ -103,7 +103,7 @@ class FuncRemoveObjects(StatementFunction):
         if len(self.args) > 1:
             number = self.args[1]
 
-        return self.caller.remove_object(obj_key, number)
+        return self.caller.remove_objects_by_key(obj_key, number)
 
 
 class FuncTeleportTo(StatementFunction):
