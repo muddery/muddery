@@ -134,9 +134,10 @@ class MudderyAccount(DefaultAccount):
         if session:
             session.msg(logged_in={})
 
-            char_all = [{"name": char.get_name(), "id": char.get_id()} for char in self.db._playable_characters]
-            session.msg({"char_all": char_all,
-                         "max_char": settings.MAX_NR_CHARACTERS})
+            session.msg({
+                "char_all": self.get_all_nicknames(),
+                "max_char": settings.MAX_NR_CHARACTERS
+            })
 
     def get_all_characters(self):
         """
@@ -229,14 +230,17 @@ class MudderyAccount(DefaultAccount):
 
         # Find the character to puppet.
         try:
-            new_char = ELEMENT(settings.PLAYER_CHARACTER_ELEMENT_TYPE)()
+            if self.is_staff:
+                new_char = ELEMENT(settings.STAFF_CHARACTER_ELEMENT_TYPE)()
+                character_key = GAME_SETTINGS.get("default_staff_character_key")
+            else:
+                new_char = ELEMENT(settings.PLAYER_CHARACTER_ELEMENT_TYPE)()
+                character_key = GAME_SETTINGS.get("default_player_character_key")
             new_char.set_db_id(char_db_id)
 
             # do the connection
             new_char.set_account_id(self.id)
             new_char.set_session(session)
-
-            character_key = GAME_SETTINGS.get("default_player_character_key")
             new_char.setup_element(character_key)
         except:
             traceback.print_exc()

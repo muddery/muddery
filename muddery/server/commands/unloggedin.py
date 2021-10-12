@@ -76,59 +76,6 @@ def _throttle(session, maxlim=None, timeout=None, storage=_LATEST_FAILED_LOGINS)
         return False
 
 
-def create_guest_player(session):
-    """
-    Creates a guest player/character for this session, if one is available.
-
-    Args:
-    session (Session): the session which will use the guest player/character.
-
-    Returns:
-    GUEST_ENABLED (boolean), player (Player):
-    the boolean is whether guest accounts are enabled at all.
-    the Player which was created from an available guest name.
-    """
-    # check if guests are enabled.
-    if not settings.GUEST_ENABLED:
-        return False, None
-
-    # Check IP bans.
-    bans = ServerConfig.objects.conf("server_bans")
-    if bans and any(tup[2].match(session.address) for tup in bans if tup[2]):
-        # this is a banned IP!
-        string = "{rYou have been banned and cannot continue from here." \
-            "\nIf you feel this ban is in error, please email an admin.{x"
-        session.msg(string)
-        session.sessionhandler.disconnect(session, "Good bye! Disconnecting.")
-        return True, None
-
-    try:
-        # Find an available guest name.
-        playername = None
-        for playername in settings.GUEST_LIST:
-            if not AccountDB.objects.filter(username__iexact=playername).count():
-                break
-            playername = None
-        if playername == None:
-            session.msg("All guest accounts are in use. Please try again later.")
-            return True, None
-
-        password = "%016x" % getrandbits(64)
-        permissions = settings.PERMISSION_GUEST_DEFAULT
-        new_player = create_player(playername, password, permissions=permissions)
-        if new_player:
-            create_character(new_player, playername, permissions=permissions)
-
-    except Exception as e:
-        # We are in the middle between logged in and -not, so we have
-        # to handle tracebacks ourselves at this point. If we don't,
-        # we won't see any errors at all.
-        session.msg({"alert":_("There was an error creating the Player: %s" % e)})
-        logger.log_trace()
-    finally:
-        return True, new_player
-
-
 def create_normal_player(session, playername, password):
     """
     Create a new player.
@@ -456,8 +403,6 @@ class CmdQuickLogin(BaseCommand):
             session.msg({"alert":string})
             return
 
-        player = None
-        character = None
         if AccountDB.objects.filter(username__iexact=name_md5):
             # Already has this player. Login.
             player = connect_normal_player(session, name_md5, name_md5)
@@ -465,21 +410,21 @@ class CmdQuickLogin(BaseCommand):
             # Register
             player = create_normal_player(session, name_md5, name_md5)
 
-        if player:
-            session.sessionhandler.login(session, player)
-            if player.db._last_puppet:
-                character = player.db._last_puppet
-            elif player.db._playable_characters:
-                character = player.db._playable_characters[0]
-            else:
-                character = create_character(player, playername)
+        if not player:
+            session.msg({"alert": _("{RYou cannot login.")})
 
-        if character:
-            try:
-                player.puppet_object(session, character)
-                player.db._last_puppet = character
-            except RuntimeError as exc:
-                session.msg({"alert":_("{RYou cannot become {C%s{n: %s") % (character.name, exc)})
+        session.sessionhandler.login(session, player)
+        char_all = player.get_all_characters()
+        if len(char_all) > 0:
+            char_id = char_all.keys[0]
+        else:
+            character = create_character(player, playername)
+            char_id = character.get_db_id()
+
+        try:
+            player.puppet_object(session, char_id)
+        except RuntimeError as exc:
+            session.msg({"alert": _("{RYou cannot login.")})
 
 
 class CmdUnconnectedQuit(BaseCommand):

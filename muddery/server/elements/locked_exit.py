@@ -40,6 +40,9 @@ class MudderyLockedExit(ELEMENT("EXIT")):
         if not super(MudderyLockedExit, self).can_traverse(character):
             return False
 
+        if character.is_staff():
+            return True
+
         # Only can pass exits which have already been unlocked.
         if character.is_exit_unlocked(self.get_element_key()):
             if not self.const.unlock_forever:

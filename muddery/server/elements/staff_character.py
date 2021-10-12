@@ -34,6 +34,14 @@ class MudderyStaffCharacter(ELEMENT("PLAYER_CHARACTER")):
     element_name = _("Staff Character", "elements")
     model_name = "staff_characters"
 
+    def is_staff(self):
+        """
+        Check if this is a staff character.
+
+        :return:
+        """
+        return True
+
     def is_visible(self, caller):
         """
         If this object is not visible.
@@ -55,6 +63,7 @@ class MudderyStaffCharacter(ELEMENT("PLAYER_CHARACTER")):
         output = {
             "id": self.get_id(),
             "name": self.get_name(),
+            "is_staff": self.is_staff(),
             "icon": getattr(self, "icon", None),
             "allow_commands": True,
         }
@@ -74,3 +83,12 @@ class MudderyStaffCharacter(ELEMENT("PLAYER_CHARACTER")):
         self.msg(message)
 
         self.show_location()
+
+    def get_appearance(self, caller):
+        """
+        This is a convenient hook for a 'look'
+        command to call.
+        """
+        info = super(MudderyStaffCharacter, self).get_appearance(caller)
+        info["is_staff"] = True
+        return info

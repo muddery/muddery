@@ -176,4 +176,5 @@ MudderyLocalDict = {
     "FROM[": "来自[",
     "ME": "我",
     "LOCAL": "本地",
+    "ADMIN": "管理员",
 };

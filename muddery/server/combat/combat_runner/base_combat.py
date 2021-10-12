@@ -23,7 +23,6 @@ from evennia.utils import logger
 from muddery.server.utils import defines
 from muddery.server.database.worlddata.worlddata import WorldData
 from muddery.server.mappings.element_set import ELEMENT, ELEMENT_SET
-from muddery.server.utils import utils
 
 
 class CStatus(Enum):
@@ -116,7 +115,7 @@ class BaseCombat(object):
             # add the combat handler
             character.join_combat(combat_id)
 
-            if utils.is_player(character):
+            if character.is_player():
                 self.show_combat(character)
 
     def start(self):
@@ -250,7 +249,7 @@ class BaseCombat(object):
         all_player_left = True
         for char in self.characters.values():
             if char["status"] != CStatus.LEFT and\
-               char["char"].is_element(settings.PLAYER_CHARACTER_ELEMENT_TYPE):
+               char["char"].is_player():
                 all_player_left = False
                 break
 

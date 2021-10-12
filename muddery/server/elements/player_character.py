@@ -140,34 +140,6 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
 
     cmdset_storage = property(__cmdset_storage_get, __cmdset_storage_set, __cmdset_storage_del)
 
-    def contents_get(self, exclude=None):
-        """
-        Returns the contents of this object, i.e. all
-        objects that has this object set as its location.
-        This should be publically available.
-
-        Args:
-            exclude (Object): Object to exclude from returned
-                contents list
-
-        Returns:
-            contents (list): List of contents of this Object.
-
-        Notes:
-            Also available as the `contents` property.
-
-        """
-        return []
-
-    def contents_set(self, *args):
-        "You cannot replace this property"
-        raise AttributeError(
-            "{}.contents is read-only. Use obj.move_to or "
-            "obj.location to move an object here.".format(self.__class__)
-        )
-
-    contents = property(contents_get, contents_set, contents_set)
-
     # initialize all handlers in a lazy fashion
     @lazy_property
     def quest_handler(self):
@@ -224,6 +196,14 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         :return:
         """
         return self.db_id
+
+    def is_player(self):
+        """
+        Check if this is a player character.
+
+        :return:
+        """
+        return True
 
     def set_level(self, level):
         """

@@ -13,7 +13,6 @@ from muddery.server.utils.loot_handler import LootHandler
 from muddery.server.database.worlddata.loot_list import RoomProfitList
 from muddery.server.statements.statement_handler import STATEMENT_HANDLER
 from muddery.server.mappings.element_set import ELEMENT
-from muddery.server.utils.utils import is_player
 from muddery.server.utils.localized_strings_handler import _
 
 
@@ -60,7 +59,7 @@ class MudderyProfitRoom(ELEMENT("ROOM")):
         """
         super(MudderyProfitRoom, self).at_character_arrive(character)
 
-        if is_player(character):
+        if character.is_player():
             if STATEMENT_HANDLER.match_condition(self.const.condition, character, None):
                 self.last_trigger_time[character.get_id()] = time.time()
 

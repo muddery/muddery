@@ -345,13 +345,18 @@ MudderyMainFrame.prototype.onLogout = function(data) {
  */
 MudderyMainFrame.prototype.onPuppet = function(data) {
     core.data_handler.character_id = data["id"];
-    core.data_handler.character_name = data["name"];
     core.data_handler.character_icon = data["icon"];
 
+    var name = data["name"];
+    if (data["is_staff"]) {
+        name += "[" + core.trans("ADMIN") + "]";
+    }
+    core.data_handler.character_name = name;
+
     mud.scene_window.clear();
-    mud.scene_window.setInfo(data["name"], data["icon"]);
-    mud.char_data_window.setInfo(data["name"], data["icon"]);
-    mud.combat_window.setInfo(data["name"], data["icon"]);
+    mud.scene_window.setInfo(name, data["icon"]);
+    mud.char_data_window.setInfo(name, data["icon"]);
+    mud.combat_window.setInfo(name, data["icon"]);
 
     if ("allow_commands" in data && data["allow_commands"]) {
         // show command button
@@ -2217,6 +2222,11 @@ MudderyScene.prototype.setScene = function(scene) {
         // Only show 10 players.
         var count = 0;
         for (var i = 0; i < scene["players"].length; i++) {
+            var name = scene["players"][i]["name"];
+            if (scene["players"][i]["is_staff"]) {
+                name += "[" + core.trans("ADMIN") + "]";
+            }
+
             $("<div>")
                 .addClass("scene-button object-button player")
                 .data("index", i)

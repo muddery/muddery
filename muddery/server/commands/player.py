@@ -13,6 +13,7 @@ from muddery.server.utils.localized_strings_handler import _
 from muddery.server.utils.builder import create_character
 from muddery.server.database.gamedata.account_characters import AccountCharacters
 from muddery.server.database.gamedata.character_info import CharacterInfo
+from muddery.server.utils.game_settings import GAME_SETTINGS
 
 
 MAX_NR_CHARACTERS = settings.MAX_NR_CHARACTERS
@@ -148,14 +149,12 @@ class CmdPuppet(BaseCommand):
         char_id = args
         char_all = player.get_all_characters()
         if char_id not in char_all:
-            print("not in")
             session.msg({"alert": _("That is not a valid character choice.")})
             return
 
         try:
             player.puppet_object(session, char_id)
         except Exception as e:
-            traceback.print_exc()
             session.msg({"alert": _("That is not a valid character choice.")})
 
 
@@ -251,7 +250,15 @@ class CmdCharCreate(BaseCommand):
             pass
 
         try:
-            create_character(player, name)
+            if player.is_staff:
+                create_character(
+                    player,
+                    name,
+                    character_key=GAME_SETTINGS.get("default_staff_character_key"),
+                    element_type=settings.STAFF_CHARACTER_ELEMENT_TYPE
+                )
+            else:
+                create_character(player, name)
         except Exception as e:
             # We are in the middle between logged in and -not, so we have
             # to handle tracebacks ourselves at this point. If we don't,

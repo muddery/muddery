@@ -52,7 +52,7 @@ class EventTrigger(object):
         self.owner = weakref.proxy(owner)
 
         # The owner can bypass all events.
-        self.can_bypass = self.owner.is_element(settings.STAFF_CHARACTER_ELEMENT_TYPE)
+        self.can_bypass = self.owner.is_staff()
 
     @classmethod
     def all_triggers(cls):

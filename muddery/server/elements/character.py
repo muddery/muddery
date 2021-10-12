@@ -686,6 +686,22 @@ class MudderyCharacter(BaseElement):
         """
         return True
 
+    def is_player(self):
+        """
+        Check if this is a player character.
+
+        :return:
+        """
+        return False
+
+    def is_staff(self):
+        """
+        Check if this is a staff character.
+
+        :return:
+        """
+        return False
+
     def die(self, killers):
         """
         This character die.

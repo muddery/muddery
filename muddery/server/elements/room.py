@@ -9,7 +9,6 @@ import ast
 from django.conf import settings
 from evennia.utils import logger
 from evennia.objects.objects import DefaultRoom
-from muddery.server.utils.utils import is_player
 from muddery.server.utils.game_settings import GAME_SETTINGS
 from muddery.server.database.worlddata.image_resource import ImageResource
 from muddery.server.database.worlddata.world_npcs import WorldNPCs
@@ -251,15 +250,16 @@ class MudderyRoom(BaseElement):
         self.all_characters[character.get_id()] = character
 
         # send surrounding changes to player
-        char_is_player = is_player(character)
-        if not GAME_SETTINGS.get("solo_mode") or not char_is_player:
-            # Players can not see other players in solo mode.
-            change = {
-                "type": "players" if char_is_player else "npcs",
-                "id": character.get_id(),
-                "name": character.get_name()
-            }
-            self.msg_characters({"obj_moved_in": change}, {character.get_id()})
+        if not character.is_staff():
+            # Players can not see staffs.
+            if not GAME_SETTINGS.get("solo_mode") or not character.is_player():
+                # Players can not see other players in solo mode.
+                change = {
+                    "type": "players" if character.is_player() else "npcs",
+                    "id": character.get_id(),
+                    "name": character.get_name()
+                }
+                self.msg_characters({"obj_moved_in": change}, {character.get_id()})
 
     def at_character_leave(self, character):
         """
@@ -274,15 +274,16 @@ class MudderyRoom(BaseElement):
             pass
 
         # send surrounding changes to player
-        char_is_player = is_player(character)
-        if not GAME_SETTINGS.get("solo_mode") or not char_is_player:
-            # Players can not see other players in solo mode.
-            change = {
-                "type": "players" if char_is_player else "npcs",
-                "id": character.get_id(),
-                "name": character.get_name()
-            }
-            self.msg_characters({"obj_moved_out": change}, {character.get_id()})
+        if not character.is_staff():
+            # Players can not see staffs.
+            if not GAME_SETTINGS.get("solo_mode") or not character.is_player():
+                # Players can not see other players in solo mode.
+                change = {
+                    "type": "players" if character.is_player() else "npcs",
+                    "id": character.get_id(),
+                    "name": character.get_name()
+                }
+                self.msg_characters({"obj_moved_out": change}, {character.get_id()})
 
     def set_name(self, name):
         """
@@ -373,10 +374,10 @@ class MudderyRoom(BaseElement):
         if not GAME_SETTINGS.get("solo_mode"):
             # Players can not see other players in solo mode.
             info["players"] = [item.get_appearance(caller) for key, item in self.all_characters.items()
-                               if is_player(item) and item.get_id() != caller.get_id() and item.is_visible(caller)]
+                               if item.is_player() and item.get_id() != caller.get_id() and item.is_visible(caller)]
 
         info["npcs"] = [item.get_appearance(caller) for key, item in self.all_characters.items()
-                         if not is_player(item) and item.is_visible(caller)]
+                         if not item.is_player() and item.is_visible(caller)]
         info["exits"] = [item["obj"].get_appearance(caller) for key, item in self.all_exits.items()
                          if item["obj"].is_visible(caller)]
         info["objects"] = [item["obj"].get_appearance(caller) for key, item in self.all_objects.items()

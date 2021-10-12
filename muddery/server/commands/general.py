@@ -1116,7 +1116,6 @@ class CmdBuy(BaseCommand):
         try:
             npc.sell_goods(shop, int(goods), caller)
         except Exception as e:
-            traceback.print_exc()
             caller.msg({"alert": _("Can not buy this goods.")})
             logger.log_err("Can not buy %s %s %s: %s" % (args["npc"], shop, goods, e))
             return
