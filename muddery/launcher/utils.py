@@ -380,46 +380,48 @@ def create_database():
     Create the game's database.
     """
     # make migrations
+    django_args = ["makemigrations"]
+    django_kwargs = {}
+    try:
+        django.core.management.call_command(*django_args, **django_kwargs)
+    except django.core.management.base.CommandError as exc:
+        raise(configs.ERROR_INPUT.format(traceback=exc, args=django_args, kwargs=django_kwargs))
+
     django_args = ["makemigrations", "gamedata"]
     django_kwargs = {}
     try:
         django.core.management.call_command(*django_args, **django_kwargs)
     except django.core.management.base.CommandError as exc:
-        print(configs.ERROR_INPUT.format(traceback=exc, args=django_args, kwargs=django_kwargs))
-        raise
+        raise(configs.ERROR_INPUT.format(traceback=exc, args=django_args, kwargs=django_kwargs))
 
     django_args = ["makemigrations", "worlddata"]
     django_kwargs = {}
     try:
         django.core.management.call_command(*django_args, **django_kwargs)
     except django.core.management.base.CommandError as exc:
-        print(configs.ERROR_INPUT.format(traceback=exc, args=django_args, kwargs=django_kwargs))
-        raise
+        raise(configs.ERROR_INPUT.format(traceback=exc, args=django_args, kwargs=django_kwargs))
 
     # migrate the database
+    django_args = ["migrate"]
+    django_kwargs = {}
     try:
-        django_args = ["migrate"]
-        django_kwargs = {}
-        django.core.management.call_command(*django_args, **django_kwargs)
-
-        django_args = ["migrate", "gamedata"]
-        django_kwargs = {"database": "gamedata"}
-        django.core.management.call_command(*django_args, **django_kwargs)
-
-        django_args = ["migrate", "worlddata"]
-        django_kwargs = {"database": "worlddata"}
         django.core.management.call_command(*django_args, **django_kwargs)
     except django.core.management.base.CommandError as exc:
-        print(configs.ERROR_INPUT.format(traceback=exc, args=django_args, kwargs=django_kwargs))
-        raise
+        raise(configs.ERROR_INPUT.format(traceback=exc, args=django_args, kwargs=django_kwargs))
 
-    # import worlddata
+    django_args = ["migrate", "gamedata"]
+    django_kwargs = {"database": "gamedata"}
     try:
-        print("Importing local data.")
-        import_local_data()
-    except Exception as e:
-        traceback.print_exc()
-        print("Import local data error: %s" % e)
+        django.core.management.call_command(*django_args, **django_kwargs)
+    except django.core.management.base.CommandError as exc:
+        raise(configs.ERROR_INPUT.format(traceback=exc, args=django_args, kwargs=django_kwargs))
+
+    django_args = ["migrate", "worlddata"]
+    django_kwargs = {"database": "worlddata"}
+    try:
+        django.core.management.call_command(*django_args, **django_kwargs)
+    except django.core.management.base.CommandError as exc:
+        raise(configs.ERROR_INPUT.format(traceback=exc, args=django_args, kwargs=django_kwargs))
 
 
 def print_info():

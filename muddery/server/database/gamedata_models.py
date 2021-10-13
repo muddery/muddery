@@ -1,7 +1,7 @@
 
 from django.db import models
 
-KEY_LENGTH = 255
+KEY_LENGTH = 80
 NAME_LENGTH = 80
 
 

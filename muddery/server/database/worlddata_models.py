@@ -6,7 +6,7 @@ from django.core.exceptions import ValidationError
 from django.conf import settings
 
 
-KEY_LENGTH = 255
+KEY_LENGTH = 80
 NAME_LENGTH = 80
 POSITION_LENGTH = 80
 VALUE_LENGTH = 80

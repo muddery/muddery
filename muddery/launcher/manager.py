@@ -113,42 +113,11 @@ def migrate_database():
     os.chdir(gamedir)
     evennia_launcher.init_game_directory(gamedir, check_db=False)
 
-    # make migrations
-    django_args = ["makemigrations", "gamedata"]
-    django_kwargs = {}
     try:
-        django.core.management.call_command(*django_args, **django_kwargs)
-    except django.core.management.base.CommandError as exc:
-        print(configs.ERROR_INPUT.format(traceback=exc, args=django_args, kwargs=django_kwargs))
-
-    django_args = ["makemigrations", "worlddata"]
-    django_kwargs = {}
-    try:
-        django.core.management.call_command(*django_args, **django_kwargs)
-    except django.core.management.base.CommandError as exc:
-        print(configs.ERROR_INPUT.format(traceback=exc, args=django_args, kwargs=django_kwargs))
-
-    # migrate the database
-    django_args = ["migrate"]
-    django_kwargs = {}
-    try:
-        django.core.management.call_command(*django_args, **django_kwargs)
-    except django.core.management.base.CommandError as exc:
-        print(configs.ERROR_INPUT.format(traceback=exc, args=django_args, kwargs=django_kwargs))
-
-    django_args = ["migrate", "gamedata"]
-    django_kwargs = {"database": "gamedata"}
-    try:
-        django.core.management.call_command(*django_args, **django_kwargs)
-    except django.core.management.base.CommandError as exc:
-        print(configs.ERROR_INPUT.format(traceback=exc, args=django_args, kwargs=django_kwargs))
-
-    django_args = ["migrate", "worlddata"]
-    django_kwargs = {"database": "worlddata"}
-    try:
-        django.core.management.call_command(*django_args, **django_kwargs)
-    except django.core.management.base.CommandError as exc:
-        print(configs.ERROR_INPUT.format(traceback=exc, args=django_args, kwargs=django_kwargs))
+        utils.create_database()
+    except Exception as e:
+        traceback.print_exc()
+        print("Migrate database error: %s" % e)
 
 
 def show_version(about=False):
@@ -201,9 +170,19 @@ def run_evennia(option):
 
     if not utils.check_database():
         try:
+            print("Migrating databases.")
             utils.create_database()
         except Exception as e:
             traceback.print_exc()
+            print("Migrate database error: %s" % e)
+            raise
+
+        try:
+            print("Importing local data.")
+            utils.import_local_data()
+        except Exception as e:
+            traceback.print_exc()
+            print("Import local data error: %s" % e)
             raise
 
     # pass-through to evennia
