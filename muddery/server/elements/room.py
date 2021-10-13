@@ -6,15 +6,12 @@ Rooms are simple containers that has no location of their own.
 """
 
 import ast
-from django.conf import settings
 from evennia.utils import logger
-from evennia.objects.objects import DefaultRoom
 from muddery.server.utils.game_settings import GAME_SETTINGS
 from muddery.server.database.worlddata.image_resource import ImageResource
 from muddery.server.database.worlddata.world_npcs import WorldNPCs
 from muddery.server.database.worlddata.world_exits import WorldExits
 from muddery.server.database.worlddata.world_objects import WorldObjects
-from muddery.server.database.worlddata.worlddata import WorldData
 from muddery.server.mappings.element_set import ELEMENT
 from muddery.server.utils.defines import ConversationType, EventType
 from muddery.server.utils.localized_strings_handler import _

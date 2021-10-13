@@ -11,8 +11,6 @@ creation commands.
 import time, datetime, traceback, ast
 from apscheduler.schedulers.background import BackgroundScheduler
 from django.conf import settings
-from django.core.exceptions import ObjectDoesNotExist
-from evennia.objects.objects import DefaultCharacter
 from evennia.utils import logger
 from evennia.utils.utils import lazy_property, class_from_module
 from muddery.server.elements.base_element import BaseElement
