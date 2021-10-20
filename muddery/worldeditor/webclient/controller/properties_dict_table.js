@@ -16,7 +16,7 @@ PropertiesDictTable.prototype.init = function() {
     this.bindEvents();
 
     service.queryAllElements(this.queryAllElementsSuccess, this.queryTableFailed);
-    service.queryElementProperties(this.element_type, this.queryTableSuccess);
+    service.queryElementTypeProperties(this.element_type, this.queryTableSuccess);
 }
 
 
@@ -34,7 +34,7 @@ PropertiesDictTable.prototype.bindEvents = function() {
 PropertiesDictTable.prototype.onSelectElementChange = function(e) {
     controller.element_type = $(this).val();
 
-    service.queryElementProperties(controller.element_type, controller.refreshTableSuccess);
+    service.queryElementTypeProperties(controller.element_type, controller.refreshTableSuccess);
 }
 
 PropertiesDictTable.prototype.queryAllElementsSuccess = function(data) {
@@ -89,7 +89,7 @@ PropertiesDictTable.prototype.setTreeLevel = function(source, target, node, leve
 }
 
 PropertiesDictTable.prototype.refresh = function() {
-    service.queryElementProperties(
+    service.queryElementTypeProperties(
         this.element_type,
         this.refreshTableSuccess,
         this.failedCallback

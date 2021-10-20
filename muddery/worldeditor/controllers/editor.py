@@ -127,7 +127,7 @@ class QueryAreas(BaseRequestProcesser):
         return success_response(data)
 
 
-class QueryElementProperties(BaseRequestProcesser):
+class QueryElementTypeProperties(BaseRequestProcesser):
     """
     Query an element's properties.
 

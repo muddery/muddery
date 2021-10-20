@@ -495,9 +495,6 @@ class exit_locks(BaseObjects):
 class object_creators(BaseObjects):
     "Players can get new objects from an object_creator."
 
-    # related object's key
-    relation = models.CharField(max_length=KEY_LENGTH, db_index=True, blank=True)
-
     # loot's verb
     loot_verb = models.CharField(max_length=NAME_LENGTH, blank=True)
 
@@ -604,7 +601,6 @@ class shop_goods(models.Model):
         "Define Django meta options"
         abstract = True
         app_label = "worlddata"
-        unique_together = ("shop", "goods")
 
 
 # ------------------------------------------------------------
