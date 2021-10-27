@@ -6,11 +6,11 @@ set and has a single command defined on itself with the same name as its key,
 for allowing Characters to traverse the exit to its destination.
 
 """
+
 import traceback
 import weakref
-from evennia.utils import logger
+from muddery.server.utils import logger
 from muddery.server.utils.localized_strings_handler import _
-from muddery.server.mappings.element_set import ELEMENT
 from muddery.server.elements.base_element import BaseElement
 from muddery.server.statements.statement_handler import STATEMENT_HANDLER
 from muddery.server.server import Server

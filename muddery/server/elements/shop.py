@@ -5,7 +5,6 @@ The DialogueHandler maintains a pool of dialogues.
 
 """
 
-from evennia.utils import logger
 from muddery.server.mappings.element_set import ELEMENT
 from muddery.server.utils.localized_strings_handler import _
 from muddery.server.statements.statement_handler import STATEMENT_HANDLER

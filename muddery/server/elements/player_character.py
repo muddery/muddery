@@ -14,7 +14,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from evennia.scripts.scripthandler import ScriptHandler
 from evennia.commands.cmdsethandler import CmdSetHandler
 from evennia.utils.utils import lazy_property
-from evennia.utils import logger
+from muddery.server.utils import logger
 from evennia.comms.models import ChannelDB
 from muddery.server.server import Server
 from muddery.server.utils.quest_handler import QuestHandler
@@ -971,7 +971,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
             return result
         except Exception as e:
             ostring = "Can not use %s: %s" % (item["key"], e)
-            logger.log_tracemsg(ostring)
+            logger.log_trace(ostring)
 
         return _("No effect.")
 
@@ -1862,7 +1862,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
             DIALOGUE_HANDLER.finish_dialogue(dlg_key, self, npc)
         except Exception as e:
             ostring = "Can not finish dialogue %s: %s" % (dlg_key, e)
-            logger.log_tracemsg(ostring)
+            logger.log_trace(ostring)
 
         # Get next dialogue.
         next_dialogues = DIALOGUE_HANDLER.get_next_dialogues(dlg_key, self, npc)

@@ -4,7 +4,7 @@ LootHandler handles matters of loots.
 
 import random
 import math
-from evennia.utils import logger
+from muddery.server.utils import logger
 from muddery.server.statements.statement_handler import STATEMENT_HANDLER
 
 
@@ -34,7 +34,7 @@ class LootHandler(object):
                     "condition": d.condition
                 })
         except Exception as e:
-            logger.log_errmsg("Can't load loot info %s" % e)
+            logger.log_err("Can't load loot info %s" % e)
 
         self.loot_list = loot_list
 

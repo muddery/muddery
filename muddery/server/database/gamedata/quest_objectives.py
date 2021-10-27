@@ -3,10 +3,7 @@
 Store object's element key data in memory.
 """
 
-from django.apps import apps
 from django.conf import settings
-from django.core.exceptions import ObjectDoesNotExist
-from evennia.utils import logger
 from muddery.server.utils import utils
 
 

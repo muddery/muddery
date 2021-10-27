@@ -3,7 +3,7 @@ All available event actions.
 """
 
 from django.conf import settings
-from evennia.utils import logger
+from muddery.server.utils import logger
 from muddery.server.utils.utils import classes_in_path
 from muddery.server.events.base_event_action import BaseEventAction
 
@@ -24,7 +24,7 @@ class EventActionSet(object):
             key = cls.key
             if key:
                 if key in self.dict:
-                    logger.log_infomsg("Event action %s is replaced by %s." % (key, cls))
+                    logger.log_info("Event action %s is replaced by %s." % (key, cls))
                 self.dict[key] = cls()
 
     def get(self, key):

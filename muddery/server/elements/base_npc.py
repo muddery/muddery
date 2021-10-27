@@ -9,7 +9,7 @@ creation commands.
 """
 
 import traceback
-from evennia.utils import logger
+from muddery.server.utils import logger
 from muddery.server.utils.dialogue_handler import DIALOGUE_HANDLER
 from muddery.server.mappings.element_set import ELEMENT
 from muddery.server.database.worlddata.npc_dialogues import NPCDialogues
@@ -75,7 +75,7 @@ class MudderyBaseNPC(ELEMENT("CHARACTER")):
                 shop.set_owner(self)
                 self.shops[key] = shop
             except Exception as e:
-                logger.log_errmsg("Can not create shop %s: (%s)%s" % (key, type(e).__name__, e))
+                logger.log_err("Can not create shop %s: (%s)%s" % (key, type(e).__name__, e))
                 continue
 
     def get_appearance(self, caller):

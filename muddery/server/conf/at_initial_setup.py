@@ -14,9 +14,6 @@ does what you expect it to.
 
 """
 
-from django.conf import settings
-from evennia.utils import search
-from muddery.server.utils import builder
 from muddery.server.utils.game_settings import GAME_SETTINGS
 import traceback
 

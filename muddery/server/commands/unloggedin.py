@@ -7,12 +7,12 @@ import re
 import time
 import hashlib
 from collections import defaultdict
-from random import getrandbits
 from django.conf import settings
 from evennia.accounts.models import AccountDB
 from evennia.server.models import ServerConfig
-from evennia.utils import logger, class_from_module
+from evennia.utils import class_from_module
 from evennia.commands.cmdhandler import CMD_LOGINSTART
+from muddery.server.utils import logger
 from muddery.server.commands.base_command import BaseCommand
 from muddery.server.utils.builder import create_player, create_character
 from muddery.server.utils.localized_strings_handler import _
@@ -128,7 +128,7 @@ def create_normal_player(session, playername, password):
         # to handle tracebacks ourselves at this point. If we don't,
         # we won't see any errors at all.
         session.msg({"alert":_("There was an error creating the Player: %s" % e)})
-        logger.log_tracemsg()
+        logger.log_trace()
 
     return new_player
 
@@ -214,7 +214,7 @@ class CmdUnconnectedConnect(BaseCommand):
             password = args["password"]
         except Exception:
             string = 'Can not log in.'
-            logger.log_errmsg(string)
+            logger.log_err(string)
             session.msg({"alert":string})
             return
 
@@ -360,7 +360,7 @@ class CmdUnconnectedCreate(BaseCommand):
             string += '\n        "connect":<connect>'
             string += '\n        }'
 
-            logger.log_errmsg(string)
+            logger.log_err(string)
             session.msg({"alert":string})
             return
 
@@ -399,7 +399,7 @@ class CmdQuickLogin(BaseCommand):
             name_md5 = md5.hexdigest()
         except Exception:
             string = 'Syntax error!'
-            logger.log_errmsg(string)
+            logger.log_err(string)
             session.msg({"alert":string})
             return
 

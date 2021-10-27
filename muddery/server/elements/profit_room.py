@@ -8,7 +8,6 @@ Rooms are simple containers that has no location of their own.
 import time
 from apscheduler.schedulers.background import BackgroundScheduler
 from evennia.utils.utils import lazy_property
-from evennia.utils import logger
 from muddery.server.utils.loot_handler import LootHandler
 from muddery.server.database.worlddata.loot_list import RoomProfitList
 from muddery.server.statements.statement_handler import STATEMENT_HANDLER

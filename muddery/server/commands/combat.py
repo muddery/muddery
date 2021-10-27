@@ -2,7 +2,7 @@
 Battle commands. They only can be used when a character is in a combat.
 """
 
-from evennia.utils import logger
+from muddery.server.utils import logger
 from muddery.server.commands.base_command import BaseCommand
 from muddery.server.utils.localized_strings_handler import _
 
@@ -141,5 +141,5 @@ class CmdCastCombatSkill(BaseCommand):
             caller.cast_combat_skill(skill_key, target_id)
         except Exception as e:
             caller.msg({"alert": _("Can not cast this skill.")})
-            logger.log_tracemsg("Can not cast skill %s: %s" % (skill_key, e))
+            logger.log_trace("Can not cast skill %s: %s" % (skill_key, e))
             return

@@ -4,7 +4,6 @@ Store object's element key data in memory.
 """
 
 from django.conf import settings
-from evennia.utils import logger
 from muddery.server.utils import utils
 
 

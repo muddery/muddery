@@ -2,10 +2,8 @@
 Characters' combat.
 """
 
-import json, traceback
 from django.conf import settings
 from muddery.server.utils import utils
-from muddery.server.utils.exception import MudderyError, ERR
 
 
 class CharacterCombat(object):

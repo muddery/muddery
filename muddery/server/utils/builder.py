@@ -5,8 +5,9 @@ This module handles importing data from csv files and creating the whole game wo
 import traceback
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
-from evennia.utils import create, logger
+from evennia.utils import create
 from evennia.comms.models import ChannelDB
+from muddery.server.utils import logger
 from muddery.server.utils.game_settings import GAME_SETTINGS
 from muddery.server.mappings.element_set import ELEMENT, ELEMENT_SET
 from muddery.server.database.gamedata.account_characters import AccountCharacters

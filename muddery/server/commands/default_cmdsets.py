@@ -10,7 +10,6 @@ To create new commands to populate the cmdset, see
 
 """
 
-from evennia import CmdSet
 from evennia import default_cmds
 from muddery.server.commands import combat
 from muddery.server.commands import general

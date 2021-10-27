@@ -4,7 +4,7 @@ This model handle statements.
 
 import re, ast, traceback
 from django.conf import settings
-from evennia.utils import logger
+from muddery.server.utils import logger
 from evennia.utils.utils import class_from_module
 
 
@@ -58,7 +58,7 @@ def get_condition_func(func_set, caller, obj, **kwargs):
             else:
                 return "False"
         except Exception as e:
-            logger.log_errmsg("Exec function error: %s %s" % (function, repr(e)))
+            logger.log_err("Exec function error: %s %s" % (function, repr(e)))
             traceback.print_exc()
             return "None"
 
@@ -92,7 +92,7 @@ def exec_function(func_set, func_word, caller, obj, **kwargs):
 
     func_class = func_set.get_func_class(func_key)
     if not func_class:
-        logger.log_errmsg("Statement error: Can not find function: %s of %s." % (func_key, func_word))
+        logger.log_err("Statement error: Can not find function: %s of %s." % (func_key, func_word))
         return
 
     func_obj = func_class()
@@ -139,7 +139,7 @@ class StatementHandler(object):
             try:
                 exec_function(self.action_func_set, function, caller, obj, **kwargs)
             except Exception as e:
-                logger.log_errmsg("Exec function error: %s %s" % (function, repr(e)))
+                logger.log_err("Exec function error: %s %s" % (function, repr(e)))
                 traceback.print_exc()
 
         return
@@ -168,7 +168,7 @@ class StatementHandler(object):
                 if result:
                     results.append(result)
             except Exception as e:
-                logger.log_errmsg("Exec function error: %s %s" % (function, repr(e)))
+                logger.log_err("Exec function error: %s %s" % (function, repr(e)))
                 traceback.print_exc()
 
         return results
@@ -195,7 +195,7 @@ class StatementHandler(object):
             # do condition
             result = eval(exec_string)
         except Exception as e:
-            logger.log_errmsg("Exec condition error: %s %s" % (condition, repr(e)))
+            logger.log_err("Exec condition error: %s %s" % (condition, repr(e)))
             traceback.print_exc()
             return False
 

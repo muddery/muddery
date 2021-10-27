@@ -5,10 +5,8 @@ This model translates default strings into localized strings.
 from collections import deque
 import time
 import math
-from django.conf import settings
 from twisted.internet import reactor
 from twisted.internet import task
-from evennia import create_script
 from muddery.server.database.gamedata.honours_mapper import HONOURS_MAPPER
 from muddery.server.utils.localized_strings_handler import _
 from muddery.server.utils.defines import CombatType

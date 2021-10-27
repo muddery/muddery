@@ -6,10 +6,7 @@ The licence of Evennia can be found in evennia/LICENSE.txt.
 """
 import traceback
 
-from django.conf import settings
-from evennia.utils import logger
-from evennia import create_script
-from evennia.comms.models import ChannelDB
+from muddery.server.utils import logger
 from muddery.server.commands.base_command import BaseCommand
 from muddery.server.utils.localized_strings_handler import _
 from muddery.server.utils.exception import MudderyError
@@ -208,7 +205,7 @@ class CmdSay(BaseCommand):
                 obj = Server.world.get_character(int(target))
         except Exception as e:
             ostring = "Can not find %s %s: %s" % (target_type, target, e)
-            logger.log_tracemsg(ostring)
+            logger.log_trace(ostring)
 
         if not obj:
             self.msg({"alert": _("You can not talk to it.")})
@@ -459,7 +456,7 @@ class CmdLoot(BaseCommand):
             obj.loot(caller)
         except Exception as e:
             ostring = "Can not loot %s: %s" % (obj.get_element_key(), e)
-            logger.log_tracemsg(ostring)
+            logger.log_trace(ostring)
             
         caller.show_location()
 
@@ -504,7 +501,7 @@ class CmdUse(BaseCommand):
             caller.show_location()
         except Exception as e:
             ostring = "Can not use %s: %s" % (self.args, e)
-            logger.log_tracemsg(ostring)
+            logger.log_trace(ostring)
 
         # Send result to the player.
         if not result:
@@ -553,7 +550,7 @@ class CmdDiscard(BaseCommand):
         except Exception as e:
             # If the caller does not have this object.
             caller.msg({"alert": _("Can not discard this object.")})
-            logger.log_tracemsg("Can not discard object %s: %s" % (self.args, e))
+            logger.log_trace("Can not discard object %s: %s" % (self.args, e))
             return
 
 
@@ -589,7 +586,7 @@ class CmdEquip(BaseCommand):
             caller.equip_object(int(position))
         except Exception as e:
             caller.msg({"alert": _("Can not use this equipment.")})
-            logger.log_tracemsg("Can not use equipment %s: %s" % (self.args, e))
+            logger.log_trace("Can not use equipment %s: %s" % (self.args, e))
             return
 
         # Send lastest status to the player.
@@ -632,7 +629,7 @@ class CmdTakeOff(BaseCommand):
             return
         except Exception as e:
             caller.msg({"alert": _("Can not take off this equipment.")})
-            logger.log_tracemsg("Can not take off %s: %s" % (self.args, e))
+            logger.log_trace("Can not take off %s: %s" % (self.args, e))
             return
 
         # Send lastest status to the player.
@@ -711,7 +708,7 @@ class CmdCastSkill(BaseCommand):
             caller.cast_skill(skill_key, target)
         except Exception as e:
             caller.msg({"alert":_("Can not cast this skill.")})
-            logger.log_tracemsg("Can not cast skill %s: %s" % (skill_key, e))
+            logger.log_trace("Can not cast skill %s: %s" % (skill_key, e))
             return
 
 
@@ -983,7 +980,7 @@ class CmdGiveUpQuest(BaseCommand):
             return
         except Exception as e:
             caller.msg({"alert": _("Can not give up this quest.")})
-            logger.log_tracemsg("Can not give up quest %s: %s" % (quest_key, e))
+            logger.log_trace("Can not give up quest %s: %s" % (quest_key, e))
             return
 
         # Send lastest status to the player.
@@ -1025,7 +1022,7 @@ class CmdUnlockExit(BaseCommand):
                 return
         except Exception as e:
             caller.msg({"alert": _("Can not open this exit.")})
-            logger.log_tracemsg("Can not open exit %s: %s" % (exit_key, e))
+            logger.log_trace("Can not open exit %s: %s" % (exit_key, e))
             return
 
 

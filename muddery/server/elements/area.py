@@ -5,7 +5,7 @@ Areas are compose the whole map. Rooms are belongs to areas.
 
 """
 
-from evennia.utils import logger
+from muddery.server.utils import logger
 from muddery.server.elements.base_element import BaseElement
 from muddery.server.mappings.element_set import ELEMENT
 from muddery.server.utils.localized_strings_handler import _
@@ -54,7 +54,7 @@ class MudderyArea(BaseElement):
                                    "width": resource_info.image_width,
                                    "height": resource_info.image_height}
             except Exception as e:
-                logger.log_tracemsg("Load background %s error: %s" % (resource, e))
+                logger.log_trace("Load background %s error: %s" % (resource, e))
 
         # load rooms in this area
         self.load_rooms()

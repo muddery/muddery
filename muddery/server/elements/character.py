@@ -11,7 +11,7 @@ creation commands.
 import time, datetime, traceback, ast
 from apscheduler.schedulers.background import BackgroundScheduler
 from django.conf import settings
-from evennia.utils import logger
+from muddery.server.utils import logger
 from evennia.utils.utils import lazy_property, class_from_module
 from muddery.server.elements.base_element import BaseElement
 from muddery.server.combat.combat_handler import COMBAT_HANDLER
@@ -567,22 +567,22 @@ class MudderyCharacter(BaseElement):
         """
         if self.is_in_combat():
             # already in battle
-            logger.log_errmsg("%s is already in battle." % self.get_id())
+            logger.log_err("%s is already in battle." % self.get_id())
             return False
 
         # search target
         if not target:
-            logger.log_errmsg("Can not find the target.")
+            logger.log_err("Can not find the target.")
             return False
 
         if not target.is_element(settings.CHARACTER_ELEMENT_TYPE):
             # Target is not a character.
-            logger.log_errmsg("Can not attack the target %s." % target.get_id())
+            logger.log_err("Can not attack the target %s." % target.get_id())
             return False
 
         if target.is_in_combat():
             # obj is already in battle
-            logger.log_errmsg("%s is already in battle." % target.get_id())
+            logger.log_err("%s is already in battle." % target.get_id())
             return False
 
         # create a new combat handler
@@ -620,7 +620,7 @@ class MudderyCharacter(BaseElement):
         target = ELEMENT(table_data.element_type)()
         target.setup_element(target_key, level=target_level, first_time=True, temp=True)
         if not target:
-            logger.log_errmsg("Can not create the target %s." % target_key)
+            logger.log_err("Can not create the target %s." % target_key)
             return False
 
         return self.attack_target(target, desc)

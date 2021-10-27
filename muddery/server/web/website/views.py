@@ -13,7 +13,7 @@ from django.shortcuts import render
 from evennia import SESSION_HANDLER
 from evennia.objects.models import ObjectDB
 from evennia.accounts.models import AccountDB
-from evennia.utils import logger
+from muddery.server.utils import logger
 
 from django.contrib.auth import login
 

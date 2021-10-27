@@ -3,7 +3,7 @@ Shop goods is the object in shops. They have some special attributes to record g
 
 """
 
-from evennia.utils import logger
+from muddery.server.utils import logger
 from muddery.server.database.worlddata.worlddata import WorldData
 from muddery.server.utils.localized_strings_handler import _
 from muddery.server.mappings.element_set import ELEMENT, ELEMENT_SET
@@ -36,7 +36,7 @@ class MudderyShopGoods(BaseElement):
             table_data = WorldData.get_tables_data(common_models, key=data.goods)
             table_data = table_data[0]
         except Exception as e:
-            logger.log_errmsg("Can not find goods %s." % data.goods)
+            logger.log_err("Can not find goods %s." % data.goods)
             return
 
         self.obj_key = data.goods
@@ -50,7 +50,7 @@ class MudderyShopGoods(BaseElement):
             unit_record = WorldData.get_tables_data(common_models, key=data.unit)
             unit_record = unit_record[0]
         except Exception as e:
-            logger.log_errmsg("Can not find price unit %s." % data.unit)
+            logger.log_err("Can not find price unit %s." % data.unit)
             return
 
         self.unit_key = data.unit

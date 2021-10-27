@@ -24,7 +24,7 @@ several more options for customizing the Guest account system.
 
 import traceback
 from django.conf import settings
-from evennia.utils import logger
+from muddery.server.utils import logger
 from evennia import DefaultAccount, DefaultGuest
 from evennia.utils.utils import make_iter
 from muddery.server.database.gamedata.account_characters import AccountCharacters

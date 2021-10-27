@@ -18,8 +18,7 @@ from enum import Enum
 import time
 import datetime
 from apscheduler.schedulers.background import BackgroundScheduler
-from django.conf import settings
-from evennia.utils import logger
+from muddery.server.utils import logger
 from muddery.server.utils import defines
 from muddery.server.database.worlddata.worlddata import WorldData
 from muddery.server.mappings.element_set import ELEMENT, ELEMENT_SET
@@ -337,7 +336,7 @@ class BaseCombat(object):
                             "reject": "",
                         })
                     except Exception as e:
-                        logger.log_errmsg("Can not loot object %s: %s." % (obj_info["object_key"], e))
+                        logger.log_err("Can not loot object %s: %s." % (obj_info["object_key"], e))
                         pass
 
             rewards[winner_id] = {

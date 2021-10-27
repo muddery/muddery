@@ -23,7 +23,7 @@ settings file:
 
 import json
 from evennia.server.serversession import ServerSession as BaseServerSession
-from evennia.utils import logger
+from muddery.server.utils import logger
 
 
 class ServerSession(BaseServerSession):
@@ -61,7 +61,7 @@ class ServerSession(BaseServerSession):
                     out_text = json.dumps({"data": text, "context": context}, ensure_ascii=False)
                 except Exception as e:
                     out_text = json.dumps({"data": {"err": "There is an error occurred while outputing messages."}})
-                    logger.log_tracemsg("json.dumps failed: %s" % e)
+                    logger.log_trace("json.dumps failed: %s" % e)
 
             # set raw=True
             kwargs["options"].update({"raw": True, "client_raw": True})

@@ -7,7 +7,7 @@ MudderyObject is an object which can load it's data automatically.
 """
 
 import ast
-from evennia.utils import logger
+from muddery.server.utils import logger
 from evennia.utils.utils import lazy_property
 from muddery.server.utils.data_field_handler import DataFieldHandler, ConstDataHolder
 from muddery.server.database.worlddata.properties_dict import PropertiesDict
@@ -188,12 +188,12 @@ class BaseElement(object):
 
             # check element type
             if self.const_data_handler.has("element_type") and self.const.element_type != self.element_type:
-                logger.log_errmsg("Wrong element type %s: %s" % (element_key, self.element_type))
+                logger.log_err("Wrong element type %s: %s" % (element_key, self.element_type))
 
             # Load extend data.
             self.load_extend_data(base_model, element_key)
         except Exception as e:
-            logger.log_errmsg("%s %s can not load data:%s" % (self.model_name, element_key, e))
+            logger.log_err("%s %s can not load data:%s" % (self.model_name, element_key, e))
 
         self.load_custom_level_data(self.element_type, element_key, level)
 
@@ -214,7 +214,7 @@ class BaseElement(object):
             record = WorldData.get_table_data(model, key=key)
             record = record[0]
         except Exception as e:
-            logger.log_errmsg("Can not find key %s in %s" % (key, model))
+            logger.log_err("Can not find key %s in %s" % (key, model))
             return
 
         # Set data.
@@ -243,7 +243,7 @@ class BaseElement(object):
                 record = WorldData.get_table_data(data_model, key=key)
                 record = record[0]
             except Exception as e:
-                logger.log_errmsg("Can not find key %s in %s" % (key, data_model))
+                logger.log_err("Can not find key %s in %s" % (key, data_model))
                 continue
 
             # Set data.

@@ -6,7 +6,7 @@ The licence of Evennia can be found in evennia/LICENSE.txt.
 
 import re, traceback
 from django.conf import settings
-from evennia.utils import logger
+from muddery.server.utils import logger
 from evennia.utils.utils import make_iter
 from muddery.server.commands.base_command import BaseCommand
 from muddery.server.utils.localized_strings_handler import _
@@ -191,7 +191,7 @@ class CmdUnpuppet(BaseCommand):
         except RuntimeError as e:
             session.msg({"alert":_("Could not unpuppet: %s" % e)})
         except Exception as e:
-            logger.log_errmsg("Could not unpuppet: %s" % e)
+            logger.log_err("Could not unpuppet: %s" % e)
 
 
 class CmdCharCreate(BaseCommand):
@@ -313,7 +313,7 @@ class CmdCharDelete(BaseCommand):
                 "char_all": player.get_all_nicknames(),
             })
         except Exception as e:
-            logger.log_errmsg("Can not delete character %s: %s")
+            logger.log_err("Can not delete character %s: %s")
             session.msg({"alert": _("You can not delete this character.")})
 
 

@@ -6,11 +6,9 @@ actions of a skill.
 
 """
 
-import time, re, traceback
+import re, traceback
 from muddery.server.utils.localized_strings_handler import _
-from muddery.server.utils.game_settings import GAME_SETTINGS
 from muddery.server.statements.statement_handler import STATEMENT_HANDLER
-from muddery.server.mappings.element_set import ELEMENT
 from muddery.server.elements.base_element import BaseElement
 
 

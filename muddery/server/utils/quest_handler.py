@@ -3,7 +3,7 @@ QuestHandler handles a character's quests.
 """
 
 import weakref
-from evennia.utils import logger
+from muddery.server.utils import logger
 from muddery.server.statements.statement_handler import STATEMENT_HANDLER
 from muddery.server.utils.localized_strings_handler import _
 from muddery.server.utils.exception import MudderyError
@@ -79,7 +79,7 @@ class QuestHandler(object):
             None
         """
         if not GAME_SETTINGS.get("can_give_up_quests"):
-            logger.log_tracemsg("Can not give up quests.")
+            logger.log_trace("Can not give up quests.")
             raise MudderyError(_("Can not give up this quest."))
 
         quest = CharacterQuests.get_quest(self.owner.get_db_id(), quest_key)
@@ -246,7 +246,7 @@ class QuestHandler(object):
             record = record[0]
             return STATEMENT_HANDLER.match_condition(record.condition, self.owner, None)
         except Exception as e:
-            logger.log_errmsg("Can't get quest %s's condition: %s" % (quest_key, e))
+            logger.log_err("Can't get quest %s's condition: %s" % (quest_key, e))
         return False
 
     def show_quests(self):

@@ -5,7 +5,7 @@ All available requests.
 import os, re
 from importlib import import_module
 from django.conf import settings
-from evennia.utils import logger
+from muddery.server.utils import logger
 from evennia.utils.utils import class_from_module
 from muddery.server.utils.utils import get_module_path
 
@@ -61,7 +61,7 @@ class ElementSet(object):
                                     module_path += "." + relative_path + "." + name + "." + class_name
 
                                 if key_name in self.module_dict:
-                                    logger.log_infomsg("Element %s is replaced by %s." % (key_name, module_path))
+                                    logger.log_info("Element %s is replaced by %s." % (key_name, module_path))
 
                                 self.module_dict[key_name] = module_path
                                 class_name = ""
@@ -93,12 +93,12 @@ class ElementSet(object):
             cls = class_from_module(self.module_dict[key])
             if key in self.class_dict:
                 if self.class_dict[key] != cls:
-                    logger.log_infomsg("Element %s is replaced by %s." % (key, cls))
+                    logger.log_info("Element %s is replaced by %s." % (key, cls))
 
             self.class_dict[key] = cls
             return cls
 
-        logger.log_errmsg("Can not find element type: %s." % key)
+        logger.log_err("Can not find element type: %s." % key)
 
     def get_module(self, key):
         """

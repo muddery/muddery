@@ -6,7 +6,7 @@ Rooms are simple containers that has no location of their own.
 """
 
 import ast
-from evennia.utils import logger
+from muddery.server.utils import logger
 from muddery.server.utils.game_settings import GAME_SETTINGS
 from muddery.server.database.worlddata.image_resource import ImageResource
 from muddery.server.database.worlddata.world_npcs import WorldNPCs
@@ -81,7 +81,7 @@ class MudderyRoom(BaseElement):
             if position:
                 self.position = ast.literal_eval(position)
         except Exception as e:
-            logger.log_tracemsg("load position error: %s" % e)
+            logger.log_trace("load position error: %s" % e)
 
         # get background
         self.background = None
@@ -94,7 +94,7 @@ class MudderyRoom(BaseElement):
                                    "width": resource_info.image_width,
                                    "height": resource_info.image_height}
             except Exception as e:
-                logger.log_tracemsg("Load background %s error: %s" % (resource, e))
+                logger.log_trace("Load background %s error: %s" % (resource, e))
 
         # load exits
         self.load_exits()
