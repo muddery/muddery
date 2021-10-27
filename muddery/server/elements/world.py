@@ -2,12 +2,13 @@
 The World is the base controller of a server. It managers all areas, maps and characters on this server.
 """
 
-from evennia.utils import logger
 from muddery.server.elements.base_element import BaseElement
 from muddery.server.mappings.element_set import ELEMENT
 from muddery.server.database.worlddata.world_areas import WorldAreas
+from muddery.server.database.worlddata.world_channels import WorldChannels
 from muddery.server.database.worlddata.worlddata import WorldData
 from muddery.server.utils.localized_strings_handler import _
+from muddery.server.utils.defines import ConversationType
 
 
 class MudderyWorld(BaseElement):
@@ -19,6 +20,10 @@ class MudderyWorld(BaseElement):
 
     def __init__(self, *agrs, **wargs):
         super(MudderyWorld, self).__init__(*agrs, **wargs)
+
+        # All channels in this world.
+        # all_channels: {channel's key: channel's object}
+        self.all_channels = {}
 
         # All areas in this world.
         # all_areas: {area's key: area's object}
@@ -43,7 +48,25 @@ class MudderyWorld(BaseElement):
         :return:
         """
         # Load data.
+        self.load_channels()
         self.load_areas()
+
+    def load_channels(self):
+        """
+        Load all channels.
+        """
+        records = WorldChannels.all()
+        base_model = ELEMENT("CHANNEL").get_base_model()
+        self.all_channels = {}
+
+        for record in records:
+            table_data = WorldData.get_table_data(base_model, key=record.key)
+            table_data = table_data[0]
+
+            new_channel = ELEMENT(table_data.element_type)()
+            new_channel.setup_element(record.key)
+
+            self.all_channels[new_channel.get_element_key()] = new_channel
 
     def load_areas(self):
         """
@@ -95,7 +118,11 @@ class MudderyWorld(BaseElement):
         :param character:
         :return:
         """
-        self.all_characters[character.get_db_id()] = character
+        char_db_id = character.get_db_id()
+        self.all_characters[char_db_id] = character
+
+        for channel in self.all_channels.values():
+            channel.add_character(char_db_id)
 
     def on_char_unpuppet(self, character):
         """
@@ -104,7 +131,11 @@ class MudderyWorld(BaseElement):
         :param character:
         :return:
         """
-        self.all_characters[character.get_db_id()] = character
+        char_db_id = character.get_db_id()
+        del self.all_characters[char_db_id]
+
+        for channel in self.all_channels.values():
+            channel.remove_character(char_db_id)
 
     def get_character(self, char_db_id):
         """
@@ -114,3 +145,23 @@ class MudderyWorld(BaseElement):
         :return:
         """
         return self.all_characters[char_db_id]
+
+    def get_channel(self, channel_key):
+        """
+        Get a channel by its key.
+        """
+        return self.all_channels[channel_key]
+
+    def send_message(self, caller, target_type, target, message):
+        """
+        Send a player's message to the target.
+        """
+        if target_type == ConversationType.CHANNEL.value:
+            channel = self.get_channel(target)
+            channel.get_message(caller, message)
+        elif target_type == ConversationType.LOCAL.value:
+            room = self.get_room(target)
+            room.get_message(caller, message)
+        elif target_type == ConversationType.PRIVATE.value:
+            character = self.get_character(int(target))
+            character.get_message(caller, message)

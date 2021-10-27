@@ -10,7 +10,6 @@ from muddery.server.utils import logger
 from muddery.server.commands.base_command import BaseCommand
 from muddery.server.utils.localized_strings_handler import _
 from muddery.server.utils.exception import MudderyError
-from muddery.server.utils.defines import ConversationType
 from muddery.server.utils.defines import CombatType
 from muddery.server.combat.combat_handler import COMBAT_HANDLER
 from muddery.server.combat.match_pvp import MATCH_COMBAT_HANDLER
@@ -194,24 +193,7 @@ class CmdSay(BaseCommand):
         target = self.args["target"]
         message = self.args["message"]
 
-        obj = None
-        try:
-            if target_type == ConversationType.CHANNEL.value:
-                obj = ChannelDB.objects.filter(db_key=target)
-                obj = obj[0]
-            elif target_type == ConversationType.LOCAL.value:
-                obj = Server.world.get_room(target)
-            elif target_type == ConversationType.PRIVATE.value:
-                obj = Server.world.get_character(int(target))
-        except Exception as e:
-            ostring = "Can not find %s %s: %s" % (target_type, target, e)
-            logger.log_trace(ostring)
-
-        if not obj:
-            self.msg({"alert": _("You can not talk to it.")})
-            return
-
-        obj.get_message(caller, message)
+        Server.world.send_message(caller, target_type, target, message)
 
 
 #------------------------------------------------------------

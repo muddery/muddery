@@ -315,7 +315,7 @@ BASE_ROOM_TYPECLASS = "evennia.objects.objects.DefaultRoom"
 BASE_EXIT_TYPECLASS = "evennia.objects.objects.DefaultExit"
 
 # Typeclass for Channel (fallback).
-BASE_CHANNEL_TYPECLASS = "muddery.server.typeclasses.channels.MudderyChannel"
+BASE_CHANNEL_TYPECLASS = "evennia.comms.comms.DefaultChannel"
 
 # Typeclass for Scripts (fallback). You usually don't need to change this
 # but create custom variations of scripts on a per-case basis instead.

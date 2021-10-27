@@ -2,8 +2,6 @@
 import re
 from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator
-from django.core.exceptions import ValidationError
-from django.conf import settings
 
 
 KEY_LENGTH = 80
@@ -134,11 +132,11 @@ class honour_settings(models.Model):
 
 
 # ------------------------------------------------------------
-# Object's base
+# Element's basic data.
 # ------------------------------------------------------------
-class BaseObjects(models.Model):
+class BaseElement(models.Model):
     """
-    The base model of all objects. All objects data are linked with keys.
+    The base model of all elements. All elements data are linked with keys.
     """
     # object's key
     key = models.CharField(max_length=KEY_LENGTH, unique=True, blank=True)
@@ -152,7 +150,20 @@ class BaseObjects(models.Model):
         return self.key
 
 
-class world_areas(BaseObjects):
+class world_channels(BaseElement):
+    "The communication channels."
+
+    # channel's element type
+    element_type = models.CharField(max_length=KEY_LENGTH, default="CHANNEL")
+
+    # channel's name
+    name = models.CharField(max_length=NAME_LENGTH, blank=True)
+
+    # channel's description for display
+    desc = models.TextField(blank=True)
+
+
+class world_areas(BaseElement):
     "The game map is composed by areas."
 
     # area's element type
@@ -182,7 +193,7 @@ class world_areas(BaseObjects):
         app_label = "worlddata"
 
 
-class world_rooms(BaseObjects):
+class world_rooms(BaseElement):
     "Defines all unique rooms."
 
     # room's element type
@@ -221,7 +232,7 @@ class world_rooms(BaseObjects):
 # rooms that can give profits to characters in the room.
 #
 # ------------------------------------------------------------
-class profit_rooms(BaseObjects):
+class profit_rooms(BaseElement):
     """
     The action to trigger other actions at interval.
     """
@@ -246,7 +257,7 @@ class profit_rooms(BaseObjects):
         app_label = "worlddata"
 
 
-class world_objects(BaseObjects):
+class world_objects(BaseElement):
     "Store all unique objects."
 
     # The key of a world room.
@@ -268,7 +279,7 @@ class world_objects(BaseObjects):
         app_label = "worlddata"
 
 
-class common_objects(BaseObjects):
+class common_objects(BaseElement):
     "Store all common objects."
 
     # object's element type
@@ -289,7 +300,7 @@ class common_objects(BaseObjects):
         app_label = "worlddata"
 
 
-class pocket_objects(BaseObjects):
+class pocket_objects(BaseElement):
     "Store all pocket objects."
 
     # the max number of this object in one pile, must above 1
@@ -310,7 +321,7 @@ class pocket_objects(BaseObjects):
         app_label = "worlddata"
 
 
-class foods(BaseObjects):
+class foods(BaseElement):
     "Foods inherit from common objects."
 
     class Meta:
@@ -319,7 +330,7 @@ class foods(BaseObjects):
         app_label = "worlddata"
 
 
-class skill_books(BaseObjects):
+class skill_books(BaseElement):
     "Skill books inherit from common objects."
 
     # skill's key
@@ -334,7 +345,7 @@ class skill_books(BaseObjects):
         app_label = "worlddata"
 
 
-class equipments(BaseObjects):
+class equipments(BaseElement):
     "equipments inherit from common objects."
 
     # The key of an equipment position.
@@ -351,7 +362,7 @@ class equipments(BaseObjects):
         app_label = "worlddata"
 
 
-class characters(BaseObjects):
+class characters(BaseElement):
     "Store common characters."
 
     # object's element type
@@ -384,7 +395,7 @@ class characters(BaseObjects):
         app_label = "worlddata"
 
 
-class world_npcs(BaseObjects):
+class world_npcs(BaseElement):
     "Store all NPCs."
 
     # NPC's location, it must be a room.
@@ -399,7 +410,7 @@ class world_npcs(BaseObjects):
         app_label = "worlddata"
 
 
-class player_characters(BaseObjects):
+class player_characters(BaseElement):
     "Player's character."
 
     class Meta:
@@ -408,7 +419,7 @@ class player_characters(BaseObjects):
         app_label = "worlddata"
 
 
-class staff_characters(BaseObjects):
+class staff_characters(BaseElement):
     "Staff's character."
 
     class Meta:
@@ -460,7 +471,7 @@ class world_exits(models.Model):
 # exit lock's additional data
 #
 # ------------------------------------------------------------
-class exit_locks(BaseObjects):
+class exit_locks(BaseElement):
     "Locked exit's additional data"
 
     # condition of the lock
@@ -492,7 +503,7 @@ class exit_locks(BaseObjects):
 # object creator's additional data
 #
 # ------------------------------------------------------------
-class object_creators(BaseObjects):
+class object_creators(BaseElement):
     "Players can get new objects from an object_creator."
 
     # loot's verb
@@ -546,7 +557,7 @@ class skills(models.Model):
         app_label = "worlddata"
 
 
-class shops(BaseObjects):
+class shops(BaseElement):
     "Store all shops."
 
     # object's element type
