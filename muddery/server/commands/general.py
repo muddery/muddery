@@ -181,11 +181,11 @@ class CmdSay(BaseCommand):
         if not self.args:
             return
 
-        if not "target" in self.args:
+        if "target" not in self.args:
             caller.msg({"alert": _("You should choose a target to say.")})
             return
 
-        if not "message" in self.args:
+        if "message" not in self.args:
             caller.msg({"alert": _("You should say something.")})
             return
 

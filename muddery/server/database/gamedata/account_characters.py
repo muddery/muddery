@@ -13,7 +13,7 @@ class AccountCharacters(object):
     """
     # data storage
     storage_class = utils.class_from_path(settings.DATABASE_ACCESS_OBJECT)
-    storage = storage_class("account_characters", "account_id", "char_id")
+    storage = storage_class("account_characters", "account_id", "")
 
     @classmethod
     def add(cls, account_id, char_id):

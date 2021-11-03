@@ -105,6 +105,9 @@ DATABASE_APPS_MAPPING = {
 # Database Access Object
 DATABASE_ACCESS_OBJECT = 'muddery.server.database.storage.kv_table_write_back.KeyValueWriteBackTable'
 
+# Database Access Object without cache
+DATABASE_ACCESS_OBJECT_NO_CACHE = 'muddery.server.database.storage.kv_table.KeyValueTable'
+
 # Object's default runtime table. If a typeclass's own runtime table does
 # not exist, will use this table instead.
 DEFAULT_OBJECT_RUNTIME_TABLE = "object_attributes"
@@ -320,6 +323,9 @@ BASE_CHANNEL_TYPECLASS = "evennia.comms.comms.DefaultChannel"
 # Typeclass for Scripts (fallback). You usually don't need to change this
 # but create custom variations of scripts on a per-case basis instead.
 BASE_SCRIPT_TYPECLASS = "evennia.scripts.scripts.DefaultScript"
+
+# Element type for accounts.
+ACCOUNT_ELEMENT_TYPE = "ACCOUNT"
 
 # Element type for general characters, include NPCs, mobs and player characters.
 CHARACTER_ELEMENT_TYPE = "CHARACTER"

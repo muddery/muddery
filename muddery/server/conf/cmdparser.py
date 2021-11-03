@@ -27,9 +27,6 @@ from muddery.server.utils import logger
 import evennia.commands.cmdparser as evennia_cmdparser
 
 
-CMD_LOGINSTART = "__unloggedin_look_command"
-
-
 def cmdparser(raw_string, cmdset, caller, match_index=None):
     """
     This function is called by the cmdhandler once it has

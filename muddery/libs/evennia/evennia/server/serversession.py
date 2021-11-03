@@ -226,10 +226,6 @@ class ServerSession(Session):
         self.puppet = None
         self.cmdset_storage = settings.CMDSET_SESSION
 
-        # Update account's last login time.
-        self.account.last_login = timezone.now()
-        self.account.save()
-
         # add the session-level cmdset
         self.cmdset = CmdSetHandler(self, True)
 

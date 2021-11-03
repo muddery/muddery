@@ -53,9 +53,6 @@ var frames_dict = {
     "quests.html":			{scripts: 		[],
                       	 	 controller:	"MudderyQuests",},
                       	 	 
-	"quick_login.html":	 	{scripts: 		[],
-                      	 	 controller:	"MudderyQuickLogin",},
-                      	 	 
     "register.html": 		{scripts: 		[],
                       	 	 controller:	"MudderyRegister",},
                       	 	 

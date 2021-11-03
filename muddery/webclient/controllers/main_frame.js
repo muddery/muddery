@@ -296,6 +296,7 @@ MudderyMainFrame.prototype.onConnectionOpen = function() {
 	self.showLoginWindow();
 	if (self.first_connection) {
 	    self.first_connection = false;
+	    core.service.queryUnloggedIn();
 	    mud.login_window.checkAutoLogin();
 	}
 }
@@ -1316,11 +1317,11 @@ MudderyLogin.prototype.onTabRegister = function(element) {
  * Event when clicks the register button.
  */
 MudderyLogin.prototype.onClickRegister = function(element) {
-    var playername = this.select(".reg-name").val();
+    var username = this.select(".reg-name").val();
     var password = this.select(".reg-password").val();
     var password_verify = this.select(".reg-password-verify").val();
 
-    core.service.register(playername, password, password_verify, true);
+    core.service.register(username, password, password_verify, true);
     this.clearValues();
 }
 
@@ -1374,8 +1375,8 @@ MudderyLogin.prototype.setConnScreen = function(conn_screen) {
 /*
  * Set values.
  */
-MudderyLogin.prototype.setValues = function(playername, password, auto_login) {
-    this.select(".login-name").val(playername);
+MudderyLogin.prototype.setValues = function(username, password, auto_login) {
+    this.select(".login-name").val(username);
     this.select(".login-password").val(password);
     if (auto_login) {
         this.select(".checkbox-auto-login").addClass("checked");

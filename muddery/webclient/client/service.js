@@ -22,6 +22,11 @@ MudderyService.prototype = {
     sendCommandLink: function(cmd, args, context) {
         Evennia.msg("text", this.cmdString(cmd, args, context));
     },
+
+    // query the unloggedin message
+    queryUnloggedIn: function () {
+        Evennia.msg("text", this.cmdString("unloggedin_look", ""));
+    },
     
     castSkill: function(skill, target) {
         var cmd = "cast_skill";
@@ -45,29 +50,28 @@ MudderyService.prototype = {
         Evennia.msg("text", this.cmdString("leave_combat", ""));
     },
 
-    doQuickLogin: function(playername) {
-        var args = {"playername" : playername};
-        Evennia.msg("text", this.cmdString("quick_login", args));
-    },
-
     // login
-    login: function(playername, password) {
-        var args = {"playername" : playername,
-                    "password" : password};
+    login: function(username, password) {
+        var args = {
+            "username" : username,
+            "password" : password
+        };
         
         Evennia.msg("text", this.cmdString("connect", args));
     },
 
     // register
-    register: function(playername, password, password_verify, connect) {
+    register: function(username, password, password_verify, connect) {
         if (password != password_verify) {
             mud.main_frame.popupMessage(core.trans("Error"), core.trans("Password does not match."));
             return;
         }
 
-        var args = {"playername": playername,
-                    "password": password,
-                    "connect": connect};
+        var args = {
+            "username": username,
+            "password": password,
+            "connect": connect
+        };
         Evennia.msg("text", this.cmdString("create", args));
     },
 

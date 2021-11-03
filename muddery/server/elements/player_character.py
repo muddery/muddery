@@ -1947,26 +1947,3 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         :return:
         """
         return self.skills[skill_key]["obj"].get_appearance(self)
-
-    def at_cmdset_get(self, **kwargs):
-        """
-        Called just before cmdsets on this object are requested by the
-        command handler. If changes need to be done on the fly to the
-        cmdset before passing them on to the cmdhandler, this is the
-        place to do it. This is called also if the object currently
-        have no cmdsets.
-
-        Kwargs:
-            caller (Session, Object or Account): The caller requesting
-                this cmdset.
-
-        """
-        pass
-
-    @lazy_property
-    def cmdset(self):
-        return CmdSetHandler(self, True)
-
-    @lazy_property
-    def scripts(self):
-        return ScriptHandler(self)

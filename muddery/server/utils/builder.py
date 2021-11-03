@@ -16,30 +16,6 @@ from muddery.server.database.gamedata.system_data import SystemData
 from muddery.server.database.gamedata.character_location import CharacterLocation
 
 
-def create_player(playername, password, permissions=None, typeclass=None):
-    """
-    Helper function, creates a player of the specified typeclass.
-    """
-    if not permissions:
-        permissions = settings.PERMISSION_ACCOUNT_DEFAULT
-
-    new_player = create.create_account(playername, None, password,
-                                       permissions=permissions, typeclass=typeclass)
-
-    # This needs to be set so the engine knows this player is
-    # logging in for the first time. (so it knows to call the right
-    # hooks during login later)
-    new_player.db.FIRST_LOGIN = True
-
-    # join the new player to the public channel
-    pchannel = ChannelDB.objects.get_channel(settings.DEFAULT_CHANNELS[0]["key"])
-    if not pchannel.connect(new_player):
-        string = "New player '%s' could not connect to public channel!" % new_player.key
-        logger.log_err(string)
-
-    return new_player
-    
-
 def create_character(new_player, nickname, character_key=None,
                      level=1, element_type=None, location_key=None, home_key=None):
     """
@@ -57,6 +33,7 @@ def create_character(new_player, nickname, character_key=None,
     new_character.set_account_id(new_player.id)
 
     # Get a new player character id.
+    # TODO: load for update
     char_db_id = SystemData.load("last_player_character_id", 0)
     char_db_id += 1
     SystemData.save("last_player_character_id", char_db_id)

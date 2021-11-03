@@ -500,16 +500,6 @@ class ServerSessionHandler(SessionHandler):
         # sets up and assigns all properties on the session
         session.at_login(account)
 
-        # account init
-        account.at_init()
-
-        # Check if this is the first time the *account* logs in
-        if account.db.FIRST_LOGIN:
-            account.at_first_login()
-            del account.db.FIRST_LOGIN
-
-        account.at_pre_login()
-
         if _MULTISESSION_MODE == 0:
             # disconnect all previous sessions.
             self.disconnect_duplicate_sessions(session)
@@ -736,7 +726,7 @@ class ServerSessionHandler(SessionHandler):
             sessions (list): All Sessions associated with this account.
 
         """
-        uid = account.uid
+        uid = account.get_session_id()
         return [session for session in self.values() if session.logged_in and session.uid == uid]
 
     def sessions_from_puppet(self, puppet):

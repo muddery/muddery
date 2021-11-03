@@ -1,6 +1,7 @@
 
 from django.db import models
 
+
 KEY_LENGTH = 80
 NAME_LENGTH = 80
 
@@ -9,6 +10,9 @@ class system_data(models.Model):
     """
     Store system data. Only use the first record.
     """
+    # The last id of accounts.
+    last_account_id = models.PositiveIntegerField(default=0)
+
     # The last id of player characters.
     last_player_character_id = models.PositiveIntegerField(default=0)
 
@@ -16,8 +20,6 @@ class system_data(models.Model):
         "Define Django meta options"
         abstract = True
         app_label = "gamedata"
-        verbose_name = "System Data"
-        verbose_name_plural = "System Data"
 
 
 # ------------------------------------------------------------
@@ -39,8 +41,6 @@ class object_keys(models.Model):
         "Define Django meta options"
         abstract = True
         app_label = "gamedata"
-        verbose_name = "Object Key"
-        verbose_name_plural = "Object Keys"
 
 
 # ------------------------------------------------------------
@@ -65,8 +65,6 @@ class BaseAttributes(models.Model):
         "Define Django meta options"
         abstract = True
         app_label = "gamedata"
-        verbose_name = "Object Attribute"
-        verbose_name_plural = "Object Attributes"
         unique_together = ("obj_id", "key")
 
 
@@ -81,9 +79,64 @@ class object_states(BaseAttributes):
         "Define Django meta options"
         abstract = True
         app_label = "gamedata"
-        verbose_name = "Object Runtime Status"
-        verbose_name_plural = "Object Runtime Status"
         unique_together = ("obj_id", "key")
+
+
+# ------------------------------------------------------------
+#
+# server bans
+#
+# ------------------------------------------------------------
+class server_bans(models.Model):
+
+    # ban's type, should be "IP" or "USERNAME"
+    type = models.CharField(max_length=KEY_LENGTH, db_index=True)
+
+    # IP or name
+    target = models.CharField(max_length=KEY_LENGTH)
+
+    # create time
+    create_time = models.DateTimeField(auto_now_add=True)
+
+    # finish time
+    finish_time = models.DateTimeField()
+
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        app_label = "gamedata"
+        unique_together = ("type", "target")
+
+
+# ------------------------------------------------------------
+#
+# player's accounts
+#
+# ------------------------------------------------------------
+class accounts(models.Model):
+
+    # account's username
+    username = models.CharField(max_length=KEY_LENGTH, unique=True)
+
+    # account's password
+    password = models.CharField(max_length=128)
+
+    # account's id
+    account_id = models.PositiveIntegerField(unique=True)
+
+    # account's type
+    type = models.CharField(max_length=KEY_LENGTH, db_index=True)
+
+    # account's create time
+    create_time = models.DateTimeField(blank=True, null=True)
+
+    # account's last login time
+    last_login = models.DateTimeField(blank=True, null=True)
+
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        app_label = "gamedata"
 
 
 # ------------------------------------------------------------
@@ -103,8 +156,6 @@ class account_characters(models.Model):
         "Define Django meta options"
         abstract = True
         app_label = "gamedata"
-        verbose_name = "Account Character"
-        verbose_name_plural = "Account Characters"
 
 
 # ------------------------------------------------------------
@@ -128,8 +179,6 @@ class character_info(models.Model):
         "Define Django meta options"
         abstract = True
         app_label = "gamedata"
-        verbose_name = "Character Info"
-        verbose_name_plural = "Characters Info"
 
 
 # ------------------------------------------------------------
@@ -150,8 +199,6 @@ class character_location(models.Model):
         "Define Django meta options"
         abstract = True
         app_label = "gamedata"
-        verbose_name = "Player Location"
-        verbose_name_plural = "Players Location"
 
 
 # ------------------------------------------------------------
@@ -181,8 +228,6 @@ class character_inventory(models.Model):
         "Define Django meta options"
         abstract = True
         app_label = "gamedata"
-        verbose_name = "Character's Inventory"
-        verbose_name_plural = "Character's Inventories"
         unique_together = ("character_id", "position")
 
 
@@ -210,8 +255,6 @@ class character_equipments(models.Model):
         "Define Django meta options"
         abstract = True
         app_label = "gamedata"
-        verbose_name = "Character's Equipment"
-        verbose_name_plural = "Character's Equipment"
         unique_together = ("character_id", "position")
 
 
@@ -242,8 +285,6 @@ class character_skills(models.Model):
         "Define Django meta options"
         abstract = True
         app_label = "gamedata"
-        verbose_name = "Character Skill"
-        verbose_name_plural = "Character Skills"
         unique_together = ("character_id", "skill")
 
 
@@ -265,8 +306,6 @@ class character_combat(models.Model):
         "Define Django meta options"
         abstract = True
         app_label = "gamedata"
-        verbose_name = "Character Combat"
-        verbose_name_plural = "Character Combats"
 
 
 # ------------------------------------------------------------
@@ -290,8 +329,6 @@ class character_quests(models.Model):
         "Define Django meta options"
         abstract = True
         app_label = "gamedata"
-        verbose_name = "Quest"
-        verbose_name_plural = "Quests"
         unique_together = ("character_id", "quest")
 
 
@@ -317,8 +354,6 @@ class quest_objectives(models.Model):
         "Define Django meta options"
         abstract = True
         app_label = "gamedata"
-        verbose_name = "Quest Objective"
-        verbose_name_plural = "Quest Objectives"
         unique_together = ("character_quest", "objective")
 
 
@@ -340,5 +375,3 @@ class honours(models.Model):
         "Define Django meta options"
         abstract = True
         app_label = "gamedata"
-        verbose_name = "Honour"
-        verbose_name_plural = "Honours"
