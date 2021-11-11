@@ -90,9 +90,10 @@ class MatchPVPHandler(object):
         self.remove_all()
 
         honour_settings = HonourSettings.get_first_data()
-        self.max_honour_diff = honour_settings.max_honour_diff
-        self.preparing_time = honour_settings.preparing_time
-        self.match_interval = honour_settings.match_interval
+        if honour_settings:
+            self.max_honour_diff = honour_settings.max_honour_diff
+            self.preparing_time = honour_settings.preparing_time
+            self.match_interval = honour_settings.match_interval
 
         self.loop = task.LoopingCall(self.match)
         self.loop.start(self.match_interval)

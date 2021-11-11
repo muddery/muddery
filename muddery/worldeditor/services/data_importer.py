@@ -41,21 +41,25 @@ def import_file(fullname, file_type=None, table_name=None, clear=True, except_er
             field_type = -1
 
             try:
-                # get field info
-                field = model_obj._meta.get_field(field_name)
-
-                if isinstance(field, models.BooleanField):
-                    field_type = 1
-                elif isinstance(field, models.IntegerField):
-                    field_type = 2
-                elif isinstance(field, models.FloatField):
-                    field_type = 3
-                elif isinstance(field, models.ForeignKey):
-                    field_type = 4
-                elif isinstance(field, models.ManyToManyField):
-                    field_type = 5
+                if field_name == "id":
+                    # skip "id" field, it's used by db automatically.
+                    field_type = -1
                 else:
-                    field_type = 0
+                    # get field info
+                    field = model_obj._meta.get_field(field_name)
+
+                    if isinstance(field, models.BooleanField):
+                        field_type = 1
+                    elif isinstance(field, models.IntegerField):
+                        field_type = 2
+                    elif isinstance(field, models.FloatField):
+                        field_type = 3
+                    elif isinstance(field, models.ForeignKey):
+                        field_type = 4
+                    elif isinstance(field, models.ManyToManyField):
+                        field_type = 5
+                    else:
+                        field_type = 0
             except Exception as e:
                 field_type = -1
                 logger.log_errmsg("Field %s error: %s" % (field_name, e))
@@ -71,10 +75,6 @@ def import_file(fullname, file_type=None, table_name=None, clear=True, except_er
         record = {}
         for item in zip(field_names, field_types, values):
             field_name = item[0]
-            # skip "id" field
-            if field_name == "id":
-                continue
-
             field_type = item[1]
             value = item[2]
 

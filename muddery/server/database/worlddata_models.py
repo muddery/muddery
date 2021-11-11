@@ -57,12 +57,14 @@ class game_settings(models.Model):
 
     # Time of global CD.
     global_cd = models.FloatField(blank=True,
-                                  default=1.0,
+                                  default=1.5,
                                   validators=[MinValueValidator(0.0)])
 
     # The CD of auto casting a skill. It must be bigger than GLOBAL_CD
     # They can not be equal!
-    auto_cast_skill_cd = models.PositiveIntegerField(blank=True, default=1)
+    auto_cast_skill_cd = models.FloatField(blank=True,
+                                           default=1.0,
+                                           validators=[MinValueValidator(0.0)])
 
     # Allow players to give up quests.
     can_give_up_quests = models.BooleanField(blank=True, default=True)
