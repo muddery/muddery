@@ -54,7 +54,7 @@ class MudderyArea(BaseElement):
                                    "width": resource_info.image_width,
                                    "height": resource_info.image_height}
             except Exception as e:
-                logger.log_tracemsg("Load background %s error: %s" % (resource, e))
+                logger.log_errmsg("Load background %s error: %s" % (resource, e))
 
         # load rooms in this area
         self.load_rooms()

@@ -4,6 +4,7 @@ Load and cache all worlddata.
 
 from django.conf import settings
 from django.apps import apps
+from evennia.utils import logger
 from muddery.server.database.storage.memory_table import MemoryTable, RecordData
 from muddery.server.utils.exception import MudderyError
 
@@ -94,6 +95,7 @@ class WorldData(object):
         Return:
             (list) records
         """
+        has_data = True
         all_fields = {}
         row_data = []
         for table_name in tables:
@@ -105,13 +107,18 @@ class WorldData(object):
             field_pos = dict(zip(fields, range(len(row_data), len(row_data) + len(fields))))
 
             if not records:
-                all_fields.update(field_pos)
-                row_data.extend([None] * len(fields))
+                # all_fields.update(field_pos)
+                # row_data.extend([None] * len(fields))
+                logger.log_errmsg("Can not load data of %s from table %s." % (key, table_name))
+                has_data = False
             elif len(records) > 1:
-                raise MudderyError("Can not solve more than one records from table: %s" % table_name)
+                raise MudderyError("Can not solve more than one records of %s from table %s" % (key, table_name))
             else:
                 record = records[0]
                 all_fields.update(field_pos)
                 row_data.extend([getattr(record, field_name) for field_name in fields])
 
-        return [RecordData(all_fields, row_data)]
+        if has_data:
+            return [RecordData(all_fields, row_data)]
+        else:
+            return []

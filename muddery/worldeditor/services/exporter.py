@@ -17,6 +17,17 @@ def export_file(filename, table_name, file_type=None):
     """
     Export a table to a csv file.
     """
+    def to_str(value):
+        """
+        Transform a value to a string.
+        :param value:
+        :return:
+        """
+        if value is None:
+            return ""
+        else:
+            return str(value)
+
     if not file_type:
         # Get file's extension name.
         file_type = os.path.splitext(filename)[1].lower()
@@ -37,7 +48,7 @@ def export_file(filename, table_name, file_type=None):
 
     records = general_query_mapper.get_all_records(table_name)
     for record in records:
-        line = [str(record.serializable_value(field.get_attname())) for field in fields]
+        line = [to_str(record.serializable_value(field.get_attname())) for field in fields]
         writer.writeln(line)
 
     writer.save()
