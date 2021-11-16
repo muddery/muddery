@@ -65,6 +65,17 @@ class Accounts(object):
         return data["password"]
 
     @classmethod
+    def set_password(cls, username, password):
+        """
+        Set a new password.
+        :param username:
+        :return:
+        """
+        cls.storage.save("", username, {
+            "password": password,
+        })
+
+    @classmethod
     def get_info(cls, username):
         """
         Get an account's information.

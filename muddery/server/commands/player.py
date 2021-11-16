@@ -47,28 +47,15 @@ class CmdQuit(BaseCommand):
     game. Use the /all switch to disconnect from all sessions.
     """
     key = "quit"
-    locks = "cmd:all()"
 
-    def func(self):
-        "hook function"
-        session = self.session
-        player = self.account
-
-        nsess = len(player.sessions.all())
-        if nsess == 2:
-            session.msg({"msg":"{RQuitting{n. One session is still connected.",
-                       "logout":""},
-                       session=session)
-        elif nsess > 2:
-            session.msg({"msg":"{RQuitting{n. %i session are still connected." % (nsess-1),
-                       "logout":""},
-                       session=session)
-        else:
-            # we are quitting the last available session
-            session.msg({"msg":"{RQuitting{n. Hope to see you again, soon.",
-                       "logout":""},
-                       session=session)
-        player.disconnect_session_from_account(session)
+    @classmethod
+    def func(cls, account, args):
+        # we are quitting the last available session
+        account.msg({
+            "msg": "{RQuitting{n. Hope to see you again, soon.",
+            "logout": ""
+        })
+        account.disconnect()
 
 
 class CmdChangePassword(BaseCommand):
@@ -85,32 +72,14 @@ class CmdChangePassword(BaseCommand):
     Change player's password.
     """
     key = "change_pw"
-    locks = "cmd:all()"
 
-    def func(self):
+    @classmethod
+    def func(cls, account, args):
         "hook function"
-        session = self.session
-        player = self.account
-        args = self.args
-
         current_password = args["current"]
         new_password = args["new"]
 
-        if not player.check_password(current_password):
-            session.msg({"alert":_("Incorrect password.")},
-                        session=session)
-            return
-
-        if len(new_password) < 4:
-            session.msg({"alert":_("Password is too simple.")},
-                        session=session)
-            return
-
-        player.set_password(new_password)
-        player.save()
-        session.msg({"alert":_("Password changed."),
-                     "pw_changed": True},
-                    session=session)
+        account.change_password(current_password, new_password)
 
 
 class CmdPuppet(BaseCommand):
@@ -130,32 +99,26 @@ class CmdPuppet(BaseCommand):
 
     """
     key = "puppet"
-    locks = "cmd:all()"
 
-    # this is used by the parent
-    account_caller = True
-
-    def func(self):
+    @classmethod
+    def func(cls, account, args):
         """
         Main puppet method
         """
-        session = self.session
-        player = self.account
-        args = self.args
         if not args:
-            session.msg({"alert": _("That is not a valid character choice.")})
+            account.msg({"alert": _("That is not a valid character choice.")})
             return
 
         char_id = args
-        char_all = player.get_all_characters()
+        char_all = account.get_all_characters()
         if char_id not in char_all:
-            session.msg({"alert": _("That is not a valid character choice.")})
+            account.msg({"alert": _("That is not a valid character choice.")})
             return
 
         try:
-            player.puppet_object(session, char_id)
+            account.puppet_object(char_id)
         except Exception as e:
-            session.msg({"alert": _("That is not a valid character choice.")})
+            account.msg({"alert": _("That is not a valid character choice.")})
 
 
 class CmdUnpuppet(BaseCommand):
@@ -173,23 +136,15 @@ class CmdUnpuppet(BaseCommand):
     """
 
     key = "unpuppet"
-    locks = "cmd:all()"
 
-    # this is used by the parent
-    account_caller = True
-
-    def func(self):
-        "Implement function"
-
-        player = self.account
-        session = self.session
-
+    @classmethod
+    def func(cls, account, args):
         # disconnect
         try:
-            player.unpuppet_object(session)
-            session.msg({"unpuppet": True})
+            account.unpuppet_object()
+            account.msg({"unpuppet": True})
         except RuntimeError as e:
-            session.msg({"alert":_("Could not unpuppet: %s" % e)})
+            account.msg({"alert":_("Could not unpuppet: %s" % e)})
         except Exception as e:
             logger.log_err("Could not unpuppet: %s" % e)
 
@@ -206,31 +161,24 @@ class CmdCharCreate(BaseCommand):
     Create a new character with a name.
     """
     key = "char_create"
-    locks = "cmd:all()"
 
-    # this is used by the parent
-    account_caller = True
-
-    def func(self):
+    @classmethod
+    def func(cls, account, args):
         "create the new character"
-        session = self.session
-        player = self.account
-        args = self.args
-        
         if not args:
-            session.msg({"alert":_("You should give the character a name.")})
+            account.msg({"alert":_("You should give the character a name.")})
             return
         
         name = args["name"]
         if not name:
-            session.msg({"alert":_("Name should not be empty.")})
+            account.msg({"alert":_("Name should not be empty.")})
             return
 
         # sanity checks
         if not (0 < len(name) <= 30):
             # Nickname's length
             string = "\n\r Name can max be 30 characters or fewer."
-            session.msg({"alert":string})
+            account.msg({"alert":string})
             return
         # strip excessive spaces in playername
         nickname = re.sub(r"\s+", " ", name).strip()
@@ -244,32 +192,32 @@ class CmdCharCreate(BaseCommand):
         try:
             CharacterInfo.get_char_id(nickname)
             # check if this name already exists.
-            session.msg({"alert":_("{RA character named '{r%s{R' already exists.{n") % name})
+            account.msg({"alert":_("{RA character named '{r%s{R' already exists.{n") % name})
             return
         except:
             pass
 
         try:
-            if player.is_staff:
+            if account.is_staff:
                 create_character(
-                    player,
+                    account,
                     name,
                     character_key=GAME_SETTINGS.get("default_staff_character_key"),
                     element_type=settings.STAFF_CHARACTER_ELEMENT_TYPE
                 )
             else:
-                create_character(player, name)
+                create_character(account, name)
         except Exception as e:
             # We are in the middle between logged in and -not, so we have
             # to handle tracebacks ourselves at this point. If we don't,
             # we won't see any errors at all.
-            session.msg({"alert":_("There was an error creating the Player: %s" % e)})
+            account.msg({"alert":_("There was an error creating the Player: %s" % e)})
             logger.log_trace()
             return
 
-        session.msg({
+        account.msg({
             "char_created": True,
-            "char_all": player.get_all_nicknames(),
+            "char_all": account.get_all_nicknames(),
         })
 
 
@@ -285,16 +233,12 @@ class CmdCharDelete(BaseCommand):
     Permanently deletes one of your characters.
     """
     key = "char_delete"
-    locks = "cmd:all()"
 
-    def func(self):
+    @classmethod
+    def func(cls, account, args):
         "delete the character"
-        player = self.account
-        session = self.session
-        args = self.args
-
         if not args:
-            self.msg({"alert":_("Please select a character")})
+            account.msg({"alert":_("Please select a character")})
             return
 
         char_id = args["id"]
@@ -330,14 +274,10 @@ class CmdCharDeleteWithPW(BaseCommand):
     Permanently deletes one of your characters.
     """
     key = "char_delete"
-    locks = "cmd:all()"
 
-    def func(self):
+    @classmethod
+    def func(cls, account, args):
         "delete the character"
-        player = self.account
-        session = self.session
-        args = self.args
-
         if not args:
             self.msg({"alert":_("Please select a character")})
             return
@@ -390,14 +330,11 @@ class CmdCharAll(BaseCommand):
 
     """
     key = "char_all"
-    locks = "cmd:all()"
-    
-    def func(self):
+
+    @classmethod
+    def func(cls, account, args):
         "delete the character"
-        player = self.account
-        session = self.session
-        
-        char_all = player.get_all_characters()
-        session.msg({
+        char_all = account.get_all_characters()
+        account.msg({
             "char_all": [{"name": data["nickname"], "id": char_id} for char_id, data in char_all.items()],
         })

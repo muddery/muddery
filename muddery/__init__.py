@@ -11,6 +11,7 @@ to launch such a shell (using python or ipython depending on your install).
 See www.muddery.org for full documentation.
 
 """
+import traceback
 
 
 def _create_version():
@@ -26,6 +27,7 @@ def _create_version():
         with open(os.path.join(root, "VERSION.txt"), 'r') as f:
             version = f.read().strip()
     except IOError as err:
+        traceback.print_exc()
         print(err)
     return version
 

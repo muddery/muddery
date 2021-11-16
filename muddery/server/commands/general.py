@@ -29,14 +29,12 @@ class CmdLook(BaseCommand):
     Observes your location or objects in your vicinity.
     """
     key = "look"
-    locks = "cmd:all()"
 
-    def func(self):
+    @classmethod
+    def func(cls, caller, args):
         """
         Handle the looking.
         """
-        caller = self.caller
-
         if not caller.is_alive():
             caller.msg({"alert": _("You are died.")})
             return
@@ -79,12 +77,12 @@ class CmdInventory(BaseCommand):
     Show everything in your inventory.
     """
     key = "inventory"
-    locks = "cmd:all()"
 
-    def func(self):
+    @classmethod
+    def func(cls, caller, args):
         "check inventory"
-        inv = self.caller.get_inventory_appearance()
-        self.caller.msg({"inventory":inv})
+        inv = caller.get_inventory_appearance()
+        caller.msg({"inventory":inv})
 
 
 class CmdInventoryObject(BaseCommand):
@@ -100,15 +98,12 @@ class CmdInventoryObject(BaseCommand):
     Observes your location or objects in your vicinity.
     """
     key = "inventory_obj"
-    locks = "cmd:all()"
 
-    def func(self):
+    @classmethod
+    def func(cls, caller, args):
         """
         Handle the looking.
         """
-        caller = self.caller
-        args = self.args
-
         if not args:
             caller.msg({"alert": _("You should select something in your inventory.")})
             return
@@ -133,15 +128,12 @@ class CmdEquipmentsObject(BaseCommand):
     Observes your location or objects in your vicinity.
     """
     key = "equipments_obj"
-    locks = "cmd:all()"
 
-    def func(self):
+    @classmethod
+    def func(cls, caller, args):
         """
         Handle the looking.
         """
-        caller = self.caller
-        args = self.args
-
         if not args:
             caller.msg({"alert": _("You should select something in your equipments.")})
             return
@@ -170,28 +162,24 @@ class CmdSay(BaseCommand):
     """
 
     key = "say"
-    locks = "cmd:all()"
-    help_cateogory = "General"
 
-    def func(self):
+    @classmethod
+    def func(cls, caller, args):
         "Run the say command"
-
-        caller = self.caller
-
-        if not self.args:
+        if not args:
             return
 
-        if "target" not in self.args:
+        if "target" not in args:
             caller.msg({"alert": _("You should choose a target to say.")})
             return
 
-        if "message" not in self.args:
+        if "message" not in args:
             caller.msg({"alert": _("You should say something.")})
             return
 
-        target_type = self.args["type"]
-        target = self.args["target"]
-        message = self.args["message"]
+        target_type = args["type"]
+        target = args["target"]
+        message = args["message"]
 
         Server.world.send_message(caller, target_type, target, message)
 
@@ -209,23 +197,20 @@ class CmdLookRoomObj(BaseCommand):
     }
     """
     key = "look_room_obj"
-    locks = "cmd:all()"
-    help_cateogory = "General"
 
-    def func(self):
-        caller = self.caller
-
+    @classmethod
+    def func(cls, caller, args):
         if not caller.is_alive():
             caller.msg({"alert": _("You are died.")})
             return
 
-        if not self.args:
+        if not args:
             caller.msg({"alert": _("You should appoint an object.")})
             return
 
         try:
-            room = self.caller.get_location()
-            obj = room.get_object(self.args)
+            room = caller.get_location()
+            obj = room.get_object(args)
         except Exception as e:
             caller.msg({"alert": _("Can not find the object.")})
             return
@@ -247,23 +232,20 @@ class CmdLookRoomChar(BaseCommand):
     }
     """
     key = "look_room_char"
-    locks = "cmd:all()"
-    help_cateogory = "General"
 
-    def func(self):
-        caller = self.caller
-
+    @classmethod
+    def func(cls, caller, args):
         if not caller.is_alive():
             caller.msg({"alert": _("You are died.")})
             return
 
-        if not self.args:
+        if not args:
             caller.msg({"alert": _("You should appoint a character.")})
             return
 
         try:
-            char_id = int(self.args)
-            room = self.caller.get_location()
+            char_id = int(args)
+            room = caller.get_location()
             obj = room.get_character(char_id)
         except Exception as e:
             caller.msg({"alert": _("Can not find the object.")})
@@ -288,24 +270,21 @@ class CmdTraverse(BaseCommand):
     Tranvese an exit, go to the destination of the exit.
     """
     key = "traverse"
-    locks = "cmd:all()"
-    help_cateogory = "General"
 
-    def func(self):
+    @classmethod
+    def func(cls, caller, args):
         "Move caller to the exit."
-        caller = self.caller
-
         if not caller.is_alive():
             caller.msg({"alert": _("You are died.")})
             return
 
-        if not self.args:
+        if not args:
             caller.msg({"alert": _("Should appoint an exit to go.")})
             return
 
         try:
-            room = self.caller.get_location()
-            exit = room.get_exit(self.args)
+            room = caller.get_location()
+            exit = room.get_exit(args)
         except:
             caller.msg({"alert": _("Can not find the exit.")})
             return
@@ -328,20 +307,17 @@ class CmdTalk(BaseCommand):
     Begin a talk with an NPC. Show all available dialogues of this NPC.
     """
     key = "talk"
-    locks = "cmd:all()"
-    help_cateogory = "General"
 
-    def func(self):
+    @classmethod
+    def func(cls, caller, args):
         "Talk to an NPC."
-        caller = self.caller
-
-        if not self.args:
+        if not args:
             caller.msg({"alert":_("You should talk to someone.")})
             return
 
         try:
-            npc_id = int(self.args)
-            room = self.caller.get_location()
+            npc_id = int(args)
+            room = caller.get_location()
             npc = room.get_character(npc_id)
         except:
             # Can not find the NPC in the caller's location.
@@ -370,14 +346,10 @@ class CmdDialogue(BaseCommand):
     current sentence and get next sentences.
     """
     key = "finish_dialogue"
-    locks = "cmd:all()"
-    help_cateogory = "General"
 
-    def func(self):
+    @classmethod
+    def func(cls, caller, args):
         "Continue a dialogue."
-        caller = self.caller
-        args = self.args
-
         if not args:
             caller.msg({"alert":_("You should talk to someone.")})
             return
@@ -415,20 +387,19 @@ class CmdLoot(BaseCommand):
     them to the character.
     """
     key = "loot"
-    locks = "cmd:all()"
-    help_cateogory = "General"
 
-    def func(self):
+    @classmethod
+    def func(cls, caller, args):
         "Loot objects."
-        caller = self.caller
+        caller = caller
 
-        if not self.args:
+        if not args:
             caller.msg({"alert":_("You should loot something.")})
             return
 
         try:
-            room = self.caller.get_location()
-            obj = room.get_object(self.args)
+            room = caller.get_location()
+            obj = room.get_object(args)
         except:
             caller.msg({"alert": _("Can not find the object.")})
             return
@@ -460,21 +431,17 @@ class CmdUse(BaseCommand):
     Different objects can have different results.
     """
     key = "use"
-    locks = "cmd:all()"
-    help_cateogory = "General"
 
-    def func(self):
-        "Use an object."
-        caller = self.caller
-
+    @classmethod
+    def func(cls, caller, args):
         if not caller.is_alive():
             caller.msg({"alert": _("You are died.")})
             return
 
-        if not self.args or "position" not in self.args:
+        if not args or "position" not in args:
             caller.msg({"alert": _("You should use something.")})
             return
-        position = self.args["position"]
+        position = args["position"]
 
         result = ""
         try:
@@ -482,7 +449,7 @@ class CmdUse(BaseCommand):
             result = caller.use_object(int(position))
             caller.show_location()
         except Exception as e:
-            ostring = "Can not use %s: %s" % (self.args, e)
+            ostring = "Can not use %s: %s" % (args, e)
             logger.log_trace(ostring)
 
         # Send result to the player.
@@ -509,21 +476,20 @@ class CmdDiscard(BaseCommand):
     Call caller's remove_objects function with specified object.
     """
     key = "discard"
-    locks = "cmd:all()"
-    help_cateogory = "General"
 
-    def func(self):
+    @classmethod
+    def func(cls, caller, args):
         "Use an object."
-        caller = self.caller
+        caller = caller
 
         if not caller.is_alive():
             caller.msg({"alert":_("You are died.")})
             return
 
-        if not self.args or "position" not in self.args:
+        if not args or "position" not in args:
             caller.msg({"alert":_("You should discard something.")})
             return
-        position = self.args["position"]
+        position = args["position"]
 
         # remove object
         try:
@@ -532,7 +498,7 @@ class CmdDiscard(BaseCommand):
         except Exception as e:
             # If the caller does not have this object.
             caller.msg({"alert": _("Can not discard this object.")})
-            logger.log_trace("Can not discard object %s: %s" % (self.args, e))
+            logger.log_trace("Can not discard object %s: %s" % (args, e))
             return
 
 
@@ -551,24 +517,23 @@ class CmdEquip(BaseCommand):
     Put on an equipment and add its attributes to the character.
     """
     key = "equip"
-    locks = "cmd:all()"
-    help_cateogory = "General"
 
-    def func(self):
+    @classmethod
+    def func(cls, caller, args):
         "Put on an equipment."
-        caller = self.caller
+        caller = caller
 
-        if not self.args or "position" not in self.args:
+        if not args or "position" not in args:
             caller.msg({"alert": _("You should equip something.")})
             return
-        position = self.args["position"]
+        position = args["position"]
 
         try:
             # equip
             caller.equip_object(int(position))
         except Exception as e:
             caller.msg({"alert": _("Can not use this equipment.")})
-            logger.log_trace("Can not use equipment %s: %s" % (self.args, e))
+            logger.log_trace("Can not use equipment %s: %s" % (args, e))
             return
 
         # Send lastest status to the player.
@@ -591,17 +556,14 @@ class CmdTakeOff(BaseCommand):
     Take off an equipment and remove its attributes from the character.
     """
     key = "takeoff"
-    locks = "cmd:all()"
-    help_cateogory = "General"
 
-    def func(self):
+    @classmethod
+    def func(cls, caller, args):
         "Take off an equipment."
-        caller = self.caller
-
-        if not self.args or "position" not in self.args:
+        if not args or "position" not in args:
             caller.msg({"alert":_("You should take off something.")})
             return
-        position = self.args["position"]
+        position = args["position"]
 
         try:
             # Take off the equipment.
@@ -611,7 +573,7 @@ class CmdTakeOff(BaseCommand):
             return
         except Exception as e:
             caller.msg({"alert": _("Can not take off this equipment.")})
-            logger.log_trace("Can not take off %s: %s" % (self.args, e))
+            logger.log_trace("Can not take off %s: %s" % (args, e))
             return
 
         # Send lastest status to the player.
@@ -645,14 +607,10 @@ class CmdCastSkill(BaseCommand):
     
     """
     key = "cast_skill"
-    locks = "cmd:all()"
-    help_cateogory = "General"
 
-    def func(self):
+    @classmethod
+    def func(cls, caller, args):
         "Cast a skill."
-        caller = self.caller
-        args = self.args
-
         if not caller.is_alive():
             caller.msg({"alert":_("You are died.")})
             return
@@ -710,15 +668,10 @@ class CmdAttack(BaseCommand):
     already in combat, the caller will join its combat.
     """
     key = "attack"
-    locks = "cmd:all()"
-    help_category = "General"
 
-    def func(self):
+    @classmethod
+    def func(cls, caller, args):
         "Handle command"
-
-        caller = self.caller
-        args = self.args
-
         if not caller:
             return
 
@@ -796,12 +749,10 @@ class CmdQueueUpCombat(BaseCommand):
     }
     """
     key = "queue_up_combat"
-    locks = "cmd:all()"
-    help_category = "General"
 
-    def func(self):
+    @classmethod
+    def func(cls, caller, args):
         "Handle command"
-        caller = self.caller
         if not caller:
             return
 
@@ -826,13 +777,10 @@ class CmdQuitCombatQueue(BaseCommand):
     }
     """
     key = "quit_combat_queue"
-    locks = "cmd:all()"
-    help_category = "General"
 
-    def func(self):
+    @classmethod
+    def func(cls, caller, args):
         "Handle command"
-
-        caller = self.caller
         if not caller:
             return
 
@@ -852,13 +800,10 @@ class CmdConfirmCombat(BaseCommand):
     }
     """
     key = "confirm_combat"
-    locks = "cmd:all()"
-    help_category = "General"
 
-    def func(self):
+    @classmethod
+    def func(cls, caller, args):
         "Handle command"
-
-        caller = self.caller
         if not caller:
             return
 
@@ -878,13 +823,12 @@ class CmdRejectCombat(BaseCommand):
     }
     """
     key = "reject_combat"
-    locks = "cmd:all()"
-    help_category = "General"
 
-    def func(self):
+    @classmethod
+    def func(cls, caller, args):
         "Handle command"
 
-        caller = self.caller
+        caller = caller
         if not caller:
             return
 
@@ -904,17 +848,15 @@ class CmdGetRankings(BaseCommand):
         }
     """
     key = "get_rankings"
-    locks = "cmd:all()"
-    help_cateogory = "General"
 
-    def func(self):
+    @classmethod
+    def func(cls, caller, args):
         """
         Get characters rankings.
 
         Returns:
             None
         """
-        caller = self.caller
         if not caller:
             return
 
@@ -934,25 +876,23 @@ class CmdGiveUpQuest(BaseCommand):
         }
     """
     key = "giveup_quest"
-    locks = "cmd:all()"
-    help_cateogory = "General"
 
-    def func(self):
+    @classmethod
+    def func(cls, caller, args):
         """
         Give up a quest.
 
         Returns:
             None
         """
-        caller = self.caller
         if not caller:
             return
 
-        if not self.args:
+        if not args:
             caller.msg({"alert":_("You should give up a quest.")})
             return
 
-        quest_key = self.args
+        quest_key = args
 
         try:
             # Give up the quest.
@@ -984,18 +924,15 @@ class CmdUnlockExit(BaseCommand):
     A character must unlock a LockedExit before tranvese it.
     """
     key = "unlock_exit"
-    locks = "cmd:all()"
-    help_cateogory = "General"
 
-    def func(self):
+    @classmethod
+    def func(cls, caller, args):
         "Open a locked exit."
-        caller = self.caller
-
-        if not self.args:
+        if not args:
             caller.msg({"alert": _("You should unlock something.")})
             return
 
-        exit_key = self.args
+        exit_key = args
 
         try:
             # Unlock the exit.
@@ -1025,14 +962,10 @@ class CmdShopping(BaseCommand):
         }
     """
     key = "shopping"
-    locks = "cmd:all()"
-    help_cateogory = "General"
 
-    def func(self):
+    @classmethod
+    def func(cls, caller, args):
         "Do shopping."
-        caller = self.caller
-        args = self.args
-
         if not args or "npc" not in args or "shop" not in args:
             caller.msg({"alert": _("You should shopping in someplace.")})
             return
@@ -1068,21 +1001,17 @@ class CmdBuy(BaseCommand):
         }
     """
     key = "buy"
-    locks = "cmd:all()"
-    help_cateogory = "General"
 
-    def func(self):
+    @classmethod
+    def func(cls, caller, args):
         "Buy a goods."
-        caller = self.caller
-        args = self.args
-
         if not args or "npc" not in args or "shop" not in args or "goods" not in args:
             caller.msg({"alert": _("You should buy something.")})
             return
 
         try:
             npc_id = int(args["npc"])
-            room = self.caller.get_location()
+            room = caller.get_location()
             npc = room.get_character(npc_id)
         except:
             caller.msg({"alert": _("Can not find this NPC.")})
@@ -1115,15 +1044,12 @@ class CmdQueryQuest(BaseCommand):
     Observes your location or objects in your vicinity.
     """
     key = "query_quest"
-    locks = "cmd:all()"
 
-    def func(self):
+    @classmethod
+    def func(cls, caller, args):
         """
         Handle the looking.
         """
-        caller = self.caller
-        args = self.args
-
         if not args or "key" not in args:
             caller.msg({"alert": _("Can not find it.")})
             return
@@ -1151,15 +1077,12 @@ class CmdQuerySkill(BaseCommand):
     Observes your location or objects in your vicinity.
     """
     key = "query_skill"
-    locks = "cmd:all()"
 
-    def func(self):
+    @classmethod
+    def func(cls, caller, args):
         """
         Handle the looking.
         """
-        caller = self.caller
-        args = self.args
-
         if not args or "key" not in args:
             caller.msg({"alert": _("Can not find it.")})
             return
@@ -1173,70 +1096,6 @@ class CmdQuerySkill(BaseCommand):
 
 
 #------------------------------------------------------------
-# connect
-#------------------------------------------------------------
-class CmdConnect(BaseCommand):
-    """
-    Connect to the game when the player has already connectd, 
-    ignore it to avoid wrong command messages.
-
-    Usage:
-        {"cmd":"connect"}
-    """
-    key = "connect"
-    locks = "cmd:all()"
-
-    def func(self):
-        """
-        Just ignore it.
-        """
-        pass
-
-
-#------------------------------------------------------------
-# create
-#------------------------------------------------------------
-class CmdCreate(BaseCommand):
-    """
-    create an account when the player has already connectd,
-    ignore it to avoid wrong command messages.
-
-    Usage:
-        {"cmd":"create_account"}
-    """
-    key = "create_account"
-    locks = "cmd:all()"
-
-    def func(self):
-        """
-        Just ignore it.
-        """
-        pass
-
-
-
-#------------------------------------------------------------
-# create and connect
-#------------------------------------------------------------
-class CmdCreateConnect(BaseCommand):
-    """
-    create an account when the player has already connectd,
-    ignore it to avoid wrong command messages.
-
-    Usage:
-        {"cmd":"create_connect"}
-    """
-    key = "create_connect"
-    locks = "cmd:all()"
-
-    def func(self):
-        """
-        Just ignore it.
-        """
-        pass
-        
-        
-#------------------------------------------------------------
 # do some tests
 #------------------------------------------------------------
 class CmdTest(BaseCommand):
@@ -1247,9 +1106,9 @@ class CmdTest(BaseCommand):
         {"cmd":"test"}
     """
     key = "test"
-    locks = "cmd:all()"
 
-    def func(self):
+    @classmethod
+    def func(cls, caller, args):
         """
         Put your test here.
         """

@@ -2,6 +2,7 @@
 The World is the base controller of a server. It managers all areas, maps and characters on this server.
 """
 
+from django.conf import settings
 from muddery.server.elements.base_element import BaseElement
 from muddery.server.mappings.element_set import ELEMENT
 from muddery.server.database.worlddata.world_areas import WorldAreas
@@ -9,6 +10,7 @@ from muddery.server.database.worlddata.world_channels import WorldChannels
 from muddery.server.database.worlddata.worlddata import WorldData
 from muddery.server.utils.localized_strings_handler import _
 from muddery.server.utils.defines import ConversationType
+from muddery.server.utils.utils import class_from_path
 
 
 class MudderyWorld(BaseElement):
@@ -50,6 +52,7 @@ class MudderyWorld(BaseElement):
         # Load data.
         self.load_channels()
         self.load_areas()
+        self.load_commands()
 
     def load_channels(self):
         """
@@ -92,6 +95,19 @@ class MudderyWorld(BaseElement):
             rooms_key = new_area.get_rooms_key()
             for key in rooms_key:
                 self.room_dict[key] = record.key
+
+    def load_commands(self):
+        """
+        Load all client commands.
+        """
+        session_cmdset = class_from_path(settings.SESSION_CMDSET)
+        session_cmdset.create()
+
+        account_cmdset = class_from_path(settings.ACCOUNT_CMDSET)
+        account_cmdset.create()
+
+        character_cmdset = class_from_path(settings.CHARACTER_CMDSET)
+        character_cmdset.create()
 
     def get_room(self, room_key):
         """

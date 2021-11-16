@@ -12,6 +12,7 @@ and portal through the evennia_runner. Run without arguments to get a
 menu. Run the script with the -h flag to see usage information.
 """
 
+import traceback
 import sys
 import argparse
 from argparse import ArgumentParser
@@ -34,7 +35,6 @@ def main():
     """
     Run the muddery main program.
     """
-
     # set up argument parser
 
     parser = ArgumentParser(description=configs.CMDLINE_HELP, formatter_class=argparse.RawTextHelpFormatter)
@@ -161,6 +161,7 @@ def main():
         try:
             manager.run_evennia(option)
         except Exception as e:
+            traceback.print_exc()
             print(e)
             sys.exit(-1)
         sys.exit()

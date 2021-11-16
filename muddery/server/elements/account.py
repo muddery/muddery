@@ -31,6 +31,9 @@ from muddery.server.utils.localized_strings_handler import _
 from muddery.server.utils import logger
 
 
+_SESSIONS = None
+
+
 class MudderyAccount(BaseElement):
     """
     The character not controlled by players.
@@ -88,14 +91,7 @@ class MudderyAccount(BaseElement):
 
     def set_user(self, username, password, session):
         # Match account name and check password
-        try:
-            raw_password = Accounts.get_password(username)
-        except KeyError:
-            # Wrong username.
-            raise MudderyError(ERR.no_authentication, _("Incorrect username or password."))
-
-        passed = check_password(password, raw_password)
-        if not passed:
+        if not self.check_password(username, password):
             # Password not match.
             raise MudderyError(ERR.no_authentication, _("Incorrect username or password."))
 
@@ -196,7 +192,7 @@ class MudderyAccount(BaseElement):
         if self.session:
             self.session.data_out(text=text, **kwargs)
 
-    def puppet_object(self, session, char_db_id):
+    def puppet_object(self, char_db_id):
         """
         Use the given session to control (puppet) the given object (usually
         a Character type).
@@ -212,7 +208,7 @@ class MudderyAccount(BaseElement):
         # safety checks
         if not char_db_id:
             raise RuntimeError("Object not found")
-        if not session:
+        if not self.session:
             raise RuntimeError("Session not found")
 
         current_obj = self.puppet_obj
@@ -238,11 +234,10 @@ class MudderyAccount(BaseElement):
             new_char.set_db_id(char_db_id)
 
             # do the connection
-            new_char.set_account_id(self.id)
-            new_char.set_session(session)
+            new_char.set_account(self)
             new_char.setup_element(character_key)
         except:
-            session.msg({"alert": _("That is not a valid character choice.")})
+            self.msg({"alert": _("That is not a valid character choice.")})
             return
 
         # Send puppet info to the client first.
@@ -263,7 +258,7 @@ class MudderyAccount(BaseElement):
             pass
 
         self.puppet_obj = new_char
-        session.puid = char_db_id
+        self.session.puid = char_db_id
 
         # add the character to the world
         Server.world.on_char_puppet(new_char)
@@ -319,3 +314,43 @@ class MudderyAccount(BaseElement):
 
     def at_cmdset_get(self):
         pass
+
+    def check_password(self, username, password):
+        """
+        Check if the password is correct.
+        """
+        try:
+            raw_password = Accounts.get_password(username)
+        except KeyError:
+            # Wrong username.
+            return False
+
+        return check_password(password, raw_password)
+
+    def change_password(self, current_password, new_password):
+        """
+        Change the account's password.
+        """
+        if not self.check_password(self.username, current_password):
+            self.msg({"alert":_("Incorrect password.")})
+            return
+
+        raw_password = make_password(new_password)
+        Accounts.set_password(self.username, raw_password)
+
+        self.msg({
+            "alert":_("Password changed."),
+            "pw_changed": True
+        })
+
+    def disconnect(self, reason):
+        """
+        Disconnect the session
+        """
+        if self.session:
+            global _SESSIONS
+            if not _SESSIONS:
+                from evennia.server.sessionhandler import SESSIONS as _SESSIONS
+            _SESSIONS.disconnect(self.session, reason)
+
+            self.session = None

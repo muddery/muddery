@@ -19,14 +19,12 @@ class CmdCombatInfo(BaseCommand):
     Observes your combat.
     """
     key = "combat_info"
-    locks = "cmd:all()"
 
-    def func(self):
+    @classmethod
+    def func(cls, caller, args):
         """
         Return the overall combat informations to the caller.
         """
-        caller = self.caller
-
         if not caller.is_in_combat():
             # If the caller is not in combat.
             caller.msg({"msg":_("You are not in combat!")})
@@ -51,14 +49,12 @@ class CmdLeaveCombat(BaseCommand):
     Observes your combat.
     """
     key = "leave_combat"
-    locks = "cmd:all()"
 
-    def func(self):
+    @classmethod
+    def func(cls, caller, args):
         """
         Left the current combat.
         """
-        caller = self.caller
-
         if not caller.is_in_combat():
             # If the caller is not in combat.
             caller.msg({"msg":_("You are not in combat!")})
@@ -94,14 +90,10 @@ class CmdCastCombatSkill(BaseCommand):
 
     """
     key = "cast_combat_skill"
-    locks = "cmd:all()"
-    help_cateogory = "General"
 
-    def func(self):
+    @classmethod
+    def func(cls, caller, args):
         "Cast a skill in a combat."
-        caller = self.caller
-        args = self.args
-
         if not caller.is_alive():
             caller.msg({"alert": _("You are died.")})
             return

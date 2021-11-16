@@ -82,9 +82,9 @@ class CmdConnectAccount(BaseCommand):
 
     """
     key = "connect"
-    locks = "cmd:all()"
 
-    def func(self):
+    @classmethod
+    def func(cls, session, args):
         """
         Uses the Django admin api. Note that unlogged-in commands
         have a unique position in that their func() receives
@@ -92,9 +92,6 @@ class CmdConnectAccount(BaseCommand):
         other types of logged-in commands (this is because
         there is no object yet before the player has logged in)
         """
-        session = self.caller
-        args = self.args
-
         try:
             username = args["username"]
             password = args["password"]
@@ -167,32 +164,30 @@ class CmdCreateAccount(BaseCommand):
         connect: (boolean)connect after created
     """
     key = "create"
-    locks = "cmd:all()"
 
-    def func(self):
+    @classmethod
+    def func(cls, session, args):
         "Do checks, create account and login."
-        session = self.caller
-
-        if not self.args:
+        if not args:
             session.msg({"alert": _("Syntax error!")})
             return
 
-        if "username" not in self.args:
+        if "username" not in args:
             session.msg({"alert": _("You should appoint a username.")})
             return
 
-        if "password" not in self.args:
+        if "password" not in args:
             session.msg({"alert": _("You should appoint a password.")})
             return
 
-        username = self.args["username"]
+        username = args["username"]
         username = re.sub(r"\s+", " ", username).strip()
 
-        password = self.args["password"]
+        password = args["password"]
 
         connect = True
-        if "connect" in self.args:
-            connect = self.args["connect"]
+        if "connect" in args:
+            connect = args["connect"]
 
         # Create an account.
         element_type = settings.ACCOUNT_ELEMENT_TYPE
@@ -232,11 +227,9 @@ class CmdQuitAccount(BaseCommand):
     version is a bit more complicated.
     """
     key = "quit"
-    locks = "cmd:all()"
 
-    def func(self):
-        "Simply close the connection."
-        session = self.caller
+    @classmethod
+    def func(cls, session, args):
         #session.msg("Good bye! Disconnecting ...")
         session.sessionhandler.disconnect(session, "Good bye! Disconnecting.")
 
@@ -256,9 +249,9 @@ class CmdUnloginLook(BaseCommand):
     All it does is display the connect screen.
     """
     key = "unloggedin_look"
-    locks = "cmd:all()"
 
-    def func(self):
+    @classmethod
+    def func(cls, session, args):
         "Show the connect screen."
         game_name = GAME_SETTINGS.get("game_name")
         connection_screen = GAME_SETTINGS.get("connection_screen")
@@ -270,7 +263,7 @@ class CmdUnloginLook(BaseCommand):
             "desc": r.desc,
         } for r in records]
 
-        self.caller.msg({
+        session.msg({
             "game_name": game_name,
             "conn_screen": connection_screen,
             "equipment_pos": equipment_pos,

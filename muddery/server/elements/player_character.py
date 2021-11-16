@@ -9,6 +9,7 @@ creation commands.
 """
 
 import ast, traceback
+import weakref
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from evennia.scripts.scripthandler import ScriptHandler
@@ -81,7 +82,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
 
         self.pk = 0
 
-        self.session = None
+        self.account = None
         self.account_id = None
 
         # character's inventory
@@ -278,21 +279,14 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
             value = self.const_data_handler.get(key)
             self.body_data_handler.add(key, value)
 
-    def set_session(self, session):
+    def set_account(self, account):
         """
-        Set the client's session.
-        :param session:
+        Set the player's account.
+        :param account:
         :return:
         """
-        self.session = session
-
-    def set_account_id(self, account_id):
-        """
-        Set the player's account id.
-        :param account_id:
-        :return:
-        """
-        self.account_id = account_id
+        self.account = weakref.proxy(account)
+        self.account_id = account.get_id()
 
     def get_account_id(self):
         """
@@ -405,7 +399,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
 
     def msg(self, text=None, options=None, **kwargs):
         """
-        Emits something to a session attached to the object.
+        Emits something to the account attached to the object.
 
         Args:
             text (str, optional): The message to send
@@ -414,15 +408,15 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
             `at_msg_receive` will be called on this Object.
             All extra kwargs will be passed on to the protocol.
         """
-        if not self.session:
+        if not self.account:
             return
 
         # Send messages to the client. Messages are in format of JSON.
         kwargs["options"] = options
 
-        # relay to session
+        # relay to account
         logger.log_info("Send message, %s: %s" % (self.get_db_id(), text))
-        self.session.msg(text=text, **kwargs)
+        self.account.msg(text=text, **kwargs)
 
     def get_level(self):
         """

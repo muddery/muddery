@@ -24,37 +24,42 @@ def at_server_start():
     This is called every time the server starts up, regardless of
     how it was shut down.
     """
+    print("server start")
+
     # load data
     from muddery.server.database.worlddata.worlddata import WorldData
     WorldData.reload()
+    print("WorldData loaded.")
 
     # reset settings
     from muddery.server.utils.game_settings import GAME_SETTINGS
     GAME_SETTINGS.reset()
+    print("GAME_SETTINGS loaded.")
 
     # reload local strings
     from muddery.server.utils.localized_strings_handler import LOCALIZED_STRINGS_HANDLER
     LOCALIZED_STRINGS_HANDLER.reload()
+    print("LOCALIZED_STRINGS_HANDLER loaded.")
 
     # clear dialogues
     from muddery.server.utils.dialogue_handler import DIALOGUE_HANDLER
     DIALOGUE_HANDLER.clear()
-    
+    print("DIALOGUE_HANDLER loaded.")
+
     # reload equipment types
     from muddery.server.utils.equip_type_handler import EQUIP_TYPE_HANDLER
     EQUIP_TYPE_HANDLER.reload()
+    print("EQUIP_TYPE_HANDLER loaded.")
 
     # localize model fields
     from muddery.server.utils.localiztion_handler import localize_model_fields
     localize_model_fields()
-    
-    # load condition descriptions
-    from muddery.server.utils.desc_handler import DESC_HANDLER
-    DESC_HANDLER.reload()
+    print("localize_model_fields loaded.")
 
     # load honours
     from muddery.server.database.gamedata.honours_mapper import HONOURS_MAPPER
     HONOURS_MAPPER.reload()
+    print("HONOURS_MAPPER loaded.")
 
     # create the world
     try:

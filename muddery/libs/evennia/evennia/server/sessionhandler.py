@@ -301,8 +301,7 @@ class ServerSessionHandler(SessionHandler):
         for delays.
 
         """
-        if not session.logged_in:
-            self.data_in(session, text=[[CMD_LOGINSTART], {}])
+        pass
 
     def portal_connect(self, portalsessiondata):
         """

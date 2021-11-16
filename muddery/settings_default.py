@@ -122,10 +122,6 @@ TYPECLASS_FULL_CACHE = True
 # existing default, there are examples of many of these modules
 # in contrib/examples.
 
-# The command parser module to use. See the default module for which
-# functions it must implement
-COMMAND_PARSER = "muddery.server.conf.cmdparser.cmdparser"
-
 # An optional module that, if existing, must hold a function
 # named at_initial_setup(). This hook method can be used to customize
 # the server's initial setup sequence (the very first startup of the system).
@@ -410,19 +406,25 @@ SKILL_FUNC_SET = "muddery.server.statements.default_statement_func_set.SkillFunc
 ######################################################################
 
 # Command set used on session before player has logged in
-CMDSET_UNLOGGEDIN = "muddery.server.commands.default_cmdsets.UnloggedinCmdSet"
+CMDSET_UNLOGGEDIN = "evennia.commands.default.cmdset_unloggedin.UnloggedinCmdSet"
 
 # Command set used on the logged-in session
-CMDSET_SESSION = "muddery.server.commands.default_cmdsets.SessionCmdSet"
+CMDSET_SESSION = "evennia.commands.default.cmdset_session.SessionCmdSet"
 
 # Default set for logged in player with characters (fallback)
-CMDSET_CHARACTER = "muddery.server.commands.default_cmdsets.CharacterCmdSet"
+CMDSET_CHARACTER = "evennia.commands.default.cmdset_character.CharacterCmdSet"
 
 # Command set for accounts without a character (ooc)
-CMDSET_ACCOUNT = "muddery.server.commands.default_cmdsets.AccountCmdSet"
+CMDSET_ACCOUNT = "evennia.commands.default.cmdset_account.AccountCmdSet"
 
-# Command set for players in combat
-CMDSET_COMBAT = "muddery.server.commands.default_cmdsets.CombatCmdSet"
+# Command set used on the logged-in session
+SESSION_CMDSET = "muddery.server.commands.default_cmdsets.SessionCmdSet"
+
+# Command set for accounts without a character (ooc)
+ACCOUNT_CMDSET = "muddery.server.commands.default_cmdsets.AccountCmdSet"
+
+# Default set for logged in player with characters (fallback)
+CHARACTER_CMDSET = "muddery.server.commands.default_cmdsets.CharacterCmdSet"
 
 
 ######################################################################
