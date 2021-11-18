@@ -5,8 +5,6 @@ This module handles importing data from csv files and creating the whole game wo
 import traceback
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
-from evennia.utils import create
-from evennia.comms.models import ChannelDB
 from muddery.server.utils import logger
 from muddery.server.utils.game_settings import GAME_SETTINGS
 from muddery.server.mappings.element_set import ELEMENT, ELEMENT_SET
@@ -30,7 +28,7 @@ def create_character(new_player, nickname, character_key=None,
     new_character = ELEMENT(element_type)()
 
     # set player's account id
-    new_character.set_account_id(new_player.id)
+    new_character.set_account(new_player)
 
     # Get a new player character id.
     # TODO: load for update
@@ -54,7 +52,7 @@ def create_character(new_player, nickname, character_key=None,
         nickname = character_key
 
     # save data
-    AccountCharacters.add(new_player.id, char_db_id)
+    AccountCharacters.add(new_player.get_id(), char_db_id)
     CharacterInfo.add(char_db_id, nickname, level)
 
     # set nickname

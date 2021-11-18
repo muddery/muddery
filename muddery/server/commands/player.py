@@ -7,7 +7,6 @@ The licence of Evennia can be found in evennia/LICENSE.txt.
 import re, traceback
 from django.conf import settings
 from muddery.server.utils import logger
-from evennia.utils.utils import make_iter
 from muddery.server.commands.base_command import BaseCommand
 from muddery.server.utils.localized_strings_handler import _
 from muddery.server.utils.builder import create_character
@@ -15,19 +14,6 @@ from muddery.server.database.gamedata.account_characters import AccountCharacter
 from muddery.server.database.gamedata.character_info import CharacterInfo
 from muddery.server.utils.game_settings import GAME_SETTINGS
 
-
-MAX_NR_CHARACTERS = settings.MAX_NR_CHARACTERS
-MULTISESSION_MODE = settings.MULTISESSION_MODE
-
-# limit symbol import for API
-__all__ = ("CmdQuit")
-
-# force max nr chars to 1 if mode is 0 or 1
-MAX_NR_CHARACTERS = MULTISESSION_MODE < 2 and 1 or MAX_NR_CHARACTERS
-BASE_ACCOUNT_TYPECLASS = settings.BASE_ACCOUNT_TYPECLASS
-
-PERMISSION_HIERARCHY = settings.PERMISSION_HIERARCHY
-PERMISSION_HIERARCHY_LOWER = [perm.lower() for perm in PERMISSION_HIERARCHY]
 
 # Obs - these are all intended to be stored on the Player, and as such,
 # use self.player instead of self.caller, just to be sure. Also self.msg()
@@ -51,11 +37,11 @@ class CmdQuit(BaseCommand):
     @classmethod
     def func(cls, account, args):
         # we are quitting the last available session
+        account.disconnect()
         account.msg({
             "msg": "{RQuitting{n. Hope to see you again, soon.",
             "logout": ""
         })
-        account.disconnect()
 
 
 class CmdChangePassword(BaseCommand):
@@ -180,14 +166,15 @@ class CmdCharCreate(BaseCommand):
             string = "\n\r Name can max be 30 characters or fewer."
             account.msg({"alert":string})
             return
+
+        # check total characters number
+        char_all = account.get_all_characters()
+        if len(char_all) >= settings.MAX_NR_CHARACTERS:
+            account.msg({"alert": _("You may only create a maximum of %i characters.") % settings.MAX_NR_CHARACTERS})
+            return
+
         # strip excessive spaces in playername
         nickname = re.sub(r"\s+", " ", name).strip()
-        
-        charmax = settings.MAX_NR_CHARACTERS if settings.MULTISESSION_MODE > 1 else 1
-
-        if player.db._playable_characters and len(player.db._playable_characters) >= charmax:
-            session.msg({"alert":_("You may only create a maximum of %i characters.") % charmax})
-            return
 
         try:
             CharacterInfo.get_char_id(nickname)
@@ -198,15 +185,7 @@ class CmdCharCreate(BaseCommand):
             pass
 
         try:
-            if account.is_staff:
-                create_character(
-                    account,
-                    name,
-                    character_key=GAME_SETTINGS.get("default_staff_character_key"),
-                    element_type=settings.STAFF_CHARACTER_ELEMENT_TYPE
-                )
-            else:
-                create_character(account, name)
+            create_character(account, name)
         except Exception as e:
             # We are in the middle between logged in and -not, so we have
             # to handle tracebacks ourselves at this point. If we don't,
@@ -243,22 +222,17 @@ class CmdCharDelete(BaseCommand):
 
         char_id = args["id"]
 
-        # use the playable_characters list to search
-        characters = AccountCharacters.get_account_characters(player.id)
-        if not characters or char_id not in characters:
-            session.msg({"alert": _("You have no such character to delete.")})
-            return
-
         try:
-            player.delete_character(session, char_id)
-
-            session.msg({
-                "char_deleted": True,
-                "char_all": player.get_all_nicknames(),
-            })
+            account.delete_character(char_id)
         except Exception as e:
             logger.log_err("Can not delete character %s: %s")
-            session.msg({"alert": _("You can not delete this character.")})
+            account.msg({"alert": _("You can not delete this character.")})
+            return
+
+        account.msg({
+            "char_deleted": True,
+            "char_all": account.get_all_nicknames(),
+        })
 
 
 class CmdCharDeleteWithPW(BaseCommand):
@@ -279,44 +253,29 @@ class CmdCharDeleteWithPW(BaseCommand):
     def func(cls, account, args):
         "delete the character"
         if not args:
-            self.msg({"alert":_("Please select a character")})
+            account.msg({"alert":_("Please select a character")})
             return
             
-        obj_id = args["id"]
+        char_id = args["id"]
         password = args["password"]
             
-        check = player.check_password(password)
+        check = account.check_password(password)
         if not check:
             # No password match
-            session.msg({"alert":_("Incorrect password.")})
+            account.msg({"alert":_("Incorrect password.")})
             return
 
-        # use the playable_characters list to search
-        match = [char for char in make_iter(player.db._playable_characters) if char.get_id() == obj_id]
-        if not match:
-            session.msg({"alert":_("You have no such character to delete.")})
+        try:
+            account.delete_character(char_id)
+        except Exception as e:
+            logger.log_err("Can not delete character %s: %s")
+            account.msg({"alert": _("You can not delete this character.")})
             return
-        elif len(match) > 1:
-            session.msg({"alert":_("Aborting - there are two characters with the same name. Ask an admin to delete the right one.")})
-            return
-        else: # one match
-            delobj = match[0]
 
-            # get new playable characters
-            new_characters = [char for char in player.db._playable_characters if char != delobj]
-
-            # remove object
-            deleted = delobj.delete()
-            
-            if not deleted:
-                session.msg({"alert":_("Can not delete this character.")})
-                return
-
-            char_all = player.get_all_characters()
-            session.msg({
-                "char_created": True,
-                "char_all": [{"name": data["nickname"], "id": char_id} for char_id, data in char_all.items()],
-            })
+        account.msg({
+            "char_deleted": True,
+            "char_all": account.get_all_nicknames(),
+        })
 
 
 class CmdCharAll(BaseCommand):

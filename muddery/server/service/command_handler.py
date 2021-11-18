@@ -33,7 +33,7 @@ def cmdhandler(session, raw_string):
         account_cmdset = class_from_path(settings.ACCOUNT_CMDSET)
         command = account_cmdset.get(command_key)
         if command:
-            command.func(session, args)
+            command.func(account, args)
             return
 
         # character commands
@@ -42,7 +42,7 @@ def cmdhandler(session, raw_string):
             character_cmdset = class_from_path(settings.CHARACTER_CMDSET)
             command = character_cmdset.get(command_key)
             if command:
-                command.func(session, args)
+                command.func(character, args)
                 return
 
     logger.log_err("Can not find command, %s: %s" % (session, raw_string))
