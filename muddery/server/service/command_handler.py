@@ -37,7 +37,7 @@ def cmdhandler(session, raw_string):
             return
 
         # character commands
-        character = account.puppet
+        character = account.get_puppet_obj()
         if character:
             character_cmdset = class_from_path(settings.CHARACTER_CMDSET)
             command = character_cmdset.get(command_key)

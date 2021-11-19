@@ -104,6 +104,7 @@ class CmdPuppet(BaseCommand):
         try:
             account.puppet_object(char_id)
         except Exception as e:
+            traceback.print_exc()
             account.msg({"alert": _("That is not a valid character choice.")})
 
 

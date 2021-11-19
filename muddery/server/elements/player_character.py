@@ -12,11 +12,8 @@ import ast, traceback
 import weakref
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
-from evennia.scripts.scripthandler import ScriptHandler
-from evennia.commands.cmdsethandler import CmdSetHandler
 from evennia.utils.utils import lazy_property
 from muddery.server.utils import logger
-from evennia.comms.models import ChannelDB
 from muddery.server.server import Server
 from muddery.server.utils.quest_handler import QuestHandler
 from muddery.server.utils.statement_attribute_handler import StatementAttributeHandler
@@ -121,25 +118,6 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
     @lazy_property
     def states(self):
         return ObjectStatesHandler(self.get_db_id(), DBObjectStorage)
-
-    @lazy_property
-    def cmdset(self):
-        return CmdSetHandler(self, True)
-
-    # cmdset_storage property handling
-    def __cmdset_storage_get(self):
-        """getter"""
-        return [settings.CMDSET_CHARACTER]
-
-    def __cmdset_storage_set(self, value):
-        """setter"""
-        pass
-
-    def __cmdset_storage_del(self):
-        """deleter"""
-        pass
-
-    cmdset_storage = property(__cmdset_storage_get, __cmdset_storage_set, __cmdset_storage_del)
 
     # initialize all handlers in a lazy fashion
     @lazy_property
@@ -397,7 +375,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
 
         super(MudderyPlayerCharacter, self).refresh_states(keep_states)
 
-    def msg(self, text=None, options=None, **kwargs):
+    def msg(self, text):
         """
         Emits something to the account attached to the object.
 
@@ -411,12 +389,8 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         if not self.account:
             return
 
-        # Send messages to the client. Messages are in format of JSON.
-        kwargs["options"] = options
-
         # relay to account
-        logger.log_info("Send message, %s: %s" % (self.get_db_id(), text))
-        self.account.msg(text=text, **kwargs)
+        self.account.msg(text)
 
     def get_level(self):
         """
@@ -454,13 +428,10 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         Returns:
             (dict) channels
         """
-        channels = {}
-        channel = ChannelDB.objects.get_channel(settings.DEFAULT_CHANNELS[0]["key"])
-        if channel.has_connection(self):
-            channels[channel.key] = {
-                "type": "CHANNEL",
-                "name": _("Public", category="channels"),
-            }
+        all_channels = Server.world.get_all_channels()
+        channels = {c.get_element_key(): {
+            "type": "CHANNEL",
+            "name": c.get_name()} for c in all_channels}
 
         return channels
 

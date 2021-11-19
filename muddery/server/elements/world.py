@@ -162,6 +162,12 @@ class MudderyWorld(BaseElement):
         """
         return self.all_characters[char_db_id]
 
+    def get_all_channels(self):
+        """
+        Get a channel by its key.
+        """
+        return self.all_channels
+
     def get_channel(self, channel_key):
         """
         Get a channel by its key.

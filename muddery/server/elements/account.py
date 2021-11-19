@@ -7,6 +7,7 @@ channels can be used to implement many different forms of message
 distribution systems.
 """
 
+import traceback
 import datetime
 from django.conf import settings
 from django.contrib.auth.hashers import check_password, is_password_usable, make_password
@@ -168,7 +169,7 @@ class MudderyAccount(BaseElement):
         char_all = self.get_all_characters()
         return [{"name": CharacterInfo.get_nickname(char_id), "id": char_id} for char_id in char_all]
 
-    def msg(self, text=None, session=None, options=None, **kwargs):
+    def msg(self, text):
         """
         Evennia -> User
         This is the main route for sending data back to the user from the
@@ -185,12 +186,10 @@ class MudderyAccount(BaseElement):
             any (dict): All other keywords are passed on to the protocol.
 
         """
-        kwargs["options"] = options
-
         # session relay
-        logger.log_info("Send message, %s: %s" % (self, text))
+        logger.log_info("Account %s send message: %s" % (self.get_id(), text))
         if self.session:
-            self.session.data_out(text=text, **kwargs)
+            self.session.data_out(text=text)
 
     def puppet_object(self, char_db_id):
         """
@@ -236,7 +235,8 @@ class MudderyAccount(BaseElement):
             # do the connection
             new_char.set_account(self)
             new_char.setup_element(character_key)
-        except:
+        except Exception as e:
+            traceback.print_exc()
             self.msg({"alert": _("That is not a valid character choice.")})
             return
 
@@ -286,6 +286,12 @@ class MudderyAccount(BaseElement):
 
         if self.session:
             self.session.puid = None
+
+    def get_puppet_obj(self):
+        """
+        Get the object current controlling.
+        """
+        return self.puppet_obj
 
     def delete_character(self, char_db_id):
         """

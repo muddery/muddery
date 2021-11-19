@@ -132,10 +132,12 @@ class EventTrigger(object):
         Called when a character moves out of a room.
         """
         # Remove room interval actions.
+        """
         scripts = self.owner.scripts.all()
         for script in scripts:
             if script.is_element("SCRIPT_ROOM_INTERVAL"):
                 script.stop()
+        """
 
     def at_character_die(self):
         """

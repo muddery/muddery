@@ -242,7 +242,7 @@ class MudderyAccount(DefaultAccount):
             new_char.set_account_id(self.id)
             new_char.set_session(session)
             new_char.setup_element(character_key)
-        except:
+        except Exception as e:
             traceback.print_exc()
             session.msg({"alert": _("That is not a valid character choice.")})
             return
