@@ -8,7 +8,6 @@ MudderyObject is an object which can load it's data automatically.
 
 import ast
 from muddery.server.utils import logger
-from evennia.utils.utils import lazy_property
 from muddery.server.utils.data_field_handler import DataFieldHandler, ConstDataHolder
 from muddery.server.database.worlddata.properties_dict import PropertiesDict
 from muddery.server.mappings.element_set import ELEMENT
@@ -28,8 +27,11 @@ class BaseElement(object):
 
     def __init__(self, *agrs, **wargs):
         super(BaseElement, self).__init__(*agrs, **wargs)
+
         self.element_key = ""
         self.level = None
+
+        self.const_data_handler = DataFieldHandler(self)
 
         # is temporary element.
         self.is_temp = False
@@ -97,10 +99,6 @@ class BaseElement(object):
                     }
 
         return cls._all_properties_
-
-    @lazy_property
-    def const_data_handler(self):
-        return DataFieldHandler(self)
 
     # @property system stores object's data.
     def __const_get(self):

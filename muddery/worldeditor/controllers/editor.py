@@ -3,10 +3,10 @@ Battle commands. They only can be used when a character is in a combat.
 """
 
 import json, traceback
-from evennia.utils import logger
 from evennia.server.sessionhandler import SESSIONS
 from muddery.worldeditor.services import data_query, data_edit, general_query
 from muddery.server.utils.exception import MudderyError, ERR
+from muddery.server.utils import logger
 from muddery.worldeditor.utils.response import success_response
 from muddery.worldeditor.controllers.base_request_processer import BaseRequestProcesser
 from muddery.worldeditor.dao import general_query_mapper
@@ -899,7 +899,7 @@ class ApplyChanges(BaseRequestProcesser):
             SESSIONS.portal_restart_server()
         except Exception as e:
             message = "Can not build the world: %s" % e
-            logger.log_tracemsg(message)
+            logger.log_trace(message)
             raise MudderyError(ERR.build_world_error, message)
 
         return success_response("success")

@@ -7,7 +7,7 @@ from django.apps import apps
 from django.conf import settings
 from django.db import models
 from django.core.exceptions import ValidationError
-from evennia.utils import logger
+from muddery.server.utils import logger
 from muddery.worldeditor.utils import readers
 from muddery.server.utils.exception import MudderyError, ERR
 
@@ -58,7 +58,7 @@ def import_file(fullname, file_type=None, table_name=None, clear=True, except_er
                     field_type = 0
             except Exception as e:
                 field_type = -1
-                logger.log_errmsg("Field %s error: %s" % (field_name, e))
+                logger.log_err("Field %s error: %s" % (field_name, e))
 
             field_types.append(field_type)
 
@@ -227,5 +227,5 @@ def import_file(fullname, file_type=None, table_name=None, clear=True, except_er
         # Does support this file type.
         raise(MudderyError(ERR.import_data_error, "Does not support this file type."))
 
-    logger.log_infomsg("Importing %s" % table_name)
+    logger.log_info("Importing %s" % table_name)
     import_data(model_obj, reader)

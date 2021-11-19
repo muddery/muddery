@@ -12,7 +12,6 @@ import ast, traceback
 import weakref
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
-from evennia.utils.utils import lazy_property
 from muddery.server.utils import logger
 from muddery.server.server import Server
 from muddery.server.utils.quest_handler import QuestHandler
@@ -79,6 +78,9 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
 
         self.pk = 0
 
+        self.states = None
+        self.body_data_handler = DataFieldHandler(self)
+
         self.account = None
         self.account_id = None
 
@@ -103,36 +105,6 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         #    }
         self.equipments = {}
 
-    def __str__(self):
-        """
-        Print the character's name.
-        :return:
-        """
-        return "%s(%s)" % (self.get_name(), self.get_id())
-
-    # initialize all handlers in a lazy fashion
-    @lazy_property
-    def event(self):
-        return EventTrigger(self)
-
-    @lazy_property
-    def states(self):
-        return ObjectStatesHandler(self.get_db_id(), DBObjectStorage)
-
-    # initialize all handlers in a lazy fashion
-    @lazy_property
-    def quest_handler(self):
-        return QuestHandler(self)
-
-    # attributes used in statements
-    @lazy_property
-    def statement_attr(self):
-        return StatementAttributeHandler(self)
-
-    @lazy_property
-    def body_data_handler(self):
-        return DataFieldHandler(self)
-
     # @property body stores character's body properties before using equipments and skills.
     def __body_get(self):
         """
@@ -144,6 +116,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         try:
             return self._body_holder
         except AttributeError:
+            # create body handler
             self._body_holder = ConstDataHolder(self, "body_properties", manager_name='body_data_handler')
             return self._body_holder
 
@@ -209,6 +182,20 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
 
         super(MudderyPlayerCharacter, self).setup_element(key, level, first_time)
 
+    def load_data(self, element_key, level=None):
+        """
+        Load the object's data.
+
+        :arg
+            element_key: (string) the key of the data.
+            level: (int) element's level.
+
+        :return:
+        """
+        # create states handler
+        self.states = ObjectStatesHandler(self.get_db_id(), DBObjectStorage)
+        super(MudderyPlayerCharacter, self).load_data(element_key, level)
+
     def at_element_setup(self, first_time):
         """
         Called when the element is setting up.
@@ -218,11 +205,20 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         """
         super(MudderyPlayerCharacter, self).at_element_setup(first_time)
 
+        # initialize quests
+        self.quest_handler = QuestHandler(self)
+
+        # attributes used in statements
+        self.statement_attr = StatementAttributeHandler(self)
+
         # load inventory
         self.load_inventory()
 
         # load equipments
         self.load_equipments()
+
+        # initialize events
+        self.event = EventTrigger(self)
 
         self.solo_mode = GAME_SETTINGS.get("solo_mode")
         self.available_channels = {}

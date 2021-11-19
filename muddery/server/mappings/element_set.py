@@ -6,7 +6,7 @@ import os, re
 from importlib import import_module
 from django.conf import settings
 from muddery.server.utils import logger
-from evennia.utils.utils import class_from_module
+from muddery.server.utils.utils import class_from_path
 from muddery.server.utils.utils import get_module_path
 
 
@@ -78,7 +78,7 @@ class ElementSet(object):
         for key in self.module_dict:
             if key in self.class_dict:
                 continue
-            cls = class_from_module(self.module_dict[key])
+            cls = class_from_path(self.module_dict[key])
             self.class_dict[key] = cls
 
         self.all_loaded = True
@@ -90,7 +90,7 @@ class ElementSet(object):
         if key in self.class_dict:
             return self.class_dict[key]
         elif key in self.module_dict:
-            cls = class_from_module(self.module_dict[key])
+            cls = class_from_path(self.module_dict[key])
             if key in self.class_dict:
                 if self.class_dict[key] != cls:
                     logger.log_info("Element %s is replaced by %s." % (key, cls))

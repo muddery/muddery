@@ -1,7 +1,5 @@
 """
-This is adapt from evennia/evennia/commands/default/player.py.
-The licence of Evennia can be found in evennia/LICENSE.txt.
-
+General account commands usually availabe to all players.
 """
 
 import re, traceback

@@ -10,9 +10,9 @@ from django import http
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.contrib.admin.views.decorators import staff_member_required
-from evennia.utils import logger
-from muddery.utils import utils
-from muddery.utils.localized_strings_handler import _, LOCALIZED_STRINGS_HANDLER
+from muddery.server.utils import logger
+from muddery.server.utils import utils
+from muddery.server.utils.localized_strings_handler import _, LOCALIZED_STRINGS_HANDLER
 
 
 @staff_member_required
@@ -58,7 +58,7 @@ def export_py_localized_strings(request):
         response['Content-Disposition'] = 'attachment;filename="%s"' % filename
     except Exception as e:
         message = "Can't export game data: %s" % e
-        logger.log_tracemsg(message)
+        logger.log_trace(message)
 
         file.close()
         return render(request, 'fail.html', {"message": message})
@@ -90,7 +90,7 @@ def export_js_localized_strings(request):
         response['Content-Disposition'] = 'attachment;filename="%s"' % filename
     except Exception as e:
         message = "Can't export game data: %s" % e
-        logger.log_tracemsg(message)
+        logger.log_trace(message)
 
         file.close()
         return render(request, 'fail.html', {"message": message})

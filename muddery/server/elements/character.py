@@ -12,7 +12,6 @@ import time, datetime, traceback, ast
 from apscheduler.schedulers.background import BackgroundScheduler
 from django.conf import settings
 from muddery.server.utils import logger
-from evennia.utils.utils import lazy_property, class_from_module
 from muddery.server.elements.base_element import BaseElement
 from muddery.server.combat.combat_handler import COMBAT_HANDLER
 from muddery.server.mappings.element_set import ELEMENT
@@ -25,6 +24,7 @@ from muddery.server.utils.game_settings import GAME_SETTINGS
 from muddery.server.utils.localized_strings_handler import _
 from muddery.server.utils.defines import CombatType, EventType
 from muddery.server.utils.object_states_handler import ObjectStatesHandler
+from muddery.server.utils.utils import class_from_path
 from muddery.server.database.gamedata.object_storage import MemoryObjectStorage
 from muddery.server.server import Server
 
@@ -45,10 +45,6 @@ class MudderyCharacter(BaseElement):
     skill_scheduler_id = "skill"
     reborn_scheduler_id = "reborn"
 
-    @lazy_property
-    def states(self):
-        return ObjectStatesHandler(self.get_id(), MemoryObjectStorage)
-
     @staticmethod
     def generate_id():
         """
@@ -66,7 +62,9 @@ class MudderyCharacter(BaseElement):
         super(MudderyCharacter, self).__init__()
 
         self.set_id(self.generate_id())
+        self.states = ObjectStatesHandler(self.get_id(), MemoryObjectStorage)
 
+        self.loot_handler = None
         self.location = None
         self.scheduler = None
 
@@ -87,10 +85,6 @@ class MudderyCharacter(BaseElement):
         # stop auto casting
         self.stop_auto_combat_skill()
 
-    # initialize loot handler in a lazy fashion
-    @lazy_property
-    def loot_handler(self):
-        return LootHandler(CharacterLootList.get(self.get_element_key()))
 
     def set_id(self, char_id):
         """
@@ -127,7 +121,7 @@ class MudderyCharacter(BaseElement):
         self.friendly = self.const.friendly if self.const.friendly else 0
 
         # skill's ai
-        ai_choose_skill_class = class_from_module(settings.AI_CHOOSE_SKILL)
+        ai_choose_skill_class = class_from_path(settings.AI_CHOOSE_SKILL)
         self.ai_choose_skill = ai_choose_skill_class()
 
         # skill's gcd
@@ -147,6 +141,9 @@ class MudderyCharacter(BaseElement):
 
         # load default skills
         self.load_skills()
+
+        # initialize loot handler
+        self.loot_handler = LootHandler(CharacterLootList.get(self.get_element_key()))
 
     def after_element_setup(self, first_time):
         """

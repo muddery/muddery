@@ -2,8 +2,7 @@
 Logging facilities
 
 These are thin wrappers on top of Twisted's logging facilities; logs
-are all directed either to stdout (if Evennia is running in
-interactive mode) or to $GAME_DIR/server/logs.
+are all directed either to stdout or to $GAME_DIR/server/logs.
 
 """
 import time

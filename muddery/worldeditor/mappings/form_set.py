@@ -4,7 +4,7 @@ This model translates default strings into localized strings.
 
 from django.conf import settings
 from django.contrib.admin.forms import forms
-from evennia.utils import logger
+from muddery.server.utils import logger
 from muddery.server.utils.utils import classes_in_path
 
 
@@ -27,7 +27,7 @@ class FormSet(object):
                 model_name = model.__name__
 
                 if model_name in self.dict:
-                    logger.log_infomsg("Form %s is replaced by %s." % (model_name, cls))
+                    logger.log_info("Form %s is replaced by %s." % (model_name, cls))
 
                 self.dict[model_name] = cls
 

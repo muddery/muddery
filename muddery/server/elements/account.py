@@ -171,7 +171,7 @@ class MudderyAccount(BaseElement):
 
     def msg(self, text):
         """
-        Evennia -> User
+        Element -> User
         This is the main route for sending data back to the user from the
         server.
 

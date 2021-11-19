@@ -4,7 +4,6 @@ Make HTTP response.
 
 import json
 from django.http import HttpResponse, StreamingHttpResponse
-from evennia.utils import logger
 from muddery.server.utils.utils import file_iterator
 
 

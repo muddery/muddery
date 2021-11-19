@@ -2,7 +2,6 @@
 Query and deal common tables.
 """
 
-from evennia.utils import logger
 from django.apps import apps
 from django.conf import settings
 from muddery.server.utils import defines

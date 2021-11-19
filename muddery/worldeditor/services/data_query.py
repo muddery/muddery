@@ -6,7 +6,7 @@ import ast
 from django.conf import settings
 from django.db import connections
 from django.core.exceptions import ObjectDoesNotExist
-from evennia.utils import logger
+from muddery.server.utils import logger
 from muddery.server.utils.game_settings import GAME_SETTINGS
 from muddery.worldeditor.dao import common_mappers as CM
 from muddery.worldeditor.dao.common_mappers import WORLD_AREAS
@@ -346,7 +346,7 @@ def query_map(area_key):
         try:
             position = ast.literal_eval(record.position)
         except SyntaxError as e:
-            logger.log_errmsg("Parse map %s's position error: %s" % (record["key"], e))
+            logger.log_err("Parse map %s's position error: %s" % (record["key"], e))
             position = ()
 
         info = {

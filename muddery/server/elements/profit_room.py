@@ -7,7 +7,6 @@ Rooms are simple containers that has no location of their own.
 
 import time
 from apscheduler.schedulers.background import BackgroundScheduler
-from evennia.utils.utils import lazy_property
 from muddery.server.utils.loot_handler import LootHandler
 from muddery.server.database.worlddata.loot_list import RoomProfitList
 from muddery.server.statements.statement_handler import STATEMENT_HANDLER
@@ -23,11 +22,6 @@ class MudderyProfitRoom(ELEMENT("ROOM")):
     element_name = _("Profit Room", "elements")
     model_name = "profit_rooms"
 
-    # initialize loot handler in a lazy fashion
-    @lazy_property
-    def loot_handler(self):
-        return LootHandler(RoomProfitList.get(self.get_element_key()))
-
     def __init__(self):
         """
         Init the element.
@@ -36,12 +30,16 @@ class MudderyProfitRoom(ELEMENT("ROOM")):
 
         self.scheduler = BackgroundScheduler()
         self.last_trigger_time = {}
+        self.loot_handler = None
 
     def at_element_setup(self, first_time):
         """
         Set data_info to the object.
         """
         super(MudderyProfitRoom, self).at_element_setup(first_time)
+
+        # initialize loot handler
+        self.loot_handler = LootHandler(RoomProfitList.get(self.get_element_key()))
 
         # add the auto profit job
         if self.scheduler.get_job(self.get_element_key()) is None:

@@ -5,7 +5,7 @@ This model handle statements.
 import re, ast, traceback
 from django.conf import settings
 from muddery.server.utils import logger
-from evennia.utils.utils import class_from_module
+from muddery.server.utils.utils import class_from_path
 
 
 #re_words = re.compile(r'([a-zA-Z_][a-zA-Z0-9_]*)|("(.*)")')
@@ -109,13 +109,13 @@ class StatementHandler(object):
         Creates a statement handler instance. Loads statements.
         """
         # load function sets
-        action_func_set_class = class_from_module(settings.ACTION_FUNC_SET)
+        action_func_set_class = class_from_path(settings.ACTION_FUNC_SET)
         self.action_func_set = action_func_set_class()
 
-        condition_func_set_class = class_from_module(settings.CONDITION_FUNC_SET)
+        condition_func_set_class = class_from_path(settings.CONDITION_FUNC_SET)
         self.condition_func_set = condition_func_set_class()
 
-        skill_func_set_class = class_from_module(settings.SKILL_FUNC_SET)
+        skill_func_set_class = class_from_path(settings.SKILL_FUNC_SET)
         self.skill_func_set = skill_func_set_class()
 
     def do_action(self, action, caller, obj, **kwargs):

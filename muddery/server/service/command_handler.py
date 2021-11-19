@@ -12,7 +12,7 @@ def cmdhandler(session, raw_string):
     try:
         data = json.loads(raw_string)
     except Exception:
-        # Command is not in JSON, call evennia's cmdparser.
+        # Command is not in JSON.
         logger.log_err("Can not parse command, %s: %s" % (session, raw_string))
         return
 

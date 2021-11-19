@@ -296,10 +296,10 @@ SERVER_SESSION_CLASS = "muddery.server.conf.serversession.ServerSession"
 TYPECLASS_PATHS = ["muddery.server.elements"]
 
 # Typeclass for account objects (linked to a character) (fallback)
-BASE_ACCOUNT_TYPECLASS = "muddery.server.typeclasses.accounts.MudderyAccount"
+BASE_ACCOUNT_TYPECLASS = "evennia.accounts.accounts.DefaultAccount"
 
 # Typeclass for guest account objects (linked to a character)
-BASE_GUEST_TYPECLASS = "muddery.server.typeclasses.accounts.Guest"
+BASE_GUEST_TYPECLASS = "evennia.accounts.accounts.DefaultGuest"
 
 # Typeclass and base for all objects (fallback)
 BASE_OBJECT_TYPECLASS = "evennia.objects.objects.DefaultObject"

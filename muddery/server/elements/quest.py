@@ -30,10 +30,22 @@ class MudderyQuest(BaseElement):
     element_name = _("Quest", "elements")
     model_name = "quests"
 
-    # initialize loot handler in a lazy fashion
-    @lazy_property
-    def loot_handler(self):
-        return LootHandler(QuestRewardList.get(self.element_key))
+    def __init__(self):
+        """
+        Init the element.
+        """
+        super(MudderyQuest, self).__init__()
+
+        self.loot_handler = None
+
+    def at_element_setup(self, first_time):
+        """
+        Set data_info to the object.
+        """
+        super(MudderyQuest, self).at_element_setup(first_time)
+
+        # initialize loot handler
+        self.loot_handler = LootHandler(QuestRewardList.get(self.get_element_key()))
 
     def set_character(self, character_id):
         """

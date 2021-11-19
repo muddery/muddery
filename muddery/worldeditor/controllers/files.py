@@ -5,7 +5,7 @@ Battle commands. They only can be used when a character is in a combat.
 import os, tempfile, time
 from PIL import Image
 from django.conf import settings
-from evennia.utils import logger
+from muddery.server.utils import logger
 from muddery.worldeditor.services import exporter, importer
 from muddery.worldeditor.utils.response import success_response, file_response
 from muddery.server.utils.exception import MudderyError, ERR
@@ -36,7 +36,7 @@ class upload_zip(BaseRequestProcesser):
                     fp.write(chunk)
                 importer.unzip_data_all(fp)
             except Exception as e:
-                logger.log_tracemsg("Upload error: %s" % e)
+                logger.log_trace("Upload error: %s" % e)
                 raise MudderyError(ERR.upload_error, str(e))
 
         return success_response("success")
@@ -64,7 +64,7 @@ class upload_resources(BaseRequestProcesser):
                     fp.write(chunk)
                 importer.unzip_resources_all(fp)
             except Exception as e:
-                logger.log_tracemsg("Upload error: %s" % e)
+                logger.log_trace("Upload error: %s" % e)
                 raise MudderyError(ERR.upload_error, str(e))
 
         return success_response("success")
@@ -108,7 +108,7 @@ class upload_single_data(BaseRequestProcesser):
             # Import the template file.
             importer.import_file(temp_filename, table_name=table_name, file_type=file_type, clear=True)
         except Exception as e:
-            logger.log_tracemsg("Upload error: %s" % e)
+            logger.log_trace("Upload error: %s" % e)
             raise MudderyError(ERR.upload_error, str(e))
         finally:
             try:
@@ -144,7 +144,7 @@ class download_zip(BaseRequestProcesser):
         except Exception as e:
             if fp:
                 fp.close()
-            logger.log_tracemsg("Download error: %s" % e)
+            logger.log_trace("Download error: %s" % e)
             raise MudderyError(ERR.download_error, "Download file error: %s" % e)
 
 
@@ -170,7 +170,7 @@ class download_resources(BaseRequestProcesser):
         except Exception as e:
             if fp:
                 fp.close()
-            logger.log_tracemsg("Download error: %s" % e)
+            logger.log_trace("Download error: %s" % e)
             raise MudderyError(ERR.download_error, "Download file error: %s" % e)
 
 
@@ -207,7 +207,7 @@ class download_single_data(BaseRequestProcesser):
         except Exception as e:
             if fp:
                 fp.close()
-            logger.log_tracemsg("Download error: %s" % e)
+            logger.log_trace("Download error: %s" % e)
             raise MudderyError(ERR.download_error, "Download file error: %s" % e)
 
 
@@ -265,7 +265,7 @@ class upload_image(BaseRequestProcesser):
             except Exception as e:
                 if fp:
                     fp.close()
-                logger.log_tracemsg("Upload error: %s" % e)
+                logger.log_trace("Upload error: %s" % e)
                 raise MudderyError(ERR.upload_error, str(e))
         else:
             # Compare the uploaded file with the local file.
@@ -297,7 +297,7 @@ class upload_image(BaseRequestProcesser):
             except Exception as e:
                 if fp:
                     fp.close()
-                logger.log_tracemsg("Upload error: %s" % e)
+                logger.log_trace("Upload error: %s" % e)
                 raise MudderyError(ERR.upload_error, str(e))
 
         return success_response({"resource": icon_location})

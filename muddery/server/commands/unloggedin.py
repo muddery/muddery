@@ -1,6 +1,5 @@
 """
-This is adapt from evennia/evennia/commands/default/unloggedin.py.
-The licence of Evennia can be found in evennia/LICENSE.txt.
+General commands usually availabe to all users.
 """
 
 import re

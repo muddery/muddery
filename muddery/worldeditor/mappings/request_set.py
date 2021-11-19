@@ -3,7 +3,7 @@ All available requests.
 """
 
 from django.conf import settings
-from evennia.utils import logger
+from muddery.server.utils import logger
 from muddery.server.utils.exception import MudderyError
 from muddery.server.utils.utils import classes_in_path
 from muddery.worldeditor.controllers.base_request_processer import BaseRequestProcesser
@@ -27,7 +27,7 @@ class RequestSet(object):
             name = cls.name
 
             if not path and not name:
-                logger.log_errmsg("Missing request's path and name.")
+                logger.log_err("Missing request's path and name.")
                 continue
 
             if path[0] != "/":
@@ -37,7 +37,7 @@ class RequestSet(object):
                 name = ""
 
             if (path, name,) in self.dict:
-                logger.log_infomsg("Request %s-%s is replaced by %s." % (path, name, cls))
+                logger.log_info("Request %s-%s is replaced by %s." % (path, name, cls))
 
             self.dict[(path, name,)] = cls()
 

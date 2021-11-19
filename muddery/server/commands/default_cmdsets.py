@@ -1,13 +1,7 @@
 """
 Command sets
 
-All commands in the game must be grouped in a cmdset.  A given command
-can be part of any number of cmdsets and cmdsets can be added/removed
-and merged onto entities at runtime.
-
-To create new commands to populate the cmdset, see
-`commands/command.py`.
-
+All commands in the game must be grouped in a cmdset.
 """
 
 from muddery.server.commands.command_set import CommandSet

@@ -2,7 +2,6 @@
 This model translates default strings into localized strings.
 """
 
-from evennia.utils import logger
 from django.apps import apps
 from django.conf import settings
 from muddery.server.mappings.element_set import ELEMENT

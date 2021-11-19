@@ -1,8 +1,5 @@
 """
 General Character commands usually availabe to all characters
-
-This is adapt from evennia/evennia/commands/default/general.py.
-The licence of Evennia can be found in evennia/LICENSE.txt.
 """
 import traceback
 

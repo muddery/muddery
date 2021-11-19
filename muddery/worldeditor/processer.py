@@ -8,7 +8,7 @@ import json
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse
-from evennia.utils import logger
+from muddery.server.utils import logger
 from muddery.server.utils.exception import MudderyError, ERR
 from muddery.worldeditor.mappings.request_set import REQUEST_SET
 import muddery.worldeditor.controllers
@@ -60,19 +60,19 @@ class Processer(object):
                 func = data.get("func", "")
                 args = data.get("args", {})
             except Exception as e:
-                logger.log_errmsg("Parse request body error: %s" % e)
+                logger.log_err("Parse request body error: %s" % e)
                 pass
 
         print("request: '%s' '%s' '%s'" % (path, func, args))
 
         processor = REQUEST_SET.get(path, func)
         if not processor:
-            logger.log_errmsg("Can not find API: %s %s" % (path, func))
+            logger.log_err("Can not find API: %s %s" % (path, func))
             return error_response(ERR.no_api, msg="Can not find API: %s %s" % (path, func))
 
         # check authentication
         if processor.login and not request.user.is_authenticated:
-            logger.log_errmsg("Need authentication.")
+            logger.log_err("Need authentication.")
             return error_response(ERR.no_authentication, msg="Need authentication.")
 
         # check staff
@@ -83,10 +83,10 @@ class Processer(object):
         try:
             response = processor.func(args, request)
         except MudderyError as e:
-            logger.log_errmsg("Error: %s, %s" % (e.code, e))
+            logger.log_err("Error: %s, %s" % (e.code, e))
             response = error_response(e.code, msg=str(e), data=e.data)
         except Exception as e:
-            logger.log_tracemsg("Error: %s" % e)
+            logger.log_trace("Error: %s" % e)
             response = error_response(ERR.internal, msg=str(e))
 
         return response
