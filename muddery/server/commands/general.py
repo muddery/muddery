@@ -28,7 +28,7 @@ class CmdLook(BaseCommand):
     key = "look"
 
     @classmethod
-    def func(cls, caller, args):
+    def func(cls, caller, args, context):
         """
         Handle the looking.
         """
@@ -76,7 +76,7 @@ class CmdInventory(BaseCommand):
     key = "inventory"
 
     @classmethod
-    def func(cls, caller, args):
+    def func(cls, caller, args, context):
         "check inventory"
         inv = caller.get_inventory_appearance()
         caller.msg({"inventory":inv})
@@ -97,7 +97,7 @@ class CmdInventoryObject(BaseCommand):
     key = "inventory_obj"
 
     @classmethod
-    def func(cls, caller, args):
+    def func(cls, caller, args, context):
         """
         Handle the looking.
         """
@@ -107,7 +107,7 @@ class CmdInventoryObject(BaseCommand):
 
         appearance = caller.get_inventory_object_appearance(args)
         if appearance:
-            caller.msg({"inventory_obj": appearance}, context=self.context)
+            caller.msg({"inventory_obj": appearance}, context=context)
         else:
             caller.msg({"alert": _("Can not find it in your inventory.")})
 
@@ -127,7 +127,7 @@ class CmdEquipmentsObject(BaseCommand):
     key = "equipments_obj"
 
     @classmethod
-    def func(cls, caller, args):
+    def func(cls, caller, args, context):
         """
         Handle the looking.
         """
@@ -137,7 +137,7 @@ class CmdEquipmentsObject(BaseCommand):
 
         appearance = caller.return_equipments_object(args)
         if appearance:
-            caller.msg({"equipments_obj": appearance}, context=self.context)
+            caller.msg({"equipments_obj": appearance}, context=context)
         else:
             caller.msg({"alert": _("Can not find it in your equipments.")})
 
@@ -161,7 +161,7 @@ class CmdSay(BaseCommand):
     key = "say"
 
     @classmethod
-    def func(cls, caller, args):
+    def func(cls, caller, args, context):
         "Run the say command"
         if not args:
             return
@@ -196,7 +196,7 @@ class CmdLookRoomObj(BaseCommand):
     key = "look_room_obj"
 
     @classmethod
-    def func(cls, caller, args):
+    def func(cls, caller, args, context):
         if not caller.is_alive():
             caller.msg({"alert": _("You are died.")})
             return
@@ -231,7 +231,7 @@ class CmdLookRoomChar(BaseCommand):
     key = "look_room_char"
 
     @classmethod
-    def func(cls, caller, args):
+    def func(cls, caller, args, context):
         if not caller.is_alive():
             caller.msg({"alert": _("You are died.")})
             return
@@ -269,7 +269,7 @@ class CmdTraverse(BaseCommand):
     key = "traverse"
 
     @classmethod
-    def func(cls, caller, args):
+    def func(cls, caller, args, context):
         "Move caller to the exit."
         if not caller.is_alive():
             caller.msg({"alert": _("You are died.")})
@@ -306,7 +306,7 @@ class CmdTalk(BaseCommand):
     key = "talk"
 
     @classmethod
-    def func(cls, caller, args):
+    def func(cls, caller, args, context):
         "Talk to an NPC."
         if not args:
             caller.msg({"alert":_("You should talk to someone.")})
@@ -345,7 +345,7 @@ class CmdDialogue(BaseCommand):
     key = "finish_dialogue"
 
     @classmethod
-    def func(cls, caller, args):
+    def func(cls, caller, args, context):
         "Continue a dialogue."
         if not args:
             caller.msg({"alert":_("You should talk to someone.")})
@@ -386,7 +386,7 @@ class CmdLoot(BaseCommand):
     key = "loot"
 
     @classmethod
-    def func(cls, caller, args):
+    def func(cls, caller, args, context):
         "Loot objects."
         caller = caller
 
@@ -430,7 +430,7 @@ class CmdUse(BaseCommand):
     key = "use"
 
     @classmethod
-    def func(cls, caller, args):
+    def func(cls, caller, args, context):
         if not caller.is_alive():
             caller.msg({"alert": _("You are died.")})
             return
@@ -475,7 +475,7 @@ class CmdDiscard(BaseCommand):
     key = "discard"
 
     @classmethod
-    def func(cls, caller, args):
+    def func(cls, caller, args, context):
         "Use an object."
         caller = caller
 
@@ -516,7 +516,7 @@ class CmdEquip(BaseCommand):
     key = "equip"
 
     @classmethod
-    def func(cls, caller, args):
+    def func(cls, caller, args, context):
         "Put on an equipment."
         caller = caller
 
@@ -555,7 +555,7 @@ class CmdTakeOff(BaseCommand):
     key = "takeoff"
 
     @classmethod
-    def func(cls, caller, args):
+    def func(cls, caller, args, context):
         "Take off an equipment."
         if not args or "position" not in args:
             caller.msg({"alert":_("You should take off something.")})
@@ -606,7 +606,7 @@ class CmdCastSkill(BaseCommand):
     key = "cast_skill"
 
     @classmethod
-    def func(cls, caller, args):
+    def func(cls, caller, args, context):
         "Cast a skill."
         if not caller.is_alive():
             caller.msg({"alert":_("You are died.")})
@@ -667,7 +667,7 @@ class CmdAttack(BaseCommand):
     key = "attack"
 
     @classmethod
-    def func(cls, caller, args):
+    def func(cls, caller, args, context):
         "Handle command"
         if not caller:
             return
@@ -748,7 +748,7 @@ class CmdQueueUpCombat(BaseCommand):
     key = "queue_up_combat"
 
     @classmethod
-    def func(cls, caller, args):
+    def func(cls, caller, args, context):
         "Handle command"
         if not caller:
             return
@@ -776,7 +776,7 @@ class CmdQuitCombatQueue(BaseCommand):
     key = "quit_combat_queue"
 
     @classmethod
-    def func(cls, caller, args):
+    def func(cls, caller, args, context):
         "Handle command"
         if not caller:
             return
@@ -799,7 +799,7 @@ class CmdConfirmCombat(BaseCommand):
     key = "confirm_combat"
 
     @classmethod
-    def func(cls, caller, args):
+    def func(cls, caller, args, context):
         "Handle command"
         if not caller:
             return
@@ -822,7 +822,7 @@ class CmdRejectCombat(BaseCommand):
     key = "reject_combat"
 
     @classmethod
-    def func(cls, caller, args):
+    def func(cls, caller, args, context):
         "Handle command"
 
         caller = caller
@@ -847,7 +847,7 @@ class CmdGetRankings(BaseCommand):
     key = "get_rankings"
 
     @classmethod
-    def func(cls, caller, args):
+    def func(cls, caller, args, context):
         """
         Get characters rankings.
 
@@ -875,7 +875,7 @@ class CmdGiveUpQuest(BaseCommand):
     key = "giveup_quest"
 
     @classmethod
-    def func(cls, caller, args):
+    def func(cls, caller, args, context):
         """
         Give up a quest.
 
@@ -923,7 +923,7 @@ class CmdUnlockExit(BaseCommand):
     key = "unlock_exit"
 
     @classmethod
-    def func(cls, caller, args):
+    def func(cls, caller, args, context):
         "Open a locked exit."
         if not args:
             caller.msg({"alert": _("You should unlock something.")})
@@ -961,7 +961,7 @@ class CmdShopping(BaseCommand):
     key = "shopping"
 
     @classmethod
-    def func(cls, caller, args):
+    def func(cls, caller, args, context):
         "Do shopping."
         if not args or "npc" not in args or "shop" not in args:
             caller.msg({"alert": _("You should shopping in someplace.")})
@@ -1000,7 +1000,7 @@ class CmdBuy(BaseCommand):
     key = "buy"
 
     @classmethod
-    def func(cls, caller, args):
+    def func(cls, caller, args, context):
         "Buy a goods."
         if not args or "npc" not in args or "shop" not in args or "goods" not in args:
             caller.msg({"alert": _("You should buy something.")})
@@ -1043,7 +1043,7 @@ class CmdQueryQuest(BaseCommand):
     key = "query_quest"
 
     @classmethod
-    def func(cls, caller, args):
+    def func(cls, caller, args, context):
         """
         Handle the looking.
         """
@@ -1076,7 +1076,7 @@ class CmdQuerySkill(BaseCommand):
     key = "query_skill"
 
     @classmethod
-    def func(cls, caller, args):
+    def func(cls, caller, args, context):
         """
         Handle the looking.
         """
@@ -1105,7 +1105,7 @@ class CmdTest(BaseCommand):
     key = "test"
 
     @classmethod
-    def func(cls, caller, args):
+    def func(cls, caller, args, context):
         """
         Put your test here.
         """

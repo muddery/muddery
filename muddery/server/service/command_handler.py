@@ -18,13 +18,15 @@ def cmdhandler(session, raw_string):
 
     command_key = data["cmd"]
     args = data["args"]
+    # context default is None
+    context = data.get("context")
 
     # Find the matching command in cmdset.
     # session commands
     session_cmdset = class_from_path(settings.SESSION_CMDSET)
     command = session_cmdset.get(command_key)
     if command:
-        command.func(session, args)
+        command.func(session, args, context)
         return
 
     # account commands
@@ -33,7 +35,7 @@ def cmdhandler(session, raw_string):
         account_cmdset = class_from_path(settings.ACCOUNT_CMDSET)
         command = account_cmdset.get(command_key)
         if command:
-            command.func(account, args)
+            command.func(account, args, context)
             return
 
         # character commands
@@ -42,7 +44,7 @@ def cmdhandler(session, raw_string):
             character_cmdset = class_from_path(settings.CHARACTER_CMDSET)
             command = character_cmdset.get(command_key)
             if command:
-                command.func(character, args)
+                command.func(character, args, context)
                 return
 
     logger.log_err("Can not find command, %s: %s" % (session, raw_string))

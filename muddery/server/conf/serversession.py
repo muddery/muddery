@@ -35,7 +35,7 @@ class ServerSession(BaseServerSession):
     to the game server. All communication between game and player goes
     through their session(s).
     """
-    def data_out(self, text=None, **kwargs):
+    def data_out(self, text=None, context=None, **kwargs):
         """
         Send Evennia -> User
         Convert to JSON.
@@ -49,21 +49,17 @@ class ServerSession(BaseServerSession):
             kwargs["options"] = {}
 
         raw = options.get("raw", False)
-        context = kwargs.get("context", "")
 
-        if self.protocol_key == 'telnet':
-            out_text = str(text)
+        if raw:
+            out_text = text
         else:
-            if raw:
-                out_text = text
-            else:
-                try:
-                    out_text = json.dumps({"data": text, "context": context}, ensure_ascii=False)
-                except Exception as e:
-                    out_text = json.dumps({"data": {"err": "There is an error occurred while outputing messages."}})
-                    logger.log_trace("json.dumps failed: %s" % e)
+            try:
+                out_text = json.dumps({"data": text, "context": context}, ensure_ascii=False)
+            except Exception as e:
+                out_text = json.dumps({"data": {"err": "There is an error occurred while outputing messages."}})
+                logger.log_trace("json.dumps failed: %s" % e)
 
-            # set raw=True
-            kwargs["options"].update({"raw": True, "client_raw": True})
+        # set raw=True
+        kwargs["options"].update({"raw": True, "client_raw": True})
 
         return super(ServerSession, self).data_out(text=out_text, **kwargs)

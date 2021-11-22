@@ -371,7 +371,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
 
         super(MudderyPlayerCharacter, self).refresh_states(keep_states)
 
-    def msg(self, text):
+    def msg(self, text, context=None):
         """
         Emits something to the account attached to the object.
 
@@ -386,7 +386,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
             return
 
         # relay to account
-        self.account.msg(text)
+        self.account.msg(text, context)
 
     def get_level(self):
         """

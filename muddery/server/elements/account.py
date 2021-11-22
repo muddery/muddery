@@ -169,7 +169,7 @@ class MudderyAccount(BaseElement):
         char_all = self.get_all_characters()
         return [{"name": CharacterInfo.get_nickname(char_id), "id": char_id} for char_id in char_all]
 
-    def msg(self, text):
+    def msg(self, text, context=None):
         """
         Element -> User
         This is the main route for sending data back to the user from the
@@ -189,7 +189,7 @@ class MudderyAccount(BaseElement):
         # session relay
         logger.log_info("Account %s send message: %s" % (self.get_id(), text))
         if self.session:
-            self.session.data_out(text=text)
+            self.session.data_out(text=text, context=context)
 
     def puppet_object(self, char_db_id):
         """

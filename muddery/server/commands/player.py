@@ -33,7 +33,7 @@ class CmdQuit(BaseCommand):
     key = "quit"
 
     @classmethod
-    def func(cls, account, args):
+    def func(cls, account, args, context):
         # we are quitting the last available session
         account.disconnect()
         account.msg({
@@ -58,7 +58,7 @@ class CmdChangePassword(BaseCommand):
     key = "change_pw"
 
     @classmethod
-    def func(cls, account, args):
+    def func(cls, account, args, context):
         "hook function"
         current_password = args["current"]
         new_password = args["new"]
@@ -85,7 +85,7 @@ class CmdPuppet(BaseCommand):
     key = "puppet"
 
     @classmethod
-    def func(cls, account, args):
+    def func(cls, account, args, context):
         """
         Main puppet method
         """
@@ -123,7 +123,7 @@ class CmdUnpuppet(BaseCommand):
     key = "unpuppet"
 
     @classmethod
-    def func(cls, account, args):
+    def func(cls, account, args, context):
         # disconnect
         try:
             account.unpuppet_object()
@@ -148,7 +148,7 @@ class CmdCharCreate(BaseCommand):
     key = "char_create"
 
     @classmethod
-    def func(cls, account, args):
+    def func(cls, account, args, context):
         "create the new character"
         if not args:
             account.msg({"alert":_("You should give the character a name.")})
@@ -213,7 +213,7 @@ class CmdCharDelete(BaseCommand):
     key = "char_delete"
 
     @classmethod
-    def func(cls, account, args):
+    def func(cls, account, args, context):
         "delete the character"
         if not args:
             account.msg({"alert":_("Please select a character")})
@@ -249,7 +249,7 @@ class CmdCharDeleteWithPW(BaseCommand):
     key = "char_delete"
 
     @classmethod
-    def func(cls, account, args):
+    def func(cls, account, args, context):
         "delete the character"
         if not args:
             account.msg({"alert":_("Please select a character")})
@@ -290,7 +290,7 @@ class CmdCharAll(BaseCommand):
     key = "char_all"
 
     @classmethod
-    def func(cls, account, args):
+    def func(cls, account, args, context):
         "delete the character"
         char_all = account.get_all_characters()
         account.msg({
