@@ -9,7 +9,6 @@ creation commands.
 """
 
 import traceback
-from evennia.utils import logger
 from muddery.server.elements.character import MudderyCharacter
 
 

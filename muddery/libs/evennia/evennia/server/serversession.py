@@ -229,6 +229,9 @@ class ServerSession(Session):
         # add the session-level cmdset
         self.cmdset = CmdSetHandler(self, True)
 
+    def disconnect(self, reason):
+        self.sessionhandler.SESSIONS.disconnect(self, reason)
+
     def at_disconnect(self, reason=None):
         """
         Hook called by sessionhandler when disconnecting this session.

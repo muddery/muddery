@@ -3,7 +3,6 @@ Evennia settings file.
 
 The full options are found in the default settings file found here:
 
-{EVENNIA_SETTINGS_DEFAULT}
 {MUDDERY_SETTINGS_DEFAULT}
 
 Note: Don't copy more from the default file than you actually intend to
@@ -14,7 +13,6 @@ unnecessarily.
 
 # Use the defaults from Evennia unless explicitly overridden
 import os
-from evennia.settings_default import *
 from muddery.settings_default import *
 
 

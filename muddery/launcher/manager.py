@@ -3,7 +3,6 @@ import os
 import sys
 import traceback
 import django.core.management
-from evennia.server import evennia_launcher
 from muddery.launcher import configs, utils
 
 
@@ -34,10 +33,7 @@ def init_game(game_name, template=None, port=None):
     """
     gamedir = os.path.abspath(os.path.join(configs.CURRENT_DIR, game_name))
     utils.create_game_directory(gamedir, template, port)
-
-    os.chdir(gamedir)
-    evennia_launcher.GAMEDIR = gamedir
-    evennia_launcher.init_game_directory(gamedir, check_db=False)
+    utils.init_game_env(gamedir)
 
     print(configs.CREATED_NEW_GAMEDIR.format(gamedir=game_name,
                                              settings_path=os.path.join(game_name, configs.SETTINGS_PATH),
@@ -68,8 +64,7 @@ def load_game_data():
     print("Importing local data.")
 
     gamedir = os.path.abspath(configs.CURRENT_DIR)
-    os.chdir(gamedir)
-    evennia_launcher.init_game_directory(gamedir, check_db=False)
+    utils.init_game_env(gamedir)
 
     # load local data
     try:
@@ -89,8 +84,7 @@ def load_system_data():
     print("Importing system data.")
 
     gamedir = os.path.abspath(configs.CURRENT_DIR)
-    os.chdir(gamedir)
-    evennia_launcher.init_game_directory(gamedir, check_db=False)
+    utils.init_game_env(gamedir)
 
     # load system data
     try:
@@ -110,8 +104,7 @@ def migrate_database():
     print("Migrating databases.")
 
     gamedir = os.path.abspath(configs.CURRENT_DIR)
-    os.chdir(gamedir)
-    evennia_launcher.init_game_directory(gamedir, check_db=False)
+    utils.init_game_env(gamedir)
 
     try:
         utils.create_database()
@@ -138,11 +131,23 @@ def create_superuser(username, password):
     AccountDB.objects.create_superuser(username, '', password)
 
 
+def setup():
+    """
+    Setup the server.
+    """
+    from muddery.server.server import Server
+    Server.instance().create_the_world()
+    Server.instance().create_command_handler()
+
+
 def collect_static():
     """
     Collect static web files.
     :return:
     """
+    gamedir = os.path.abspath(configs.CURRENT_DIR)
+    utils.init_game_env(gamedir)
+
     django_args = ["collectstatic"]
     django_kwargs = {"verbosity": 0,
                      "interactive": False}

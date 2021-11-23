@@ -130,21 +130,11 @@ An "emitter" object must have a function
         //   callback (func): If given, will be given an eventual return
         //      value from the backend.
         //
-        msg: function (cmdname, args, kwargs, callback) {
-            if (!cmdname) {
+        msg: function (cmd) {
+            if (!cmd) {
                 return;
             }
-            if (kwargs) {
-                kwargs.cmdid = cmdid++;
-            }
-            var outargs = args ? args : [];
-            var outkwargs = kwargs ? kwargs : {};
-            var data = [cmdname, outargs, outkwargs];
-
-            if (typeof callback === 'function') {
-                cmdmap[cmdid] = callback;
-            }
-            this.connection.msg(data);
+            this.connection.msg(cmd);
         },
 
         // Evennia -> Client.

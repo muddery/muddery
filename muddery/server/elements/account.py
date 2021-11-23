@@ -354,9 +354,5 @@ class MudderyAccount(BaseElement):
         Disconnect the session
         """
         if self.session:
-            global _SESSIONS
-            if not _SESSIONS:
-                from evennia.server.sessionhandler import SESSIONS as _SESSIONS
-            _SESSIONS.disconnect(self.session, reason)
-
+            self.session.disconnect(reason)
             self.session = None

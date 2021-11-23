@@ -19,18 +19,6 @@ from argparse import ArgumentParser
 from muddery.launcher import configs
 
 
-def check_main_dependencies():
-    """
-    Check Muddery's main dependencies.
-
-    :return:
-    """
-    # add evennia's path
-    sys.path.insert(1, configs.EVENNIA_LIB)
-    from evennia.server import evennia_launcher
-    evennia_launcher.check_main_evennia_dependencies()
-
-
 def main():
     """
     Run the muddery main program.
@@ -69,6 +57,9 @@ def main():
         '--migrate', action='store_true', dest='migrate', default=False,
         help="Migrate databases to new version.")
     parser.add_argument(
+        '--collect_static', action='store_true', dest='collect_static', default=False,
+        help="Collect static web files.")
+    parser.add_argument(
         '--port', '-p', nargs=1, action='store', dest='port',
         metavar="<N>",
         help="Set game's network ports when init the game, recommend to use ports above 10000.")
@@ -85,7 +76,6 @@ def main():
     option = args.operation
 
     # make sure we have everything
-    check_main_dependencies()
     from muddery.launcher import manager
 
     if not args:
@@ -112,7 +102,7 @@ def main():
         try:
             manager.init_game(game_name, template, port)
         except Exception as e:
-            print(e)
+            traceback.print_exc()
             sys.exit(-1)
         sys.exit()
 
@@ -147,6 +137,14 @@ def main():
     elif args.migrate:
         try:
             manager.migrate_database()
+        except Exception as e:
+            print(e)
+            sys.exit(-1)
+        sys.exit()
+
+    elif args.collect_static:
+        try:
+            manager.collect_static()
         except Exception as e:
             print(e)
             sys.exit(-1)

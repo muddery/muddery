@@ -14,9 +14,7 @@ always be sure of what you have changed and what is default behaviour.
 """
 
 import os
-from evennia.settings_default import EVENNIA_DIR, GAME_DIR
-from evennia.settings_default import WEBSITE_TEMPLATE
-from evennia.settings_default import INSTALLED_APPS
+
 
 ######################################################################
 # Muddery base server config
@@ -26,6 +24,7 @@ from evennia.settings_default import INSTALLED_APPS
 GAME_SERVERNAME = "Muddery"
 
 MUDDERY_DIR = os.path.dirname(os.path.abspath(__file__))
+GAME_DIR = os.getcwd()
 
 # Place to put log files
 LOG_DIR = os.path.join(GAME_DIR, "server", "logs")
@@ -253,6 +252,7 @@ STATICFILES_DIRS = (
 )
 
 # We setup the location of the website template as well as the admin site.
+WEBSITE_TEMPLATE = "website"
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -260,9 +260,7 @@ TEMPLATES = [
             os.path.join(GAME_DIR, "web", "template_overrides", WEBSITE_TEMPLATE),
             os.path.join(GAME_DIR, "web", "template_overrides"),
             os.path.join(MUDDERY_DIR, "server", "web", "website", "templates", WEBSITE_TEMPLATE),
-            os.path.join(MUDDERY_DIR, "server", "web", "website", "templates"),
-            os.path.join(EVENNIA_DIR, "web", "website", "templates", WEBSITE_TEMPLATE),
-            os.path.join(EVENNIA_DIR, "web", "website", "templates")],
+            os.path.join(MUDDERY_DIR, "server", "web", "website", "templates")],
         'APP_DIRS': True,
         'OPTIONS': {
             "context_processors": [
@@ -272,7 +270,6 @@ TEMPLATES = [
                 'django.template.context_processors.media',
                 'django.template.context_processors.debug',
                 "django.contrib.messages.context_processors.messages",
-                "sekizai.context_processors.sekizai",
                 'muddery.server.web.utils.general_context.general_context',
             ],
             # While true, show "pretty" error messages for template syntax errors.
@@ -430,14 +427,43 @@ CHARACTER_CMDSET = "muddery.server.commands.default_cmdsets.CharacterCmdSet"
 ######################################################################
 # Muddery additional data features
 ######################################################################
+
+# add data app
+INSTALLED_APPS = [
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.admin",
+    "django.contrib.admindocs",
+    "django.contrib.flatpages",
+    "django.contrib.sites",
+    "django.contrib.staticfiles",
+    "django.contrib.messages",
+    "gamedata",
+    "worlddata",
+]
+
 # data app name
 GAME_DATA_APP = "gamedata"
 
 # data app name
 WORLD_DATA_APP = "worlddata"
 
-# add data app
-INSTALLED_APPS = INSTALLED_APPS + [GAME_DATA_APP, WORLD_DATA_APP]
+# Websocket settings.
+ASGI_APPLICATION = 'muddery.server.service.router.application'
+
+######################################################################
+# Django extensions
+######################################################################
+
+# Django extesions are useful third-party tools that are not
+# always included in the default django distro.
+try:
+    import django_extensions  # noqa
+    INSTALLED_APPS = INSTALLED_APPS.append("django_extensions")
+except ImportError:
+    # Django extensions are not installed in all distros.
+    pass
 
 # data file's folder under user's game directory.
 WORLD_DATA_FOLDER = os.path.join("worlddata", "data")

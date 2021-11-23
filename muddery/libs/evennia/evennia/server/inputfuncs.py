@@ -23,7 +23,7 @@ settings.INPUT_FUNC_MODULES.
 import importlib
 from codecs import lookup as codecs_lookup
 from django.conf import settings
-from muddery.server.service.command_handler import cmdhandler
+from muddery.server.server import Server
 from evennia.accounts.models import AccountDB
 from evennia.utils.logger import log_err
 from evennia.utils.utils import to_str
@@ -88,7 +88,7 @@ def text(session, *args, **kwargs):
             )
     """
     kwargs.pop("options", None)
-    cmdhandler(session, txt)
+    Server.instance().handler_message(session, txt)
     session.update_session_counters()
 
 

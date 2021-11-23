@@ -64,7 +64,8 @@ def at_server_start():
     # create the world
     try:
         from muddery.server.server import Server
-        Server.create_the_world()
+        Server.instance().create_the_world()
+        Server.instance().create_command_handler()
         print("The world has been created.")
     except Exception as e:
         traceback.print_exc()

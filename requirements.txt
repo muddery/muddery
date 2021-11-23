@@ -1,10 +1,9 @@
 # Evennia dependencies
 
 # general
-django >= 2.2.5, < 2.3
-twisted >= 19.2.1, < 20.0.0
+django >= 3.2.0
+twisted >= 21.0.0
 pytz
-django-sekizai
 inflect
 autobahn >= 20.2.1
 model_mommy

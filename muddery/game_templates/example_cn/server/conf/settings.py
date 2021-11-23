@@ -3,7 +3,6 @@ Evennia settings file.
 
 The full options are found in the default settings file found here:
 
-{EVENNIA_SETTINGS_DEFAULT}
 {MUDDERY_SETTINGS_DEFAULT}
 
 Note: Don't copy more from the default file than you actually intend to
@@ -14,7 +13,6 @@ unnecessarily.
 
 # Use the defaults from Evennia unless explicitly overridden
 import os
-from evennia.settings_default import *
 from muddery.settings_default import *
 
 
@@ -43,7 +41,7 @@ AMP_PORT = {AMP_PORT}
 
 # Language code for this installation. All choices can be found here:
 # http://www.w3.org/TR/REC-html40/struct/dirlang.html#langcodes
-LANGUAGE_CODE = 'zh-cn'
+LANGUAGE_CODE = 'zh-Hans'
 
 
 ######################################################################
@@ -58,17 +56,6 @@ WEBCLIENT_ROOT = os.path.join(GAME_DIR, "web", "static", "webclient")
 # log out all active web browsing sessions. Game web client sessions
 # may survive.
 SECRET_KEY = {SECRET_KEY}
-
-
-######################################################################
-# Typeclasses and other paths
-######################################################################
-
-# Typeclass for character objects linked to a player (fallback)
-BASE_CHARACTER_TYPECLASS = "evennia.objects.objects.DefaultCharacter"
-
-# Path of custom elements.
-PATH_TYPECLASSES_CUSTOM = "elements"
 
 
 ######################################################################

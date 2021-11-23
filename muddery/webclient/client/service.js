@@ -5,27 +5,28 @@ MudderyService = function() {
 MudderyService.prototype = {
 
     // commands
-    cmdString : function(command, args, context) {
-        return JSON.stringify({
+    sendCommand : function(command, args, context) {
+        var data = {
             "cmd" : command,
-            "args" : args,
-            "context": context
-        });
+            "args" : args || "",
+            "context": context || "",
+        };
+        Evennia.msg(data);
     },
     
     sendRawCommand: function(cmd) {
-    	Evennia.msg("text", cmd);
+    	Evennia.msg(cmd);
     },
     
     // functions when user click a command link
     //
     sendCommandLink: function(cmd, args, context) {
-        Evennia.msg("text", this.cmdString(cmd, args, context));
+       this.sendCommand(cmd, args, context);
     },
 
     // query the unloggedin message
     queryUnloggedIn: function () {
-        Evennia.msg("text", this.cmdString("unloggedin_look", ""));
+        this.sendCommand("unloggedin_look");
     },
     
     castSkill: function(skill, target) {
@@ -34,7 +35,7 @@ MudderyService.prototype = {
             "skill": skill,
             "target": target,
         };
-        Evennia.msg("text", this.cmdString(cmd, args));
+        this.sendCommand(cmd, args);
     },
 
     castCombatSkill: function(skill, target) {
@@ -43,11 +44,11 @@ MudderyService.prototype = {
             "skill": skill,
             "target": target,
         };
-        Evennia.msg("text", this.cmdString(cmd, args));
+        this.sendCommand(cmd, args);
     },
 
     leaveCombat: function() {
-        Evennia.msg("text", this.cmdString("leave_combat", ""));
+        this.sendCommand("leave_combat");
     },
 
     // login
@@ -57,7 +58,7 @@ MudderyService.prototype = {
             "password" : password
         };
         
-        Evennia.msg("text", this.cmdString("connect", args));
+        this.sendCommand("connect", args);
     },
 
     // register
@@ -72,7 +73,7 @@ MudderyService.prototype = {
             "password": password,
             "connect": connect
         };
-        Evennia.msg("text", this.cmdString("create", args));
+        this.sendCommand("create", args);
     },
 
     // change password
@@ -84,47 +85,47 @@ MudderyService.prototype = {
 
         var args = {"current": current,
                     "new": password};
-        Evennia.msg("text", this.cmdString("change_pw", args));
+        this.sendCommand("change_pw", args);
     },
 
     // create new character
     createCharacter: function(name) {
    	 	var args = {"name": name};
-		Evennia.msg("text", this.cmdString("char_create", args));
+		this.sendCommand("char_create", args);
     },
 
     // delete a character
     deleteCharacter: function(obj_id) {
         var args = {"id": obj_id};
-		Evennia.msg("text", this.cmdString("char_delete", args));
+		this.sendCommand("char_delete", args);
     },
     
     // puppet a character
     puppetCharacter: function(obj_id) {
-    	Evennia.msg("text", this.cmdString("puppet", obj_id));
+    	this.sendCommand("puppet", obj_id);
     },
     
     // unpuppet current character
     unpuppetCharacter: function() {
-        Evennia.msg("text", this.cmdString("unpuppet", ""));
+        this.sendCommand("unpuppet");
     },
     
     // look
     look: function(odj_id, context) {
-        Evennia.msg("text", this.cmdString("look", odj_id, context));
+        this.sendCommand("look", odj_id, context);
     },
 
     inventoryObject: function(position, context) {
-        Evennia.msg("text", this.cmdString("inventory_obj", position, context));
+        this.sendCommand("inventory_obj", position, context);
     },
 
     equipmentsObject: function(obj_id, context) {
-        Evennia.msg("text", this.cmdString("equipments_obj", obj_id, context));
+        this.sendCommand("equipments_obj", obj_id, context);
     },
 
     // look at an object in the room
     look_room_obj: function(object_key) {
-        Evennia.msg("text", this.cmdString("look_room_obj", object_key));
+        this.sendCommand("look_room_obj", object_key);
     },
 
     // look at a character in the room
@@ -132,38 +133,38 @@ MudderyService.prototype = {
     //  char_id: (int) character's id
     //
     look_room_char: function (char_id) {
-        Evennia.msg("text", this.cmdString("look_room_char", char_id));
+        this.sendCommand("look_room_char", char_id);
     },
 
     // go to
     traverse : function(exit_key) {
-        Evennia.msg("text", this.cmdString("traverse", exit_key));
+        this.sendCommand("traverse", exit_key);
     },
     
     // talk
     doTalk : function(odj_id) {
-        Evennia.msg("text", this.cmdString("talk", odj_id));
+        this.sendCommand("talk", odj_id);
     },
     
     // buy something
     buyGoods: function(npc, shop, goods) {
-    	Evennia.msg("text", this.cmdString("buy", {
+    	this.sendCommand("buy", {
     	    npc: npc,
     	    shop: shop,
     	    goods: goods,
-    	}));
+    	});
     },
     
     // dialogue
     finishDialogue: function(dialogue, npc) {
         var args = {"dialogue": dialogue,
                     "npc": npc};
-        Evennia.msg("text", this.cmdString("finish_dialogue", args));
+        this.sendCommand("finish_dialogue", args);
     },
     
     // logout
     logout : function() {
-        Evennia.msg("text", this.cmdString("quit", ""));
+        this.sendCommand("quit");
     },
     
     // send command from command box
@@ -171,12 +172,12 @@ MudderyService.prototype = {
         var command = $("#box_command :text").val();
         $("#box_command :text").val("");
         
-        Evennia.msg("text", command);
+        this.sendRawCommand(command);
     },
     
     // send command text
     doSendText: function(test) {
-        Evennia.msg("text", test);
+        this.sendRawCommand(test);
     },
     
     // send out a speech
@@ -186,51 +187,51 @@ MudderyService.prototype = {
             "target": target,
             "message": message,
         }
-        Evennia.msg("text", this.cmdString("say", args));
+        this.sendCommand("say", args);
     },
     
     // make a match
     makeMatch: function() {
-    	Evennia.msg("text", this.cmdString("make_match", ""));
+    	this.sendCommand("make_match");
     },
 
     // queue up an honour combat
     queueUpCombat: function() {
-    	Evennia.msg("text", this.cmdString("queue_up_combat", ""));
+    	this.sendCommand("queue_up_combat");
     },
     
     // quit a combat queue
     quitCombatQueue: function() {
-    	Evennia.msg("text", this.cmdString("quit_combat_queue", ""));
+    	this.sendCommand("quit_combat_queue");
     },
     
     // confirm an honour combat
     confirmCombat: function() {
-    	Evennia.msg("text", this.cmdString("confirm_combat", ""));
+    	this.sendCommand("confirm_combat");
     },
 
     // reject an honour combat
     rejectCombat: function() {
-    	Evennia.msg("text", this.cmdString("reject_combat", ""));
+    	this.sendCommand("reject_combat");
     },
     
     // get character rankings
     getRankings: function() {
-    	Evennia.msg("text", this.cmdString("get_rankings", ""));
+    	this.sendCommand("get_rankings");
     },
 
     // query the quest's detail information
     // args:
     //     key: (string) a quest's key
     queryQuest: function(key) {
-        Evennia.msg("text", this.cmdString("query_quest", {key: key}));
+        this.sendCommand("query_quest", {key: key});
     },
 
     // query the skill's detail information
     // args:
     //     key: (string) a skill's key
     querySkill: function(key) {
-        Evennia.msg("text", this.cmdString("query_skill", {key: key}));
+        this.sendCommand("query_skill", {key: key});
     },
 
     // do test

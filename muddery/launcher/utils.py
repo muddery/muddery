@@ -11,7 +11,6 @@ import traceback
 from pathlib import Path
 from subprocess import check_output, CalledProcessError, STDOUT
 import django.core.management
-from evennia.server import evennia_launcher
 from muddery.launcher import configs
 
 # ------------------------------------------------------------
@@ -82,10 +81,8 @@ def create_settings_file(gamedir, setting_dict=None):
         settings_string = f.read()
 
     # tweak the settings
-    evennia_settings_file = Path(os.path.join(evennia_launcher.EVENNIA_LIB, "settings_default.py")).as_posix()
     muddery_settings_file = Path(os.path.join(configs.MUDDERY_LIB, "settings_default.py")).as_posix()
-    default_setting_dict = {"EVENNIA_SETTINGS_DEFAULT": evennia_settings_file,
-                            "MUDDERY_SETTINGS_DEFAULT": muddery_settings_file,
+    default_setting_dict = {"MUDDERY_SETTINGS_DEFAULT": muddery_settings_file,
                             "ALLOWED_HOSTS": "['*']",
                             "WEBSERVER_PORTS": "[(8000, 5001)]",
                             "WEBSOCKET_CLIENT_PORT": "8001",
@@ -365,6 +362,21 @@ def import_system_data():
     # localized string file's path
     localized_string_path = os.path.join(data_path, settings.LOCALIZED_STRINGS_FOLDER, settings.LANGUAGE_CODE)
     importer.import_table_path(localized_string_path, settings.LOCALIZED_STRINGS_MODEL, clear=False, except_errors=True)
+
+
+def init_game_env(gamedir):
+    """
+    Set the environment to the game dir.
+    """
+    os.chdir(gamedir)
+
+    # Add gamedir to python path
+    sys.path.insert(0, gamedir)
+
+    # Game directory structure
+    SETTINGS_DOTPATH = "server.conf.settings"
+    os.environ.setdefault('DJANGO_SETTINGS_MODULE', SETTINGS_DOTPATH)
+    django.setup()
 
 
 def create_superuser(username, password):
