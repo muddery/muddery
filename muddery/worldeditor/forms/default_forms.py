@@ -1,5 +1,5 @@
 
-from django.contrib.admin.forms import forms
+from django import forms
 from muddery.server.utils.localiztion_handler import localize_form_fields
 from muddery.server.mappings.quest_objective_set import QUEST_OBJECTIVE_SET
 from muddery.server.mappings.quest_status_set import QUEST_STATUS_SET

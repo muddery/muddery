@@ -3,8 +3,8 @@ Battle commands. They only can be used when a character is in a combat.
 """
 
 import json, traceback
-from evennia.server.sessionhandler import SESSIONS
 from muddery.worldeditor.services import data_query, data_edit, general_query
+from muddery.server.server import Server
 from muddery.server.utils.exception import MudderyError, ERR
 from muddery.server.utils import logger
 from muddery.worldeditor.utils.response import success_response
@@ -895,8 +895,10 @@ class ApplyChanges(BaseRequestProcesser):
             WorldData.reload()
 
             # restart the server
-            SESSIONS.announce_all("Server restarting ...")
-            SESSIONS.portal_restart_server()
+            Server.world.broadcast("Server restarting ...")
+
+            # TODO: Dose not support yet.
+            # SESSIONS.portal_restart_server()
         except Exception as e:
             message = "Can not build the world: %s" % e
             logger.log_trace(message)

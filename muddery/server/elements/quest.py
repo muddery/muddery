@@ -7,7 +7,6 @@ in the character. It controls quest's objectives.
 """
 
 from muddery.server.utils import logger
-from evennia.utils.utils import lazy_property
 from muddery.server.utils import defines
 from muddery.server.database.gamedata.quest_objectives import QUEST_OBJECTIVES_DATA
 from muddery.server.statements.statement_handler import STATEMENT_HANDLER

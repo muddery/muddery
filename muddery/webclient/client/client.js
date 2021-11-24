@@ -14,38 +14,32 @@ MudderyClient.prototype = {
     init: function() {
         // This is safe to call, it will always only
         // initialize once.
-        Evennia.init();
+        Connection.init();
+
+        if (Connection.state() == WebSocket.CLOSED) {
+            this.showAlert(core.trans("Error"), core.trans("Can not connect to the server."));
+            return;
+        }
 
         // register listeners
-        Evennia.emitter.on("text", this.onText);
-        //Evennia.emitter.on("prompt", onPrompt);
-        //Evennia.emitter.on("default", onDefault);
-        Evennia.emitter.on("connection_close", this.onConnectionClose);
-        // silence currently unused events
-        Evennia.emitter.on("connection_open", this.onConnectionOpen);
-        //Evennia.emitter.on("connection_error", onSilence);
+        Connection.bindEvents({
+            on_open: this.onConnectionOpen,
+            on_close: this.onConnectionClose,
+            on_message: this.onReceiveMessage,
+        });
 
         // set an idle timer to send idle every 30 seconds,
         // to avoid proxy servers timing out on us
         setInterval(function() {
             // Connect to server
-            if (Evennia.isConnected()) {
-                Evennia.msg("text", ["idle"], {});
+            if (Connection.isConnected()) {
+                Connection.senf("idle");
             }
-        },
-        30000
-        );
-
-        if (Evennia.state() == WebSocket.CLOSED) {
-            this.showAlert(core.trans("Error"), core.trans("Can not connect to the server."));
-            return;
-        }
+        }, 30000);
     },
 
- 	onText: function(args, kwargs) {
- 	    for (var i = 0; i < args.length; i++) {
- 		    core.client.doShow("out", args[i]);
- 		}
+ 	onReceiveMessage: function(message) {
+ 		core.client.handler_message(message);
  	},
 
  	onConnectionClose: function() {
@@ -60,58 +54,9 @@ MudderyClient.prototype = {
         mud.main_frame.popupAlert(msg);
     },
 
-    doShow: function(type, msg) {
-        var data = null;
-        var context = null;
-        
-        if (type == "out") {
-            try {
-                var decode = JSON.parse(msg);
-                
-                if (typeof(decode) == "object") {
-                    // Json object.
-                    data = decode["data"];
-                    context = decode["context"];
-
-                    if (typeof(data) == "string") {
-                        data = {"msg": data};
-                    }
-                }
-                else if (typeof(decode) == "string") {
-                    // String
-                    data = {"msg": decode};
-                }
-                else {
-                    // Other types, treat them as normal text messages.
-                    data = {"msg": msg};
-                }
-            }
-            catch(err) {
-                // Not JSON packed, treat it as a normal text message.
-                data = {"msg": msg};
-            }
-        }
-        else if (type == "err") {
-            data = {"err": msg};
-        }
-        else if (type == "sys") {
-            data = {"sys": msg};
-        }
-        else if (type == "prompt") {
-            data = {"prompt": msg};
-        }
-        else if (type == "debug") {
-            data = {"debug": msg};
-        }
-        else {
-            data = {"msg": msg};
-        }
-                    
-        this.displayData(data, context);
-    },
-
-    // display all kinds of data
-    displayData : function(data, context) {
+    // handle commands from the server
+    handler_command: function(message) {
+     	var data = JSON.parse(message);
         for (var key in data) {
             try {
                 var log_data = {}

@@ -6,7 +6,6 @@ import os
 import tempfile
 import zipfile
 from django.conf import settings
-from evennia.settings_default import GAME_DIR
 from muddery.launcher import configs
 from muddery.server.utils.exception import MudderyError, ERR
 from muddery.worldeditor.utils import writers
@@ -71,7 +70,7 @@ def export_zip_all(file_obj, file_type=None):
             archive.write(temp_filename, filename)
 
         # add version file
-        version_file = os.path.join(GAME_DIR, configs.CONFIG_FILE)
+        version_file = os.path.join(configs.GAME_DIR, configs.CONFIG_FILE)
         archive.write(version_file, configs.CONFIG_FILE)
     finally:
         try:

@@ -28,11 +28,6 @@
 
    <div class="quarter">
       <h1>最近登录</h1>
-      <ul>
-      {% for player in players_connected_recent %}
-      <li>{{player.username}} -- <em>{{player.last_login|timesince}} 之前</em></li>
-      {% endfor %}
-      </ul>
       <p class="filler"><!-- Filler para to extend left vertical line --></p>
    </div>
 

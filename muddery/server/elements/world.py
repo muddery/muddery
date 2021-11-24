@@ -187,3 +187,10 @@ class MudderyWorld(BaseElement):
         elif target_type == ConversationType.PRIVATE.value:
             character = self.get_character(int(target))
             character.get_message(caller, message)
+
+    def broadcast(self, message):
+        """
+        Broadcast a message to all clients.
+        """
+        # TODO
+        pass

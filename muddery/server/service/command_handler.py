@@ -28,9 +28,6 @@ class CommandHandler(object):
             logger.log_err("Can not parse command, %s: %s" % (session, raw_string))
             return
 
-        print("data: %s" % data)
-        print("type: %s" % type(data))
-
         command_key = data["cmd"]
         args = data["args"]
         # context default is None

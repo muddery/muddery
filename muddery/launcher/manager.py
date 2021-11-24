@@ -2,6 +2,7 @@
 import os
 import sys
 import traceback
+import django
 import django.core.management
 from muddery.launcher import configs, utils
 
@@ -131,10 +132,15 @@ def create_superuser(username, password):
     AccountDB.objects.create_superuser(username, '', password)
 
 
-def setup():
+def setup_server():
     """
     Setup the server.
     """
+    import logging
+    logging.getLogger('apscheduler.executors.default').setLevel(logging.WARNING)
+
+    django.setup()
+
     from muddery.server.server import Server
     Server.instance().create_the_world()
     Server.instance().create_command_handler()

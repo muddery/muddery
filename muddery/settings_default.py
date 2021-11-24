@@ -49,7 +49,7 @@ IDLE_TIMEOUT = 60
 MAX_COMMAND_RATE = 20
 
 ######################################################################
-# Evennia Database config
+# Database config
 ######################################################################
 
 # Database config syntax:
@@ -114,84 +114,7 @@ DEFAULT_OBJECT_RUNTIME_TABLE = "object_attributes"
 # Cache all Attributes, Tags, Nicks, Aliases.
 TYPECLASS_FULL_CACHE = True
 
-######################################################################
-# Evennia pluggable modules
-######################################################################
-# Plugin modules extend Evennia in various ways. In the cases with no
-# existing default, there are examples of many of these modules
-# in contrib/examples.
-
-# An optional module that, if existing, must hold a function
-# named at_initial_setup(). This hook method can be used to customize
-# the server's initial setup sequence (the very first startup of the system).
-# The check will fail quietly if module doesn't exist or fails to load.
-AT_INITIAL_SETUP_HOOK_MODULE = "muddery.server.conf.at_initial_setup"
-
-# Module containing your custom at_server_start(), at_server_reload() and
-# at_server_stop() methods. These methods will be called every time
-# the server starts, reloads and resets/stops respectively.
-AT_SERVER_STARTSTOP_MODULE = "muddery.server.conf.at_server_startstop"
-
-# List of one or more module paths to modules containing a function start_
-# plugin_services(application). This module will be called with the main
-# Evennia Server application when the Server is initiated.
-# It will be called last in the startup sequence.
-SERVER_SERVICES_PLUGIN_MODULES = []
-
-# List of one or more module paths to modules containing a function
-# start_plugin_services(application). This module will be called with the
-# main Evennia Portal application when the Portal is initiated.
-# It will be called last in the startup sequence.
-PORTAL_SERVICES_PLUGIN_MODULES = []
-
-# Module holding MSSP meta data. This is used by MUD-crawlers to determine
-# what type of game you are running, how many players you have etc.
-MSSP_META_MODULE = "muddery.server.conf.mssp"
-
-# Module for web plugins.
-WEB_PLUGINS_MODULE = "muddery.server.conf.web_plugins"
-
-# Tuple of modules implementing lock functions. All callable functions
-# inside these modules will be available as lock functions.
-LOCK_FUNC_MODULES = ("evennia.locks.lockfuncs",)
-
-# Module holding handlers for managing incoming data from the client. These
-# will be loaded in order, meaning functions in later modules may overload
-# previous ones if having the same name.
-INPUT_FUNC_MODULES = ["evennia.server.inputfuncs"]
-
-# Modules that contain prototypes for use with the spawner mechanism.
-PROTOTYPE_MODULES = []
-
-# Delay to use before sending the evennia.syscmdkeys.CMD_LOGINSTART Command
-# when a new session connects (this defaults the unloggedin-look for showing
-# the connection screen). The delay is useful mainly for telnet, to allow
-# client/server to establish client capabilities like color/mxp etc before
-# sending any text. A value of 0.3 should be enough. While a good idea, it may
-# cause issues with menu-logins and autoconnects since the menu will not have
-# started when the autoconnects starts sending menu commands.
-# Set this to 0 to send initial data to the client when its first login.
-DELAY_CMD_LOGINSTART = 0
-
-######################################################################
-# Inlinefunc
-######################################################################
-# Evennia supports inline function preprocessing. This allows users
-# to supply inline calls on the form $func(arg, arg, ...) to do
-# session-aware text formatting and manipulation on the fly. If
-# disabled, such inline functions will not be parsed.
-INLINEFUNC_ENABLED = False
-# Only functions defined globally (and not starting with '_') in
-# these modules will be considered valid inlinefuncs. The list
-# is loaded from left-to-right, same-named functions will overload
-INLINEFUNC_MODULES = ["evennia.utils.inlinefuncs"]
-
-
-######################################################################
-# Evennia base server config
-######################################################################
-# Activate telnet service
-TELNET_ENABLED = False
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
 
 ######################################################################
@@ -279,43 +202,23 @@ TEMPLATES = [
 ]
 
 
+# MiddleWare are semi-transparent extensions to Django's functionality.
+# see http://www.djangoproject.com/documentation/middleware/ for a more detailed
+# explanation.
+MIDDLEWARE = [
+    "django.middleware.common.CommonMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",  # 1.4?
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.admindocs.middleware.XViewMiddleware",
+    "django.contrib.flatpages.middleware.FlatpageFallbackMiddleware",
+]
+
+
 ######################################################################
 # Typeclasses and other paths
 ######################################################################
-
-# Server-side session class used.
-SERVER_SESSION_CLASS = "muddery.server.conf.serversession.ServerSession"
-
-# These are paths that will be prefixed to the paths given if the
-# immediately entered path fail to find a typeclass. It allows for
-# shorter input strings. They must either base off the game directory
-# or start from the evennia library.
-TYPECLASS_PATHS = ["muddery.server.elements"]
-
-# Typeclass for account objects (linked to a character) (fallback)
-BASE_ACCOUNT_TYPECLASS = "evennia.accounts.accounts.DefaultAccount"
-
-# Typeclass for guest account objects (linked to a character)
-BASE_GUEST_TYPECLASS = "evennia.accounts.accounts.DefaultGuest"
-
-# Typeclass and base for all objects (fallback)
-BASE_OBJECT_TYPECLASS = "evennia.objects.objects.DefaultObject"
-
-# Typeclass for character objects linked to a player (fallback)
-BASE_CHARACTER_TYPECLASS = "evennia.objects.objects.DefaultCharacter"
-
-# Typeclass for rooms (fallback)
-BASE_ROOM_TYPECLASS = "evennia.objects.objects.DefaultRoom"
-
-# Typeclass for Exit objects (fallback).
-BASE_EXIT_TYPECLASS = "evennia.objects.objects.DefaultExit"
-
-# Typeclass for Channel (fallback).
-BASE_CHANNEL_TYPECLASS = "evennia.comms.comms.DefaultChannel"
-
-# Typeclass for Scripts (fallback). You usually don't need to change this
-# but create custom variations of scripts on a per-case basis instead.
-BASE_SCRIPT_TYPECLASS = "evennia.scripts.scripts.DefaultScript"
 
 # Element type for accounts.
 ACCOUNT_ELEMENT_TYPE = "ACCOUNT"
@@ -359,32 +262,6 @@ PATH_QUEST_STATUS_BASE = "muddery.server.quests.quest_status"
 
 
 ######################################################################
-# Default Player setup and access
-######################################################################
-
-# Different Multisession modes allow a player (=account) to connect to the
-# game simultaneously with multiple clients (=sessions). In modes 0,1 there is
-# only one character created to the same name as the account at first login.
-# In modes 2,3 no default character will be created and the MAX_NR_CHARACTERS
-# value (below) defines how many characters the default char_create command
-# allow per player.
-#  0 - single session, one player, one character, when a new session is
-#      connected, the old one is disconnected
-#  1 - multiple sessions, one player, one character, each session getting
-#      the same data
-#  2 - multiple sessions, one player, many characters, one session per
-#      character (disconnects multiplets)
-#  3 - like mode 2, except multiple sessions can puppet one character, each
-#      session getting the same data.
-MULTISESSION_MODE = 2
-
-# The maximum number of characters allowed for MULTISESSION_MODE 2,3. This is
-# checked by the default ooc char-creation command. Forced to 1 for
-# MULTISESSION_MODE 0 and 1.
-MAX_NR_CHARACTERS = 3
-
-
-######################################################################
 # Default statement sets
 ######################################################################
 
@@ -401,19 +278,6 @@ SKILL_FUNC_SET = "muddery.server.statements.default_statement_func_set.SkillFunc
 ######################################################################
 # Default command sets
 ######################################################################
-
-# Command set used on session before player has logged in
-CMDSET_UNLOGGEDIN = "evennia.commands.default.cmdset_unloggedin.UnloggedinCmdSet"
-
-# Command set used on the logged-in session
-CMDSET_SESSION = "evennia.commands.default.cmdset_session.SessionCmdSet"
-
-# Default set for logged in player with characters (fallback)
-CMDSET_CHARACTER = "evennia.commands.default.cmdset_character.CharacterCmdSet"
-
-# Command set for accounts without a character (ooc)
-CMDSET_ACCOUNT = "evennia.commands.default.cmdset_account.AccountCmdSet"
-
 # Command set used on the logged-in session
 SESSION_CMDSET = "muddery.server.commands.default_cmdsets.SessionCmdSet"
 
@@ -449,8 +313,11 @@ GAME_DATA_APP = "gamedata"
 # data app name
 WORLD_DATA_APP = "worlddata"
 
-# Websocket settings.
-ASGI_APPLICATION = 'muddery.server.service.router.application'
+# wsgi setting
+WSGI_APPLICATION = 'muddery.server.service.router.wsgi_application'
+
+# websocket setting
+ASGI_APPLICATION = 'muddery.server.service.router.asgi_application'
 
 ######################################################################
 # Django extensions

@@ -34,7 +34,6 @@ class Server(object):
     def __init__(self, *args, **kwargs):
         self._world = None
         self._command_handler = None
-        logging.getLogger('apscheduler.executors.default').setLevel(logging.WARNING)
 
     def create_the_world(self):
         """

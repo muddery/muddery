@@ -3,7 +3,7 @@ This model translates default strings into localized strings.
 """
 
 from django.conf import settings
-from django.contrib.admin.forms import forms
+from django import forms
 from muddery.server.utils import logger
 from muddery.server.utils.utils import classes_in_path
 

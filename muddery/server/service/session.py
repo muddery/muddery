@@ -4,7 +4,7 @@ from channels.generic.websocket import WebsocketConsumer
 from muddery.server.server import Server
 
 
-class Channel(WebsocketConsumer):
+class Session(WebsocketConsumer):
     """
     Websocket path.
     """
@@ -42,16 +42,15 @@ class Channel(WebsocketConsumer):
         # Pass messages to the muddery server.
         Server.instance().handler_message(self, text_data)
 
-    def send_data(self, data_out, close=False):
+    def msg(self, text, context=None):
         """
         Send data to the client.
 
         :param data_out: data to send {type: data}
         :param close: close connect after sends message.
         """
-        # check the data type
-        if type(data_out) != str:
-            data_out = json.dumps(data_out)
+        # create the output string
+        out_text = json.dumps({"data": text, "context": context}, ensure_ascii=False)
 
         # send message
-        self.send(text_data=data_out, close=close)
+        self.send(text_data=out_text, close=False)

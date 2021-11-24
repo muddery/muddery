@@ -5,55 +5,14 @@ the other applications. Views are django's way of processing e.g. html
 templates on the fly.
 
 """
+import traceback
+
 from django.contrib.admin.sites import site
 from django.conf import settings
 from django.contrib.admin.views.decorators import staff_member_required
 from django.shortcuts import render
-
-from evennia import SESSION_HANDLER
-from evennia.objects.models import ObjectDB
-from evennia.accounts.models import AccountDB
-from muddery.server.utils import logger
-
 from django.contrib.auth import login
-
-_BASE_CHAR_TYPECLASS = settings.BASE_CHARACTER_TYPECLASS
-
-
-def _shared_login(request):
-    """
-    Handle the shared login between website and webclient.
-
-    """
-    csession = request.session
-    account = request.user
-    website_uid = csession.get("website_authenticated_uid", None)
-    webclient_uid = csession.get("webclient_authenticated_uid", None)
-
-    if not csession.session_key:
-        # this is necessary to build the sessid key
-        csession.save()
-
-    if account.is_authenticated:
-        # Logged into website
-        if not website_uid:
-            # fresh website login (just from login page)
-            csession["website_authenticated_uid"] = account.id
-            if webclient_uid is None:
-                # auto-login web client
-                csession["webclient_authenticated_uid"] = account.id
-
-    elif webclient_uid:
-        # Not logged into website, but logged into webclient
-        if not website_uid:
-            csession["website_authenticated_uid"] = account.id
-            account = AccountDB.objects.get(id=webclient_uid)
-            try:
-                # calls our custom authenticate, in web/utils/backend.py
-                authenticate(autologin=account)
-                login(request, account)
-            except AttributeError:
-                logger.log_trace()
+from muddery.server.utils import logger
 
 
 def _gamestats():
@@ -61,6 +20,7 @@ def _gamestats():
     # TODO: Move this to either SQL or settings.py based configuration.
     fpage_account_limit = 4
 
+    """
     # A QuerySet of the most recently connected accounts.
     recent_users = AccountDB.objects.get_recently_connected_accounts()[:fpage_account_limit]
     nplyrs_conn_recent = len(recent_users)
@@ -88,48 +48,32 @@ def _gamestats():
         "num_characters": nchars,
         "num_others": nothers
     }
+    """
+
+    pagevars = {
+        "page_title": "Front Page",
+        "num_players_registered": 0,
+        "num_players_connected_recent": 0,
+        "num_players_registered_recent": 0,
+        "num_rooms": 0,
+        "num_exits": 0,
+        "num_objects": 0,
+        "num_characters": 0,
+        "num_others": 0
+    }
     return pagevars
+
 
 
 def page_index(request):
     """
     Main root page.
     """
-
-    # handle webclient-website shared login
-    _shared_login(request)
-
     # get game db stats
     pagevars = _gamestats()
 
-    return render(request, 'index.html', pagevars)
-
-
-def to_be_implemented(request):
-    """
-    A notice letting the user know that this particular feature hasn't been
-    implemented yet.
-    """
-
-    pagevars = {
-        "page_title": "To Be Implemented...",
-    }
-
-    return render(request, 'tbi.html', pagevars)
-
-
-@staff_member_required
-def evennia_admin(request):
-    """
-    Helpful Evennia-specific admin page.
-    """
-    return render(
-        request, 'evennia_admin.html', {
-            'accountdb': AccountDB})
-
-
-def admin_wrapper(request):
-    """
-    Wrapper that allows us to properly use the base Django admin site, if needed.
-    """
-    return staff_member_required(site.index)(request)
+    try:
+        return render(request, 'index.html', pagevars)
+    except Exception as e:
+        traceback.print_exc()
+        raise(e)

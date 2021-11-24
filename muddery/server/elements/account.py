@@ -189,7 +189,7 @@ class MudderyAccount(BaseElement):
         # session relay
         logger.log_info("Account %s send message: %s" % (self.get_id(), text))
         if self.session:
-            self.session.data_out(text=text, context=context)
+            self.session.msg(text=text, context=context)
 
     def puppet_object(self, char_db_id):
         """

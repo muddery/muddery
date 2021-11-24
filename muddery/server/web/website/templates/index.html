@@ -14,12 +14,7 @@
       <p>Welcome to your new installation of <a href="http://muddery.org">Muddery</a>, your friendly
       neighborhood online text game development system and server. You are looking at Muddery's web
       presence, which can be expanded to a full-fledged site as
-      needed. Through the <a href="{% url 'admin:index' %}">admin interface</a> you can view and edit the
-      database without logging into the game.
-        {% if webclient_enabled %}
-        You can also connect to the game directly from your browser using our
-        <a href="/webclient/index.html">online client</a>!<br><br>
-        {% endif %}
+      needed.
       For more info, take your time to
       peruse our extensive online <a href="https://github.com/muddery/muddery/wiki">documentation</a>.
       <p>
@@ -40,11 +35,6 @@
 
    <div class="quarter">
       <h1>Recently Connected</h1>
-      <ul>
-      {% for player in players_connected_recent %}
-      <li>{{player.username}} -- <em>{{player.last_login|timesince}} ago</em></li>
-      {% endfor %}
-      </ul>
       <p class="filler"><!-- Filler para to extend left vertical line --></p>
    </div>
 

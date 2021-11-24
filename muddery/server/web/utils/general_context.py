@@ -29,13 +29,6 @@ CONNECTIONS = ['Irc', 'Imc2']
 WEBSITE = ['Flatpages', 'News', 'Sites']
 
 
-# The main context processor function
-WEBCLIENT_ENABLED = settings.WEBCLIENT_ENABLED
-WEBSOCKET_CLIENT_ENABLED = settings.WEBSOCKET_CLIENT_ENABLED
-WEBSOCKET_PORT = settings.WEBSOCKET_CLIENT_PORT
-WEBSOCKET_URL = settings.WEBSOCKET_CLIENT_URL
-
-
 def general_context(request):
     """
     Returns common Evennia-related context stuff, which
@@ -44,14 +37,5 @@ def general_context(request):
     return {
         'game_name': GAME_NAME,
         'game_slogan': SERVER_VERSION,
-        'evennia_userapps': PLAYER_RELATED,
-        'evennia_entityapps': GAME_ENTITIES,
-        'evennia_setupapps': GAME_SETUP,
-        'evennia_connectapps': CONNECTIONS,
-        'evennia_websiteapps':WEBSITE,
-        "webclient_enabled" : WEBCLIENT_ENABLED,
-        "websocket_enabled" : WEBSOCKET_CLIENT_ENABLED,
-        "websocket_port" : WEBSOCKET_PORT,
-        "websocket_url" : WEBSOCKET_URL,
         "language_code" : settings.LANGUAGE_CODE,
     }
