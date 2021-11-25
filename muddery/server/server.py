@@ -1,8 +1,6 @@
 
 import threading
-import logging
 from django.conf import settings
-from muddery.server.utils import logger
 from muddery.server.utils.utils import class_from_path
 from muddery.server.service.command_handler import CommandHandler
 
@@ -45,7 +43,6 @@ class Server(object):
         world.setup_element("")
         self._world = world
 
-    # @property system stores object's data.
     @ClassProperty
     def world(cls):
         """

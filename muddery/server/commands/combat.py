@@ -2,7 +2,7 @@
 Battle commands. They only can be used when a character is in a combat.
 """
 
-from muddery.server.utils import logger
+from muddery.server.utils.logger import game_server_logger as logger
 from muddery.server.commands.base_command import BaseCommand
 from muddery.server.utils.localized_strings_handler import _
 

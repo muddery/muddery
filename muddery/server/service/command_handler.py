@@ -1,7 +1,9 @@
 
 import json
+import traceback
+
 from django.conf import settings
-from muddery.server.utils import logger
+from muddery.server.utils.logger import game_server_logger as logger
 from muddery.server.utils.utils import class_from_path
 
 
@@ -17,8 +19,8 @@ class CommandHandler(object):
         self.character_cmdset = character_cmdset
 
     def handler_command(self, session, raw_string):
-        print("Receive command, %s: %s" % (session, raw_string))
-        logger.log_info("Receive command, %s: %s" % (session, raw_string))
+        print("[Receive command][%s]%s" % (session, raw_string))
+        logger.log_info("[Receive command][%s]%s" % (session, raw_string))
 
         # Parse JSON formated command.
         try:
@@ -37,7 +39,11 @@ class CommandHandler(object):
         # session commands
         command = self.session_cmdset.get(command_key)
         if command:
-            command.func(session, args, context)
+            try:
+                command.func(session, args, context)
+            except Exception as e:
+                traceback.print_exc()
+                logger.log_err("Run command error, %s: %s %s" % (session, raw_string, e))
             return
 
         # account commands

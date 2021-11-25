@@ -2,16 +2,7 @@
 
 # general
 django >= 3.2.0
-twisted >= 21.0.0
-pytz
-inflect
-autobahn >= 20.2.1
-model_mommy
-
-# testing and development
-mock >= 1.0.1
-anything
-black
+channels >= 3.0.0
 
 # windows-specific
 pypiwin32;platform_system=="Windows"

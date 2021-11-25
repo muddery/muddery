@@ -3,7 +3,7 @@ All available event actions.
 """
 
 from django.conf import settings
-from muddery.server.utils import logger
+from muddery.server.utils.logger import game_server_logger as logger
 from muddery.server.utils.utils import classes_in_path
 from muddery.server.quests.base_quest_status import BaseQuestStatus
 

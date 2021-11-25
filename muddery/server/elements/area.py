@@ -5,7 +5,7 @@ Areas are compose the whole map. Rooms are belongs to areas.
 
 """
 
-from muddery.server.utils import logger
+from muddery.server.utils.logger import game_server_logger as logger
 from muddery.server.elements.base_element import BaseElement
 from muddery.server.mappings.element_set import ELEMENT
 from muddery.server.utils.localized_strings_handler import _

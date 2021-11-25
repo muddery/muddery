@@ -14,6 +14,7 @@ always be sure of what you have changed and what is default behaviour.
 """
 
 import os
+import logging
 
 
 ######################################################################
@@ -28,9 +29,9 @@ GAME_DIR = os.getcwd()
 
 # Place to put log files
 LOG_DIR = os.path.join(GAME_DIR, "server", "logs")
-SERVER_LOG_FILE = os.path.join(LOG_DIR, 'server.log')
-PORTAL_LOG_FILE = os.path.join(LOG_DIR, 'portal.log')
-HTTP_LOG_FILE = os.path.join(LOG_DIR, 'http_requests.log')
+LOG_GAME_SERVER = 'server.log'
+LOG_GAME_EDITOR = 'editor.log'
+LOG_LEVEL = logging.INFO
 
 # This setting is no use any more, so set it to blank.
 WEBSOCKET_CLIENT_URL = ""
@@ -47,6 +48,10 @@ IDLE_TIMEOUT = 60
 # OOB messages so don't set it too low if you expect a lot of events
 # from the client! To turn the limiter off, set to <= 0.
 MAX_COMMAND_RATE = 20
+
+# The maximum number of characters allowed by the default.
+MAX_PLAYER_CHARACTERS = 5
+
 
 ######################################################################
 # Database config
@@ -127,6 +132,10 @@ DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 # browser to display. Note however that this will leak memory when
 # active, so make sure to turn it off for a production server!
 DEBUG = False
+
+# If using Sites/Pages from the web admin, this value must be set to the
+# database-id of the Site (domain) we want to use with this game's Pages.
+SITE_ID = 1
 
 # Context processors define context variables, generally for the template
 # system to use.

@@ -3,7 +3,7 @@ All available requests.
 """
 
 from django.conf import settings
-from muddery.server.utils import logger
+from muddery.server.utils.logger import game_editor_logger as logger
 from muddery.server.utils.exception import MudderyError
 from muddery.server.utils.utils import classes_in_path
 from muddery.worldeditor.controllers.base_request_processer import BaseRequestProcesser

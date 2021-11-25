@@ -336,9 +336,6 @@ MudderyMainFrame.prototype.onLogout = function(data) {
 	this.showLoginWindow();
 
 	mud.select_char_window.clear();
-	
-	//reconnect, show the connection screen
-	Evennia.connect();
 }
 
 /*
@@ -1492,7 +1489,6 @@ MudderySelectChar.prototype.onNewCharacter = function(element) {
  */
 MudderySelectChar.prototype.onLogout = function(element) {
     core.service.logout();
-    Evennia.reconnect();
     mud.main_frame.showLoginWindow();
 }
 
@@ -1868,7 +1864,6 @@ MudderyGame.prototype.onSystem = function(element) {
  */
 MudderyGame.prototype.onLogout = function(element) {
     core.service.logout();
-    Evennia.reconnect();
     mud.main_frame.showLoginWindow();
 }
 

@@ -33,13 +33,10 @@ def main():
         action='store',
         dest="init",
         metavar="<gamename> [template name]",
-        help="creates a new gamedir 'name' at current location (from optional template).")
+        help="Creates a new gamedir 'name' at current location (from optional template).")
     parser.add_argument(
-        '--log', '-l',
-        action='store_true',
-        dest='tail_log',
-        default=False,
-        help="tail the portal and server logfiles and print to stdout")
+        '--setup', action='store_true', dest='setup', default=False,
+        help="Setup a new created game dir.")
     parser.add_argument(
         '-v', '--version', action='store_true',
         dest='show_version', default=False,
@@ -103,6 +100,17 @@ def main():
             manager.init_game(game_name, template, port)
         except Exception as e:
             traceback.print_exc()
+            sys.exit(-1)
+        sys.exit()
+
+    elif args.setup is not None:
+        # Create databases and load default data.
+        try:
+            manager.migrate_database()
+            manager.load_game_data()
+            manager.collect_static()
+        except Exception as e:
+            print(e)
             sys.exit(-1)
         sys.exit()
 

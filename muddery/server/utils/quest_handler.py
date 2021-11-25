@@ -3,7 +3,7 @@ QuestHandler handles a character's quests.
 """
 
 import weakref
-from muddery.server.utils import logger
+from muddery.server.utils.logger import game_server_logger as logger
 from muddery.server.statements.statement_handler import STATEMENT_HANDLER
 from muddery.server.utils.localized_strings_handler import _
 from muddery.server.utils.exception import MudderyError

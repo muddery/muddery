@@ -66,9 +66,8 @@ VERSION_INFO = \
     Muddery {version}
     OS: {os}
     Python: {python}
-    Twisted: {twisted}
     Django: {django}
-    Evennia {evennia}{about}
+    {about}
     """
 
 ABOUT_INFO = \

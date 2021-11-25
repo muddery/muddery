@@ -12,7 +12,6 @@ from django.conf import settings
 from django.contrib.admin.views.decorators import staff_member_required
 from django.shortcuts import render
 from django.contrib.auth import login
-from muddery.server.utils import logger
 
 
 def _gamestats():

@@ -29,7 +29,7 @@ from muddery.server.server import Server
 from muddery.server.utils.game_settings import GAME_SETTINGS
 from muddery.server.utils.exception import MudderyError, ERR
 from muddery.server.utils.localized_strings_handler import _
-from muddery.server.utils import logger
+from muddery.server.utils.logger import game_server_logger as logger
 
 
 _SESSIONS = None
@@ -58,7 +58,16 @@ class MudderyAccount(BaseElement):
         self.session = None
         self.puppet_obj = None
 
-    def new_user(self, username, password, type, session):
+    def __str__(self):
+        """
+        Output self as a string
+        """
+        output = str(self.get_id())
+        if self.puppet_obj:
+            output += "-" + str(self.puppet_obj)
+        return output
+
+    def new_user(self, username, password, type):
         # Create a new account with the username and password.
         if Accounts.has(username):
             raise MudderyError(ERR.invalid_input, _("Sorry, there is already a player with the name '%s'.") % username)
@@ -88,9 +97,8 @@ class MudderyAccount(BaseElement):
         self.username = username
         self.id = account_id
         self.type = type
-        self.session = session
 
-    def set_user(self, username, password, session):
+    def set_user(self, username, password):
         # Match account name and check password
         if not self.check_password(username, password):
             # Password not match.
@@ -110,7 +118,6 @@ class MudderyAccount(BaseElement):
         self.username = username
         self.id = info["id"]
         self.type = info["type"]
-        self.session = session
 
     def is_valid(self):
         """
@@ -129,32 +136,32 @@ class MudderyAccount(BaseElement):
         if self.session:
             return self.session.uid
 
-    def at_post_login(self, session=None, **kwargs):
+    def at_post_login(self, session):
         """
-        Called at the end of the login process, just before letting
-        the account loose.
-
-        Args:
-            session (Session, optional): Session logging in, if any.
-            **kwargs (dict): Arbitrary, optional arguments for users
-                overriding the call (unused by default).
-
-        Notes:
-            This is called *before* an eventual Character's
-            `at_post_login` hook. By default it is used to set up
-            auto-puppeting based on `MULTISESSION_MODE`.
-
+        Called at the end of the login process.
         """
         Accounts.update_login_time(self.username)
 
-        # inform the client that we logged in through an OOB message
-        if session:
-            session.msg(logged_in={})
+        self.session = session
 
-            session.msg({
-                "char_all": self.get_all_nicknames(),
-                "max_char": settings.MAX_NR_CHARACTERS
-            })
+        # Inform the client that we logged in first.
+        session.msg({
+            "login": {
+                "name": self.username,
+                "id": self.get_id(),
+            },
+        })
+
+        session.msg({
+            "char_all": self.get_all_nicknames(),
+            "max_char": settings.MAX_PLAYER_CHARACTERS
+        })
+
+    def at_pre_logout(self):
+        """
+        Called before the logout process.
+        """
+        pass
 
     def get_all_characters(self):
         """

@@ -4,7 +4,7 @@ General account commands usually availabe to all players.
 
 import re, traceback
 from django.conf import settings
-from muddery.server.utils import logger
+from muddery.server.utils.logger import game_server_logger as logger
 from muddery.server.commands.base_command import BaseCommand
 from muddery.server.utils.localized_strings_handler import _
 from muddery.server.utils.builder import create_character
@@ -168,8 +168,8 @@ class CmdCharCreate(BaseCommand):
 
         # check total characters number
         char_all = account.get_all_characters()
-        if len(char_all) >= settings.MAX_NR_CHARACTERS:
-            account.msg({"alert": _("You may only create a maximum of %i characters.") % settings.MAX_NR_CHARACTERS})
+        if len(char_all) >= settings.MAX_PLAYER_CHARACTERS:
+            account.msg({"alert": _("You may only create a maximum of %i characters.") % settings.MAX_PLAYER_CHARACTERS})
             return
 
         # strip excessive spaces in playername

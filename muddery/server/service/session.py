@@ -8,7 +8,6 @@ class Session(WebsocketConsumer):
     """
     Websocket path.
     """
-
     def __init__(self, *args, **kwargs):
         """
         Init the channel.
@@ -18,12 +17,26 @@ class Session(WebsocketConsumer):
         """
         super().__init__(*args, **kwargs)
 
+        self.address = None
+        self.account = None
+        self.authed = False
+
+    def __str__(self):
+        """
+        Output self as a string
+        """
+        output = self.address
+        if self.account:
+            output += "-" + str(self.account)
+        return output
+
     def connect(self):
         """
         Called on a client connecting in.
         """
         # To send message back to the client, accept first.
         self.accept()
+        self.address = "%s:%s" % (self.scope["client"][0], self.scope["client"][1])
 
     def disconnect(self, close_code):
         """
@@ -41,6 +54,31 @@ class Session(WebsocketConsumer):
         """
         # Pass messages to the muddery server.
         Server.instance().handler_message(self, text_data)
+
+    def login(self, account):
+        """
+        Login an account.
+        """
+        self.authed = True
+
+        if self.account:
+            self.logout()
+
+        self.account = account
+
+        # call hook
+        self.account.at_post_login(self)
+
+    def logout(self):
+        """
+        Logout an account
+        """
+        if self.account:
+            # call hook
+            self.account.at_pre_logout(self)
+
+        self.account = None
+        self.authed = False
 
     def msg(self, text, context=None):
         """

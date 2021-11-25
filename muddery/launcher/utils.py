@@ -213,16 +213,12 @@ def show_version_info(about=False):
     Display version info
     """
     import os, sys
-    import twisted
     import django
-    import evennia
 
     return configs.VERSION_INFO.format(version=muddery_version(),
                                        about=configs.ABOUT_INFO if about else "",
                                        os=os.name, python=sys.version.split()[0],
-                                       twisted=twisted.version.short(),
-                                       django=django.get_version(),
-                                       evennia=evennia.__version__,)
+                                       django=django.get_version())
 
 
 def check_gamedir(path):

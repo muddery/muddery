@@ -3,7 +3,7 @@ Shop goods is the object in shops. They have some special attributes to record g
 
 """
 
-from muddery.server.utils import logger
+from muddery.server.utils.logger import game_server_logger as logger
 from muddery.server.database.worlddata.worlddata import WorldData
 from muddery.server.utils.localized_strings_handler import _
 from muddery.server.mappings.element_set import ELEMENT, ELEMENT_SET

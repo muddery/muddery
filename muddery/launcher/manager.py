@@ -136,9 +136,6 @@ def setup_server():
     """
     Setup the server.
     """
-    import logging
-    logging.getLogger('apscheduler.executors.default').setLevel(logging.WARNING)
-
     django.setup()
 
     from muddery.server.server import Server

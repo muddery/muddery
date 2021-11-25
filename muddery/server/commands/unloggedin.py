@@ -8,7 +8,7 @@ import hashlib
 from collections import defaultdict
 from django.conf import settings
 from muddery.server.mappings.element_set import ELEMENT
-from muddery.server.utils import logger
+from muddery.server.utils.logger import game_server_logger as logger
 from muddery.server.commands.base_command import BaseCommand
 from muddery.server.utils.exception import MudderyError, ERR
 from muddery.server.utils.localized_strings_handler import _
@@ -116,7 +116,7 @@ class CmdConnectAccount(BaseCommand):
 
         # Set the account with username and password.
         try:
-            account.set_user(username, password, session)
+            account.set_user(username, password)
         except MudderyError as e:
             if e.code == ERR.no_authentication:
                 # Wrong username or password.
@@ -134,15 +134,7 @@ class CmdConnectAccount(BaseCommand):
         #   player.at_first_login()  # only once, for player-centric setup
         #   player.at_pre_login()
         #   player.at_post_login(session=session)
-        session.sessionhandler.login(session, account)
-
-        session.msg({
-            "login": {
-                "name": username,
-                "id": account.get_id(),
-            },
-            "char_all": account.get_all_nicknames()
-        })
+        session.login(account)
 
 
 class CmdCreateAccount(BaseCommand):
@@ -194,7 +186,7 @@ class CmdCreateAccount(BaseCommand):
 
         # Set the account with username and password.
         try:
-            account.new_user(username, password, "", session)
+            account.new_user(username, password, "")
         except MudderyError as e:
             if e.code == ERR.no_authentication:
                 # Wrong username or password.
@@ -205,8 +197,7 @@ class CmdCreateAccount(BaseCommand):
             return None
 
         if connect:
-            session.msg({"login":{"name": username, "id": account.get_id()}})
-            session.sessionhandler.login(session, account)
+            session.login(account)
         else:
             session.msg({"created":{"name": session, "id": account.get_id()}})
 
@@ -229,8 +220,7 @@ class CmdQuitAccount(BaseCommand):
 
     @classmethod
     def func(cls, session, args, context):
-        #session.msg("Good bye! Disconnecting ...")
-        session.sessionhandler.disconnect(session, "Good bye! Disconnecting.")
+        session.logout()
 
 
 class CmdUnloginLook(BaseCommand):

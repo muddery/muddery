@@ -4,9 +4,9 @@ This model translates default strings into localized strings.
 
 from collections import deque
 import time
+import datetime
 import math
-from twisted.internet import reactor
-from twisted.internet import task
+from apscheduler.schedulers.background import BackgroundScheduler
 from muddery.server.database.gamedata.honours_mapper import HONOURS_MAPPER
 from muddery.server.utils.localized_strings_handler import _
 from muddery.server.utils.defines import CombatType
@@ -35,11 +35,13 @@ class MatchPVPHandler(object):
         #       "time": begin time,
         #       "opponent": match's opponent,
         #       "confirmed": confirmed the combat,
-        #       "call_id": waiting caller's id,
+        #       "job_id": waiting caller's id,
         #   }
         self.preparing = {}
 
+        self.scheduler = BackgroundScheduler()
         self.loop = None
+        self.key = "MATCH_PVP_HANDLER"
 
         self.reset()
         
@@ -57,8 +59,8 @@ class MatchPVPHandler(object):
         # Remove all characters in the waiting queue.
         """
         for char_db_id, info in self.preparing.values():
-            call_id = info["call_id"]
-            call_id.cancel()
+            job_id = info["job_id"]
+            self.scheduler.remove_job(job_id)
 
             try:
                 character = Server.world.get_character(char_db_id)
@@ -92,8 +94,10 @@ class MatchPVPHandler(object):
         self.preparing_time = honour_settings.preparing_time
         self.match_interval = honour_settings.match_interval
 
-        self.loop = task.LoopingCall(self.match)
-        self.loop.start(self.match_interval)
+        # add the loot job
+        if self.scheduler.get_job(self.key) is None:
+            self.scheduler.add_job(self.match, "interval", seconds=self.match_interval, id=self.key)
+            self.scheduler.start()
 
     def add(self, character):
         """
@@ -163,18 +167,19 @@ class MatchPVPHandler(object):
                     except KeyError:
                         pass
 
-                    call_id = reactor.callLater(self.preparing_time, self.fight, (char_id_A, char_id_B))
+                    job_time = datetime.datetime.now() + datetime.timedelta(seconds=self.preparing_time)
+                    job = self.scheduler.add_job(self.fight, 'date', run_date=job_time, args=(char_id_A, char_id_B))
                     self.preparing[char_id_A] = {
                         "time": time.time(),
                         "opponent": char_id_B,
                         "confirmed": False,
-                        "call_id": call_id,
+                        "job_id": job.id(),
                     }
                     self.preparing[char_id_B] = {
                         "time": time.time(),
                         "opponent": char_id_A,
                         "confirmed": False,
-                        "call_id": call_id,
+                        "job_id": job.id(),
                     }
 
     def confirm(self, character):
@@ -199,8 +204,8 @@ class MatchPVPHandler(object):
             return
 
         # stop the call
-        call_id = info["call_id"]
-        call_id.cancel()
+        job_id = info["job_id"]
+        self.scheduler.remove_job(job_id)
         
         # remove characters from the preparing queue
         del self.preparing[char_db_id]

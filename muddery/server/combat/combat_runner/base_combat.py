@@ -18,7 +18,7 @@ from enum import Enum
 import time
 import datetime
 from apscheduler.schedulers.background import BackgroundScheduler
-from muddery.server.utils import logger
+from muddery.server.utils.logger import game_server_logger as logger
 from muddery.server.utils import defines
 from muddery.server.database.worlddata.worlddata import WorldData
 from muddery.server.mappings.element_set import ELEMENT, ELEMENT_SET

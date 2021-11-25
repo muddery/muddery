@@ -11,11 +11,11 @@ MudderyService.prototype = {
             "args" : args || "",
             "context": context || "",
         };
-        Evennia.msg(data);
+        Connection.send(JSON.stringify(data));
     },
     
-    sendRawCommand: function(cmd) {
-    	Evennia.msg(cmd);
+    sendRawCommand: function(text) {
+    	Connection.send(text);
     },
     
     // functions when user click a command link

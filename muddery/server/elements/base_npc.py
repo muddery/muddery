@@ -9,7 +9,7 @@ creation commands.
 """
 
 import traceback
-from muddery.server.utils import logger
+from muddery.server.utils.logger import game_server_logger as logger
 from muddery.server.utils.dialogue_handler import DIALOGUE_HANDLER
 from muddery.server.mappings.element_set import ELEMENT
 from muddery.server.database.worlddata.npc_dialogues import NPCDialogues

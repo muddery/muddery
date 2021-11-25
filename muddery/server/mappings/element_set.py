@@ -5,7 +5,7 @@ All available requests.
 import os, re
 from importlib import import_module
 from django.conf import settings
-from muddery.server.utils import logger
+from muddery.server.utils.logger import game_server_logger as logger
 from muddery.server.utils.utils import class_from_path
 from muddery.server.utils.utils import get_module_path
 

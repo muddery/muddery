@@ -3,7 +3,7 @@ General Character commands usually availabe to all characters
 """
 import traceback
 
-from muddery.server.utils import logger
+from muddery.server.utils.logger import game_server_logger as logger
 from muddery.server.commands.base_command import BaseCommand
 from muddery.server.utils.localized_strings_handler import _
 from muddery.server.utils.exception import MudderyError

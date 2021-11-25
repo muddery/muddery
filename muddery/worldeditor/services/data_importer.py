@@ -7,7 +7,7 @@ from django.apps import apps
 from django.conf import settings
 from django.db import models
 from django.core.exceptions import ValidationError
-from muddery.server.utils import logger
+from muddery.server.utils.logger import game_editor_logger as logger
 from muddery.worldeditor.utils import readers
 from muddery.server.utils.exception import MudderyError, ERR
 

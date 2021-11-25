@@ -12,7 +12,7 @@ import ast, traceback
 import weakref
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
-from muddery.server.utils import logger
+from muddery.server.utils.logger import game_server_logger as logger
 from muddery.server.server import Server
 from muddery.server.utils.quest_handler import QuestHandler
 from muddery.server.utils.statement_attribute_handler import StatementAttributeHandler
@@ -104,6 +104,12 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         #        "obj": object's instance,
         #    }
         self.equipments = {}
+
+    def __str__(self):
+        """
+        Output self as a string
+        """
+        return "%s(%s)" % (self.get_name(), self.get_db_id())
 
     # @property body stores character's body properties before using equipments and skills.
     def __body_get(self):

@@ -16,11 +16,6 @@ MudderyClient.prototype = {
         // initialize once.
         Connection.init();
 
-        if (Connection.state() == WebSocket.CLOSED) {
-            this.showAlert(core.trans("Error"), core.trans("Can not connect to the server."));
-            return;
-        }
-
         // register listeners
         Connection.bindEvents({
             on_open: this.onConnectionOpen,
@@ -28,18 +23,25 @@ MudderyClient.prototype = {
             on_message: this.onReceiveMessage,
         });
 
+        Connection.connect();
+
+        if (Connection.state() == WebSocket.CLOSED) {
+            this.showAlert(core.trans("Error"), core.trans("Can not connect to the server."));
+            return;
+        }
+
         // set an idle timer to send idle every 30 seconds,
         // to avoid proxy servers timing out on us
         setInterval(function() {
             // Connect to server
             if (Connection.isConnected()) {
-                Connection.senf("idle");
+                Connection.send("idle");
             }
         }, 30000);
     },
 
  	onReceiveMessage: function(message) {
- 		core.client.handler_message(message);
+ 		core.client.handle_message(message);
  	},
 
  	onConnectionClose: function() {
@@ -55,13 +57,14 @@ MudderyClient.prototype = {
     },
 
     // handle commands from the server
-    handler_command: function(message) {
-     	var data = JSON.parse(message);
+    handle_message: function(message) {
+     	var parsed = JSON.parse(message);
+     	var data = parsed.data;
+     	var context = parsed.context;
         for (var key in data) {
             try {
                 var log_data = {}
                 log_data[key] = data[key];
-                console.log("Received: " + JSON.stringify(log_data));
 
                 if (key == "msg") {
                 	var msg = core.text2html.parseHtml(data[key]);

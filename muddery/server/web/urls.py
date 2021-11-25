@@ -28,6 +28,10 @@ urlpatterns = [
     url(r'^' + settings.WORLD_EDITOR_API_PATH, PROCESSER.process),
 
     # favicon
-    url(r'^favicon\.ico$',  RedirectView.as_view(url='/media/images/favicon.ico', permanent=False))
-    ]
+    url(r'^favicon\.ico$',  RedirectView.as_view(url='images/favicon.ico', permanent=False)),
+
+    url(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
+
+    url(r'^static/(?P<path>.*)$', serve, {'document_root': settings.STATIC_ROOT})
+]
 

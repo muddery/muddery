@@ -6,7 +6,7 @@ import ast
 from django.conf import settings
 from django.db import connections
 from django.core.exceptions import ObjectDoesNotExist
-from muddery.server.utils import logger
+from muddery.server.utils.logger import game_editor_logger as logger
 from muddery.server.utils.game_settings import GAME_SETTINGS
 from muddery.worldeditor.dao import common_mappers as CM
 from muddery.worldeditor.dao.common_mappers import WORLD_AREAS

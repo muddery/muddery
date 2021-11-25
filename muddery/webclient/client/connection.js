@@ -10,19 +10,14 @@ Webclient library, Handle websocket messages.
         open: false,
         websocket: null,
         wsurl: settings.wsurl,
+        registered_events: {},
 
-        onOpen: null,
-        onClose: null,
-        onError: null,
-        onMessage: null,
-
-        init: function(opts) {
+        init: function() {
             if (this.initialized) {
                 // make it safe to call multiple times.
                 return;
             }
             this.initialized = true;
-            this.connection = new WebsocketConnection();
             log('Connection initialized.')
         },
 
@@ -35,7 +30,7 @@ Webclient library, Handle websocket messages.
                 return;
             }
 
-            log('Connecting.');
+            log('Websocket connecting ...');
             if (this.websocket) {
                 if (!(this.websocket.readyState == websocket.CLOSED || this.websocket.readyState == websocket.CLOSING)) {
                     // The connection is already open.
@@ -43,43 +38,36 @@ Webclient library, Handle websocket messages.
                 }
             }
 
-            this.websocket = new WebSocket(wsurl);
+            this.websocket = new WebSocket(this.wsurl);
 
             // Handle Websocket open event
-            websocket.onopen = function (event) {
+            this.websocket.onopen = function (event) {
+                log('Websocket connected.');
                 open = true;
-                if (this.onOpen) {
-                    this.onOpen();
-                }
+                Connection.onOpen();
             };
 
             // Handle Websocket close event
-            websocket.onclose = function (event) {
-                if (this.onClose) {
-                    this.onClose();
-                }
+            this.websocket.onclose = function (event) {
+                Connection.onClose();
                 open = false;
             };
 
             // Handle websocket errors
-            websocket.onerror = function (event) {
+            this.websocket.onerror = function (event) {
                 if (websocket.readyState === websocket.CLOSED) {
                     // only call if websocket was ever open at all.
                     log("Websocket failed.")
-                    if (this.onError) {
-                        this.onError();
-                    }
-
+                    Connection.onError();
                     open = false;
                 }
             };
 
             // Handle incoming websocket data [cmdname, args, kwargs]
-            websocket.onmessage = function (event) {
+            this.websocket.onmessage = function (event) {
                 var data = event.data;
-                if (this.onMessage) {
-                    this.onMessage((data);
-                }
+                log("Received: " + data);
+                Connection.onMessage(data);
             };
         },
 
@@ -89,7 +77,7 @@ Webclient library, Handle websocket messages.
                 return;
             }
 
-            console.log("Send: " + message);
+            log("Send: " + message);
             this.websocket.send(message);
         },
 
@@ -97,10 +85,10 @@ Webclient library, Handle websocket messages.
             // tell the server this connection is closing (usually
             // tied to when the client window is closed). This
             // Makes use of a websocket-protocol specific instruction.
-            self.send(JSON.stringify({"websocket_close": ""}));
-            self.websocket.close();
+            this.send(JSON.stringify({"websocket_close": ""}));
+            this.websocket.close();
             open = false;
-        }
+        },
 
         /*
          {
@@ -110,28 +98,44 @@ Webclient library, Handle websocket messages.
             on_message: on message callback function,
          }
         */
+
         bindEvents: function(events) {
-            if ("on_open" in events) {
-                this.onOpen = events["on_open"];
+            for (var key in events) {
+                this.registered_events[key] = events[key];
             }
-            if ("on_close" in events) {
-                this.onClose = events["on_close"];
+        },
+
+        onOpen: function() {
+            if ("on_open" in this.registered_events) {
+                this.registered_events["on_open"]();
             }
-            if ("on_error" in events) {
-                this.onError = events["on_error"];
+        },
+
+        onClose: function() {
+            if ("on_close" in this.registered_events) {
+                this.registered_events["on_close"]();
             }
-            if ("on_message" in events) {
-                this.onMessage = events["on_message"];
+        },
+
+        onError: function() {
+            if ("on_error" in this.registered_events) {
+                this.registered_events["on_error"]();
             }
-        }
+        },
+
+        onMessage: function(data) {
+            if ("on_message" in this.registered_events) {
+                this.registered_events["on_message"](data);
+            }
+        },
 
         isConnected: function() {
             return this.open;
-        }
+        },
 
         state: function() {
             return this.websocket.state;
-        }
+        },
     };
 
     window.Connection = Connection;
@@ -139,8 +143,8 @@ Webclient library, Handle websocket messages.
 
 
 // helper logging function (requires a js dev-console in the browser)
-function log() {
+function log(message) {
     if (Connection.debug) {
-        console.log(JSON.stringify(arguments));
+        console.log(message);
     }
 }

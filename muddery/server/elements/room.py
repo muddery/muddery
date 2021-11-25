@@ -6,7 +6,7 @@ Rooms are simple containers that has no location of their own.
 """
 
 import ast
-from muddery.server.utils import logger
+from muddery.server.utils.logger import game_server_logger as logger
 from muddery.server.utils.game_settings import GAME_SETTINGS
 from muddery.server.database.worlddata.image_resource import ImageResource
 from muddery.server.database.worlddata.world_npcs import WorldNPCs

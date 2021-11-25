@@ -5,7 +5,7 @@ This module handles importing data from csv files and creating the whole game wo
 import traceback
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
-from muddery.server.utils import logger
+from muddery.server.utils.logger import game_server_logger as logger
 from muddery.server.utils.game_settings import GAME_SETTINGS
 from muddery.server.mappings.element_set import ELEMENT, ELEMENT_SET
 from muddery.server.database.gamedata.account_characters import AccountCharacters

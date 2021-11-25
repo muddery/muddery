@@ -10,7 +10,7 @@ from django import http
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.contrib.admin.views.decorators import staff_member_required
-from muddery.server.utils import logger
+from muddery.server.utils.logger import game_editor_logger as logger
 from muddery.server.utils import utils
 from muddery.server.utils.localized_strings_handler import _, LOCALIZED_STRINGS_HANDLER
 

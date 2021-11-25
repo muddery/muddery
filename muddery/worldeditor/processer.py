@@ -8,7 +8,7 @@ import json
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse
-from muddery.server.utils import logger
+from muddery.server.utils.logger import game_editor_logger as logger
 from muddery.server.utils.exception import MudderyError, ERR
 from muddery.worldeditor.mappings.request_set import REQUEST_SET
 import muddery.worldeditor.controllers
