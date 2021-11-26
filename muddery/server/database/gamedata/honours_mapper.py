@@ -3,8 +3,10 @@ This model translates default strings into localized strings.
 """
 
 from django.db import transaction
-from django.apps import apps
 from django.conf import settings
+from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
+from muddery.server.utils.utils import class_from_path
+from muddery.server.database.manager import Manager
 
 
 class HonoursMapper(object):
@@ -12,8 +14,10 @@ class HonoursMapper(object):
     This model stores all character's honours.
     """
     def __init__(self):
-        self.honour_model = apps.get_model(settings.GAME_DATA_APP, "honours")
-        self.objects = self.honour_model.objects
+        self.model_name = "honours"
+        self.model = class_from_path(".".join([settings.GAME_DATA_APP, settings.DATA_MODEL_FILE, self.model_name]))
+        self.session = Manager.instance().get_session(settings.GAME_DATA_APP)
+        self.query = self.session.query(self.model)
         self.honours = {}
         self.rankings = []
 
@@ -24,7 +28,7 @@ class HonoursMapper(object):
         self.honours = {}
         self.rankings = []
 
-        for record in self.objects.all():
+        for record in self.query.all():
             self.honours[record.character] = {
                 "honour": record.honour,
                 "place": 0,
@@ -148,7 +152,7 @@ class HonoursMapper(object):
             honour: character's honour
         """
         try:
-            record = self.honour_model(
+            record = self.model(
                 character=char_id,
                 honour=honour
             )
@@ -171,7 +175,7 @@ class HonoursMapper(object):
             honour: character's honour
         """
         try:
-            record = self.objects.filter(character=char_id)
+            record = self.query.filter(character=char_id)
             if record:
                 record.update(honour=honour)
                 self.honours[char_id]["honour"] = honour
@@ -196,7 +200,7 @@ class HonoursMapper(object):
         success = False
         with transaction.atomic():
             for key, value in new_honours.items():
-                self.objects.filter(character=key).update(honour=value)
+                self.query.filter(character=key).update(honour=value)
             success = True
         
         if success:
@@ -211,10 +215,10 @@ class HonoursMapper(object):
         Remove a character's honour.
         """
         try:
-            self.objects.get(character=char_db_id).delete()
+            self.query.get(character=char_db_id).delete()
             del self.honours[char_db_id]
             self.make_rankings()
-        except self.honour_model.DoesNotExist:
+        except NoResultFound:
             pass
         except Exception as e:
             print("Can not remove character's honour: %s" % e)

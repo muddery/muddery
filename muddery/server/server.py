@@ -3,6 +3,7 @@ import threading
 from django.conf import settings
 from muddery.server.utils.utils import class_from_path
 from muddery.server.service.command_handler import CommandHandler
+from muddery.server.database.manager import Manager
 
 
 class Server(object):
@@ -32,6 +33,12 @@ class Server(object):
     def __init__(self, *args, **kwargs):
         self._world = None
         self._command_handler = None
+
+    def create_db(self):
+        """
+        Create the db connection.
+        """
+        Manager.instance().create()
 
     def create_the_world(self):
         """

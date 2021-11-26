@@ -3,6 +3,7 @@
 # general
 django >= 3.2.0
 channels >= 3.0.0
+sqlalchemy >= 1.4.0
 
 # windows-specific
 pypiwin32;platform_system=="Windows"

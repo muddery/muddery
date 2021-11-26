@@ -98,6 +98,28 @@ DATABASES = {
     }
 }
 
+AL_DATABASES = {
+    'gamedata': {
+        'PROTOCOL': 'sqlite:///',
+        'NAME': os.path.join(GAME_DIR, "server", "gamedata.db3"),
+        'USER': '',
+        'PASSWORD': '',
+        'HOST': '',
+        'PORT': '',
+        'OPTIONS': {
+            'timeout': 20,      # solve the sqlite's problem of database is locked.
+        }
+    },
+    'worlddata': {
+        'PROTOCOL': 'sqlite:///',
+        'NAME': os.path.join(GAME_DIR, "server", "worlddata.db3"),
+        'USER': '',
+        'PASSWORD': '',
+        'HOST': '',
+        'PORT': ''
+    }
+}
+
 # Database's router
 DATABASE_ROUTERS = ['muddery.server.database.database_router.DatabaseAppsRouter']
 
@@ -107,10 +129,12 @@ DATABASE_APPS_MAPPING = {
 }
 
 # Database Access Object
-DATABASE_ACCESS_OBJECT = 'muddery.server.database.storage.kv_table_write_back.KeyValueWriteBackTable'
+# DATABASE_ACCESS_OBJECT = 'muddery.server.database.storage.kv_table_write_back.KeyValueWriteBackTable'
+DATABASE_ACCESS_OBJECT = 'muddery.server.database.storage.kv_table_al.KeyValueTableAl'
 
 # Database Access Object without cache
-DATABASE_ACCESS_OBJECT_NO_CACHE = 'muddery.server.database.storage.kv_table.KeyValueTable'
+# DATABASE_ACCESS_OBJECT_NO_CACHE = 'muddery.server.database.storage.kv_table.KeyValueTable'
+DATABASE_ACCESS_OBJECT_NO_CACHE = 'muddery.server.database.storage.kv_table_al.KeyValueTableAl'
 
 # Object's default runtime table. If a typeclass's own runtime table does
 # not exist, will use this table instead.
@@ -321,6 +345,9 @@ GAME_DATA_APP = "gamedata"
 
 # data app name
 WORLD_DATA_APP = "worlddata"
+
+# data model's filename
+DATA_MODEL_FILE = "models"
 
 # wsgi setting
 WSGI_APPLICATION = 'muddery.server.service.router.wsgi_application'

@@ -139,6 +139,7 @@ def setup_server():
     django.setup()
 
     from muddery.server.server import Server
+    Server.instance().create_db()
     Server.instance().create_the_world()
     Server.instance().create_command_handler()
 
