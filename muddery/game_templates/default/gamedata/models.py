@@ -1,5 +1,5 @@
 
-from muddery.server.database import gamedata_models as BaseModels
+from muddery.server.database import gamedata_models_al as BaseModels
 
 
 class system_data(BaseModels.system_data):

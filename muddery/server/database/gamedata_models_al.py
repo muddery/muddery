@@ -1,6 +1,6 @@
 
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String, Time, Boolean, UniqueConstraint
+from sqlalchemy import Column, Integer, String, DateTime, Boolean, UniqueConstraint
 Base = declarative_base()
 
 KEY_LENGTH = 80
@@ -84,10 +84,10 @@ class server_bans(Base):
     target = Column(String(KEY_LENGTH))
 
     # create time
-    create_time = Column(Time)
+    create_time = Column(DateTime)
 
     # finish time
-    finish_time = Column(Time)
+    finish_time = Column(DateTime)
 
 
 # ------------------------------------------------------------
@@ -120,10 +120,10 @@ class accounts(Base):
     type = Column(String(KEY_LENGTH), index=True)
 
     # account's create time
-    create_time = Column(Time, nullable=True)
+    create_time = Column(DateTime, nullable=True)
 
     # account's last login time
-    last_login = Column(Time, nullable=True)
+    last_login = Column(DateTime, nullable=True)
 
 
 # ------------------------------------------------------------
