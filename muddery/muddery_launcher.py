@@ -54,7 +54,7 @@ def main():
         '--migrate', action='store_true', dest='migrate', default=False,
         help="Migrate databases to new version.")
     parser.add_argument(
-        '--collect_static', action='store_true', dest='collect_static', default=False,
+        '--collect-static', action='store_true', dest='collect_static', default=False,
         help="Collect static web files.")
     parser.add_argument(
         '--port', '-p', nargs=1, action='store', dest='port',
@@ -103,7 +103,7 @@ def main():
             sys.exit(-1)
         sys.exit()
 
-    elif args.setup is not None:
+    elif args.setup:
         # Create databases and load default data.
         try:
             manager.migrate_database()
@@ -114,7 +114,7 @@ def main():
             sys.exit(-1)
         sys.exit()
 
-    elif args.upgrade is not None:
+    elif args.upgrade:
         template = None
         if args.upgrade:
             template = args.upgrade

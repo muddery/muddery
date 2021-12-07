@@ -1,9 +1,13 @@
 
 import threading
-from sqlalchemy import create_engine
+import importlib
+import inspect
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.ext.declarative import declarative_base
 from django.conf import settings
+from muddery.server.database.engines import get_engine
 from muddery.server.utils.logger import game_server_logger as logger
+from muddery.server.utils.utils import classes_in_path
 
 
 class Manager(object):
@@ -34,20 +38,36 @@ class Manager(object):
         self.engines = {}
         self.sessions = {}
 
-    def create(self):
+    def connect(self):
         """
         Create db connections.
         """
         for key, cfg in settings.AL_DATABASES.items():
             try:
-                engine = create_engine(cfg["PROTOCOL"] + cfg["NAME"] + "?check_same_thread=False", echo=True)
+                engine = get_engine(cfg["ENGINE"], cfg)
                 session = sessionmaker(bind=engine)
 
                 self.engines[key] = engine
                 self.sessions[key] = session()
             except Exception as e:
                 logger.log_trace("Can not connect to db.")
-                raise(e)
+                raise e
+
+    def create_tables(self):
+        """
+        Create database tables if they are not exist.
+        """
+        for key, cfg in settings.AL_DATABASES.items():
+            try:
+                engine = self.engines[key]
+                module = importlib.import_module(cfg["MODELS"])
+                tables = [cls for cls in vars(module).values() if inspect.isclass(cls)]
+                for table in tables:
+                    getattr(table, "__table__").create(engine, checkfirst=True)
+
+            except Exception as e:
+                logger.log_trace("Can not connect to db.")
+                raise e
 
     def get_session(self, scheme):
         """

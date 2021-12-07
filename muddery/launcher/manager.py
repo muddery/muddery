@@ -109,6 +109,7 @@ def migrate_database():
 
     try:
         utils.create_database()
+        utils.create_database_al()
     except Exception as e:
         traceback.print_exc()
         print("Migrate database error: %s" % e)
@@ -139,7 +140,7 @@ def setup_server():
     django.setup()
 
     from muddery.server.server import Server
-    Server.instance().create_db()
+    Server.instance().connect_db()
     Server.instance().create_the_world()
     Server.instance().create_command_handler()
 

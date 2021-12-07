@@ -34,11 +34,12 @@ class Server(object):
         self._world = None
         self._command_handler = None
 
-    def create_db(self):
+    def connect_db(self):
         """
         Create the db connection.
         """
-        Manager.instance().create()
+        Manager.instance().connect()
+        Manager.instance().create_tables()
 
     def create_the_world(self):
         """

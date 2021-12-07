@@ -100,24 +100,15 @@ DATABASES = {
 
 AL_DATABASES = {
     'gamedata': {
-        'PROTOCOL': 'sqlite:///',
+        'ENGINE': 'sqlite3',
+        'MODELS': 'gamedata.models',
         'NAME': os.path.join(GAME_DIR, "server", "gamedata.db3"),
         'USER': '',
         'PASSWORD': '',
         'HOST': '',
         'PORT': '',
-        'OPTIONS': {
-            'timeout': 20,      # solve the sqlite's problem of database is locked.
-        }
+        'DEBUG': True,
     },
-    'worlddata': {
-        'PROTOCOL': 'sqlite:///',
-        'NAME': os.path.join(GAME_DIR, "server", "worlddata.db3"),
-        'USER': '',
-        'PASSWORD': '',
-        'HOST': '',
-        'PORT': ''
-    }
 }
 
 # Database's router
@@ -166,17 +157,8 @@ SITE_ID = 1
 TEMPLATE_CONTEXT_PROCESSORS = ('django.core.context_processors.i18n',
                                'django.core.context_processors.request',
                                'django.contrib.auth.context_processors.auth',
-                               'django.core.context_processors.media',
                                'django.core.context_processors.debug',
                                'muddery.server.web.utils.general_context.general_context',)
-
-# Absolute path to the directory that holds file uploads from web apps.
-# Example: "/home/media/media.lawrence.com"
-MEDIA_ROOT = os.path.join(GAME_DIR, "web", "media")
-
-# URL that handles the media served from MEDIA_ROOT.
-# Example: "http://media.lawrence.com"
-MEDIA_URL = '/media/'
 
 # resource's location
 IMAGE_PATH = 'image'
@@ -205,6 +187,7 @@ STATICFILES_DIRS = (
     ("webclient", os.path.join(MUDDERY_DIR, "webclient")),
     ("editor", os.path.join(GAME_DIR, "worldeditor", "webclient")),
     ("editor", os.path.join(MUDDERY_DIR, "worldeditor", "webclient")),
+    (os.path.join("webclient", "media"), os.path.join(GAME_DIR, "web", "media")),
 )
 
 # We setup the location of the website template as well as the admin site.
