@@ -1,6 +1,7 @@
 
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String, DateTime, Boolean, UniqueConstraint
+from sqlalchemy import Column, Integer, String, DateTime, Boolean
+from sqlalchemy import UniqueConstraint
 Base = declarative_base()
 
 KEY_LENGTH = 80
@@ -12,7 +13,7 @@ class system_data(Base):
     """
     Store system data. Only use the first record.
     """
-    __tablename__ = "gamedata_system_data"
+    __tablename__ = "system_data"
 
     __table_args__ = {
         "extend_existing": True,
@@ -36,7 +37,7 @@ class object_states(Base):
     """
     Object's runtime attributes.
     """
-    __tablename__ = "gamedata_object_states"
+    __tablename__ = "object_states"
 
     __table_args__ = (
         UniqueConstraint("obj_id", "key"),
@@ -66,7 +67,7 @@ class server_bans(Base):
     """
     Banned players.
     """
-    __tablename__ = "gamedata_server_bans"
+    __tablename__ = "server_bans"
 
     __table_args__ = (
         UniqueConstraint("type", "target"),
@@ -99,7 +100,7 @@ class accounts(Base):
     """
     User accounts.
     """
-    __tablename__ = "gamedata_accounts"
+    __tablename__ = "accounts"
 
     __table_args__ = {
         "extend_existing": True,
@@ -134,7 +135,7 @@ class accounts(Base):
 class account_characters(Base):
     "Account's player characters."
 
-    __tablename__ = "gamedata_account_characters"
+    __tablename__ = "account_characters"
 
     __table_args__ = {
         "extend_existing": True,
@@ -157,7 +158,7 @@ class account_characters(Base):
 class character_info(Base):
     "player character's basic information"
 
-    __tablename__ = "gamedata_character_info"
+    __tablename__ = "character_info"
 
     __table_args__ = {
         "extend_existing": True,
@@ -183,7 +184,7 @@ class character_info(Base):
 class character_location(Base):
     "player character's location"
 
-    __tablename__ = "gamedata_character_location"
+    __tablename__ = "character_location"
 
     __table_args__ = {
         "extend_existing": True,
@@ -206,7 +207,7 @@ class character_location(Base):
 class character_inventory(Base):
     "Player character's inventory."
 
-    __tablename__ = "gamedata_character_inventory"
+    __tablename__ = "character_inventory"
 
     __table_args__ = (
         UniqueConstraint("character_id", "position"),
@@ -241,7 +242,7 @@ class character_inventory(Base):
 class character_equipments(Base):
     "Player character's equipments."
 
-    __tablename__ = "gamedata_character_equipments"
+    __tablename__ = "character_equipments"
 
     __table_args__ = (
         UniqueConstraint("character_id", "position"),
@@ -273,7 +274,7 @@ class character_equipments(Base):
 class character_skills(Base):
     "Player character's skills."
 
-    __tablename__ = "gamedata_character_skills"
+    __tablename__ = "character_skills"
 
     __table_args__ = (
         UniqueConstraint("character_id", "skill"),
@@ -308,7 +309,7 @@ class character_skills(Base):
 class character_combat(Base):
     "Player character's combat."
 
-    __tablename__ = "gamedata_character_combat"
+    __tablename__ = "character_combat"
 
     __table_args__ = {
         "extend_existing": True,
@@ -331,7 +332,7 @@ class character_combat(Base):
 class character_quests(Base):
     "Player character's quests."
 
-    __tablename__ = "gamedata_character_quests"
+    __tablename__ = "character_quests"
 
     __table_args__ = (
         UniqueConstraint("character_id", "quest"),
@@ -360,7 +361,7 @@ class character_quests(Base):
 class quest_objectives(Base):
     "Quests' objectives."
 
-    __tablename__ = "gamedata_quest_objectives"
+    __tablename__ = "quest_objectives"
 
     __table_args__ = (
         UniqueConstraint("character_quest", "objective"),
@@ -390,7 +391,7 @@ class quest_objectives(Base):
 class honours(Base):
     "All character's honours."
 
-    __tablename__ = "gamedata_honours"
+    __tablename__ = "honours"
 
     __table_args__ = {
         "extend_existing": True,
