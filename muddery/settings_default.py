@@ -109,6 +109,16 @@ AL_DATABASES = {
         'PORT': '',
         'DEBUG': True,
     },
+    'worlddata': {
+        'ENGINE': 'sqlite3',
+        'MODELS': 'worlddata.models',
+        'NAME': os.path.join(GAME_DIR, "server", "worlddata.db3"),
+        'USER': '',
+        'PASSWORD': '',
+        'HOST': '',
+        'PORT': '',
+        'DEBUG': True,
+    },
 }
 
 # Database's router
@@ -326,11 +336,14 @@ INSTALLED_APPS = [
 # data app name
 GAME_DATA_APP = "gamedata"
 
+# game data model's filename
+GAME_DATA_MODEL_FILE = "gamedata.models"
+
 # data app name
 WORLD_DATA_APP = "worlddata"
 
-# data model's filename
-DATA_MODEL_FILE = "models"
+# world data model's filename
+WORLD_DATA_MODEL_FILE = "worlddata.models"
 
 # wsgi setting
 WSGI_APPLICATION = 'muddery.server.service.router.wsgi_application'
@@ -363,7 +376,7 @@ WORLD_DATA_FOLDER = os.path.join("worlddata", "data")
 WORLD_EDITOR_APP = "worldeditor"
 
 # add data app
-INSTALLED_APPS = INSTALLED_APPS + [WORLD_EDITOR_APP, ]
+# INSTALLED_APPS = INSTALLED_APPS + [WORLD_EDITOR_APP, ]
 
 # Localized string data's folder.
 LOCALIZED_STRINGS_FOLDER = "languages"

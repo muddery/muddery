@@ -7,7 +7,6 @@ from sqlalchemy.ext.declarative import declarative_base
 from django.conf import settings
 from muddery.server.database.engines import get_engine
 from muddery.server.utils.logger import game_server_logger as logger
-from muddery.server.utils.utils import classes_in_path
 
 
 class Manager(object):
@@ -74,3 +73,14 @@ class Manager(object):
         The session of the database connection.
         """
         return self.sessions.get(scheme)
+
+    def get_tables(self, scheme):
+        """
+        Get all tables' names of a scheme.
+        """
+        tables = []
+        if scheme in settings.AL_DATABASES:
+            module = importlib.import_module(settings.AL_DATABASES[scheme]["MODELS"])
+            tables = [cls.__tablename__ for cls in vars(module).values() if inspect.isclass(cls)]
+
+        return tables

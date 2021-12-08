@@ -13,7 +13,9 @@ class CharacterEquipments(object):
     """
     # data storage
     storage_class = utils.class_from_path(settings.DATABASE_ACCESS_OBJECT)
-    storage = storage_class("character_equipments", "character_id", "position")
+    session = settings.GAME_DATA_APP
+    config = settings.AL_DATABASES[session]
+    storage = storage_class(session, config["MODELS"], "character_equipments", "character_id", "position")
 
     @classmethod
     def get_character(cls, character_id):

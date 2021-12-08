@@ -1,10 +1,13 @@
 """
 Load and cache all worlddata.
 """
+import importlib
+import inspect
+import traceback
 
 from django.conf import settings
-from django.apps import apps
-from muddery.server.database.storage.memory_table import MemoryTable, RecordData
+from muddery.server.database.manager import Manager
+from muddery.server.database.storage.memory_table_al import MemoryTableAl, RecordData
 from muddery.server.utils.exception import MudderyError
 
 
@@ -28,11 +31,14 @@ class WorldData(object):
         """
         cls.clear()
 
-        config = apps.get_app_config(settings.WORLD_DATA_APP)
-        all_models = config.get_models()
-        for model_obj in all_models:
-            name = model_obj.__name__
-            cls.tables[name] = MemoryTable(settings.WORLD_DATA_APP, name)
+        module = importlib.import_module(settings.WORLD_DATA_MODEL_FILE)
+        models = [cls for cls in vars(module).values() if inspect.isclass(cls)]
+        for model in models:
+            config = settings.AL_DATABASES[settings.WORLD_DATA_APP]
+            cls.tables[model.__name__] = MemoryTableAl(
+                settings.WORLD_DATA_APP,
+                config["MODELS"],
+                model.__name__)
 
     @classmethod
     def load_table(cls, table_name):
@@ -40,10 +46,13 @@ class WorldData(object):
         Load a table to the local storage.
         """
         try:
-            model_obj = apps.get_model(settings.WORLD_DATA_APP, table_name)
-            name = model_obj.__name__
-            cls.tables[name] = MemoryTable(settings.WORLD_DATA_APP, name)
+            config = settings.AL_DATABASES[settings.WORLD_DATA_APP]
+            cls.tables[table_name] = MemoryTableAl(
+                settings.WORLD_DATA_APP,
+                config["MODELS"],
+                table_name)
         except Exception as e:
+            traceback.print_exc()
             raise MudderyError("Can not load table %s: %s" % (table_name, e))
 
     @classmethod

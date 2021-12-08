@@ -8,7 +8,7 @@ in the character. It controls quest's objectives.
 
 from muddery.server.utils.logger import game_server_logger as logger
 from muddery.server.utils import defines
-from muddery.server.database.gamedata.quest_objectives import QUEST_OBJECTIVES_DATA
+from muddery.server.database.gamedata.quest_objectives import QuestObjectives
 from muddery.server.statements.statement_handler import STATEMENT_HANDLER
 from muddery.server.utils.dialogue_handler import DIALOGUE_HANDLER
 from muddery.server.utils.loot_handler import LootHandler
@@ -104,7 +104,7 @@ class MudderyQuest(BaseElement):
         Set desc to an objective can hide the details of the objective.
         """
         output = []
-        all_accomplished = QUEST_OBJECTIVES_DATA.get_character_quest(self.character_id, self.element_key)
+        all_accomplished = QuestObjectives.get_character_quest(self.character_id, self.element_key)
 
         for item in self.objectives.values():
             desc = item["desc"]
@@ -220,7 +220,7 @@ class MudderyQuest(BaseElement):
         """
         All objectives of this quest are accomplished.
         """
-        all_accomplished = QUEST_OBJECTIVES_DATA.get_character_quest(self.character_id, self.element_key)
+        all_accomplished = QuestObjectives.get_character_quest(self.character_id, self.element_key)
 
         for item in self.objectives.values():
             character_quest = "%s:%s" % (item["type"], item["object"])
@@ -265,7 +265,7 @@ class MudderyQuest(BaseElement):
             caller.remove_objects_by_list(obj_list)
 
         # remove quest objectives records
-        QUEST_OBJECTIVES_DATA.remove(self.character_id, self.const.key)
+        QuestObjectives.remove(self.character_id, self.const.key)
 
     def at_objective(self, objective_type, object_key, number=1):
         """
@@ -284,8 +284,8 @@ class MudderyQuest(BaseElement):
 
         item = self.objectives[(objective_type, object_key)]
 
-        accomplished = QUEST_OBJECTIVES_DATA.get_progress(self.character_id, self.element_key, item["type"],
-                                                          item["object"], 0)
+        accomplished = QuestObjectives.get_progress(self.character_id, self.element_key, item["type"],
+                                                    item["object"], 0)
 
         if accomplished == item["number"]:
             # already accomplished
@@ -295,7 +295,7 @@ class MudderyQuest(BaseElement):
         if accomplished > item["number"]:
             accomplished = item["number"]
 
-        QUEST_OBJECTIVES_DATA.save_progress(self.character_id, self.element_key, objective_type, object_key, accomplished)
+        QuestObjectives.save_progress(self.character_id, self.element_key, objective_type, object_key, accomplished)
 
         return True
 

@@ -108,8 +108,10 @@ def migrate_database():
     utils.init_game_env(gamedir)
 
     try:
-        utils.create_database()
-        utils.create_database_al()
+        django.setup()
+
+        from muddery.server.server import Server
+        Server.instance().connect_db()
     except Exception as e:
         traceback.print_exc()
         print("Migrate database error: %s" % e)

@@ -13,7 +13,9 @@ class CharacterInfo(object):
     """
     # data storage
     storage_class = utils.class_from_path(settings.DATABASE_ACCESS_OBJECT)
-    storage = storage_class("character_info", "", "char_id")
+    session = settings.GAME_DATA_APP
+    config = settings.AL_DATABASES[session]
+    storage = storage_class(session, config["MODELS"], "character_info", "", "char_id")
 
     nicknames = {info["nickname"]: char_id for char_id, info in storage.load_category("", {}).items()}
 

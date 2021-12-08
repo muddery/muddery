@@ -13,7 +13,9 @@ class ServerBans(object):
     """
     # data storage
     storage_class = utils.class_from_path(settings.DATABASE_ACCESS_OBJECT)
-    storage = storage_class("server_bans", "type", "target")
+    session = settings.GAME_DATA_APP
+    config = settings.AL_DATABASES[session]
+    storage = storage_class(session, config["MODELS"], "server_bans", "type", "target")
 
     @classmethod
     def add(cls, ban_type, ban_target, finish_time):

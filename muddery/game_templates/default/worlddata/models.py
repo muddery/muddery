@@ -1,4 +1,4 @@
-from django.db import models
+
 from muddery.server.database import worlddata_models_al as BaseModels
 
 
@@ -35,6 +35,16 @@ class honour_settings(BaseModels.honour_settings):
     """
     Honour combat's settings
     """
+    pass
+
+
+# ------------------------------------------------------------
+#
+# world channels
+#
+# ------------------------------------------------------------
+class world_channels(BaseModels.world_channels):
+    "Communication channels."
     pass
 
 

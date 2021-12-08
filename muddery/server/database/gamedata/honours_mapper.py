@@ -2,6 +2,7 @@
 This model translates default strings into localized strings.
 """
 
+import importlib
 from django.db import transaction
 from django.conf import settings
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
@@ -15,7 +16,8 @@ class HonoursMapper(object):
     """
     def __init__(self):
         self.model_name = "honours"
-        self.model = class_from_path(".".join([settings.GAME_DATA_APP, settings.DATA_MODEL_FILE, self.model_name]))
+        module = importlib.import_module(settings.GAME_DATA_MODEL_FILE)
+        self.model = getattr(module, self.model_name)
         self.session = Manager.instance().get_session(settings.GAME_DATA_APP)
         self.query = self.session.query(self.model)
         self.honours = {}

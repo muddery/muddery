@@ -144,6 +144,8 @@ class BaseElement(Base):
     """
     The base model of all elements. All elements data are linked with keys.
     """
+    __abstract__ = True
+
     __table_args__ = {
         "extend_existing": True,
     }
@@ -491,7 +493,7 @@ class skills(BaseElement):
 
 class shops(BaseElement):
     "Store all shops."
-    __tablename__ = "skills"
+    __tablename__ = "shops"
 
     # object's element type
     element_type = Column(String(KEY_LENGTH), default="SHOP")
@@ -571,6 +573,8 @@ class shop_goods(Base):
 # ------------------------------------------------------------
 class loot_list(Base):
     "Loot list. It is used in object_creators and mods."
+    __abstract__ = True
+
     __table_args__ = (
         UniqueConstraint("provider", "object"),
         {
@@ -774,7 +778,7 @@ class character_states_dict(Base):
 class element_properties(Base):
     "Store element's custom properties."
     # The type of an element.
-    __tablename__ = "properties_dict"
+    __tablename__ = "element_properties"
 
     __table_args__ = (
         UniqueConstraint("element", "key", "level", "property"),
@@ -996,7 +1000,7 @@ class event_data(Base):
 
     __table_args__ = {
         "extend_existing": True,
-        "index-together": [("trigger_obj", "trigger_type")],
+        "index_together": [("trigger_obj", "trigger_type")],
     }
 
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -1119,7 +1123,7 @@ class dialogue_relations(Base):
 # ------------------------------------------------------------
 class npc_dialogues(Base):
     "Store npc's dialogues."
-    __tablename__ = "dialogue_relations"
+    __tablename__ = "npc_dialogues"
 
     __table_args__ = (
         UniqueConstraint("npc", "dialogue"),
@@ -1148,6 +1152,8 @@ class npc_dialogues(Base):
 #
 # ------------------------------------------------------------
 class BaseEventActionData(Base):
+    __abstract__ = True
+
     __table_args__ = {
         "extend_existing": True,
     }
@@ -1224,7 +1230,7 @@ class action_dialogue(BaseEventActionData):
 # ------------------------------------------------------------
 class action_learn_skill(BaseEventActionData):
     "Store all actions to learn skills."
-    __tablename__ = "action_dialogue"
+    __tablename__ = "action_learn_skill"
 
     __table_args__ = (
         UniqueConstraint("event_key", "skill"),
@@ -1403,7 +1409,7 @@ class image_resources(Base):
     __tablename__ = "image_resources"
 
     __table_args__ = {
-            "extend_existing": True,
+        "extend_existing": True,
     }
 
     id = Column(Integer, primary_key=True, autoincrement=True)

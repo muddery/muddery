@@ -2,10 +2,9 @@
 Key value storage in relational database.
 """
 import traceback
-
+import importlib
 from django.conf import settings
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
-from sqlalchemy import func
 from muddery.server.database.storage.base_kv_storage import BaseKeyValueStorage
 from muddery.server.utils.exception import MudderyError, ERR
 from muddery.server.utils.utils import class_from_path
@@ -16,7 +15,7 @@ class KeyValueTableAl(BaseKeyValueStorage):
     """
     The storage of object attributes.
     """
-    def __init__(self, model_name, category_field, key_field, default_value_field=None):
+    def __init__(self, session, model_path, model_name, category_field, key_field, default_value_field=None):
         """
 
         :param model_name: table's model
@@ -30,9 +29,10 @@ class KeyValueTableAl(BaseKeyValueStorage):
 
         # db model
         self.model_name = model_name
-        self.model = class_from_path(".".join([settings.GAME_DATA_APP, settings.DATA_MODEL_FILE, self.model_name]))
+        module = importlib.import_module(model_path)
+        self.model = getattr(module, model_name)
         self.columns = self.model.__table__.columns.keys()
-        self.session = Manager.instance().get_session(settings.GAME_DATA_APP)
+        self.session = Manager.instance().get_session(session)
 
         exclude_fields = set()
         self.category_field = category_field

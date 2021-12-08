@@ -3,13 +3,12 @@ Import table data.
 """
 
 import os, traceback
-from django.apps import apps
+import importlib
 from django.conf import settings
-from django.db import models
-from django.core.exceptions import ValidationError
 from muddery.server.utils.logger import game_editor_logger as logger
 from muddery.worldeditor.utils import readers
 from muddery.server.utils.exception import MudderyError, ERR
+from muddery.server.database.manager import Manager
 
 
 def import_file(fullname, file_type=None, table_name=None, clear=True, except_errors=False, **kwargs):
@@ -42,18 +41,14 @@ def import_file(fullname, file_type=None, table_name=None, clear=True, except_er
 
             try:
                 # get field info
-                field = model_obj._meta.get_field(field_name)
+                field = model_obj.__table__.columns[field_name]
 
-                if isinstance(field, models.BooleanField):
+                if field.python_type == bool:
                     field_type = 1
-                elif isinstance(field, models.IntegerField):
+                elif field.python_type == int:
                     field_type = 2
-                elif isinstance(field, models.FloatField):
+                elif field.python_type == float:
                     field_type = 3
-                elif isinstance(field, models.ForeignKey):
-                    field_type = 4
-                elif isinstance(field, models.ManyToManyField):
-                    field_type = 5
                 else:
                     field_type = 0
             except Exception as e:
@@ -104,7 +99,7 @@ def import_file(fullname, file_type=None, table_name=None, clear=True, except_er
                     if value:
                         record[field_name] = float(value)
             except Exception as e:
-                raise ValidationError({field_name: "value error: '%s'" % value})
+                raise Exception({field_name: "value error: '%s'" % value})
 
         return record
 
@@ -143,7 +138,7 @@ def import_file(fullname, file_type=None, table_name=None, clear=True, except_er
                 try:
                     data.full_clean()
                     data.save()
-                except ValidationError as e:
+                except Exception as e:
                     if except_errors:
                         print(parse_error(e, model_obj.__name__, line))
                     else:
@@ -153,25 +148,12 @@ def import_file(fullname, file_type=None, table_name=None, clear=True, except_er
         except StopIteration:
             # reach the end of file, pass this exception
             pass
-        except ValidationError as e:
-            traceback.print_exc()
-            raise MudderyError(ERR.import_data_error, parse_error(e, model_obj.__name__, line))
+        #except ValidationError as e:
+        #    traceback.print_exc()
+        #    raise MudderyError(ERR.import_data_error, parse_error(e, model_obj.__name__, line))
         except Exception as e:
             traceback.print_exc()
-            raise MudderyError(ERR.import_data_error, "%s (model: %s, line: %s)" % (e, model_obj.__name__, line))
-
-    def clear_model_data(model_obj, **kwargs):
-        """
-        Remove all data from db.
-
-        Args:
-            model_obj: model object.
-
-        Returns:
-            None
-        """
-        # clear old data
-        model_obj.objects.all().delete()
+            raise MudderyError(ERR.import_data_error, "%s (model: %s, line: %s)" % (e, model_obj.__tablename__, line))
 
     def parse_error(error, model_name, line):
         """
@@ -212,10 +194,13 @@ def import_file(fullname, file_type=None, table_name=None, clear=True, except_er
             file_type = ext_name[1:].lower()
 
     # get model
-    model_obj = apps.get_model(settings.WORLD_DATA_APP, table_name)
+    session = Manager.instance().get_session(settings.WORLD_DATA_APP)
+    config = settings.AL_DATABASES[settings.WORLD_DATA_APP]
+    module = importlib.import_module(config["MODELS"])
+    model = getattr(module, table_name)
 
     if clear:
-        clear_model_data(model_obj, **kwargs)
+        session.query(model).delete()
 
     reader_class = readers.get_reader(file_type)
     if not reader_class:
@@ -228,4 +213,4 @@ def import_file(fullname, file_type=None, table_name=None, clear=True, except_er
         raise(MudderyError(ERR.import_data_error, "Does not support this file type."))
 
     logger.log_info("Importing %s" % table_name)
-    import_data(model_obj, reader)
+    import_data(model, reader)

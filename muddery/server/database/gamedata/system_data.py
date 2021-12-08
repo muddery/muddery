@@ -13,7 +13,9 @@ class SystemData(object):
     """
     # data storage
     storage_class = utils.class_from_path(settings.DATABASE_ACCESS_OBJECT)
-    storage = storage_class("system_data", "", "")
+    session = settings.GAME_DATA_APP
+    config = settings.AL_DATABASES[session]
+    storage = storage_class(session, config["MODELS"], "system_data", "", "")
 
     @classmethod
     def save(cls, key, value):

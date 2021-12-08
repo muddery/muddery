@@ -40,6 +40,16 @@ class honour_settings(BaseModels.honour_settings):
 
 # ------------------------------------------------------------
 #
+# world channels
+#
+# ------------------------------------------------------------
+class world_channels(BaseModels.world_channels):
+    "Communication channels."
+    pass
+
+
+# ------------------------------------------------------------
+#
 # world areas
 #
 # ------------------------------------------------------------

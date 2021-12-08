@@ -13,7 +13,9 @@ class AccountCharacters(object):
     """
     # data storage
     storage_class = utils.class_from_path(settings.DATABASE_ACCESS_OBJECT)
-    storage = storage_class("account_characters", "account_id", "char_id")
+    session = settings.GAME_DATA_APP
+    config = settings.AL_DATABASES[session]
+    storage = storage_class(session, config["MODELS"], "account_characters", "account_id", "char_id")
 
     @classmethod
     def add(cls, account_id, char_id):

@@ -12,7 +12,9 @@ class CharacterSkills(object):
     """
     # data storage
     storage_class = utils.class_from_path(settings.DATABASE_ACCESS_OBJECT)
-    storage = storage_class("character_skills", "character_id", "skill")
+    session = settings.GAME_DATA_APP
+    config = settings.AL_DATABASES[session]
+    storage = storage_class(session, config["MODELS"], "character_skills", "character_id", "skill")
 
     @classmethod
     def save(cls, character_id, skill_key, data):

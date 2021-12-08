@@ -12,7 +12,9 @@ class CharacterLocation(object):
     """
     # data storage
     storage_class = utils.class_from_path(settings.DATABASE_ACCESS_OBJECT)
-    storage = storage_class("character_location", "", "char_id", "location")
+    session = settings.GAME_DATA_APP
+    config = settings.AL_DATABASES[session]
+    storage = storage_class(session, config["MODELS"], "character_location", "", "char_id", "location")
 
     @classmethod
     def save(cls, char_id, location):
