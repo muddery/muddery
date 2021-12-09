@@ -33,7 +33,7 @@ class system_data(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
 
     # The last id of accounts.
-    object_index = Column(Integer, default=0)
+    object_index = Column(Integer, default=0, nullable=False)
 
 
 # ------------------------------------------------------------
@@ -55,10 +55,10 @@ class game_settings(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
 
     # The name of your game.
-    game_name = Column(Unicode(NAME_LENGTH), default="")
+    game_name = Column(Unicode(NAME_LENGTH))
 
     # The screen shows to players who are not loggin.
-    connection_screen = Column(UnicodeText, default="")
+    connection_screen = Column(UnicodeText)
 
     # In solo mode, a player can not see or affect other players.
     solo_mode = Column(Boolean, default=False)
@@ -82,19 +82,19 @@ class game_settings(Base):
     # The key of a world room.
     # The start position for new characters. It is the key of the room.
     # If it is empty, the home will be set to the first room in WORLD_ROOMS.
-    start_location_key = Column(String(KEY_LENGTH), default="")
+    start_location_key = Column(String(KEY_LENGTH))
 
     # The key of a world room.
     # Player's default home. When a player dies, he will be moved to his home.
-    default_player_home_key = Column(String(KEY_LENGTH), default="")
+    default_player_home_key = Column(String(KEY_LENGTH))
 
     # The key of a character.
     # Default character of players.
-    default_player_character_key = Column(String(KEY_LENGTH), default="")
+    default_player_character_key = Column(String(KEY_LENGTH))
 
     # The key of a character.
     # Default character of staffs.
-    default_staff_character_key = Column(String(KEY_LENGTH), default="")
+    default_staff_character_key = Column(String(KEY_LENGTH))
 
 
 # ------------------------------------------------------------
@@ -116,25 +116,25 @@ class honour_settings(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
 
     # The minimum level that a player can attend a honour combat.
-    min_honour_level = Column(Integer, default=1)
+    min_honour_level = Column(Integer, default=1, nullable=False)
 
     # The number of top honour players that a player can see.
-    top_rankings_number = Column(Integer, default=10)
+    top_rankings_number = Column(Integer, default=10, nullable=False)
 
     # The number of neighbor players on the honour list that a player can see.
-    nearest_rankings_number = Column(Integer, default=10)
+    nearest_rankings_number = Column(Integer, default=10, nullable=False)
 
     # The number of neighbor players on the honour list that a player can fight.
     # honour_opponents_number = models.PositiveIntegerField(blank=True, default=100)
 
     # The maximum honour difference that the characters can match. 0 means no limits.
-    max_honour_diff = Column(Integer, default=0)
+    max_honour_diff = Column(Integer, default=0, nullable=False)
 
     # The prepare time before starting a match. In seconds.
-    preparing_time = Column(Integer, default=10)
+    preparing_time = Column(Integer, default=10, nullable=False)
 
     # The minimum time between two matches.
-    match_interval = Column(Integer, default=10)
+    match_interval = Column(Integer, default=10, nullable=False)
 
 
 # ------------------------------------------------------------
@@ -153,7 +153,7 @@ class BaseElement(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
 
     # object's key
-    key = Column(String(KEY_LENGTH), unique=True)
+    key = Column(String(KEY_LENGTH), unique=True, nullable=False)
 
 
 class world_channels(BaseElement):
@@ -161,13 +161,13 @@ class world_channels(BaseElement):
     __tablename__ = "world_channels"
 
     # channel's element type
-    element_type = Column(String(KEY_LENGTH), default="CHANNEL")
+    element_type = Column(String(KEY_LENGTH), default="CHANNEL", nullable=False)
 
     # channel's name
-    name = Column(Unicode(NAME_LENGTH), default="")
+    name = Column(Unicode(NAME_LENGTH))
 
     # channel's description for display
-    desc = Column(UnicodeText, default="")
+    desc = Column(UnicodeText)
 
 
 class world_areas(BaseElement):
@@ -175,19 +175,19 @@ class world_areas(BaseElement):
     __tablename__ = "world_areas"
 
     # area's element type
-    element_type = Column(String(KEY_LENGTH), default="AREA")
+    element_type = Column(String(KEY_LENGTH), default="AREA", nullable=False)
 
     # area's name
-    name = Column(Unicode(NAME_LENGTH), default="")
+    name = Column(Unicode(NAME_LENGTH))
 
     # area's description for display
-    desc = Column(UnicodeText, default="")
+    desc = Column(UnicodeText)
 
     # area's icon resource
-    icon = Column(String(KEY_LENGTH), default="")
+    icon = Column(String(KEY_LENGTH))
 
     # area's map background image resource
-    background = Column(String(KEY_LENGTH), default="")
+    background = Column(String(KEY_LENGTH))
 
     # area's width
     width = Column(Integer, default=0)
@@ -201,29 +201,29 @@ class world_rooms(BaseElement):
     __tablename__ = "world_rooms"
 
     # room's element type
-    element_type = Column(String(KEY_LENGTH), default="ROOM")
+    element_type = Column(String(KEY_LENGTH), default="ROOM", nullable=False)
 
     # room's name
-    name = Column(Unicode(NAME_LENGTH), default="")
+    name = Column(Unicode(NAME_LENGTH))
 
     # room's description for display
-    desc = Column(UnicodeText, default="")
+    desc = Column(UnicodeText)
 
     # room's icon resource
-    icon = Column(String(KEY_LENGTH), default="")
+    icon = Column(String(KEY_LENGTH))
 
     # The key of a world area.
     # The room's location, it must be a area.
-    area = Column(String(KEY_LENGTH), default="", index=True)
+    area = Column(String(KEY_LENGTH), index=True)
 
     # players can not fight in peaceful romms
     peaceful = Column(Boolean, default=False)
 
     # room's position which is used in maps
-    position = Column(String(POSITION_LENGTH), default="")
+    position = Column(String(POSITION_LENGTH))
 
     # room's background image resource
-    background = Column(String(KEY_LENGTH), default="")
+    background = Column(String(KEY_LENGTH))
 
 
 # ------------------------------------------------------------
@@ -238,19 +238,19 @@ class profit_rooms(BaseElement):
     __tablename__ = "profit_rooms"
 
     # Repeat interval in seconds.
-    interval = Column(Integer, default=0)
+    interval = Column(Integer, default=0, nullable=False)
 
     # Can trigger events when the character is offline.
     offline = Column(Boolean, default=False)
 
     # This message will be sent to the character when the interval begins.
-    begin_message = Column(UnicodeText, default="")
+    begin_message = Column(UnicodeText)
 
     # This message will be sent to the character when the interval ends.
-    end_message = Column(UnicodeText, default="")
+    end_message = Column(UnicodeText)
 
     # the condition for getting profits
-    condition = Column(String(CONDITION_LENGTH), default="")
+    condition = Column(String(CONDITION_LENGTH))
 
 
 class world_objects(BaseElement):
@@ -259,16 +259,16 @@ class world_objects(BaseElement):
 
     # The key of a world room.
     # object's location, it must be a room
-    location = Column(String(KEY_LENGTH), default="")
+    location = Column(String(KEY_LENGTH), index=True)
 
     # Action's name
-    action = Column(String(KEY_LENGTH), default="")
+    action = Column(String(KEY_LENGTH))
 
     # the condition for showing the object
-    condition = Column(String(CONDITION_LENGTH), default="")
+    condition = Column(String(CONDITION_LENGTH))
 
     # object's icon resource
-    icon = Column(String(KEY_LENGTH), default="")
+    icon = Column(String(KEY_LENGTH))
 
 
 class common_objects(BaseElement):
@@ -276,16 +276,16 @@ class common_objects(BaseElement):
     __tablename__ = "common_objects"
 
     # object's element type
-    element_type = Column(String(KEY_LENGTH), default="COMMON_OBJECT")
+    element_type = Column(String(KEY_LENGTH), default="COMMON_OBJECT", nullable=False)
 
     # object's name
-    name = Column(Unicode(NAME_LENGTH), default="")
+    name = Column(Unicode(NAME_LENGTH))
 
     # object's description for display
-    desc = Column(UnicodeText, default="")
+    desc = Column(UnicodeText)
 
     # object's icon resource
-    icon = Column(String(KEY_LENGTH), default="")
+    icon = Column(String(KEY_LENGTH))
 
 
 class pocket_objects(BaseElement):
@@ -293,7 +293,7 @@ class pocket_objects(BaseElement):
     __tablename__ = "pocket_objects"
 
     # the max number of this object in one pile, must above 1
-    max_stack = Column(Integer, default=1)
+    max_stack = Column(Integer, default=1, nullable=False)
 
     # if can have only one pile of this object
     unique = Column(Boolean, default=False)
@@ -315,10 +315,10 @@ class skill_books(BaseElement):
     __tablename__ = "skill_books"
 
     # skill's key
-    skill = Column(String(KEY_LENGTH), default="")
+    skill = Column(String(KEY_LENGTH))
 
     # skill's level
-    level = Column(Integer, nullable=True)
+    level = Column(Integer)
 
 
 class equipments(BaseElement):
@@ -327,11 +327,11 @@ class equipments(BaseElement):
 
     # The key of an equipment position.
     # equipment's position
-    position = Column(String(KEY_LENGTH), default="", index=True)
+    position = Column(String(KEY_LENGTH), index=True)
 
     # The key of an equipment type.
     # equipment's type
-    type = Column(String(KEY_LENGTH), default="")
+    type = Column(String(KEY_LENGTH))
 
 
 class characters(BaseElement):
@@ -339,16 +339,16 @@ class characters(BaseElement):
     __tablename__ = "characters"
 
     # object's element type
-    element_type = Column(String(KEY_LENGTH), default="CHARACTER")
+    element_type = Column(String(KEY_LENGTH), default="CHARACTER", nullable=False)
 
     # object's name
-    name = Column(Unicode(NAME_LENGTH), default="")
+    name = Column(Unicode(NAME_LENGTH))
 
     # object's description for display
-    desc = Column(UnicodeText, default="")
+    desc = Column(UnicodeText)
 
     # object's icon resource
-    icon = Column(String(KEY_LENGTH), default="")
+    icon = Column(String(KEY_LENGTH))
 
     # Character's level.
     level = Column(Integer, default=1)
@@ -360,7 +360,7 @@ class characters(BaseElement):
     friendly = Column(Integer, default=0)
 
     # Clone another character's custom properties if this character's data is empty.
-    clone = Column(String(KEY_LENGTH), default="")
+    clone = Column(String(KEY_LENGTH))
 
 
 class world_npcs(BaseElement):
@@ -368,10 +368,10 @@ class world_npcs(BaseElement):
     __tablename__ = "world_npcs"
 
     # NPC's location, it must be a room.
-    location = Column(String(KEY_LENGTH), default="", index=True)
+    location = Column(String(KEY_LENGTH), index=True)
 
     # the condition for showing the NPC
-    condition = Column(String(CONDITION_LENGTH), default="")
+    condition = Column(String(CONDITION_LENGTH))
 
 
 class player_characters(BaseElement):
@@ -394,25 +394,25 @@ class world_exits(BaseElement):
     __tablename__ = "world_exits"
 
     # object's element type
-    element_type = Column(String(KEY_LENGTH), default="EXIT")
+    element_type = Column(String(KEY_LENGTH), default="EXIT", nullable=False)
 
     # The exit's name.
-    name = Column(Unicode(NAME_LENGTH), default="")
+    name = Column(Unicode(NAME_LENGTH))
 
     # The key of a world room.
     # The exit's location, it must be a room.
     # Players can see and enter an exit from this room.
-    location = Column(String(KEY_LENGTH), default="", index=True)
+    location = Column(String(KEY_LENGTH), index=True)
 
     # The key of a world room.
     # The exits's destination.
-    destination = Column(String(KEY_LENGTH), default="")
+    destination = Column(String(KEY_LENGTH))
 
     # the action verb to enter the exit (optional)
-    verb = Column(Unicode(NAME_LENGTH), default="")
+    verb = Column(Unicode(NAME_LENGTH))
 
     # the condition to show the exit
-    condition = Column(String(CONDITION_LENGTH), default="")
+    condition = Column(String(CONDITION_LENGTH))
 
 
 # ------------------------------------------------------------
@@ -425,16 +425,16 @@ class exit_locks(BaseElement):
     __tablename__ = "exit_locks"
 
     # condition of the lock
-    unlock_condition = Column(String(CONDITION_LENGTH), default="")
+    unlock_condition = Column(String(CONDITION_LENGTH))
 
     # action to unlock the exit (optional)
-    unlock_verb = Column(Unicode(NAME_LENGTH), default="")
+    unlock_verb = Column(Unicode(NAME_LENGTH))
 
     # description when locked
-    locked_desc = Column(UnicodeText, default="")
+    locked_desc = Column(UnicodeText)
 
     # description when unlocked
-    unlocked_desc = Column(UnicodeText, default="")
+    unlocked_desc = Column(UnicodeText)
 
     # if the exit can be unlocked automatically
     auto_unlock = Column(Boolean, default=False)
@@ -453,10 +453,10 @@ class object_creators(BaseElement):
     __tablename__ = "object_creators"
 
     # loot's verb
-    loot_verb = Column(Unicode(NAME_LENGTH), default="")
+    loot_verb = Column(Unicode(NAME_LENGTH))
 
     # loot's condition
-    loot_condition = Column(String(CONDITION_LENGTH), default="")
+    loot_condition = Column(String(CONDITION_LENGTH))
 
 
 class skills(BaseElement):
@@ -464,13 +464,13 @@ class skills(BaseElement):
     __tablename__ = "skills"
 
     # skill's name
-    name = Column(Unicode(NAME_LENGTH), default="")
+    name = Column(Unicode(NAME_LENGTH))
 
     # skill's description
-    desc = Column(UnicodeText, default="")
+    desc = Column(UnicodeText)
 
     # skill's message when casting
-    message = Column(UnicodeText, default="")
+    message = Column(UnicodeText)
 
     # skill's cd
     cd = Column(Float, default=0)
@@ -479,16 +479,16 @@ class skills(BaseElement):
     passive = Column(Boolean, default=False)
 
     # skill function's name
-    function = Column(String(KEY_LENGTH), default="")
+    function = Column(String(KEY_LENGTH))
 
     # skill's icon resource
-    icon = Column(String(KEY_LENGTH), default="")
+    icon = Column(String(KEY_LENGTH))
 
     # skill's main type, used in autocasting skills.
-    main_type = Column(String(KEY_LENGTH), default="")
+    main_type = Column(String(KEY_LENGTH))
 
     # skill's sub type, used in autocasting skills.
-    sub_type = Column(String(KEY_LENGTH), default="")
+    sub_type = Column(String(KEY_LENGTH))
 
 
 class shops(BaseElement):
@@ -496,22 +496,22 @@ class shops(BaseElement):
     __tablename__ = "shops"
 
     # object's element type
-    element_type = Column(String(KEY_LENGTH), default="SHOP")
+    element_type = Column(String(KEY_LENGTH), default="SHOP", nullable=False)
 
     # shop's name
-    name = Column(Unicode(NAME_LENGTH), default="")
+    name = Column(Unicode(NAME_LENGTH))
 
     # shop's description
-    desc = Column(UnicodeText, default="")
+    desc = Column(UnicodeText)
 
     # the verb to open the shop
-    verb = Column(Unicode(NAME_LENGTH), default="")
+    verb = Column(Unicode(NAME_LENGTH))
 
     # condition of the shop
-    condition = Column(String(CONDITION_LENGTH), default="")
+    condition = Column(String(CONDITION_LENGTH))
 
     # shop's icon resource
-    icon = Column(String(KEY_LENGTH), default="")
+    icon = Column(String(KEY_LENGTH))
 
 
 class quests(BaseElement):
@@ -519,19 +519,19 @@ class quests(BaseElement):
     __tablename__ = "quests"
 
     # quest's name
-    name = Column(Unicode(NAME_LENGTH), default="")
+    name = Column(Unicode(NAME_LENGTH))
 
     # quest's description for display
-    desc = Column(UnicodeText, default="")
+    desc = Column(UnicodeText)
 
     # experience that the character get
     exp = Column(Integer, default=0)
 
     # the condition to accept this quest.
-    condition = Column(String(CONDITION_LENGTH), default="")
+    condition = Column(String(CONDITION_LENGTH))
 
     # will do this action after a quest completed
-    action = Column(String(KEY_LENGTH), default="")
+    action = Column(String(KEY_LENGTH))
 
 
 class shop_goods(Base):
@@ -545,13 +545,13 @@ class shop_goods(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
 
     # shop's key
-    shop = Column(String(KEY_LENGTH), index=True)
+    shop = Column(String(KEY_LENGTH), index=True, nullable=False)
 
     # the key of objects to sell
-    goods = Column(String(KEY_LENGTH), index=True)
+    goods = Column(String(KEY_LENGTH), index=True, nullable=False)
 
     # goods level
-    level = Column(Integer, nullable=True)
+    level = Column(Integer)
 
     # number of shop goods
     number = Column(Integer, default=1)
@@ -560,10 +560,10 @@ class shop_goods(Base):
     price = Column(Integer, default=1)
 
     # the unit of the goods price
-    unit = Column(String(KEY_LENGTH))
+    unit = Column(String(KEY_LENGTH), nullable=False)
 
     # visible condition of the goods
-    condition = Column(String(CONDITION_LENGTH), default="")
+    condition = Column(String(CONDITION_LENGTH))
 
 
 # ------------------------------------------------------------
@@ -588,10 +588,10 @@ class loot_list(Base):
     provider = Column(String(KEY_LENGTH), index=True)
 
     # the key of dropped object
-    object = Column(String(KEY_LENGTH))
+    object = Column(String(KEY_LENGTH), nullable=False)
 
     # the level of dropped object
-    level = Column(Integer, nullable=True)
+    level = Column(Integer)
 
     # number of dropped object
     number = Column(Integer, default=0)
@@ -603,14 +603,14 @@ class loot_list(Base):
     multiple = Column(Boolean, default=True)
 
     # This message will be sent to the character when get objects.
-    message = Column(UnicodeText, default="")
+    message = Column(UnicodeText)
 
     # The key of a quest.
     # if it is not empty, the player must have this quest but not accomplish this quest.
-    quest = Column(String(KEY_LENGTH), default="")
+    quest = Column(String(KEY_LENGTH))
 
     # condition of the drop
-    condition = Column(String(CONDITION_LENGTH), default="")
+    condition = Column(String(CONDITION_LENGTH))
 
 
 # ------------------------------------------------------------
@@ -669,13 +669,13 @@ class equipment_types(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
 
     # equipment type's key
-    key = Column(String(KEY_LENGTH), unique=True)
+    key = Column(String(KEY_LENGTH), unique=True, nullable=False)
 
     # type's name
-    name = Column(Unicode(NAME_LENGTH), unique=True)
+    name = Column(Unicode(NAME_LENGTH), unique=True, nullable=False)
 
     # type's description
-    desc = Column(UnicodeText, default="")
+    desc = Column(UnicodeText)
 
 
 # ------------------------------------------------------------
@@ -694,13 +694,13 @@ class equipment_positions(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
 
     # position's key
-    key = Column(String(KEY_LENGTH), unique=True)
+    key = Column(String(KEY_LENGTH), unique=True, nullable=False)
 
     # position's name for display
-    name = Column(Unicode(NAME_LENGTH), unique=True)
+    name = Column(Unicode(NAME_LENGTH), unique=True, nullable=False)
 
     # position's description
-    desc = Column(UnicodeText, default="")
+    desc = Column(UnicodeText)
 
 
 # ------------------------------------------------------------
@@ -724,19 +724,19 @@ class properties_dict(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
 
     # The key of a element type.
-    element_type = Column(String(KEY_LENGTH), index=True)
+    element_type = Column(String(KEY_LENGTH), index=True, nullable=False)
 
     # The key of the property.
-    property = Column(String(KEY_LENGTH))
+    property = Column(String(KEY_LENGTH), nullable=False)
 
     # The name of the property.
-    name = Column(Unicode(NAME_LENGTH), unique=True)
+    name = Column(Unicode(NAME_LENGTH))
 
     # The description of the property.
-    desc = Column(UnicodeText, default="")
+    desc = Column(UnicodeText)
 
     # Default value.
-    default = Column(String(VALUE_LENGTH), default="")
+    default = Column(String(VALUE_LENGTH))
 
 
 # ------------------------------------------------------------
@@ -758,16 +758,16 @@ class character_states_dict(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
 
     # The key of the state.
-    key = Column(String(KEY_LENGTH), unique=True)
+    key = Column(String(KEY_LENGTH), unique=True, nullable=False)
 
     # The name of the property.
-    name = Column(Unicode(NAME_LENGTH), unique=True)
+    name = Column(Unicode(NAME_LENGTH), unique=True, nullable=False)
 
     # Default value.
-    default = Column(String(VALUE_LENGTH), default="")
+    default = Column(String(VALUE_LENGTH))
 
     # The description of the property.
-    desc = Column(UnicodeText, default="")
+    desc = Column(UnicodeText)
 
 
 # ------------------------------------------------------------
@@ -791,19 +791,19 @@ class element_properties(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
 
     # The element's type.
-    element = Column(String(KEY_LENGTH), index=True)
+    element = Column(String(KEY_LENGTH), nullable=False)
 
     # The key of an element.
-    key = Column(String(KEY_LENGTH), index=True)
+    key = Column(String(KEY_LENGTH), nullable=False)
 
     # The level of the element.
-    level = Column(Integer, nullable=True, index=True)
+    level = Column(Integer)
 
     # The key of the property.
-    property = Column(String(KEY_LENGTH), index=True)
+    property = Column(String(KEY_LENGTH), nullable=False)
 
     # The value of the property.
-    value = Column(String(VALUE_LENGTH), default="")
+    value = Column(String(VALUE_LENGTH))
 
 
 # ------------------------------------------------------------
@@ -825,14 +825,14 @@ class default_objects(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
 
     # Character's key.
-    character = Column(String(KEY_LENGTH), index=True)
+    character = Column(String(KEY_LENGTH), index=True, nullable=False)
 
     # The key of an object.
     # Object's key.
-    object = Column(String(KEY_LENGTH))
+    object = Column(String(KEY_LENGTH), nullable=False)
 
     # Object's level.
-    level = Column(Integer, nullable=True, index=True)
+    level = Column(Integer)
 
     # Object's number
     number = Column(Integer, default=0)
@@ -858,11 +858,11 @@ class npc_shops(Base):
 
     # The key of an NPC.
     # NPC's key
-    npc = Column(String(KEY_LENGTH), index=True)
+    npc = Column(String(KEY_LENGTH), index=True, nullable=False)
 
     # The key of a shop.
     # shop's key
-    shop = Column(String(KEY_LENGTH), index=True)
+    shop = Column(String(KEY_LENGTH), index=True, nullable=False)
 
 
 # ------------------------------------------------------------
@@ -884,13 +884,13 @@ class skill_types(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
 
     # type's key
-    key = Column(String(KEY_LENGTH), unique=True)
+    key = Column(String(KEY_LENGTH), unique=True, nullable=False)
 
     # the readable name of the skill type
-    name = Column(Unicode(NAME_LENGTH), unique=True)
+    name = Column(Unicode(NAME_LENGTH), unique=True, nullable=False)
 
     # skill type's description
-    desc = Column(UnicodeText, default="")
+    desc = Column(UnicodeText)
 
 
 # ------------------------------------------------------------
@@ -912,14 +912,14 @@ class default_skills(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
 
     # character's key
-    character = Column(String(KEY_LENGTH), index=True)
+    character = Column(String(KEY_LENGTH), index=True, nullable=False)
 
     # The key of a skill.
     # skill's key
-    skill = Column(String(KEY_LENGTH))
+    skill = Column(String(KEY_LENGTH), nullable=False)
 
     # skill's level
-    level = Column(Integer, nullable=True)
+    level = Column(Integer)
 
 
 # ------------------------------------------------------------
@@ -942,20 +942,20 @@ class quest_objectives(Base):
 
     # The key of a quest.
     # quest's key
-    quest = Column(String(KEY_LENGTH), index=True)
+    quest = Column(String(KEY_LENGTH), index=True, nullable=False)
 
     # The key of an objetive type.
     # objective's type
-    type = Column(String(KEY_LENGTH))
+    type = Column(String(KEY_LENGTH), nullable=False)
 
     # relative object's key
-    object = Column(String(KEY_LENGTH), default="")
+    object = Column(String(KEY_LENGTH))
 
     # objective's number
     number = Column(Integer, default=0)
 
     # objective's discription for display
-    desc = Column(UnicodeText, default="")
+    desc = Column(UnicodeText)
 
 
 # ------------------------------------------------------------
@@ -978,15 +978,15 @@ class quest_dependencies(Base):
 
     # The key of a quest.
     # quest's key
-    quest = Column(String(KEY_LENGTH), index=True)
+    quest = Column(String(KEY_LENGTH), index=True, nullable=False)
 
     # The key of a quest.
     # quest that dependends on
-    dependency = Column(String(KEY_LENGTH))
+    dependency = Column(String(KEY_LENGTH), nullable=False)
 
     # The key of a quest dependency type.
     # dependency's type
-    type = Column(String(KEY_LENGTH))
+    type = Column(String(KEY_LENGTH), nullable=False)
 
 
 # ------------------------------------------------------------
@@ -1006,18 +1006,18 @@ class event_data(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
 
     # event's key
-    key = Column(String(KEY_LENGTH), unique=True)
+    key = Column(String(KEY_LENGTH), unique=True, nullable=False)
 
     # trigger's relative object's key
-    trigger_obj = Column(String(KEY_LENGTH), index=True)
+    trigger_obj = Column(String(KEY_LENGTH), index=True, nullable=False)
 
     # The type of the event trigger.
     # event's trigger
-    trigger_type = Column(String(KEY_LENGTH), index=True)
+    trigger_type = Column(String(KEY_LENGTH), index=True, nullable=False)
 
     # The type of an event action.
     # event's action
-    action = Column(String(KEY_LENGTH))
+    action = Column(String(KEY_LENGTH), nullable=False)
 
     # The odds of this event.
     odds = Column(Float, default=1.0)
@@ -1027,7 +1027,7 @@ class event_data(Base):
     multiple = Column(Boolean, default=True)
 
     # the condition to enable this event
-    condition = Column(String(CONDITION_LENGTH), default="")
+    condition = Column(String(CONDITION_LENGTH))
 
 
 # ------------------------------------------------------------
@@ -1046,16 +1046,16 @@ class dialogues(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
 
     # dialogue's key
-    key = Column(String(KEY_LENGTH), unique=True)
+    key = Column(String(KEY_LENGTH), unique=True, nullable=False)
 
     # dialogue's name
-    name = Column(Unicode(NAME_LENGTH), unique=True)
+    name = Column(Unicode(NAME_LENGTH))
 
     # condition to show this dialogue
-    condition = Column(String(CONDITION_LENGTH), default="")
+    condition = Column(String(CONDITION_LENGTH))
 
     # dialogue's content
-    content = Column(UnicodeText, default="")
+    content = Column(UnicodeText)
 
 
 # ------------------------------------------------------------
@@ -1078,15 +1078,15 @@ class dialogue_quest_dependencies(Base):
 
     # The key of a dialogue.
     # dialogue's key
-    dialogue = Column(String(KEY_LENGTH), index=True)
+    dialogue = Column(String(KEY_LENGTH), index=True, nullable=False)
 
     # The key of a quest.
     # related quest's key
-    dependency = Column(String(KEY_LENGTH))
+    dependency = Column(String(KEY_LENGTH), nullable=False)
 
     # The key of a quest dependency type.
     # dependency's type
-    type = Column(String(KEY_LENGTH))
+    type = Column(String(KEY_LENGTH), nullable=False)
 
 
 # ------------------------------------------------------------
@@ -1109,11 +1109,11 @@ class dialogue_relations(Base):
 
     # The key of a dialogue.
     # dialogue's key
-    dialogue = Column(String(KEY_LENGTH), index=True)
+    dialogue = Column(String(KEY_LENGTH), index=True, nullable=False)
 
     # The key of a dialogue.
     # next dialogue's key
-    next_dlg = Column(String(KEY_LENGTH), index=True)
+    next_dlg = Column(String(KEY_LENGTH), index=True, nullable=False)
 
 
 # ------------------------------------------------------------
@@ -1136,11 +1136,11 @@ class npc_dialogues(Base):
 
     # The key of an NPC.
     # NPC's key
-    npc = Column(String(KEY_LENGTH), index=True)
+    npc = Column(String(KEY_LENGTH), index=True, nullable=False)
 
     # The key of a dialogue.
     # dialogue's key
-    dialogue = Column(String(KEY_LENGTH), index=True)
+    dialogue = Column(String(KEY_LENGTH), index=True, nullable=False)
 
     # if it is a default dialogue
     default = Column(Boolean, default=False)
@@ -1161,7 +1161,7 @@ class BaseEventActionData(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
 
     # The key of an event.
-    event_key = Column(String(KEY_LENGTH), index=True)
+    event_key = Column(String(KEY_LENGTH), index=True, nullable=False)
 
 
 # ------------------------------------------------------------
@@ -1182,17 +1182,17 @@ class action_attack(BaseEventActionData):
 
     # The key of a common character.
     # mob's key
-    mob = Column(String(KEY_LENGTH))
+    mob = Column(String(KEY_LENGTH), nullable=False)
 
     # mob's level
     # Set the level of the mob.
-    level = Column(Integer, nullable=True)
+    level = Column(Integer)
 
     # event's odds ([0.0, 1.0])
     odds = Column(Float, default=0)
 
     # combat's description
-    desc = Column(UnicodeText, default="")
+    desc = Column(UnicodeText)
 
 
 # ------------------------------------------------------------
@@ -1213,11 +1213,11 @@ class action_dialogue(BaseEventActionData):
 
     # The key of a dialogue.
     # dialogue's key
-    dialogue = Column(String(KEY_LENGTH))
+    dialogue = Column(String(KEY_LENGTH), nullable=False)
 
     # The key of an NPC.
     # NPC's key
-    npc = Column(String(KEY_LENGTH), default="")
+    npc = Column(String(KEY_LENGTH))
 
     # event's odds
     odds = Column(Float, default=0)
@@ -1241,10 +1241,10 @@ class action_learn_skill(BaseEventActionData):
 
     # The key of a skill.
     # skill's key
-    skill = Column(String(KEY_LENGTH))
+    skill = Column(String(KEY_LENGTH), nullable=False)
 
     # skill's level
-    level = Column(Integer, nullable=True)
+    level = Column(Integer)
 
 
 # ------------------------------------------------------------
@@ -1265,7 +1265,7 @@ class action_accept_quest(BaseEventActionData):
 
     # The key of a quest.
     # quest's key
-    quest = Column(String(KEY_LENGTH))
+    quest = Column(String(KEY_LENGTH), nullable=False)
 
 
 # ------------------------------------------------------------
@@ -1286,7 +1286,7 @@ class action_turn_in_quest(BaseEventActionData):
 
     # The key of a quest.
     # quest's key
-    quest = Column(String(KEY_LENGTH))
+    quest = Column(String(KEY_LENGTH), nullable=False)
 
 
 # ------------------------------------------------------------
@@ -1306,7 +1306,7 @@ class action_close_event(BaseEventActionData):
     )
 
     # The key of an event to close.
-    event = Column(String(KEY_LENGTH))
+    event = Column(String(KEY_LENGTH), nullable=False)
 
 
 # ------------------------------------------------------------
@@ -1328,7 +1328,7 @@ class action_message(BaseEventActionData):
     )
 
     # Messages.
-    message = Column(String(TEXT_CONTENT_LENGTH), default="")
+    message = Column(String(TEXT_CONTENT_LENGTH))
 
 
 # ------------------------------------------------------------
@@ -1350,10 +1350,10 @@ class action_get_objects(BaseEventActionData):
     )
 
     # The object's key.
-    object = Column(String(KEY_LENGTH))
+    object = Column(String(KEY_LENGTH), nullable=False)
 
     # The object's level.
-    level = Column(Integer, nullable=True)
+    level = Column(Integer)
 
     # The object's number.
     number = Column(Integer, default=0)
@@ -1365,7 +1365,7 @@ class action_get_objects(BaseEventActionData):
     multiple = Column(Boolean, default=True)
 
     # This message will be sent to the character when get objects.
-    message = Column(UnicodeText, default="")
+    message = Column(UnicodeText)
 
 
 # ------------------------------------------------------------
@@ -1390,13 +1390,13 @@ class localized_strings(Base):
     system_data = Column(Boolean, default=False)
 
     # word's category
-    category = Column(String(KEY_LENGTH), default="")
+    category = Column(String(KEY_LENGTH), default="", nullable=False)
 
     # the origin words
-    origin = Column(String(TEXT_CONTENT_LENGTH))
+    origin = Column(String(TEXT_CONTENT_LENGTH), nullable=False)
 
     # translated worlds
-    local = Column(UnicodeText)
+    local = Column(UnicodeText, nullable=False)
 
 
 # ------------------------------------------------------------
@@ -1415,10 +1415,10 @@ class image_resources(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
 
     # image's path
-    resource = Column(String(KEY_LENGTH), unique=True)
+    resource = Column(String(KEY_LENGTH), unique=True, nullable=False)
 
     # image's type
-    type = Column(String(KEY_LENGTH))
+    type = Column(String(KEY_LENGTH), nullable=False)
 
     # resource'e width
     image_width = Column(Integer, default=0)

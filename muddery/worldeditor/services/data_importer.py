@@ -43,11 +43,11 @@ def import_file(fullname, file_type=None, table_name=None, clear=True, except_er
                 # get field info
                 field = model_obj.__table__.columns[field_name]
 
-                if field.python_type == bool:
+                if field.type.python_type == bool:
                     field_type = 1
-                elif field.python_type == int:
+                elif field.type.python_type == int:
                     field_type = 2
-                elif field.python_type == float:
+                elif field.type.python_type == float:
                     field_type = 3
                 else:
                     field_type = 0
@@ -103,7 +103,7 @@ def import_file(fullname, file_type=None, table_name=None, clear=True, except_er
 
         return record
 
-    def import_data(model_obj, data_iterator):
+    def import_data(session, model, data_iterator):
         """
         Import data to a table.
 
@@ -118,7 +118,7 @@ def import_file(fullname, file_type=None, table_name=None, clear=True, except_er
         try:
             # read title
             titles = next(data_iterator)
-            field_types = get_field_types(model_obj, titles)            
+            field_types = get_field_types(model, titles)
             line += 1
 
             # import values
@@ -133,18 +133,12 @@ def import_file(fullname, file_type=None, table_name=None, clear=True, except_er
                     line += 1
                     continue
 
-                record = parse_record(titles, field_types, values)
-                data = model_obj(**record)
-                try:
-                    data.full_clean()
-                    data.save()
-                except Exception as e:
-                    if except_errors:
-                        print(parse_error(e, model_obj.__name__, line))
-                    else:
-                        raise
+                data = parse_record(titles, field_types, values)
+                record = model(**data)
+                session.add(record)
                 line += 1
 
+            session.commit()
         except StopIteration:
             # reach the end of file, pass this exception
             pass
@@ -153,7 +147,7 @@ def import_file(fullname, file_type=None, table_name=None, clear=True, except_er
         #    raise MudderyError(ERR.import_data_error, parse_error(e, model_obj.__name__, line))
         except Exception as e:
             traceback.print_exc()
-            raise MudderyError(ERR.import_data_error, "%s (model: %s, line: %s)" % (e, model_obj.__tablename__, line))
+            raise MudderyError(ERR.import_data_error, "%s (model: %s, line: %s)" % (e, model.__tablename__, line))
 
     def parse_error(error, model_name, line):
         """
@@ -213,4 +207,4 @@ def import_file(fullname, file_type=None, table_name=None, clear=True, except_er
         raise(MudderyError(ERR.import_data_error, "Does not support this file type."))
 
     logger.log_info("Importing %s" % table_name)
-    import_data(model, reader)
+    import_data(session, model, reader)

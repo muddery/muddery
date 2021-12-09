@@ -69,7 +69,7 @@ def load_game_data():
 
     # load local data
     try:
-        utils.import_local_data()
+        utils.import_local_data(clear=True)
         print("Import local data success.")
     except Exception as e:
         traceback.print_exc()
@@ -108,8 +108,6 @@ def migrate_database():
     utils.init_game_env(gamedir)
 
     try:
-        django.setup()
-
         from muddery.server.server import Server
         Server.instance().connect_db()
     except Exception as e:

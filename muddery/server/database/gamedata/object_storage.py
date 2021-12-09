@@ -170,7 +170,9 @@ class DBObjectStorage(BaseObjectStorage):
     """
     # data storage
     storage_class = utils.class_from_path(settings.DATABASE_ACCESS_OBJECT)
-    storage = storage_class("object_states", "obj_id", "key", "value")
+    session = settings.GAME_DATA_APP
+    config = settings.AL_DATABASES[session]
+    storage = storage_class(session, config["MODELS"], "object_states", "obj_id", "key", "value")
 
 
 class MemoryObjectStorage(BaseObjectStorage):

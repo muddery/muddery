@@ -101,8 +101,6 @@ def import_data_path(path, clear=True, except_errors=False):
         clear: (boolean) clear old data.
         except_errors: (boolean) except error records and load other records.
     """
-    print("import_data_path")
-
     # import tables one by one
     tables = Manager.instance().get_tables(settings.WORLD_DATA_APP)
     for table_name in tables:
@@ -126,13 +124,8 @@ def import_table_path(path, table_name, clear=True, except_errors=False):
         clear: (boolean) clear old data.
         except_errors: (boolean) except error records and load other records.
     """
-    # clear old data
-    model = model_mapper.get_model(table_name)
-    if not model:
-        return
-
     if clear:
-        model.objects.all().delete()
+        Manager.instance().clear_table(settings.WORLD_DATA_APP, table_name)
 
     if not os.path.isdir(path):
         return

@@ -84,3 +84,17 @@ class Manager(object):
             tables = [cls.__tablename__ for cls in vars(module).values() if inspect.isclass(cls)]
 
         return tables
+
+    def clear_table(self, scheme, table_name):
+        """
+        clear all data in a table.
+        """
+        # get model
+        session = self.sessions.get(scheme)
+        if not session:
+            return
+
+        config = settings.AL_DATABASES[scheme]
+        module = importlib.import_module(config["MODELS"])
+        model = getattr(module, table_name)
+        session.query(model).delete()

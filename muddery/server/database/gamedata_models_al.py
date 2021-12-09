@@ -22,10 +22,10 @@ class system_data(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
 
     # The last id of accounts.
-    last_account_id = Column(Integer, default=0)
+    last_account_id = Column(Integer, default=0, nullable=False)
 
     # The last id of player characters.
-    last_player_character_id = Column(Integer, default=0)
+    last_player_character_id = Column(Integer, default=0, nullable=False)
 
 
 # ------------------------------------------------------------
@@ -49,10 +49,10 @@ class object_states(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
 
     # object's id
-    obj_id = Column(Integer, index=True)
+    obj_id = Column(Integer, index=True, nullable=False)
 
     # attribute's name
-    key = Column(String(KEY_LENGTH), index=True)
+    key = Column(String(KEY_LENGTH), index=True, nullable=False)
 
     # attribute's value
     value = Column(String(VALUE_LENGTH))
@@ -79,10 +79,10 @@ class server_bans(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
 
     # ban's type, should be "IP" or "USERNAME"
-    type = Column(String(KEY_LENGTH), index=True)
+    type = Column(String(KEY_LENGTH), index=True, nullable=False)
 
     # IP or name
-    target = Column(String(KEY_LENGTH))
+    target = Column(String(KEY_LENGTH), nullable=False)
 
     # create time
     create_time = Column(DateTime)
@@ -109,16 +109,16 @@ class accounts(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
 
     # account's username
-    username = Column(String(KEY_LENGTH), unique=True)
+    username = Column(String(KEY_LENGTH), unique=True, nullable=False)
 
     # account's password
-    password = Column(String(128))
+    password = Column(String(128), nullable=False)
 
     # account's id
-    account_id = Column(Integer, unique=True)
+    account_id = Column(Integer, unique=True, nullable=False)
 
     # account's type
-    type = Column(String(KEY_LENGTH), index=True)
+    type = Column(String(KEY_LENGTH), index=True, nullable=False)
 
     # account's create time
     create_time = Column(DateTime, nullable=True)
@@ -144,10 +144,10 @@ class account_characters(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
 
     # player's account id
-    account_id = Column(Integer, index=True)
+    account_id = Column(Integer, index=True, nullable=False)
 
     # playable character's id
-    char_id = Column(Integer, unique=True)
+    char_id = Column(Integer, unique=True, nullable=False)
 
 
 # ------------------------------------------------------------
@@ -167,10 +167,10 @@ class character_info(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
 
     # playable character's id
-    char_id = Column(Integer, unique=True)
+    char_id = Column(Integer, unique=True, nullable=False)
 
     # character's nickname
-    nickname = Column(String(KEY_LENGTH))
+    nickname = Column(String(KEY_LENGTH), nullable=False)
 
     # character's level
     level = Column(Integer, default=0)
@@ -193,7 +193,7 @@ class character_location(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
 
     # player character's id
-    char_id = Column(Integer, unique=True)
+    char_id = Column(Integer, unique=True, nullable=False)
 
     # location (room's key)
     location = Column(String(KEY_LENGTH))
@@ -219,19 +219,19 @@ class character_inventory(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
 
     # character's id
-    character_id = Column(Integer, index=True)
+    character_id = Column(Integer, index=True, nullable=False)
 
     # position in the inventory
-    position = Column(Integer)
+    position = Column(Integer, nullable=False)
 
     # object's key
-    object_key = Column(String(KEY_LENGTH))
+    object_key = Column(String(KEY_LENGTH), nullable=False)
 
     # object's number
     number = Column(Integer, default=0)
 
     # object's level
-    level = Column(Integer, nullable=True)
+    level = Column(Integer)
 
 
 # ------------------------------------------------------------
@@ -254,16 +254,16 @@ class character_equipments(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
 
     # character's id
-    character_id = Column(Integer, index=True)
+    character_id = Column(Integer, index=True, nullable=False)
 
     # the position to put on equipments
-    position = Column(String(KEY_LENGTH))
+    position = Column(String(KEY_LENGTH), nullable=False)
 
     # object's key
-    object_key = Column(String(KEY_LENGTH))
+    object_key = Column(String(KEY_LENGTH), nullable=False)
 
     # object's level
-    level = Column(Integer, nullable=True)
+    level = Column(Integer)
 
 
 # ------------------------------------------------------------
@@ -286,13 +286,13 @@ class character_skills(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
 
     # character's id
-    character_id = Column(Integer, index=True)
+    character_id = Column(Integer, index=True, nullable=False)
 
     # skill's key
-    skill = Column(String(KEY_LENGTH))
+    skill = Column(String(KEY_LENGTH), nullable=False)
 
     # skill's level
-    level = Column(Integer, nullable=True)
+    level = Column(Integer)
 
     # is default skill
     is_default = Column(Boolean, default=False)
@@ -318,10 +318,10 @@ class character_combat(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
 
     # character's id
-    character_id = Column(Integer, unique=True)
+    character_id = Column(Integer, unique=True, nullable=False)
 
     # combat's id
-    combat = Column(Integer)
+    combat = Column(Integer, nullable=False)
 
 
 # ------------------------------------------------------------
@@ -344,13 +344,13 @@ class character_quests(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
 
     # character's id
-    character_id = Column(Integer, index=True)
+    character_id = Column(Integer, index=True, nullable=False)
 
     # quest's key
-    quest = Column(String(KEY_LENGTH), index=True)
+    quest = Column(String(KEY_LENGTH), index=True, nullable=False)
 
     # quest is finished
-    finished = Column(Boolean, default=False, index=True)
+    finished = Column(Boolean, default=False, index=True, nullable=False)
 
 
 # ------------------------------------------------------------
@@ -373,11 +373,11 @@ class quest_objectives(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
 
     # character's id and quest's key, separated by colon
-    character_quest = Column(String(KEY_LENGTH + KEY_LENGTH), index=True)
+    character_quest = Column(String(KEY_LENGTH + KEY_LENGTH), index=True, nullable=False)
 
     # Quest's objective.
     # objective's type and relative object's key, separated by colon
-    objective = Column(String(KEY_LENGTH + KEY_LENGTH))
+    objective = Column(String(KEY_LENGTH + KEY_LENGTH), nullable=False)
 
     # objective's progress
     progress = Column(Integer, default=0)
@@ -400,7 +400,7 @@ class honours(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
 
     # character's database id
-    character = Column(Integer, unique=0)
+    character = Column(Integer, unique=0, nullable=False)
 
     # character's honour. special character's honour is -1, such as the superuser.
     honour = Column(Integer, default=-1, index=True)

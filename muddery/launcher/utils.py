@@ -324,7 +324,7 @@ def get_game_config(path):
     return tuple(num_list), game_template
 
 
-def import_local_data():
+def import_local_data(clear=False):
     """
     Import all local data files to models.
     """
@@ -334,11 +334,11 @@ def import_local_data():
     # load custom data
     # data file's path
     data_path = os.path.join(settings.GAME_DIR, settings.WORLD_DATA_FOLDER)
-    importer.import_data_path(data_path, clear=False, except_errors=True)
+    importer.import_data_path(data_path, clear=clear, except_errors=True)
 
     # localized string file's path
     localized_string_path = os.path.join(data_path, settings.LOCALIZED_STRINGS_FOLDER, settings.LANGUAGE_CODE)
-    importer.import_table_path(localized_string_path, settings.LOCALIZED_STRINGS_MODEL, clear=False, except_errors=True)
+    importer.import_table_path(localized_string_path, settings.LOCALIZED_STRINGS_MODEL, clear=clear, except_errors=True)
 
 
 def import_system_data():

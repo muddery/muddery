@@ -87,12 +87,12 @@ class MemoryTableAl(object):
 
         # index together or unique together
         indexes = []
-        if type(self.model.__table_args__) == list:
+        if type(self.model.__table_args__) == tuple:
             for table_args in self.model.__table_args__:
                 if type(table_args) == dict and "index_together" in table_args:
                     indexes.extend(table_args["index_together"])
                 if type(table_args) == UniqueConstraint:
-                    pass
+                    indexes.append(table_args.columns.keys())
         elif type(self.model.__table_args__) == dict:
             if "index_together" in self.model.__table_args__:
                 indexes.extend(self.model.__table_args__["index_together"])
