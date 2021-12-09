@@ -2,10 +2,11 @@
 This model translates default strings into localized strings.
 """
 
-from django.apps import apps
+import importlib
 from django.conf import settings
 from muddery.server.mappings.element_set import ELEMENT
 from muddery.worldeditor.dao import general_query_mapper as q
+from muddery.server.database.manager import Manager
 
 
 class CommonMapper(object):
@@ -13,18 +14,37 @@ class CommonMapper(object):
     Common data mapper.
     """
     def __init__(self, model_name):
+        session_name = settings.WORLD_DATA_MODEL_FILE
+        self.session = Manager.instance().get_session(session_name)
         self.model_name = model_name
-        self.model = apps.get_model(settings.WORLD_DATA_APP, model_name)
-        self.objects = self.model.objects
+        module = importlib.import_module(session_name)
+        self.model = getattr(module, model_name)
 
     def all(self):
-        return self.objects.all()
+        query = self.session.query(self.model)
+        return query.all()
 
-    def get(self, *args, **kwargs):
-        return self.objects.get(*args, **kwargs)
+    def get(self, **kwargs):
+        """
+        Get a record with conditions in kwargs.
+        """
+        query = self.session.query(self.model)
 
-    def filter(self, *args, **kwargs):
-        return self.objects.filter(*args, **kwargs)
+        for field, value in kwargs:
+            query = query.filter(getattr(self.model, field) == value)
+
+        return query.one()
+
+    def filter(self, **kwargs):
+        """
+        Get a list of records with conditions in kwargs.
+        """
+        query = self.session.query(self.model)
+
+        for field, value in kwargs:
+            query = query.filter(getattr(self.model, field) == value)
+
+        return query.all()
 
 
 class ElementsMapper(CommonMapper):
