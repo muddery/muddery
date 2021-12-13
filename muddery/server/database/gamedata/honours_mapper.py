@@ -6,6 +6,7 @@ import importlib
 from django.db import transaction
 from django.conf import settings
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
+from sqlalchemy import select, update, delete
 from muddery.server.utils.utils import class_from_path
 from muddery.server.database.manager import Manager
 
@@ -19,7 +20,6 @@ class HonoursMapper(object):
         module = importlib.import_module(settings.GAME_DATA_MODEL_FILE)
         self.model = getattr(module, self.model_name)
         self.session = Manager.instance().get_session(settings.GAME_DATA_APP)
-        self.query = self.session.query(self.model)
         self.honours = {}
         self.rankings = []
 
@@ -30,7 +30,9 @@ class HonoursMapper(object):
         self.honours = {}
         self.rankings = []
 
-        for record in self.query.all():
+        stmt = select(self.model)
+        result = self.session.execute(stmt)
+        for record in result.scalars():
             self.honours[record.character] = {
                 "honour": record.honour,
                 "place": 0,
@@ -158,7 +160,8 @@ class HonoursMapper(object):
                 character=char_id,
                 honour=honour
             )
-            record.save()
+            self.session.add(record)
+            self.session.commit()
             self.honours[char_id] = {
                 "honour": honour,
                 "place": 0,
@@ -176,17 +179,20 @@ class HonoursMapper(object):
             char_id: character's id
             honour: character's honour
         """
-        try:
-            record = self.query.filter(character=char_id)
-            if record:
-                record.update(honour=honour)
+        stmt = update(self.model).where(character=char_id).values(honour=honour)
+        result = self.session.execute(stmt)
+        if result.rowcount > 0:
+            try:
+                self.session.commit()
                 self.honours[char_id]["honour"] = honour
-            else:
-                self.create_honour(char_id, honour)
+            except Exception as e:
+                self.session.rollback()
+                print("Can not set character's honour: %s" % e)
+        else:
+            # Add a new honour record.
+            self.create_honour(char_id, honour)
 
-            self.make_rankings()
-        except Exception as e:
-            print("Can not set character's honour: %s" % e)
+        self.make_rankings()
 
     def set_honours(self, new_honours):
         """
@@ -200,9 +206,11 @@ class HonoursMapper(object):
                 self.create_honour(key, 0)
 
         success = False
-        with transaction.atomic():
+        with self.session.begin():
             for key, value in new_honours.items():
-                self.query.filter(character=key).update(honour=value)
+                stmt = update(self.model).where(character=key).values(honour=value)
+                result = self.session.execute(stmt)
+                self.session.commit()
             success = True
         
         if success:
@@ -217,14 +225,15 @@ class HonoursMapper(object):
         Remove a character's honour.
         """
         try:
-            self.query.get(character=char_db_id).delete()
+            stmt = delete(self.model).where(character=char_db_id)
+            result = self.session.execute(stmt)
+            self.session.commit()
             del self.honours[char_db_id]
             self.make_rankings()
-        except NoResultFound:
-            pass
         except Exception as e:
+            self.session.rollback()
             print("Can not remove character's honour: %s" % e)
-            
+
     def get_characters(self, character, number):
         """
         Get opponents whose ranking is in the given number.

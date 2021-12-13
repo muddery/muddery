@@ -3,6 +3,7 @@ Query and deal common tables.
 """
 
 import importlib
+from sqlalchemy import select, delete
 from django.conf import settings
 from django.db import connections
 from django.core.exceptions import ObjectDoesNotExist
@@ -34,12 +35,13 @@ def get_query(table_name, **kwargs):
     model = getattr(module, table_name)
 
     # set conditions
-    query = session.query(model)
+    stmt = select(model)
     if kwargs:
         for field, value in kwargs:
-            query = query.filter(getattr(model, field) == value)
+            stmt = stmt.where(getattr(model, field) == value)
 
-    return query
+    result = session.execute(stmt)
+    return result.scalars()
 
 
 def filter_records(table_name, **kwargs):
@@ -47,7 +49,7 @@ def filter_records(table_name, **kwargs):
     Filter records by conditions.
     """
     query = get_query(table_name, **kwargs)
-    return query.all()
+    return query
 
 
 def get_record(table_name, **kwargs):
@@ -71,7 +73,7 @@ def get_the_first_record(table_name):
     """
     # get model
     query = get_query(table_name)
-    return query.objects.first()
+    return query.first()
 
 
 def get_all_records(table_name):
@@ -107,6 +109,25 @@ def get_record_by_key(table_name, object_key):
     return get_record(table_name, key=object_key)
 
 
+def delete_records(table_name, **kwargs):
+    """
+    Delete records with the given conditions.
+    """
+    session_name = settings.WORLD_DATA_MODEL_FILE
+    session = Manager.instance().get_session(session_name)
+    module = importlib.import_module(session_name)
+    model = getattr(module, table_name)
+
+    # set conditions
+    stmt = delete(model)
+    if kwargs:
+        for field, value in kwargs:
+            stmt = stmt.where(getattr(model, field) == value)
+
+    result = session.execute(stmt)
+    return result.rowcount
+
+
 def delete_record_by_id(table_name, record_id):
     """
     Delete a record from a table by its id.
@@ -116,8 +137,7 @@ def delete_record_by_id(table_name, record_id):
         record_id: (number) record's id.
     """
     # get model
-    record = get_record_by_id(table_name, record_id)
-    record.delete()
+    delete_records(table_name, id=record_id)
 
 
 def delete_record_by_key(table_name, object_key):
@@ -129,24 +149,10 @@ def delete_record_by_key(table_name, object_key):
         object_key: (string) object's key.
     """
     # get model
-    record = get_record_by_key(table_name, object_key)
-    record.delete()
+    delete_records(table_name, key=object_key)
 
 
-def delete_records(table_name, **kwargs):
-    """
-    Delete records by conditions.
-
-    Args:
-        table_name: (string) db table's name.
-        kwargs: (dict) conditions.
-    """
-    # get model
-    records = filter_records(table_name, **kwargs)
-    records.delete()
-
-
-def get_all_from_tables(tables):
+def get_all_from_tables(tables, **kwargs):
     """
     Query all object's data from tables.
 
@@ -159,28 +165,33 @@ def get_all_from_tables(tables):
     if not tables:
         return
 
-    # Get table's full name
-    tables = [settings.WORLD_DATA_APP + "_" + table for table in tables]
+    session_name = settings.WORLD_DATA_MODEL_FILE
+    session = Manager.instance().get_session(session_name)
+    module = importlib.import_module(session_name)
 
     if len(tables) == 1:
         # only one table
-        query = "select * from %s" % tables[0]
+        model = getattr(module, tables[0])
+        stmt = select(model)
+
+        if kwargs:
+            for field, value in kwargs:
+                stmt = stmt.where(getattr(model, field) == value)
     else:
         # join tables
-        from_tables = ", ".join(tables)
-        conditions = [tables[0] + ".key=" + t + ".key" for t in tables[1:]]
-        conditions = " and ".join(conditions)
-        query = "select * from %s where %s" % (from_tables, conditions)
+        models = [getattr(module, t) for t in tables]
+        stmt = select(*models)
 
-    cursor = connections[settings.WORLD_DATA_APP].cursor()
-    cursor.execute(query)
-    columns = [col[0] for col in cursor.description]
+        if kwargs:
+            for field, value in kwargs:
+                stmt = stmt.where(getattr(models[0], field) == value)
 
-    # return records
-    record = cursor.fetchone()
-    while record is not None:
-        yield dict(zip(columns, record))
-        record = cursor.fetchone()
+        first_model = models[0]
+        for model in models[1:]:
+            stmt = stmt.join(model, getattr(first_model, "key") == getattr(model, "key"))
+
+    result = session.excute(stmt)
+    return result.mappings()
 
 
 def get_tables_record_by_key(tables, key):
@@ -194,34 +205,7 @@ def get_tables_record_by_key(tables, key):
     Return:
         a dict of values.
     """
-    if not tables:
-        return
-
-    # Get table's full name
-    tables = [settings.WORLD_DATA_APP + "_" + table for table in tables]
-
-    if len(tables) == 1:
-        query = "select * from %(tables)s where %(tables)s.key=%%s" % {"tables": tables[0]}
-    else:
-        # join tables
-        from_tables = ", ".join(tables)
-        conditions = [tables[0] + ".key=" + t + ".key" for t in tables[1:]]
-        conditions = " and ".join(conditions)
-        query = "select * from %(tables)s where %(first_table)s.key=%%s and %(join)s" %\
-                    {"tables": from_tables,
-                     "first_table": tables[0],
-                     "join": conditions}
-
-    cursor = connections[settings.WORLD_DATA_APP].cursor()
-    cursor.execute(query, [key])
-    columns = [col[0] for col in cursor.description]
-
-    # return records
-    record = cursor.fetchone()
-    if record:
-        return dict(zip(columns, record))
-    else:
-        raise ObjectDoesNotExist
+    return get_all_from_tables(tables, key=key)
 
 
 def get_element_base_data(element_type):

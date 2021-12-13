@@ -5,6 +5,8 @@ import traceback
 import importlib
 from django.conf import settings
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
+from sqlalchemy import select, update, delete
+from sqlalchemy import func
 from muddery.server.database.storage.base_kv_storage import BaseKeyValueStorage
 from muddery.server.utils.exception import MudderyError, ERR
 from muddery.server.utils.utils import class_from_path
@@ -47,9 +49,6 @@ class KeyValueTableAl(BaseKeyValueStorage):
         if default_value_field:
             exclude_fields.add(default_value_field)
 
-    def __del__(self):
-        self.session.close()
-
     def add(self, category, key, value=None):
         """
         Add a new attribute. If the key already exists, raise an exception.
@@ -79,7 +78,7 @@ class KeyValueTableAl(BaseKeyValueStorage):
             self.session.commit()
         except Exception as e:
             self.session.rollback()
-            raise e
+            raise
 
     def save(self, category, key, value=None):
         """
@@ -97,19 +96,17 @@ class KeyValueTableAl(BaseKeyValueStorage):
         else:
             data = {self.default_value_field: value}
 
-        query = self.session.query(self.model)
+        stmt = update(self.model).values(**data)
 
         if self.category_field:
-            query = query.filter(getattr(self.model, self.category_field) == category)
+            stmt = stmt.where(getattr(self.model, self.category_field) == category)
 
         if self.key_field:
-            query = query.filter(getattr(self.model, self.key_field) == key)
+            stmt = stmt.where(getattr(self.model, self.key_field) == key)
 
-        try:
-            record = query.one()
-            for key, value in data.items():
-                setattr(record, key, value)
-        except NoResultFound:
+        result = self.session.execute(stmt)
+        if result.rowcount == 0:
+            # no matched rows
             if self.category_field:
                 data[self.category_field] = category
 
@@ -123,7 +120,7 @@ class KeyValueTableAl(BaseKeyValueStorage):
             self.session.commit()
         except Exception as e:
             self.session.rollback()
-            raise e
+            raise
 
     def has(self, category, key):
         """
@@ -133,23 +130,26 @@ class KeyValueTableAl(BaseKeyValueStorage):
             category: (string) the category of data.
             key: (string) attribute's key.
         """
-        query = self.session.query(self.model)
+        stmt = select(func.count()).select_from(self.model)
 
         if self.category_field:
-            query = query.filter(getattr(self.model, self.category_field) == category)
+            stmt = stmt.where(getattr(self.model, self.category_field) == category)
 
         if self.key_field:
-            query = query.filter(getattr(self.model, self.key_field) == key)
+            stmt = stmt.where(getattr(self.model, self.key_field) == key)
 
-        return query.count() > 0
+        result = self.session.execute(stmt)
+        record = result.scalars().one()
+        return record
 
     def all(self):
         """
         Get all data.
         :return:
         """
-        query = self.session.query(self.model)
-        records = query.all()
+        stmt = select(self.model)
+        result = self.session.execute(stmt)
+        records = result.scalars()
 
         all_data = {}
         if self.category_field:
@@ -191,16 +191,18 @@ class KeyValueTableAl(BaseKeyValueStorage):
             KeyError: If `raise_exception` is set and no matching Attribute
                 was found matching `key` and no default value set.
         """
-        query = self.session.query(self.model)
+        stmt = select(self.model)
 
         if self.category_field:
-            query = query.filter(getattr(self.model, self.category_field) == category)
+            stmt = stmt.where(getattr(self.model, self.category_field) == category)
 
         if self.key_field:
-            query = query.filter(getattr(self.model, self.key_field) == key)
+            stmt = stmt.where(getattr(self.model, self.key_field) == key)
+
+        result = self.session.execute(stmt)
 
         try:
-            record = query.one()
+            record = result.scalars().one()
         except NoResultFound:
             if len(default) > 0:
                 return default[0]
@@ -221,18 +223,13 @@ class KeyValueTableAl(BaseKeyValueStorage):
         Args:
             category: (string) category's name.
         """
-        query = self.session.query(self.model)
+        stmt = select(self.model)
 
         if self.category_field:
-            query = query.filter(getattr(self.model, self.category_field) == category)
+            stmt = stmt.where(getattr(self.model, self.category_field) == category)
 
-        records = query.all()
-
-        if len(records) == 0:
-            if len(default) > 0:
-                return default[0]
-            else:
-                raise KeyError
+        result = self.session.execute(stmt)
+        records = result.scalars()
 
         if self.key_field:
             data = {
@@ -247,6 +244,12 @@ class KeyValueTableAl(BaseKeyValueStorage):
                 } for record in records
             }
 
+        if len(data) == 0:
+            if len(default) > 0:
+                return default[0]
+            else:
+                raise KeyError
+
         return data
 
     def delete(self, category, key):
@@ -257,16 +260,20 @@ class KeyValueTableAl(BaseKeyValueStorage):
             category: (string) the category of data.
             key: (string) attribute's key.
         """
-        query = self.session.query(self.model)
+        stmt = delete(self.model)
 
         if self.category_field:
-            query = query.filter(getattr(self.model, self.category_field) == category)
+            stmt = stmt.where(getattr(self.model, self.category_field) == category)
 
         if self.key_field:
-            query = query.filter(getattr(self.model, self.key_field) == key)
+            stmt = stmt.where(getattr(self.model, self.key_field) == key)
 
-        query.delete()
-        self.session.commit()
+        result = self.session.execute(stmt)
+        try:
+            self.session.commit()
+        except Exception as e:
+            self.session.rollback()
+            raise
 
     def delete_category(self, category):
         """
@@ -275,13 +282,17 @@ class KeyValueTableAl(BaseKeyValueStorage):
         Args:
             category: (string) the category of data.
         """
-        query = self.session.query(self.model)
+        stmt = delete(self.model)
 
         if self.category_field:
-            query = query.filter(getattr(self.model, self.category_field) == category)
+            stmt = stmt.where(getattr(self.model, self.category_field) == category)
 
-        query.delete()
-        self.session.commit()
+        result = self.session.execute(stmt)
+        try:
+            self.session.commit()
+        except Exception as e:
+            self.session.rollback()
+            raise
 
     def atomic(self):
         """

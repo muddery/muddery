@@ -2,8 +2,8 @@
 import threading
 import importlib
 import inspect
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import Session
+from sqlalchemy import select, delete
 from django.conf import settings
 from muddery.server.database.engines import get_engine
 from muddery.server.utils.logger import game_server_logger as logger
@@ -44,10 +44,8 @@ class Manager(object):
         for key, cfg in settings.AL_DATABASES.items():
             try:
                 engine = get_engine(cfg["ENGINE"], cfg)
-                session = sessionmaker(bind=engine)
-
                 self.engines[key] = engine
-                self.sessions[key] = session()
+                self.sessions[key] = Session(engine)
             except Exception as e:
                 logger.log_trace("Can not connect to db.")
                 raise e
@@ -97,4 +95,9 @@ class Manager(object):
         config = settings.AL_DATABASES[scheme]
         module = importlib.import_module(config["MODELS"])
         model = getattr(module, table_name)
-        session.query(model).delete()
+        stmt = delete(model)
+        try:
+            result = session.execute(stmt)
+            session.commit()
+        except Exception as e:
+            session.rollback()

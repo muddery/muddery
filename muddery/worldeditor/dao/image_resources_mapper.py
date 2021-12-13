@@ -2,8 +2,10 @@
 Query and deal common tables.
 """
 
-from django.apps import apps
+import importlib
 from django.conf import settings
+from muddery.worldeditor.dao import general_query_mapper as query
+from muddery.server.database.manager import Manager
 
 
 class ImageResourcesMapper(object):
@@ -12,8 +14,11 @@ class ImageResourcesMapper(object):
     """
     def __init__(self):
         self.model_name = "image_resources"
-        self.model = apps.get_model(settings.WORLD_DATA_APP, self.model_name)
-        self.objects = self.model.objects
+        session_name = settings.GAME_DATA_APP
+        config = settings.AL_DATABASES[session_name]
+        module = importlib.import_module(config["MODELS"])
+        self.model = getattr(module, self.model_name)
+        self.session = Manager.instance().get_session(session_name)
 
     def get(self, resource):
         """
@@ -22,7 +27,7 @@ class ImageResourcesMapper(object):
         Args:
             resource: (string) resource's path.
         """
-        return self.objects.get(resource=resource)
+        return query.get_record(self.model_name, resource=resource)
 
     def add(self, path, type, width, height):
         """
@@ -37,16 +42,21 @@ class ImageResourcesMapper(object):
         Return:
             none
         """
-        record = {
+        data = {
             "resource": path,
             "type": type,
             "image_width": width,
             "image_height": height,
         }
 
-        data = self.model(**record)
-        data.full_clean()
-        data.save()
+        record = self.model(**data)
+        self.session.add(record)
+
+        try:
+            self.session.commit()
+        except Exception as e:
+            self.session.rollback()
+            raise
 
 
 IMAGE_RESOURCES = ImageResourcesMapper()

@@ -2,14 +2,11 @@
 Query and deal common tables.
 """
 
-from django.apps import apps
-from django.conf import settings
-from muddery.server.utils import defines
+from muddery.worldeditor.dao import general_query_mapper as query
 
 
 def get_element_event(element_key):
     """
     Get object's event.
     """
-    model = apps.get_model(settings.WORLD_DATA_APP, "event_data")
-    return model.objects.filter(trigger_obj=element_key)
+    return query.filter_records("event_data", trigger_obj=element_key)

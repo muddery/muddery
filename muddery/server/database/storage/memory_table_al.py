@@ -4,7 +4,7 @@ Load and cache all worlddata.
 
 import importlib
 from django.conf import settings
-from sqlalchemy import UniqueConstraint
+from sqlalchemy import UniqueConstraint, select
 from muddery.server.database.manager import Manager
 from muddery.server.utils.exception import MudderyError
 
@@ -63,7 +63,9 @@ class MemoryTableAl(object):
             self.table_fields[field_name] = i
 
         # load records
-        records = self.session.query(self.model).all()
+        stmt = select(self.model)
+        result = self.session.execute(stmt)
+        records = result.scalars()
         for r in records:
             row_data = [getattr(r, field_name) for field_name in self.columns]
             self.records.append(RecordData(self.table_fields, row_data))

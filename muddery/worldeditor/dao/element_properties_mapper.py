@@ -2,10 +2,11 @@
 Query and deal common tables.
 """
 
-from django.apps import apps
+import importlib
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from muddery.server.utils.exception import MudderyError, ERR
+from muddery.server.database.manager import Manager
 
 
 class ElementPropertiesMapper(object):
@@ -14,8 +15,12 @@ class ElementPropertiesMapper(object):
     """
     def __init__(self):
         self.model_name = "element_properties"
-        self.model = apps.get_model(settings.WORLD_DATA_APP, self.model_name)
-        self.objects = self.model.objects
+        session_name = settings.WORLD_DATA_MODEL_FILE
+        self.session = Manager.instance().get_session(session_name)
+
+        config = settings.AL_DATABASES[session_name]
+        module = importlib.import_module(config["MODELS"])
+        self.model = getattr(module, self.model_name)
 
     def get_properties(self, element_type, element_key, level):
         """

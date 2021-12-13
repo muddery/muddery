@@ -6,7 +6,6 @@ import inspect
 import traceback
 
 from django.conf import settings
-from muddery.server.database.manager import Manager
 from muddery.server.database.storage.memory_table_al import MemoryTableAl, RecordData
 from muddery.server.utils.exception import MudderyError
 
