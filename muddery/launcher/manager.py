@@ -140,9 +140,9 @@ def setup_server():
     django.setup()
 
     from muddery.server.server import Server
-    Server.instance().connect_db()
-    Server.instance().create_the_world()
-    Server.instance().create_command_handler()
+    Server.inst().connect_db()
+    Server.inst().create_the_world()
+    Server.inst().create_command_handler()
 
 
 def collect_static():

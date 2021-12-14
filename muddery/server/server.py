@@ -2,11 +2,12 @@
 import threading
 from django.conf import settings
 from muddery.server.utils.utils import class_from_path
+from muddery.server.utils.singleton import Singleton
 from muddery.server.service.command_handler import CommandHandler
 from muddery.server.database.manager import Manager
 
 
-class Server(object):
+class Server(Singleton):
     """
     The game world.
     """
@@ -19,17 +20,6 @@ class Server(object):
         def __get__(self, instance, owner):
             return self.method(owner)
 
-    @classmethod
-    def instance(cls, *args, **kwargs):
-        """
-        Singleton object.
-        """
-        if not hasattr(Server, "_instance"):
-            with Server._instance_lock:
-                if not hasattr(Server, "_instance"):
-                    Server._instance = Server(*args, **kwargs)
-        return Server._instance
-
     def __init__(self, *args, **kwargs):
         self._world = None
         self._command_handler = None
@@ -38,8 +28,8 @@ class Server(object):
         """
         Create the db connection.
         """
-        Manager.instance().connect()
-        Manager.instance().create_tables()
+        Manager.inst().connect()
+        Manager.inst().create_tables()
 
     def create_the_world(self):
         """
@@ -59,7 +49,7 @@ class Server(object):
         Syntax is same as for the _get_db_holder() method and
         property, e.g. obj.system.attr = value etc.
         """
-        return cls.instance()._world
+        return cls.inst()._world
 
     def create_command_handler(self):
         """

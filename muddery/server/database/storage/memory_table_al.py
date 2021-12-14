@@ -44,7 +44,7 @@ class MemoryTableAl(object):
         module = importlib.import_module(model_path)
         self.model = getattr(module, model_name)
         self.columns = self.model.__table__.columns.keys()
-        self.session = Manager.instance().get_session(session)
+        self.session = Manager.inst().get_session(session)
 
         self.records = []
         self.table_fields = {}

@@ -53,7 +53,7 @@ class Session(WebsocketConsumer):
         :return:
         """
         # Pass messages to the muddery server.
-        Server.instance().handler_message(self, text_data)
+        Server.inst().handler_message(self, text_data)
 
     def login(self, account):
         """

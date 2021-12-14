@@ -2,10 +2,10 @@
 This model translates default strings into localized strings.
 """
 
-import importlib
 from django.conf import settings
+from sqlalchemy import select, update, delete, func
 from muddery.server.mappings.element_set import ELEMENT
-from muddery.worldeditor.dao import general_query_mapper as q
+from muddery.worldeditor.dao import general_query_mapper as query
 from muddery.server.database.manager import Manager
 
 
@@ -14,37 +14,106 @@ class CommonMapper(object):
     Common data mapper.
     """
     def __init__(self, model_name):
-        session_name = settings.WORLD_DATA_MODEL_FILE
-        self.session = Manager.instance().get_session(session_name)
         self.model_name = model_name
-        module = importlib.import_module(session_name)
-        self.model = getattr(module, model_name)
+
+        session_name = settings.WORLD_DATA_MODEL_FILE
+        self.session = Manager.inst().get_session(session_name)
+        self.model = Manager.inst().get_model(session_name, model_name)
 
     def all(self):
-        query = self.session.query(self.model)
-        return query.all()
+        stmt = select(self.model)
+        result = self.session.execute(stmt)
+        return result.scalars().all()
 
-    def get(self, **kwargs):
+    def get(self, condition, for_update=False):
         """
         Get a record with conditions in kwargs.
         """
-        query = self.session.query(self.model)
+        stmt = select(self.model)
 
-        for field, value in kwargs:
-            query = query.filter(getattr(self.model, field) == value)
+        if for_update:
+            stmt = stmt.with_for_update()
 
-        return query.one()
+        for field, value in condition:
+            stmt = stmt.where(getattr(self.model, field) == value)
 
-    def filter(self, **kwargs):
+        result = self.session.execute(stmt)
+        return result.scalars().one()
+
+    def filter(self, condition, order=(), for_update=False):
         """
         Get a list of records with conditions in kwargs.
         """
-        query = self.session.query(self.model)
+        stmt = select(self.model)
 
-        for field, value in kwargs:
-            query = query.filter(getattr(self.model, field) == value)
+        if for_update:
+            stmt = stmt.with_for_update()
 
-        return query.all()
+        for field, value in condition:
+            stmt = stmt.where(getattr(self.model, field) == value)
+
+        if order:
+            stmt = stmt.order(*order)
+
+        result = self.session.execute(stmt)
+        return result.scalars().all()
+
+    def count(self, condition):
+        """
+        Count the number of records with conditions in kwargs.
+        """
+        stmt = select(func.count()).select_from(self.model)
+        for field, value in condition:
+            stmt = stmt.where(getattr(self.model, field) == value)
+
+        result = self.session.execute(stmt)
+        return result.scalars().all()
+
+    def add(self, values):
+        """
+        Update or insert a record.
+        """
+        record = self.model(**values)
+        try:
+            self.session.add(record)
+        except Exception as e:
+            self.session.roll_back()
+            raise
+
+    def update_or_add(self, condition, values):
+        """
+        Update or insert a record.
+        """
+        stmt = update(self.model)
+        for field, value in condition:
+            stmt = stmt.where(getattr(self.model, field) == value)
+
+        try:
+            result = self.session.execute(stmt)
+        except Exception as e:
+            self.session.roll_back()
+            raise
+
+        if result.rowcount == 0:
+            # Can not found the record to update, insert a new record.
+            data = dict(condition, **values)
+            record = self.model(**data)
+            try:
+                self.session.add(record)
+            except Exception as e:
+                self.session.roll_back()
+                raise
+
+    def delete(self, condition):
+        stmt = delete(self.model)
+        for field, value in condition:
+            stmt = stmt.where(getattr(self.model, field) == value)
+
+        try:
+            result = self.session.execute(stmt)
+        except Exception as e:
+            self.session.roll_back()
+            raise
 
 
 class ElementsMapper(CommonMapper):
@@ -62,9 +131,9 @@ class ElementsMapper(CommonMapper):
         Get all records with its base data.
         """
         if self.base_model_name == self.model_name:
-            return q.get_all_from_tables([self.model_name])
+            return query.get_all_from_tables([self.model_name])
         else:
-            return q.get_all_from_tables([self.base_model_name, self.model_name])
+            return query.get_all_from_tables([self.base_model_name, self.model_name])
 
     def get_by_key_with_base(self, key):
         """
@@ -74,6 +143,6 @@ class ElementsMapper(CommonMapper):
             key: (string) object's key.
         """
         if self.base_model_name == self.model_name:
-            return q.get_tables_record_by_key([self.model_name], key)
+            return query.get_tables_record_by_key([self.model_name], key)
         else:
-            return q.get_tables_record_by_key([self.base_model_name, self.model_name], key)
+            return query.get_tables_record_by_key([self.base_model_name, self.model_name], key)

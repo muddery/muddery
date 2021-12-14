@@ -11,7 +11,7 @@ from muddery.worldeditor.utils.response import success_response, file_response
 from muddery.server.utils.exception import MudderyError, ERR
 from muddery.worldeditor.utils import writers
 from muddery.worldeditor.controllers.base_request_processer import BaseRequestProcesser
-from muddery.worldeditor.dao.image_resources_mapper import IMAGE_RESOURCES
+from muddery.worldeditor.dao.image_resources_mapper import ImageResourcesMapper
 
 
 class upload_zip(BaseRequestProcesser):
@@ -293,7 +293,7 @@ class upload_image(BaseRequestProcesser):
                 image = Image.open(filepath)
                 size = image.size
 
-                IMAGE_RESOURCES.add(icon_location, file_type, size[0], size[1])
+                ImageResourcesMapper.inst().add(icon_location, file_type, size[0], size[1])
             except Exception as e:
                 if fp:
                     fp.close()

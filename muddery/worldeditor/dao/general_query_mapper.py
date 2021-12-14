@@ -25,42 +25,43 @@ def get_all_fields(table_name):
     return model.__table__.columns.keys()
 
 
-def get_query(table_name, **kwargs):
+def get_query(table_name, condition=None):
     """
-    Get a query of given contidions.
+    Get a query of given condition.
     """
     session_name = settings.WORLD_DATA_MODEL_FILE
-    session = Manager.instance().get_session(session_name)
+    session = Manager.inst().get_session(session_name)
     module = importlib.import_module(session_name)
     model = getattr(module, table_name)
 
     # set conditions
     stmt = select(model)
-    if kwargs:
-        for field, value in kwargs:
-            stmt = stmt.where(getattr(model, field) == value)
+
+    if condition:
+        where_condition = {getattr(model, field): value for field, value in condition}
+        stmt = stmt.where(**where_condition)
 
     result = session.execute(stmt)
-    return result.scalars()
+    return result
 
 
-def filter_records(table_name, **kwargs):
+def filter_records(table_name, condition=None):
     """
     Filter records by conditions.
     """
-    query = get_query(table_name, **kwargs)
+    query = get_query(table_name, condition)
     return query
 
 
-def get_record(table_name, **kwargs):
+def get_record(table_name, condition=None):
     """
     Get a record by conditions.
 
     Args:
         table_name: (string) db table's name.
-        kwargs: (dict) conditions.
+        condition: (dict) conditions.
     """
-    query = get_query(table_name, **kwargs)
+    query = get_query(table_name, condition)
     return query.one()
 
 
@@ -94,7 +95,7 @@ def get_record_by_id(table_name, record_id):
         table_name: (string) db table's name.
         record_id: (number) record's id.
     """
-    return get_record(table_name, id=record_id)
+    return get_record(table_name, {"id": record_id})
 
 
 def get_record_by_key(table_name, object_key):
@@ -106,23 +107,23 @@ def get_record_by_key(table_name, object_key):
         object_key: (string) object's key.
     """
     # get model
-    return get_record(table_name, key=object_key)
+    return get_record(table_name, {"key": object_key})
 
 
-def delete_records(table_name, **kwargs):
+def delete_records(table_name, condition=None):
     """
     Delete records with the given conditions.
     """
     session_name = settings.WORLD_DATA_MODEL_FILE
-    session = Manager.instance().get_session(session_name)
+    session = Manager.inst().get_session(session_name)
     module = importlib.import_module(session_name)
     model = getattr(module, table_name)
 
     # set conditions
     stmt = delete(model)
-    if kwargs:
-        for field, value in kwargs:
-            stmt = stmt.where(getattr(model, field) == value)
+    if condition:
+        where_condition = {getattr(model, field): value for field, value in condition}
+        stmt = stmt.where(**where_condition)
 
     result = session.execute(stmt)
     return result.rowcount
@@ -137,7 +138,7 @@ def delete_record_by_id(table_name, record_id):
         record_id: (number) record's id.
     """
     # get model
-    delete_records(table_name, id=record_id)
+    delete_records(table_name, {"id": record_id})
 
 
 def delete_record_by_key(table_name, object_key):
@@ -149,10 +150,10 @@ def delete_record_by_key(table_name, object_key):
         object_key: (string) object's key.
     """
     # get model
-    delete_records(table_name, key=object_key)
+    delete_records(table_name, {"key": object_key})
 
 
-def get_all_from_tables(tables, **kwargs):
+def get_all_from_tables(tables, condition=None):
     """
     Query all object's data from tables.
 
@@ -166,7 +167,7 @@ def get_all_from_tables(tables, **kwargs):
         return
 
     session_name = settings.WORLD_DATA_MODEL_FILE
-    session = Manager.instance().get_session(session_name)
+    session = Manager.inst().get_session(session_name)
     module = importlib.import_module(session_name)
 
     if len(tables) == 1:
@@ -174,17 +175,17 @@ def get_all_from_tables(tables, **kwargs):
         model = getattr(module, tables[0])
         stmt = select(model)
 
-        if kwargs:
-            for field, value in kwargs:
-                stmt = stmt.where(getattr(model, field) == value)
+        if condition:
+            where_condition = {getattr(model, field): value for field, value in condition}
+            stmt = stmt.where(**where_condition)
     else:
         # join tables
         models = [getattr(module, t) for t in tables]
         stmt = select(*models)
 
-        if kwargs:
-            for field, value in kwargs:
-                stmt = stmt.where(getattr(models[0], field) == value)
+        if condition:
+            where_condition = {getattr(models[0], field): value for field, value in condition}
+            stmt = stmt.where(**where_condition)
 
         first_model = models[0]
         for model in models[1:]:
@@ -205,7 +206,7 @@ def get_tables_record_by_key(tables, key):
     Return:
         a dict of values.
     """
-    return get_all_from_tables(tables, key=key)
+    return get_all_from_tables(tables, {"key": key})
 
 
 def get_element_base_data(element_type):
@@ -216,4 +217,4 @@ def get_element_base_data(element_type):
     :return:
     """
     base_model = ELEMENT(element_type).get_base_model()
-    return filter_records(base_model, element_type=element_type)
+    return filter_records(base_model, {"element_type": element_type})

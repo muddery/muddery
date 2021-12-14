@@ -188,7 +188,7 @@ def import_file(fullname, file_type=None, table_name=None, clear=True, except_er
             file_type = ext_name[1:].lower()
 
     # get model
-    session = Manager.instance().get_session(settings.WORLD_DATA_APP)
+    session = Manager.inst().get_session(settings.WORLD_DATA_APP)
     config = settings.AL_DATABASES[settings.WORLD_DATA_APP]
     module = importlib.import_module(config["MODELS"])
     model = getattr(module, table_name)

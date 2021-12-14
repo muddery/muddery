@@ -386,7 +386,7 @@ class QueryForm(BaseRequestProcesser):
         table_name = args["table"]
         record = args.get('record', None)
 
-        data = data_edit.query_form(table_name, id=record)
+        data = data_edit.query_form(table_name, {"id": record})
         return success_response(data)
 
 
@@ -415,7 +415,7 @@ class QueryFormFirstRecord(BaseRequestProcesser):
         except Exception as e:
             raise MudderyError(ERR.invalid_form, "Wrong table: %s." % table_name)
 
-        data = data_edit.query_form(table_name, id=record_id)
+        data = data_edit.query_form(table_name, {"id": record_id})
         return success_response(data)
 
 
@@ -446,7 +446,7 @@ class SaveForm(BaseRequestProcesser):
         record_id = args.get('record', None)
 
         record_id = data_edit.save_form(values, table_name, record_id)
-        data = data_edit.query_form(table_name, id=record_id)
+        data = data_edit.query_form(table_name, {"id": record_id})
         return success_response(data)
 
 
@@ -487,7 +487,7 @@ class SaveEventActionForm(BaseRequestProcesser):
         table_name = action.model_name
 
         # Remove old records.
-        data_edit.delete_records(table_name, event_key=event_key)
+        data_edit.delete_records(table_name, {"event_key": event_key})
 
         # Add new data.
         for value in values:

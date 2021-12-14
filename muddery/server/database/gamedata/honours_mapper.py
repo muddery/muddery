@@ -19,7 +19,7 @@ class HonoursMapper(object):
         self.model_name = "honours"
         module = importlib.import_module(settings.GAME_DATA_MODEL_FILE)
         self.model = getattr(module, self.model_name)
-        self.session = Manager.instance().get_session(settings.GAME_DATA_APP)
+        self.session = Manager.inst().get_session(settings.GAME_DATA_APP)
         self.honours = {}
         self.rankings = []
 

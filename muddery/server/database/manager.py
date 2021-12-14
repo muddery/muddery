@@ -7,32 +7,13 @@ from sqlalchemy import select, delete
 from django.conf import settings
 from muddery.server.database.engines import get_engine
 from muddery.server.utils.logger import game_server_logger as logger
+from muddery.server.utils.singleton import Singleton
 
 
-class Manager(object):
+class Manager(Singleton):
     """
     Database manager.
     """
-    _instance_lock = threading.Lock()
-
-    class ClassProperty:
-        def __init__(self, method):
-            self.method = method
-
-        def __get__(self, instance, owner):
-            return self.method(owner)
-
-    @classmethod
-    def instance(cls, *args, **kwargs):
-        """
-        Singleton object.
-        """
-        if not hasattr(Manager, "_instance"):
-            with Manager._instance_lock:
-                if not hasattr(Manager, "_instance"):
-                    Manager._instance = Manager()
-        return Manager._instance
-
     def __init__(self):
         self.engines = {}
         self.sessions = {}
@@ -101,3 +82,13 @@ class Manager(object):
             session.commit()
         except Exception as e:
             session.rollback()
+
+    def get_model(self, scheme, table_name):
+        """
+        Get the table's ORM model.
+        """
+        if scheme in settings.AL_DATABASES:
+            config = settings.AL_DATABASES[scheme]
+            module = importlib.import_module(config["MODELS"])
+            model = getattr(module, table_name)
+            return model

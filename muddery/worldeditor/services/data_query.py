@@ -10,11 +10,11 @@ from muddery.server.utils.logger import game_editor_logger as logger
 from muddery.server.utils.game_settings import GAME_SETTINGS
 from muddery.worldeditor.dao import common_mappers as CM
 from muddery.worldeditor.dao.common_mappers import WORLD_AREAS
-from muddery.worldeditor.dao.world_rooms_mapper import WORLD_ROOMS_MAPPER
-from muddery.worldeditor.dao.world_exits_mapper import WORLD_EXITS_MAPPER
+from muddery.worldeditor.dao.world_rooms_mapper import WorldRoomsMapper
+from muddery.worldeditor.dao.world_exits_mapper import WorldExitsMapper
 from muddery.worldeditor.dao import general_query_mapper as query
-from muddery.worldeditor.dao.element_properties_mapper import ELEMENT_PROPERTIES
-from muddery.worldeditor.dao.event_mapper import get_element_event
+from muddery.worldeditor.dao.element_properties_mapper import ElementPropertiesMapper
+from muddery.worldeditor.dao.events_mapper import EventsMapper
 from muddery.worldeditor.services.general_query import query_fields
 from muddery.server.mappings.element_set import ELEMENT_SET, ELEMENT
 from muddery.server.mappings.event_action_set import EVENT_ACTION_SET
@@ -113,7 +113,7 @@ def query_element_properties(element_type, element_key):
     # Get rows.
     levels = []
     data = {}
-    records = ELEMENT_PROPERTIES.get_properties_all_levels(element_type, element_key)
+    records = ElementPropertiesMapper.inst().get_properties_all_levels(element_type, element_key)
     for record in records:
         if record.level not in levels:
             levels.append(record.level)
@@ -169,7 +169,7 @@ def query_element_level_properties(element_type, element_key, level):
 
     # Get properties.
     data = {}
-    records = ELEMENT_PROPERTIES.get_properties(element_type, element_key, level)
+    records = ElementPropertiesMapper.inst().get_properties(element_type, element_key, level)
     for record in records:
         data[record.property] = record.value
 
@@ -217,7 +217,7 @@ def query_element_events(element_key):
         element_key: (string) the element' key.
     """
     fields = query_fields("event_data")
-    records = get_element_event(element_key)
+    records = EventsMapper.inst().get_element_event(element_key)
     rows = []
     for record in records:
         line = [str(record.serializable_value(field["name"])) for field in fields]
@@ -337,7 +337,7 @@ def query_map(area_key):
         raise MudderyError(ERR.no_data, "Can not find map: %s" % area_key)
     area_info = area_record
 
-    room_records = WORLD_ROOMS_MAPPER.rooms_in_area(area_key)
+    room_records = WorldRoomsMapper.inst().rooms_in_area(area_key)
     room_info = []
     room_keys = []
     for record in room_records:
@@ -359,7 +359,7 @@ def query_map(area_key):
         }
         room_info.append(info)
 
-    exit_records = WORLD_EXITS_MAPPER.exits_of_rooms(room_keys)
+    exit_records = WorldExitsMapper.inst().exits_of_rooms(room_keys)
     exit_info = []
     for record in exit_records:
         info = {

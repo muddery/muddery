@@ -102,7 +102,7 @@ def import_data_path(path, clear=True, except_errors=False):
         except_errors: (boolean) except error records and load other records.
     """
     # import tables one by one
-    tables = Manager.instance().get_tables(settings.WORLD_DATA_APP)
+    tables = Manager.inst().get_tables(settings.WORLD_DATA_APP)
     for table_name in tables:
         file_names = glob.glob(os.path.join(path, table_name) + ".*")
 
@@ -125,7 +125,7 @@ def import_table_path(path, table_name, clear=True, except_errors=False):
         except_errors: (boolean) except error records and load other records.
     """
     if clear:
-        Manager.instance().clear_table(settings.WORLD_DATA_APP, table_name)
+        Manager.inst().clear_table(settings.WORLD_DATA_APP, table_name)
 
     if not os.path.isdir(path):
         return

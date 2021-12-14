@@ -2,23 +2,16 @@
 Query and deal common tables.
 """
 
-import importlib
-from django.conf import settings
-from muddery.worldeditor.dao import general_query_mapper as query
-from muddery.server.database.manager import Manager
+from muddery.server.utils.singleton import Singleton
+from muddery.worldeditor.dao.common_mapper_base import CommonMapper
 
 
-class ImageResourcesMapper(object):
+class ImageResourcesMapper(CommonMapper, Singleton):
     """
     Object's image.
     """
     def __init__(self):
-        self.model_name = "image_resources"
-        session_name = settings.GAME_DATA_APP
-        config = settings.AL_DATABASES[session_name]
-        module = importlib.import_module(config["MODELS"])
-        self.model = getattr(module, self.model_name)
-        self.session = Manager.instance().get_session(session_name)
+        super(ImageResourcesMapper, self).__init__("image_resources")
 
     def get(self, resource):
         """
@@ -27,7 +20,9 @@ class ImageResourcesMapper(object):
         Args:
             resource: (string) resource's path.
         """
-        return query.get_record(self.model_name, resource=resource)
+        return self.get({
+            "resource": resource
+        })
 
     def add(self, path, type, width, height):
         """
@@ -42,22 +37,10 @@ class ImageResourcesMapper(object):
         Return:
             none
         """
-        data = {
+        self.update_or_add({
             "resource": path,
             "type": type,
+        }, {
             "image_width": width,
             "image_height": height,
-        }
-
-        record = self.model(**data)
-        self.session.add(record)
-
-        try:
-            self.session.commit()
-        except Exception as e:
-            self.session.rollback()
-            raise
-
-
-IMAGE_RESOURCES = ImageResourcesMapper()
-
+        })

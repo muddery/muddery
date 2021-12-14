@@ -2,37 +2,28 @@
 Query and deal common tables.
 """
 
-from django.apps import apps
-from django.conf import settings
-from django.db import transaction
+from muddery.server.utils.singleton import Singleton
+from muddery.worldeditor.dao.common_mapper_base import CommonMapper
 
 
-class SystemDataMapper(object):
+class SystemDataMapper(CommonMapper, Singleton):
     """
     The world editor system's data.
     """
     def __init__(self):
-        self.model_name = "system_data"
-        self.model = apps.get_model(settings.WORLD_DATA_APP, self.model_name)
-        self.objects = self.model.objects
+        super(SystemDataMapper, self).__init__("system_data")
 
-        if self.model.objects.count() == 0:
-            data = self.model()
-            data.full_clean()
-            data.save()
+        if self.count({}) == 0:
+            self.add({})
 
     def get_object_index(self):
         """
         Increase the object index and get the new value.
         """
-        with transaction.atomic():
-            record = self.objects.select_for_update().first()
-            index = record.object_index
-            record.object_index = index + 1
-            record.save()
+        record = self.get({}, for_update=True)
+        index = record.object_index
+        self.update_or_add({}, {
+            "object_index": index,
+        })
 
         return index
-
-
-SYSTEM_DATA = SystemDataMapper()
-

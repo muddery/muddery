@@ -3,8 +3,8 @@ Battle commands. They only can be used when a character is in a combat.
 """
 
 from django.conf import settings
-from muddery.worldeditor.dao import common_mappers as CM
-from muddery.worldeditor.dao import general_query_mapper, model_mapper
+from muddery.worldeditor.dao import general_query_mapper
+from muddery.server.database.manager import Manager
 from muddery.server.utils.exception import MudderyError, ERR
 from muddery.server.utils.localized_strings_handler import _
 
@@ -53,8 +53,9 @@ def query_tables():
     """
     Query all tables' names.
     """
-    models = model_mapper.get_all_models()
-    models_info = [{"key": model.__name__,
-                    "name": _(model.__name__, category="models") + "(" + model.__name__ + ")"}
-                    for model in models if model._meta.app_label == "worlddata"]
+    tables = Manager.inst().get_tables()
+    models_info = [{
+        "key": table,
+        "name": _(table, category="models") + "(" + table + ")"
+    } for table in tables]
     return models_info

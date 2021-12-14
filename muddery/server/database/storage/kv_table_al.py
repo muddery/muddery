@@ -34,7 +34,7 @@ class KeyValueTableAl(BaseKeyValueStorage):
         module = importlib.import_module(model_path)
         self.model = getattr(module, model_name)
         self.columns = self.model.__table__.columns.keys()
-        self.session = Manager.instance().get_session(session)
+        self.session = Manager.inst().get_session(session)
 
         exclude_fields = set()
         self.category_field = category_field
@@ -140,7 +140,7 @@ class KeyValueTableAl(BaseKeyValueStorage):
 
         result = self.session.execute(stmt)
         record = result.scalars().one()
-        return record
+        return record > 0
 
     def all(self):
         """
@@ -149,7 +149,7 @@ class KeyValueTableAl(BaseKeyValueStorage):
         """
         stmt = select(self.model)
         result = self.session.execute(stmt)
-        records = result.scalars()
+        records = result.scalars().all()
 
         all_data = {}
         if self.category_field:
@@ -229,7 +229,7 @@ class KeyValueTableAl(BaseKeyValueStorage):
             stmt = stmt.where(getattr(self.model, self.category_field) == category)
 
         result = self.session.execute(stmt)
-        records = result.scalars()
+        records = result.scalars().all()
 
         if self.key_field:
             data = {

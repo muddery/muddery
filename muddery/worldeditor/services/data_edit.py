@@ -7,8 +7,8 @@ from django.core.exceptions import ObjectDoesNotExist
 from muddery.server.utils.exception import MudderyError, ERR
 from muddery.worldeditor.dao import general_query_mapper
 from muddery.worldeditor.dao.common_mappers import WORLD_AREAS, WORLD_ROOMS
-from muddery.worldeditor.dao.system_data_mapper import SYSTEM_DATA
-from muddery.worldeditor.dao.element_properties_mapper import ELEMENT_PROPERTIES
+from muddery.worldeditor.dao.system_data_mapper import SystemDataMapper
+from muddery.worldeditor.dao.element_properties_mapper import ElementPropertiesMapper
 from muddery.worldeditor.mappings.form_set import FORM_SET
 from muddery.server.mappings.element_set import ELEMENT, ELEMENT_SET
 from muddery.server.mappings.event_action_set import EVENT_ACTION_SET
@@ -16,13 +16,13 @@ from muddery.worldeditor.forms.location_field import LocationField
 from muddery.worldeditor.forms.image_field import ImageField
 
 
-def query_form(table_name, **kwargs):
+def query_form(table_name, condition=None):
     """
     Query table's data.
 
     Args:
         table_name: (string) data table's name.
-        kwargs: (dict) conditions.
+        condition: (dict) conditions.
     """
     form_class = FORM_SET.get(table_name)
     if not form_class:
@@ -30,10 +30,10 @@ def query_form(table_name, **kwargs):
 
     form = None
     record = None
-    if kwargs:
+    if condition:
         try:
             # Query record's data.
-            record = general_query_mapper.get_record(table_name, **kwargs)
+            record = general_query_mapper.get_record(table_name, condition)
             form = form_class(instance=record)
         except Exception as e:
             form = None
@@ -119,11 +119,11 @@ def delete_record(table_name, record_id):
     general_query_mapper.delete_record_by_id(table_name, record_id)
 
 
-def delete_records(table_name, **kwargs):
+def delete_records(table_name, condition=None):
     """
     Delete records by conditions.
     """
-    general_query_mapper.delete_records(table_name, **kwargs)
+    general_query_mapper.delete_records(table_name, condition)
 
 
 def query_element_form(base_element_type, obj_element_type, element_key):
@@ -148,7 +148,7 @@ def query_element_form(base_element_type, obj_element_type, element_key):
     forms = []
     for table_name in table_names:
         if element_key:
-            object_form = query_form(table_name, key=element_key)
+            object_form = query_form(table_name, {"key": element_key})
         else:
             object_form = query_form(table_name)
 
@@ -181,7 +181,7 @@ def save_element_level_properties(element_type, element_key, level, values):
         level: (number) object's level.
         values: (dict) values to save.
     """
-    ELEMENT_PROPERTIES.add_properties(element_type, element_key, level, values)
+    ElementPropertiesMapper.inst().add_properties(element_type, element_key, level, values)
 
 
 def delete_element_level_properties(element_type, element_key, level):
@@ -193,7 +193,7 @@ def delete_element_level_properties(element_type, element_key, level):
         element_key: (string) the element's key.
         level: (number) object's level.
     """
-    ELEMENT_PROPERTIES.delete_properties(element_type, element_key, level)
+    ElementPropertiesMapper.inst().delete_properties(element_type, element_key, level)
 
 
 def save_element_form(tables, element_type, element_key):
@@ -220,7 +220,7 @@ def save_element_form(tables, element_type, element_key):
 
     if not new_key:
         # Does not has a new key, generate a new key.
-        index = SYSTEM_DATA.get_object_index()
+        index = SystemDataMapper.inst().get_object_index()
         new_key = "%s_auto_%s" % (element_type, index)
         for table in tables:
             table["values"]["key"] = new_key
@@ -325,7 +325,7 @@ def query_event_action_forms(action_type, event_key):
     records = general_query_mapper.filter_records(table_name, event_key=event_key)
     if records:
         for record in records:
-            forms.append(query_form(table_name, id=record.id))
+            forms.append(query_form(table_name, {"id": record.id}))
     else:
         forms.append(query_form(table_name))
 

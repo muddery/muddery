@@ -103,5 +103,3 @@ DIALOGUE_RELATIONS = CommonMapper("dialogue_relations")
 NPC_DIALOGUES = CommonMapper("npc_dialogues")
 
 LOCALIZED_STRINGS = CommonMapper("localized_strings")
-
-IMAGE_RESOURCES = CommonMapper("image_resources")
