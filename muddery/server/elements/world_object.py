@@ -3,13 +3,12 @@ Objects that are unique in the whole world.
 """
 
 from muddery.server.mappings.element_set import ELEMENT
-from muddery.server.utils.localized_strings_handler import _
 from muddery.server.statements.statement_handler import STATEMENT_HANDLER
 
 
 class MudderyWorldObject(ELEMENT("COMMON_OBJECT")):
     element_type = "WORLD_OBJECT"
-    element_name = _("World Object", "elements")
+    element_name = "World Object"
     model_name = "world_objects"
 
     def is_visible(self, caller):

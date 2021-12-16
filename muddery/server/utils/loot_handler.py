@@ -4,7 +4,7 @@ LootHandler handles matters of loots.
 
 import random
 import math
-from muddery.server.utils.logger import game_server_logger as logger
+from muddery.server.utils.logger import logger
 from muddery.server.statements.statement_handler import STATEMENT_HANDLER
 
 

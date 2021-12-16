@@ -1,5 +1,7 @@
 
 import threading
+import traceback
+
 from django.conf import settings
 from muddery.server.utils.utils import class_from_path
 from muddery.server.utils.singleton import Singleton
@@ -23,13 +25,23 @@ class Server(Singleton):
     def __init__(self, *args, **kwargs):
         self._world = None
         self._command_handler = None
+        self.db_connected = False
+        self.connect_db()
 
     def connect_db(self):
         """
         Create the db connection.
         """
-        Manager.inst().connect()
-        Manager.inst().create_tables()
+        if self.db_connected:
+            return
+
+        try:
+            Manager.inst().connect()
+            Manager.inst().create_tables()
+            self.db_connected = True
+        except Exception as e:
+            traceback.print_exc()
+            raise
 
     def create_the_world(self):
         """

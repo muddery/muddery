@@ -3,10 +3,9 @@ Event action.
 """
 
 import traceback
-from muddery.server.utils.logger import game_server_logger as logger
+from muddery.server.utils.logger import logger
 from muddery.server.events.base_event_action import BaseEventAction
 from muddery.server.database.worlddata.worlddata import WorldData
-from muddery.server.utils.localized_strings_handler import _
 
 
 class ActionLearnSkill(BaseEventAction):
@@ -14,7 +13,7 @@ class ActionLearnSkill(BaseEventAction):
     Learn a skill.
     """
     key = "ACTION_LEARN_SKILL"
-    name = _("Learn a Skill", category="event_actions")
+    name = "Learn a Skill"
     model_name = "action_learn_skill"
     repeatedly = False
 

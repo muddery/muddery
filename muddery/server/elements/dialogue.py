@@ -8,7 +8,6 @@ in the character. It controls quest's objectives.
 
 from muddery.server.statements.statement_handler import STATEMENT_HANDLER
 from muddery.server.database.worlddata.dialogues import Dialogues
-from muddery.server.utils.localized_strings_handler import _
 from muddery.server.database.worlddata.dialogue_relations import DialogueRelations
 from muddery.server.database.worlddata.dialogue_quests import DialogueQuests
 from muddery.server.elements.base_element import BaseElement
@@ -20,7 +19,7 @@ class MudderyDialogue(BaseElement):
     This class controls quest's objectives. Hooks are called when a character doing some things.
     """
     element_type = "DIALOGUE"
-    element_name = _("Dialogue", "elements")
+    element_name = "Dialogue"
 
     def load_data(self, key, level=None):
         """

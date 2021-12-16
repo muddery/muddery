@@ -179,5 +179,4 @@ class Logger(object):
             self.logger.info("[SS] %s" % line)
 
 
-game_server_logger = Logger.instance(settings.LOG_DIR, settings.LOG_GAME_SERVER, settings.LOG_LEVEL)
-game_editor_logger = Logger.instance(settings.LOG_DIR, settings.LOG_GAME_EDITOR, settings.LOG_LEVEL)
+logger = Logger.instance(settings.LOG_DIR, settings.LOG_NAME, settings.LOG_LEVEL)

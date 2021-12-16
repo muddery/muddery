@@ -3,7 +3,7 @@ Shop goods is the object in shops. They have some special attributes to record g
 
 """
 
-from muddery.server.utils.logger import game_server_logger as logger
+from muddery.server.utils.logger import logger
 from muddery.server.database.worlddata.worlddata import WorldData
 from muddery.server.utils.localized_strings_handler import _
 from muddery.server.mappings.element_set import ELEMENT, ELEMENT_SET
@@ -17,7 +17,7 @@ class MudderyShopGoods(BaseElement):
     to sell and additional shop information.
     """
     element_type = "SHOP_GOODS"
-    element_name = _("Goods", "elements")
+    element_name = "Goods"
     model_name = "shop_goods"
 
     def set_data(self, data):

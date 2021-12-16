@@ -2,22 +2,20 @@
 Characters' combat.
 """
 
-from django.conf import settings
-from muddery.server.utils import utils
+from muddery.server.database.gamedata.base_data import BaseData
+from muddery.server.utils.singleton import Singleton
 
 
-class CharacterLocation(object):
+class CharacterLocation(BaseData, Singleton):
     """
     Player character's location.
     """
-    # data storage
-    storage_class = utils.class_from_path(settings.DATABASE_ACCESS_OBJECT)
-    session = settings.GAME_DATA_APP
-    config = settings.AL_DATABASES[session]
-    storage = storage_class(session, config["MODELS"], "character_location", "", "char_id", "location")
+    __table_name = "character_location"
+    __category_name = ""
+    __key_field = "char_id"
+    __default_value_field = "location"
 
-    @classmethod
-    def save(cls, char_id, location):
+    def save(self, char_id, location):
         """
         Set a player character's location.
 
@@ -25,10 +23,9 @@ class CharacterLocation(object):
             char_id: (int) player character's id.
             location: (string) location's key.
         """
-        cls.storage.save("", char_id, location)
+        self.storage.save("", char_id, location)
 
-    @classmethod
-    def load(cls, char_id, *default):
+    def load(self, char_id, *default):
         """
         Get the location of a player character.
 
@@ -36,14 +33,13 @@ class CharacterLocation(object):
             char_id: (int) player character's id.
             default: (int) default value
         """
-        return cls.storage.load("", char_id, *default)
+        return self.storage.load("", char_id, *default)
 
-    @classmethod
-    def remove_character(cls, char_id):
+    def remove_character(self, char_id):
         """
         Remove a player character.
 
         Args:
             char_id: (number) player character's id.
         """
-        cls.storage.delete("", char_id)
+        self.storage.delete("", char_id)

@@ -9,8 +9,8 @@ creation commands.
 """
 
 import traceback
-from muddery.server.utils.logger import game_server_logger as logger
-from muddery.server.utils.dialogue_handler import DIALOGUE_HANDLER
+from muddery.server.utils.logger import logger
+from muddery.server.utils.dialogue_handler import DialogueHandler
 from muddery.server.mappings.element_set import ELEMENT
 from muddery.server.database.worlddata.npc_dialogues import NPCDialogues
 from muddery.server.database.worlddata.npc_shops import NPCShops
@@ -27,7 +27,7 @@ class MudderyBaseNPC(ELEMENT("CHARACTER")):
         shops
     """
     element_type = "BASE_NPC"
-    element_name = _("Base None Player Character", "elements")
+    element_name = "Base None Player Character"
     model_name = ""
 
     def at_element_setup(self, first_time):
@@ -154,7 +154,7 @@ class MudderyBaseNPC(ELEMENT("CHARACTER")):
         If the npc can complete or provide quests.
         Returns (can_provide_quest, can_complete_quest).
         """
-        return DIALOGUE_HANDLER.have_quest(caller, self)
+        return DialogueHandler.inst().have_quest(caller, self)
 
     def remove_from_combat(self):
         """

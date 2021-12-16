@@ -3,18 +3,32 @@ Set the game's configuration.
 """
 
 from muddery.server.database.worlddata.game_settings import GameSettings as GameSettingsData
+from muddery.server.utils.singleton import Singleton
 
 
-class GameSettings(object):
+class GameSettings(Singleton):
     """
     Handles a character's custom attributes.
     """
-    def __init__(self, default_values):
+    def __init__(self):
         """
         Initialize handler.
         """
         self.values = {}
-        self.default_values = default_values
+        self.default_values = {
+            "game_name": "Muddery",
+            "connection_screen": "",
+            "solo_mode": False,
+            "global_cd": 1.0,
+            "auto_cast_skill_cd": 1.5,
+            "can_give_up_quests": True,
+            "can_close_dialogue": False,
+            "auto_resume_dialogues": True,
+            "start_location_key": "",
+            "default_player_home_key": "",
+            "default_player_character_key": "",
+            "default_staff_character_key": "",
+        }
         self.reset()
 
     def reset(self):
@@ -61,19 +75,3 @@ class GameSettings(object):
             values: (map) all values
         """
         return self.values
-
-
-GAME_SETTINGS = GameSettings({
-    "game_name": "Muddery",
-    "connection_screen": "",
-    "solo_mode": False,
-    "global_cd": 1.0,
-    "auto_cast_skill_cd": 1.5,
-    "can_give_up_quests": True,
-    "can_close_dialogue": False,
-    "auto_resume_dialogues": True,
-    "start_location_key": "",
-    "default_player_home_key": "",
-    "default_player_character_key": "",
-    "default_staff_character_key": "",
-})

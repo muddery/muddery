@@ -4,7 +4,6 @@ Event action.
 
 from muddery.server.events.base_interval_action import BaseIntervalAction
 from muddery.server.database.worlddata.worlddata import WorldData
-from muddery.server.utils.localized_strings_handler import _
 
 
 class ActionMessage(BaseIntervalAction):
@@ -12,7 +11,7 @@ class ActionMessage(BaseIntervalAction):
     Show messages to the character.
     """
     key = "ACTION_MESSAGE"
-    name = _("Message", category="event_actions")
+    name = "Message"
     model_name = "action_message"
     repeatedly = True
 

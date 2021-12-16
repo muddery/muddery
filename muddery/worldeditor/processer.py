@@ -8,14 +8,14 @@ import json
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse
-from muddery.server.utils.logger import game_editor_logger as logger
+from muddery.server.utils.logger import logger
 from muddery.server.utils.exception import MudderyError, ERR
-from muddery.worldeditor.mappings.request_set import REQUEST_SET
+from muddery.worldeditor.mappings.request_set import RequestSet
 import muddery.worldeditor.controllers
 from muddery.worldeditor.utils.response import error_response
 
 
-class Processer(object):
+class Processor(object):
     """
     HTTP request processer.
     """
@@ -25,6 +25,7 @@ class Processer(object):
                 path_prefix = "/" + path_prefix
 
         self.path_prefix = path_prefix
+        self.request_set = RequestSet()
 
     @csrf_exempt
     def process(self, request):
@@ -65,7 +66,7 @@ class Processer(object):
 
         print("request: '%s' '%s' '%s'" % (path, func, args))
 
-        processor = REQUEST_SET.get(path, func)
+        processor = self.request_set.get(path, func)
         if not processor:
             logger.log_err("Can not find API: %s %s" % (path, func))
             return error_response(ERR.no_api, msg="Can not find API: %s %s" % (path, func))
@@ -92,5 +93,5 @@ class Processer(object):
         return response
 
 
-PROCESSER = Processer(settings.WORLD_EDITOR_API_PATH)
+
 

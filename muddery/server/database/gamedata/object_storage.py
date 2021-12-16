@@ -8,6 +8,8 @@ from django.conf import settings
 from muddery.server.utils import utils
 from muddery.server.utils.exception import MudderyError, ERR
 from muddery.server.database.storage.memory_storage import MemoryStorage
+from muddery.server.database.gamedata.base_data import BaseData
+from muddery.server.utils.singleton import Singleton
 
 
 def to_string(value):
@@ -55,16 +57,12 @@ def from_string(str_value):
     return value
 
 
-class BaseObjectStorage(object):
+class BaseObjectStorage(BaseData, Singleton):
     """
     The storage of object attributes.
     """
     # data storage
-    storage_class = None
-    storage = None
-
-    @classmethod
-    def save(cls, obj_id, key, value):
+    def save(self, obj_id, key, value):
         """
         Set an attribute.
 
@@ -74,10 +72,9 @@ class BaseObjectStorage(object):
             value: (any) attribute's value.
         """
         to_save = to_string(value)
-        cls.storage.save(obj_id, key, to_save)
+        self.storage.save(obj_id, key, to_save)
 
-    @classmethod
-    def save_keys(cls, obj_id, value_dict):
+    def save_keys(self, obj_id, value_dict):
         """
         Set attributes.
 
@@ -86,12 +83,11 @@ class BaseObjectStorage(object):
             value_dict: (dict) a dict of key-values.
         """
         if value_dict:
-            with cls.storage.atomic():
+            with self.storage.atomic():
                 for key, value in value_dict.items():
-                    cls.storage.save(obj_id, key, to_string(value))
+                    self.storage.save(obj_id, key, to_string(value))
 
-    @classmethod
-    def has(cls, obj_id, key):
+    def has(self, obj_id, key):
         """
         Check if the attribute exists.
 
@@ -99,10 +95,9 @@ class BaseObjectStorage(object):
             obj_id: (number) object's id.
             key: (string) attribute's key.
         """
-        return cls.storage.has(obj_id, key)
+        return self.storage.has(obj_id, key)
 
-    @classmethod
-    def load(cls, obj_id, key, *default):
+    def load(self, obj_id, key, *default):
         """
         Get the value of an attribute.
 
@@ -116,7 +111,7 @@ class BaseObjectStorage(object):
                 was found matching `key` and no default value set.
         """
         try:
-            value = cls.storage.load(obj_id, key)
+            value = self.storage.load(obj_id, key)
             return from_string(value)
         except KeyError as e:
             if len(default) > 0:
@@ -124,19 +119,17 @@ class BaseObjectStorage(object):
             else:
                 raise e
 
-    @classmethod
-    def load_obj(cls, obj_id):
+    def load_obj(self, obj_id):
         """
         Get values of an object.
 
         Args:
             obj_id: (number) object's id.
         """
-        values = cls.storage.load_category(obj_id, {})
+        values = self.storage.load_category(obj_id, {})
         return {key: from_string(value) for key, value in values.items()}
 
-    @classmethod
-    def delete(cls, obj_id, key):
+    def delete(self, obj_id, key):
         """
         delete an attribute of an object.
 
@@ -144,41 +137,41 @@ class BaseObjectStorage(object):
             obj_id: (number) object's id.
             key: (string) attribute's key.
         """
-        cls.storage.delete(obj_id, key)
+        self.storage.delete(obj_id, key)
 
-    @classmethod
-    def remove_obj(cls, obj_id):
+    def remove_obj(self, obj_id):
         """
         Remove an object's all attributes.
 
         Args:
             obj_id: (number) object's id.
         """
-        cls.storage.delete_category(obj_id)
+        self.storage.delete_category(obj_id)
 
-    @classmethod
-    def atomic(cls):
+    def atomic(self):
         """
         Guarantee the atomic execution of a given block.
         """
-        return cls.storage.atomic()
+        return self.storage.atomic()
 
 
 class DBObjectStorage(BaseObjectStorage):
     """
     The storage of object attributes.
     """
-    # data storage
-    storage_class = utils.class_from_path(settings.DATABASE_ACCESS_OBJECT)
-    session = settings.GAME_DATA_APP
-    config = settings.AL_DATABASES[session]
-    storage = storage_class(session, config["MODELS"], "object_states", "obj_id", "key", "value")
+    __table_name = "object_states"
+    __category_name = "obj_id"
+    __key_field = "key"
+    __default_value_field = "value"
 
 
 class MemoryObjectStorage(BaseObjectStorage):
     """
     The storage of object attributes.
     """
-    # data storage
-    storage_class = MemoryStorage
-    storage = storage_class()
+    def create_storage(self):
+        """
+        Create the storage object.
+        """
+        storage_class = MemoryStorage
+        return storage_class()

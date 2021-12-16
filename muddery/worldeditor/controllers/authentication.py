@@ -2,12 +2,15 @@
 Battle commands. They only can be used when a character is in a combat.
 """
 
-from django.conf import settings
 from django.contrib import auth
-from muddery.worldeditor.services import data_query
+from django.contrib.auth.hashers import check_password, is_password_usable, make_password
+from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
+from muddery.worldeditor.utils.response import error_response
 from muddery.server.utils.exception import MudderyError, ERR
 from muddery.worldeditor.utils.response import success_response
 from muddery.worldeditor.controllers.base_request_processer import BaseRequestProcesser
+from muddery.worldeditor.dao.accounts import Accounts
+from muddery.server.utils.localized_strings_handler import _
 
 
 class login(BaseRequestProcesser):
@@ -31,12 +34,10 @@ class login(BaseRequestProcesser):
         username = args['username']
         password = args['password']
 
+        # Match account name and check password
         user = auth.authenticate(username=username, password=password)
         if not user:
             raise MudderyError(ERR.no_authentication, "Authentication fialed.")
-
-        if not user.is_staff:
-            raise MudderyError(ERR.no_permission, "No permission.")
 
         auth.login(request, user)
         return success_response("success")

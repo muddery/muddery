@@ -8,7 +8,6 @@ distribution systems.
 """
 
 from muddery.server.elements.base_element import BaseElement
-from muddery.server.utils.localized_strings_handler import _
 from muddery.server.server import Server
 
 
@@ -20,7 +19,7 @@ class MudderyChannel(BaseElement):
         shops
     """
     element_type = "CHANNEL"
-    element_name = _("Channel", "elements")
+    element_name = "Channel"
     model_name = ""
 
     def at_element_setup(self, first_time):

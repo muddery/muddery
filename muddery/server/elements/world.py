@@ -8,7 +8,6 @@ from muddery.server.mappings.element_set import ELEMENT
 from muddery.server.database.worlddata.world_areas import WorldAreas
 from muddery.server.database.worlddata.world_channels import WorldChannels
 from muddery.server.database.worlddata.worlddata import WorldData
-from muddery.server.utils.localized_strings_handler import _
 from muddery.server.utils.defines import ConversationType
 from muddery.server.utils.utils import class_from_path
 
@@ -18,7 +17,7 @@ class MudderyWorld(BaseElement):
     The whole world which contains all areas.
     """
     element_type = "WORLD"
-    element_name = _("World", "elements")
+    element_name = "World"
 
     def __init__(self, *agrs, **wargs):
         super(MudderyWorld, self).__init__(*agrs, **wargs)

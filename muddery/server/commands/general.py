@@ -3,13 +3,13 @@ General Character commands usually availabe to all characters
 """
 import traceback
 
-from muddery.server.utils.logger import game_server_logger as logger
+from muddery.server.utils.logger import logger
 from muddery.server.commands.base_command import BaseCommand
 from muddery.server.utils.localized_strings_handler import _
 from muddery.server.utils.exception import MudderyError
 from muddery.server.utils.defines import CombatType
 from muddery.server.combat.combat_handler import COMBAT_HANDLER
-from muddery.server.combat.match_pvp import MATCH_COMBAT_HANDLER
+from muddery.server.combat.match_pvp import MatchPVPHandler
 from muddery.server.database.worlddata.honour_settings import HonourSettings
 from muddery.server.server import Server
 
@@ -758,7 +758,7 @@ class CmdQueueUpCombat(BaseCommand):
             caller.msg({"alert": _("You need to reach level %s." % honour_settings.min_honour_level)})
             return
 
-        MATCH_COMBAT_HANDLER.add(caller)
+        MatchPVPHandler.inst().add(caller)
 
 
 # ------------------------------------------------------------
@@ -781,7 +781,7 @@ class CmdQuitCombatQueue(BaseCommand):
         if not caller:
             return
 
-        MATCH_COMBAT_HANDLER.remove(caller)
+        MatchPVPHandler.inst().remove(caller)
 
 
 # ------------------------------------------------------------
@@ -804,7 +804,7 @@ class CmdConfirmCombat(BaseCommand):
         if not caller:
             return
 
-        MATCH_COMBAT_HANDLER.confirm(caller)
+        MatchPVPHandler.inst().confirm(caller)
 
 
 # ------------------------------------------------------------
@@ -829,7 +829,7 @@ class CmdRejectCombat(BaseCommand):
         if not caller:
             return
 
-        MATCH_COMBAT_HANDLER.reject(caller)
+        MatchPVPHandler.inst().reject(caller)
 
 
 # ------------------------------------------------------------

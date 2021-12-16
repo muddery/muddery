@@ -29,8 +29,7 @@ GAME_DIR = os.getcwd()
 
 # Place to put log files
 LOG_DIR = os.path.join(GAME_DIR, "server", "logs")
-LOG_GAME_SERVER = 'server.log'
-LOG_GAME_EDITOR = 'editor.log'
+LOG_NAME = 'server.log'
 LOG_LEVEL = logging.INFO
 
 # This setting is no use any more, so set it to blank.

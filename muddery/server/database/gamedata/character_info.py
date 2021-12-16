@@ -3,100 +3,95 @@
 Store object's element key data in memory.
 """
 
-from django.conf import settings
-from muddery.server.utils import utils
+from muddery.server.database.gamedata.base_data import BaseData
+from muddery.server.utils.singleton import Singleton
 
 
-class CharacterInfo(object):
+class CharacterInfo(BaseData, Singleton):
     """
     The storage of player character's basic data.
     """
-    # data storage
-    storage_class = utils.class_from_path(settings.DATABASE_ACCESS_OBJECT)
-    session = settings.GAME_DATA_APP
-    config = settings.AL_DATABASES[session]
-    storage = storage_class(session, config["MODELS"], "character_info", "", "char_id")
+    __table_name = "character_info"
+    __category_name = ""
+    __key_field = "char_id"
+    __default_value_field = ""
 
-    nicknames = {info["nickname"]: char_id for char_id, info in storage.load_category("", {}).items()}
+    def __init__(self):
+        super(CharacterInfo, self).__init__()
 
-    @classmethod
-    def add(cls, char_id, nickname="", level=1):
+        self.nicknames = {info["nickname"]: char_id for char_id, info in self.storage.load_category("", {}).items()}
+
+    def add(self, char_id, nickname="", level=1):
         """
         Add a new player character.
         :param char_id:
         :param nickname:
         :return:
         """
-        cls.storage.add("", char_id, {
+        self.storage.add("", char_id, {
             "nickname": nickname,
             "level": level,
         })
         if nickname:
-            cls.nicknames[nickname] = char_id
+            self.nicknames[nickname] = char_id
 
-    @classmethod
-    def set_nickname(cls, char_id, nickname):
+    def set_nickname(self, char_id, nickname):
         """
         Update a character's nickname.
         :param char_id:
         :param nickname:
         :return:
         """
-        current_data = cls.storage.load("", char_id, None)
-        cls.storage.save("", char_id, {"nickname": nickname})
+        current_data = self.storage.load("", char_id, None)
+        self.storage.save("", char_id, {"nickname": nickname})
 
         if current_data and current_data["nickname"]:
-            del cls.nicknames[current_data["nickname"]]
-        cls.nicknames[nickname] = char_id
+            del self.nicknames[current_data["nickname"]]
+        self.nicknames[nickname] = char_id
 
-    @classmethod
-    def remove_character(cls, char_id):
+    def remove_character(self, char_id):
         """
         Remove an object.
         :param char_id:
         :return:
         """
-        current_info = cls.storage.load("", char_id)
-        cls.storage.delete("", char_id)
+        current_info = self.storage.load("", char_id)
+        self.storage.delete("", char_id)
 
         if current_info["nickname"]:
-            del cls.nicknames[current_info["nickname"]]
+            del self.nicknames[current_info["nickname"]]
 
-    @classmethod
-    def get_nickname(cls, char_id):
+    def get_nickname(self, char_id):
         """
         Get a player character's nickname.
         :param char_id:
         :return:
         """
-        data = cls.storage.load("", char_id)
+        data = self.storage.load("", char_id)
         return data["nickname"]
 
-    @classmethod
-    def get_char_id(cls, nickname):
+    def get_char_id(self, nickname):
         """
         Get an player character's id by its nickname.
         :param nickname:
         :return:
         """
-        return cls.nicknames[nickname]
+        return self.nicknames[nickname]
 
-    @classmethod
-    def set_level(cls, char_id, level):
+    def set_level(self, char_id, level):
         """
         Set a character's level data.
         :param char_id:
         :param nickname:
         :return:
         """
-        cls.storage.save("", char_id, {"level": level})
+        self.storage.save("", char_id, {"level": level})
 
-    @classmethod
-    def get_level(cls, char_id):
+    def get_level(self, char_id):
         """
         Get a player character's level.
         :param char_id:
         :return:
         """
-        data = cls.storage.load("", char_id)
+        data = self.storage.load("", char_id)
         return data["level"]

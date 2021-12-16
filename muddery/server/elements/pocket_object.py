@@ -18,7 +18,7 @@ class MudderyPocketObject(ELEMENT("COMMON_OBJECT")):
     of the object that a player can put in his inventory.
     """
     element_type = "POCKET_OBJECT"
-    element_name = _("Pocket Object", "elements")
+    element_name = "Pocket Object"
     model_name = "pocket_objects"
 
     def get_name(self):
@@ -90,7 +90,7 @@ class MudderyFood(ELEMENT("POCKET_OBJECT")):
     strength, etc.
     """
     element_type = "FOOD"
-    element_name = _("Food", "elements")
+    element_name = "Food"
     model_name = "foods"
 
     def take_effect(self, user, number):
@@ -145,7 +145,7 @@ class MudderyEquipment(ELEMENT("POCKET_OBJECT")):
     etc.
     """
     element_type = "EQUIPMENT"
-    element_name = _("Equipment", "elements")
+    element_name = "Equipment"
     model_name = "equipments"
 
     def get_body_position(self):
@@ -197,7 +197,7 @@ class MudderySkillBook(ELEMENT("POCKET_OBJECT")):
     This is a skill book. Players can use it to learn a new skill.
     """
     element_type = "SKILL_BOOK"
-    element_name = _("Skill Book", "elements")
+    element_name = "Skill Book"
     model_name = "skill_books"
 
     def get_available_commands(self, caller):

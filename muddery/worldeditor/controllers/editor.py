@@ -6,7 +6,7 @@ import json, traceback
 from muddery.worldeditor.services import data_query, data_edit, general_query
 from muddery.server.server import Server
 from muddery.server.utils.exception import MudderyError, ERR
-from muddery.server.utils.logger import game_editor_logger as logger
+from muddery.server.utils.logger import logger
 from muddery.worldeditor.utils.response import success_response
 from muddery.worldeditor.controllers.base_request_processer import BaseRequestProcesser
 from muddery.worldeditor.dao import general_query_mapper

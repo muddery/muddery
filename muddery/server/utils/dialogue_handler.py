@@ -6,11 +6,12 @@ The DialogueHandler maintains a pool of dialogues.
 """
 
 from muddery.server.utils import defines
-from muddery.server.utils.game_settings import GAME_SETTINGS
+from muddery.server.utils.game_settings import GameSettings
 from muddery.server.mappings.element_set import ELEMENT
+from muddery.server.utils.singleton import Singleton
 
 
-class DialogueHandler(object):
+class DialogueHandler(Singleton):
     """
     The DialogueHandler maintains a pool of dialogues.
     """
@@ -18,7 +19,9 @@ class DialogueHandler(object):
         """
         Initialize the handler.
         """
-        self.can_close_dialogue = GAME_SETTINGS.get("can_close_dialogue")
+        super(DialogueHandler, self).__init__()
+
+        self.can_close_dialogue = GameSettings.inst().get("can_close_dialogue")
         self.dialogue_storage = {}
     
     def load_cache(self, dlg_key):
@@ -324,7 +327,3 @@ class DialogueHandler(object):
                 break
 
         return provide_quest, finish_quest
-
-
-# main dialogue handler
-DIALOGUE_HANDLER = DialogueHandler()

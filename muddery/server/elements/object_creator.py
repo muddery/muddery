@@ -15,7 +15,7 @@ class MudderyObjectCreator(ELEMENT("WORLD_OBJECT")):
     This object loads attributes from world data on init automatically.
     """
     element_type = "WORLD_OBJECT_CREATOR"
-    element_name = _("Object Creator", "elements")
+    element_name = "Object Creator"
     model_name = "object_creators"
 
     def __init__(self):

@@ -3,7 +3,7 @@ import json
 import traceback
 
 from django.conf import settings
-from muddery.server.utils.logger import game_server_logger as logger
+from muddery.server.utils.logger import logger
 from muddery.server.utils.utils import class_from_path
 
 

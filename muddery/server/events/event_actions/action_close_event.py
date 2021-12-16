@@ -4,7 +4,6 @@ Event action.
 
 from muddery.server.events.base_event_action import BaseEventAction
 from muddery.server.database.worlddata.worlddata import WorldData
-from muddery.server.utils.localized_strings_handler import _
 
 
 class ActionCloseEvent(BaseEventAction):
@@ -12,7 +11,7 @@ class ActionCloseEvent(BaseEventAction):
     Close events.
     """
     key = "ACTION_CLOSE_EVENT"
-    name = _("Close an Event", category="event_actions")
+    name = "Close an Event"
     model_name = "action_close_event"
     repeatedly = False
 

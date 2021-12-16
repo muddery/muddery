@@ -7,15 +7,16 @@ import time
 import datetime
 import math
 from apscheduler.schedulers.background import BackgroundScheduler
-from muddery.server.database.gamedata.honours_mapper import HONOURS_MAPPER
+from muddery.server.database.gamedata.honours_mapper import HonoursMapper
 from muddery.server.utils.localized_strings_handler import _
 from muddery.server.utils.defines import CombatType
 from muddery.server.database.worlddata.honour_settings import HonourSettings
 from muddery.server.combat.combat_handler import COMBAT_HANDLER
 from muddery.server.server import Server
+from muddery.server.utils.singleton import Singleton
 
 
-class MatchPVPHandler(object):
+class MatchPVPHandler(Singleton):
     """
     This model translates default strings into localized strings.
     """
@@ -23,6 +24,8 @@ class MatchPVPHandler(object):
         """
         Initialize handler
         """
+        super(MatchPVPHandler, self).__init__()
+        
         self.max_honour_diff = 0
         self.preparing_time = 0
         self.match_interval = 10
@@ -149,8 +152,8 @@ class MatchPVPHandler(object):
                 if char_id_B in self.preparing:
                     continue
 
-                honour_A = HONOURS_MAPPER.get_honour(char_id_A, 0)
-                honour_B = HONOURS_MAPPER.get_honour(char_id_B, 0)
+                honour_A = HonoursMapper.inst().get_honour(char_id_A, 0)
+                honour_B = HonoursMapper.inst().get_honour(char_id_B, 0)
 
                 # max_honour_diff means no limits
                 if self.max_honour_diff == 0 or math.fabs(honour_A - honour_B) <= self.max_honour_diff:
@@ -347,7 +350,3 @@ class MatchPVPHandler(object):
 
             opponent0.msg({"left_combat_queue": ""})
             opponent1.msg({"left_combat_queue": ""})
-
-
-# main handler
-MATCH_COMBAT_HANDLER = MatchPVPHandler()

@@ -14,7 +14,7 @@ class ActionGetObjects(BaseIntervalAction):
     Get objects.
     """
     key = "ACTION_GET_OBJECTS"
-    name = _("Get Objects", category="event_actions")
+    name = "Get Objects"
     model_name = "action_get_objects"
     repeatedly = True
 

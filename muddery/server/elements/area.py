@@ -5,10 +5,9 @@ Areas are compose the whole map. Rooms are belongs to areas.
 
 """
 
-from muddery.server.utils.logger import game_server_logger as logger
+from muddery.server.utils.logger import logger
 from muddery.server.elements.base_element import BaseElement
 from muddery.server.mappings.element_set import ELEMENT
-from muddery.server.utils.localized_strings_handler import _
 from muddery.server.database.worlddata.image_resource import ImageResource
 from muddery.server.database.worlddata.world_rooms import WorldRooms
 from muddery.server.database.worlddata.worlddata import WorldData
@@ -19,7 +18,7 @@ class MudderyArea(BaseElement):
     Areas are compose the whole map. Rooms are belongs to areas.
     """
     element_type = "AREA"
-    element_name = _("Area", "elements")
+    element_name = "Area"
     model_name = "world_areas"
 
     def __init__(self):

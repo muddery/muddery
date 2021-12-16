@@ -9,7 +9,6 @@ from muddery.launcher import configs
 from muddery.launcher.utils import copy_tree
 from muddery.server.database.manager import Manager
 from muddery.worldeditor.services.data_importer import import_file
-from muddery.worldeditor.dao import model_mapper
 
 
 def unzip_data_all(fp):

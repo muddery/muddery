@@ -5,8 +5,8 @@ This module handles importing data from csv files and creating the whole game wo
 import traceback
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
-from muddery.server.utils.logger import game_server_logger as logger
-from muddery.server.utils.game_settings import GAME_SETTINGS
+from muddery.server.utils.logger import logger
+from muddery.server.utils.game_settings import GameSettings
 from muddery.server.mappings.element_set import ELEMENT, ELEMENT_SET
 from muddery.server.database.gamedata.account_characters import AccountCharacters
 from muddery.server.database.gamedata.character_info import CharacterInfo
@@ -20,7 +20,7 @@ def create_character(new_player, nickname, character_key=None,
     Helper function, creates a character based on a player's name.
     """
     if not character_key:
-        character_key = GAME_SETTINGS.get("default_player_character_key")
+        character_key = GameSettings.inst().get("default_player_character_key")
 
     if not element_type:
         element_type = settings.PLAYER_CHARACTER_ELEMENT_TYPE
@@ -39,9 +39,9 @@ def create_character(new_player, nickname, character_key=None,
 
     # set location
     if not location_key:
-        location_key = GAME_SETTINGS.get("start_location_key")
+        location_key = GameSettings.inst().get("start_location_key")
         if not location_key:
-            location_key = GAME_SETTINGS.get("default_player_home_key")
+            location_key = GameSettings.inst().get("default_player_home_key")
             if not location_key:
                 location_key = ""
 

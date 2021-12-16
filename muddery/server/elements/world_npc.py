@@ -10,7 +10,6 @@ creation commands.
 
 from muddery.server.mappings.element_set import ELEMENT
 from muddery.server.statements.statement_handler import STATEMENT_HANDLER
-from muddery.server.utils.localized_strings_handler import _
 
 
 class MudderyWorldNPC(ELEMENT("BASE_NPC")):
@@ -18,7 +17,7 @@ class MudderyWorldNPC(ELEMENT("BASE_NPC")):
     The character not controlled by players.
     """
     element_type = "WORLD_NPC"
-    element_name = _("World NPC", "elements")
+    element_name = "World NPC"
     model_name = "world_npcs"
 
     def after_element_setup(self, first_time):

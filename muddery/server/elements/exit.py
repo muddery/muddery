@@ -9,7 +9,7 @@ for allowing Characters to traverse the exit to its destination.
 
 import traceback
 import weakref
-from muddery.server.utils.logger import game_server_logger as logger
+from muddery.server.utils.logger import logger
 from muddery.server.utils.localized_strings_handler import _
 from muddery.server.elements.base_element import BaseElement
 from muddery.server.statements.statement_handler import STATEMENT_HANDLER
@@ -21,7 +21,7 @@ class MudderyExit(BaseElement):
     Exits are connectors between rooms.
     """
     element_type = "EXIT"
-    element_name = _("Exit", "elements")
+    element_name = "Exit"
     model_name = "world_exits"
 
     def __init__(self):

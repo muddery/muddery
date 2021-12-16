@@ -4,13 +4,12 @@ General account commands usually availabe to all players.
 
 import re, traceback
 from django.conf import settings
-from muddery.server.utils.logger import game_server_logger as logger
+from muddery.server.utils.logger import logger
 from muddery.server.commands.base_command import BaseCommand
 from muddery.server.utils.localized_strings_handler import _
 from muddery.server.utils.builder import create_character
 from muddery.server.database.gamedata.account_characters import AccountCharacters
 from muddery.server.database.gamedata.character_info import CharacterInfo
-from muddery.server.utils.game_settings import GAME_SETTINGS
 
 
 # Obs - these are all intended to be stored on the Player, and as such,

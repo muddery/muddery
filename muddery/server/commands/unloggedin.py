@@ -8,11 +8,11 @@ import hashlib
 from collections import defaultdict
 from django.conf import settings
 from muddery.server.mappings.element_set import ELEMENT
-from muddery.server.utils.logger import game_server_logger as logger
+from muddery.server.utils.logger import logger
 from muddery.server.commands.base_command import BaseCommand
 from muddery.server.utils.exception import MudderyError, ERR
 from muddery.server.utils.localized_strings_handler import _
-from muddery.server.utils.game_settings import GAME_SETTINGS
+from muddery.server.utils.game_settings import GameSettings
 from muddery.server.database.worlddata.equipment_positions import EquipmentPositions
 from muddery.server.database.worlddata.honour_settings import HonourSettings
 
@@ -242,8 +242,8 @@ class CmdUnloginLook(BaseCommand):
     @classmethod
     def func(cls, session, args, context):
         "Show the connect screen."
-        game_name = GAME_SETTINGS.get("game_name")
-        connection_screen = GAME_SETTINGS.get("connection_screen")
+        game_name = GameSettings.inst().get("game_name")
+        connection_screen = GameSettings.inst().get("connection_screen")
         honour_settings = HonourSettings.get_first_data()
         records = EquipmentPositions.all()
         equipment_pos = [{

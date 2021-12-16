@@ -3,7 +3,6 @@ Quest status.
 """
 
 from muddery.server.quests.base_quest_status import BaseQuestStatus
-from muddery.server.utils.localized_strings_handler import _
 
 
 class CanNotProvide(BaseQuestStatus):
@@ -11,7 +10,7 @@ class CanNotProvide(BaseQuestStatus):
     Can not provide the quest.
     """
     key = "CAN_NOT_PROVIDE"
-    name = _("Can Not Provide Quest", category="quest_status")
+    name = "Can Not Provide Quest"
 
     def match(self, caller, quest_key):
         """

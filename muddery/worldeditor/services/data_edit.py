@@ -9,9 +9,10 @@ from muddery.worldeditor.dao import general_query_mapper
 from muddery.worldeditor.dao.common_mappers import WORLD_AREAS, WORLD_ROOMS
 from muddery.worldeditor.dao.system_data_mapper import SystemDataMapper
 from muddery.worldeditor.dao.element_properties_mapper import ElementPropertiesMapper
-from muddery.worldeditor.mappings.form_set import FORM_SET
+from muddery.worldeditor.services.forms import get_form
 from muddery.server.mappings.element_set import ELEMENT, ELEMENT_SET
 from muddery.server.mappings.event_action_set import EVENT_ACTION_SET
+from muddery.server.utils.localized_strings_handler import _
 from muddery.worldeditor.forms.location_field import LocationField
 from muddery.worldeditor.forms.image_field import ImageField
 
@@ -24,7 +25,7 @@ def query_form(table_name, condition=None):
         table_name: (string) data table's name.
         condition: (dict) conditions.
     """
-    form_class = FORM_SET.get(table_name)
+    form_class = get_form(table_name)
     if not form_class:
         raise MudderyError(ERR.no_table, "Can not find table: %s" % table_name)
 
@@ -87,7 +88,7 @@ def save_form(values, table_name, record_id=None):
         table_name: (string) data table's name.
         record_id: (string, optional) record's id. If it is empty, add a new record.
     """
-    form_class = FORM_SET.get(table_name)
+    form_class = get_form(table_name)
     if not form_class:
         raise MudderyError(ERR.no_table, "Can not find table: %s" % table_name)
 
@@ -164,7 +165,7 @@ def query_element_form(base_element_type, obj_element_type, element_key):
                 # set the element type to the new value
                 field["value"] = obj_element_type
                 field["type"] = "Select"
-                field["choices"] = [(key, element.element_name + " (" + key + ")")
+                field["choices"] = [(key, _(element.element_name, "elements") + " (" + key + ")")
                                     for key, element in candidate_element_types.items()]
                 break
 
@@ -230,7 +231,7 @@ def save_element_form(tables, element_type, element_key):
         table_name = table["table"]
         form_values = table["values"]
 
-        form_class = FORM_SET.get(table_name)
+        form_class = get_form(table_name)
         form = None
         if element_key:
             try:

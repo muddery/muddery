@@ -5,7 +5,6 @@ Staff Characters are Objects setup to be puppeted by Staffs.
 They can not be seen in game.
 """
 
-from muddery.server.utils.localized_strings_handler import _
 from muddery.server.mappings.element_set import ELEMENT
 
 
@@ -29,7 +28,7 @@ class MudderyStaffCharacter(ELEMENT("PLAYER_CHARACTER")):
 
     """
     element_type = "STAFF_CHARACTER"
-    element_name = _("Staff Character", "elements")
+    element_name = "Staff Character"
     model_name = "staff_characters"
 
     def is_staff(self):

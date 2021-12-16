@@ -8,12 +8,12 @@
 
 from django.conf import settings
 from muddery.server.utils import utils
-from muddery.server.utils.game_settings import GAME_SETTINGS
+from muddery.server.utils.game_settings import GameSettings
 
 # Determine the site name and server version
 
 try:
-    GAME_NAME = GAME_SETTINGS.get("game_name")
+    GAME_NAME = GameSettings.inst().get("game_name")
 except AttributeError:
     GAME_NAME = "Muddery"
 SERVER_VERSION = utils.get_muddery_version()

@@ -3,11 +3,11 @@ QuestHandler handles a character's quests.
 """
 
 import weakref
-from muddery.server.utils.logger import game_server_logger as logger
+from muddery.server.utils.logger import logger
 from muddery.server.statements.statement_handler import STATEMENT_HANDLER
 from muddery.server.utils.localized_strings_handler import _
 from muddery.server.utils.exception import MudderyError
-from muddery.server.utils.game_settings import GAME_SETTINGS
+from muddery.server.utils.game_settings import GameSettings
 from muddery.server.database.worlddata.worlddata import WorldData
 from muddery.server.database.worlddata.quest_dependencies import QuestDependencies
 from muddery.server.mappings.quest_status_set import QUEST_STATUS_SET
@@ -78,7 +78,7 @@ class QuestHandler(object):
         Returns:
             None
         """
-        if not GAME_SETTINGS.get("can_give_up_quests"):
+        if not GameSettings.inst().get("can_give_up_quests"):
             logger.log_trace("Can not give up quests.")
             raise MudderyError(_("Can not give up this quest."))
 

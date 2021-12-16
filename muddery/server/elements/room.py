@@ -6,8 +6,8 @@ Rooms are simple containers that has no location of their own.
 """
 
 import ast
-from muddery.server.utils.logger import game_server_logger as logger
-from muddery.server.utils.game_settings import GAME_SETTINGS
+from muddery.server.utils.logger import logger
+from muddery.server.utils.game_settings import GameSettings
 from muddery.server.database.worlddata.image_resource import ImageResource
 from muddery.server.database.worlddata.world_npcs import WorldNPCs
 from muddery.server.database.worlddata.world_exits import WorldExits
@@ -30,7 +30,7 @@ class MudderyRoom(BaseElement):
     properties and methods available on all Objects.
     """
     element_type = "ROOM"
-    element_name = _("Room", "elements")
+    element_name = "Room"
     model_name = "world_rooms"
 
     def __init__(self):
@@ -249,7 +249,7 @@ class MudderyRoom(BaseElement):
         # send surrounding changes to player
         if not character.is_staff():
             # Players can not see staffs.
-            if not GAME_SETTINGS.get("solo_mode") or not character.is_player():
+            if not GameSettings.inst().get("solo_mode") or not character.is_player():
                 # Players can not see other players in solo mode.
                 change = {
                     "type": "players" if character.is_player() else "npcs",
@@ -273,7 +273,7 @@ class MudderyRoom(BaseElement):
         # send surrounding changes to player
         if not character.is_staff():
             # Players can not see staffs.
-            if not GAME_SETTINGS.get("solo_mode") or not character.is_player():
+            if not GameSettings.inst().get("solo_mode") or not character.is_player():
                 # Players can not see other players in solo mode.
                 change = {
                     "type": "players" if character.is_player() else "npcs",
@@ -368,7 +368,7 @@ class MudderyRoom(BaseElement):
         # get name, description, commands and all objects in it
         info = {}
 
-        if not GAME_SETTINGS.get("solo_mode"):
+        if not GameSettings.inst().get("solo_mode"):
             # Players can not see other players in solo mode.
             info["players"] = [item.get_appearance(caller) for key, item in self.all_characters.items()
                                if item.is_player() and item.get_id() != caller.get_id() and item.is_visible(caller)]
@@ -404,7 +404,7 @@ class MudderyRoom(BaseElement):
             "msg": message
         }
 
-        if GAME_SETTINGS.get("solo_mode"):
+        if GameSettings.inst().get("solo_mode"):
             caller.msg({"conversation": output})
         else:
             self.msg_characters({"conversation": output})

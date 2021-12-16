@@ -3,9 +3,10 @@ This model translates default strings into localized strings.
 """
 
 from muddery.server.database.worlddata.localized_strings import LocalizedStrings
+from muddery.server.utils.singleton import Singleton
 
 
-class LocalizedStringsHandler(object):
+class LocalizedStringsHandler(Singleton):
     """
     This model translates default strings into localized strings.
     """
@@ -13,6 +14,8 @@ class LocalizedStringsHandler(object):
         """
         Initialize handler
         """
+        super(LocalizedStringsHandler, self).__init__()
+
         self.loaded = False
         self.clear()
 
@@ -60,13 +63,9 @@ class LocalizedStringsHandler(object):
             return default
 
 
-# main dialogue handler
-LOCALIZED_STRINGS_HANDLER = LocalizedStringsHandler()
-
-
 # translator
 def _(origin, category="", default=None):
     """
     This function returns the localized string.
     """
-    return LOCALIZED_STRINGS_HANDLER.translate(origin, category, default)
+    return LocalizedStringsHandler.inst().translate(origin, category, default)

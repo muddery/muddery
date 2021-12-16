@@ -17,7 +17,7 @@ class MudderySkill(BaseElement):
     A skill of the character.
     """
     element_type = "SKILL"
-    element_name = _("Skill", "elements")
+    element_name = "Skill"
     model_name = "skills"
 
     msg_escape = re.compile(r'%[%|n|c|t]')

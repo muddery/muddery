@@ -3,7 +3,7 @@ MudderyObject is an object which can load it's data automatically.
 """
 
 import ast
-from muddery.server.utils.logger import game_server_logger as logger
+from muddery.server.utils.logger import logger
 from muddery.server.utils.data_field_handler import DataFieldHandler, ConstDataHolder
 from muddery.server.database.worlddata.properties_dict import PropertiesDict
 from muddery.server.mappings.element_set import ELEMENT

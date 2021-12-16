@@ -4,7 +4,6 @@ CommonObject is the object that players can put into their inventory.
 """
 
 from muddery.server.elements.base_element import BaseElement
-from muddery.server.utils.localized_strings_handler import _
 
 
 class MudderyCommonObject(BaseElement):
@@ -12,7 +11,7 @@ class MudderyCommonObject(BaseElement):
     This is a common object, the base class of all objects..
     """
     element_type = "COMMON_OBJECT"
-    element_name = _("Common Object", "elements")
+    element_name = "Common Object"
     model_name = "common_objects"
 
     def get_name(self):

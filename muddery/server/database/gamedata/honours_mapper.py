@@ -9,9 +9,10 @@ from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 from sqlalchemy import select, update, delete
 from muddery.server.utils.utils import class_from_path
 from muddery.server.database.manager import Manager
+from muddery.server.utils.singleton import Singleton
 
 
-class HonoursMapper(object):
+class HonoursMapper(Singleton):
     """
     This model stores all character's honours.
     """
@@ -253,7 +254,3 @@ class HonoursMapper(object):
             return [id for id in self.rankings[begin:end] if id != character_id]
         else:
             return [id for id in self.rankings[-number:]]
-        
-
-# main honour handler
-HONOURS_MAPPER = HonoursMapper()

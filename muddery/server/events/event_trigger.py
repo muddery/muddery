@@ -10,10 +10,6 @@ from muddery.server.statements.statement_handler import STATEMENT_HANDLER
 from muddery.server.database.worlddata.event_data import EventData
 from muddery.server.mappings.event_action_set import EVENT_ACTION_SET
 from muddery.server.utils.defines import EventType
-from muddery.server.utils.localized_strings_handler import _
-
-
-PERMISSION_BYPASS_EVENTS = {perm.lower() for perm in settings.PERMISSION_BYPASS_EVENTS}
 
 
 class EventTrigger(object):
@@ -25,23 +21,23 @@ class EventTrigger(object):
     triggers = {
         # at attriving a room. trigger_obj: room_id
         EventType.EVENT_TRIGGER_ARRIVE: {
-            "name": _("On Arrive", category="event_triggers")
+            "name": "On Arrive"
         },
         # caller kills one. trigger_obj: dead_one_id
         EventType.EVENT_TRIGGER_KILL: {
-            "name": _("On kill the Target", category="event_triggers")
+            "name": "On kill the Target"
         },
         # caller die. trigger_obj: killer_id
         EventType.EVENT_TRIGGER_DIE: {
-            "name": _("On Die", category="event_triggers")
+            "name": "On Die"
         },
         # before traverse an exit. trigger_obj: exit_id
         EventType.EVENT_TRIGGER_TRAVERSE: {
-            "name": _("On Traverse An Exit", category="event_triggers")
+            "name": "On Traverse An Exit"
         },
         # when a character finishes a dialogue sentence. trigger_obj: sentence_id
         EventType.EVENT_TRIGGER_DIALOGUE: {
-            "name": _("On Finish a Dialogue", category="event_triggers")
+            "name": "On Finish a Dialogue"
         }
     }
 

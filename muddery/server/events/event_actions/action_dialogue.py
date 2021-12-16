@@ -5,7 +5,6 @@ Event action.
 import random
 from muddery.server.events.base_event_action import BaseEventAction
 from muddery.server.database.worlddata.worlddata import WorldData
-from muddery.server.utils.localized_strings_handler import _
 
 
 class ActionDialogue(BaseEventAction):
@@ -13,7 +12,7 @@ class ActionDialogue(BaseEventAction):
     Begin a dialogue.
     """
     key = "ACTION_DIALOGUE"
-    name = _("Dialogue", category="event_actions")
+    name = "Dialogue"
     model_name = "action_dialogue"
     repeatedly = False
 

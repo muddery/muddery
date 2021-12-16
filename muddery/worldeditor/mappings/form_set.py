@@ -4,7 +4,7 @@ This model translates default strings into localized strings.
 
 from django.conf import settings
 from django import forms
-from muddery.server.utils.logger import game_editor_logger as logger
+from muddery.server.utils.logger import logger
 from muddery.server.utils.utils import classes_in_path
 
 

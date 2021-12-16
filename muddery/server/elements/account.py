@@ -22,14 +22,14 @@ from muddery.server.database.gamedata.character_equipments import CharacterEquip
 from muddery.server.database.gamedata.character_quests import CharacterQuests
 from muddery.server.database.gamedata.character_skills import CharacterSkills
 from muddery.server.database.gamedata.character_combat import CharacterCombat
-from muddery.server.database.gamedata.honours_mapper import HONOURS_MAPPER
+from muddery.server.database.gamedata.honours_mapper import HonoursMapper
 from muddery.server.elements.base_element import BaseElement
 from muddery.server.mappings.element_set import ELEMENT
 from muddery.server.server import Server
-from muddery.server.utils.game_settings import GAME_SETTINGS
+from muddery.server.utils.game_settings import GameSettings
 from muddery.server.utils.exception import MudderyError, ERR
 from muddery.server.utils.localized_strings_handler import _
-from muddery.server.utils.logger import game_server_logger as logger
+from muddery.server.utils.logger import logger
 
 
 _SESSIONS = None
@@ -43,7 +43,7 @@ class MudderyAccount(BaseElement):
         shops
     """
     element_type = "ACCOUNT"
-    element_name = _("Account", "elements")
+    element_name = "Account"
     model_name = ""
 
     def __init__(self):
@@ -106,7 +106,7 @@ class MudderyAccount(BaseElement):
 
         # Check name bans
         try:
-            finish_time = ServerBans.get_ban_time("USERNAME", username)
+            finish_time = ServerBans.inst().get_ban_time("USERNAME", username)
             current_time = datetime.datetime.now()
             if current_time <= finish_time:
                 # This username is banned.
@@ -114,7 +114,7 @@ class MudderyAccount(BaseElement):
         except KeyError:
             pass
 
-        info = Accounts.get_info(username)
+        info = Accounts.inst().get_info(username)
         self.username = username
         self.id = info["id"]
         self.type = info["type"]
@@ -233,10 +233,10 @@ class MudderyAccount(BaseElement):
         try:
             if self.type == "STAFF":
                 new_char = ELEMENT(settings.STAFF_CHARACTER_ELEMENT_TYPE)()
-                character_key = GAME_SETTINGS.get("default_staff_character_key")
+                character_key = GameSettings.inst().get("default_staff_character_key")
             else:
                 new_char = ELEMENT(settings.PLAYER_CHARACTER_ELEMENT_TYPE)()
-                character_key = GAME_SETTINGS.get("default_player_character_key")
+                character_key = GameSettings.inst().get("default_player_character_key")
             new_char.set_db_id(char_db_id)
 
             # do the connection
@@ -308,22 +308,22 @@ class MudderyAccount(BaseElement):
         :return:
         """
         # use the playable_characters list to search
-        characters = AccountCharacters.get_account_characters(self.id)
+        characters = AccountCharacters.inst().get_account_characters(self.id)
         if char_db_id not in characters:
             raise KeyError("Can not find the character.")
 
         self.unpuppet_object()
 
         # delete all character data.
-        AccountCharacters.remove_character(self.id, char_db_id)
-        CharacterInfo.remove_character(char_db_id)
-        CharacterLocation.remove_character(char_db_id)
-        CharacterInventory.remove_character(char_db_id)
-        CharacterEquipments.remove_character(char_db_id)
-        CharacterQuests.remove_character(char_db_id)
-        CharacterSkills.remove_character(char_db_id)
-        CharacterCombat.remove_character(char_db_id)
-        HONOURS_MAPPER.remove_character(char_db_id)
+        AccountCharacters.inst().remove_character(self.id, char_db_id)
+        CharacterInfo.inst().remove_character(char_db_id)
+        CharacterLocation.inst().remove_character(char_db_id)
+        CharacterInventory.inst().remove_character(char_db_id)
+        CharacterEquipments.inst().remove_character(char_db_id)
+        CharacterQuests.inst().remove_character(char_db_id)
+        CharacterSkills.inst().remove_character(char_db_id)
+        CharacterCombat.inst().remove_character(char_db_id)
+        HonoursMapper.inst().remove_character(char_db_id)
 
     def at_cmdset_get(self):
         pass
@@ -333,7 +333,7 @@ class MudderyAccount(BaseElement):
         Check if the password is correct.
         """
         try:
-            raw_password = Accounts.get_password(username)
+            raw_password = Accounts.inst().get_password(username)
         except KeyError:
             # Wrong username.
             return False

@@ -3,38 +3,35 @@
 Store object's element key data in memory.
 """
 
-from django.conf import settings
-from muddery.server.utils import utils
+from muddery.server.database.gamedata.base_data import BaseData
+from muddery.server.utils.singleton import Singleton
 
 
-class SystemData(object):
+class SystemData(BaseData, Singleton):
     """
     The storage of system data.
     """
-    # data storage
-    storage_class = utils.class_from_path(settings.DATABASE_ACCESS_OBJECT)
-    session = settings.GAME_DATA_APP
-    config = settings.AL_DATABASES[session]
-    storage = storage_class(session, config["MODELS"], "system_data", "", "")
+    __table_name = "system_data"
+    __category_name = ""
+    __key_field = ""
+    __default_value_field = ""
 
-    @classmethod
-    def save(cls, key, value):
+    def save(self, key, value):
         """
         Store a value.
         :return:
         """
-        cls.storage.save("", "", {
+        self.storage.save("", "", {
             key: value
         })
 
-    @classmethod
-    def load(cls, key, *default):
+    def load(self, key, *default):
         """
         Load a value.
         :return:
         """
         try:
-            data = cls.storage.load("", "")
+            data = self.storage.load("", "")
             return data[key]
         except KeyError as e:
             if len(default) > 0:

@@ -18,7 +18,7 @@ class MudderyLockedExit(ELEMENT("EXIT")):
     The view and commands of locked exits are different from unlocked exits.
     """
     element_type = "LOCKED_EXIT"
-    element_name = _("Locked Exit", "elements")
+    element_name = "Locked Exit"
     model_name = "exit_locks"
 
     def can_traverse(self, character):

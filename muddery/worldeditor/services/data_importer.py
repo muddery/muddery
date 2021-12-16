@@ -5,7 +5,7 @@ Import table data.
 import os, traceback
 import importlib
 from django.conf import settings
-from muddery.server.utils.logger import game_editor_logger as logger
+from muddery.server.utils.logger import logger
 from muddery.worldeditor.utils import readers
 from muddery.server.utils.exception import MudderyError, ERR
 from muddery.server.database.manager import Manager

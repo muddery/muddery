@@ -6,7 +6,6 @@ The DialogueHandler maintains a pool of dialogues.
 """
 
 from muddery.server.mappings.element_set import ELEMENT
-from muddery.server.utils.localized_strings_handler import _
 from muddery.server.statements.statement_handler import STATEMENT_HANDLER
 from muddery.server.database.worlddata.shop_goods import ShopGoods
 from muddery.server.database.worlddata.worlddata import WorldData
@@ -18,7 +17,7 @@ class MudderyShop(BaseElement):
     A shop.
     """
     element_type = "SHOP"
-    element_name = _("Shop", "elements")
+    element_name = "Shop"
     model_name = "shops"
 
     def at_element_setup(self, first_time):

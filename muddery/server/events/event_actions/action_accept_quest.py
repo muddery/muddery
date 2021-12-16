@@ -4,7 +4,6 @@ Event action.
 
 from muddery.server.events.base_event_action import BaseEventAction
 from muddery.server.database.worlddata.worlddata import WorldData
-from muddery.server.utils.localized_strings_handler import _
 
 
 class ActionAcceptQuest(BaseEventAction):
@@ -12,7 +11,7 @@ class ActionAcceptQuest(BaseEventAction):
     Accept a quest.
     """
     key = "ACTION_ACCEPT_QUEST"
-    name = _("Accept a Quest", category="event_actions")
+    name = "Accept a Quest"
     model_name = "action_accept_quest"
     repeatedly = False
 

@@ -19,7 +19,7 @@ class MudderyProfitRoom(ELEMENT("ROOM")):
     Characters in this room can get profits.
     """
     element_type = "PROFIT_ROOM"
-    element_name = _("Profit Room", "elements")
+    element_name = "Profit Room"
     model_name = "profit_rooms"
 
     def __init__(self):

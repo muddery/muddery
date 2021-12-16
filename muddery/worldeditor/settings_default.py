@@ -29,9 +29,13 @@ GAME_DIR = os.getcwd()
 
 # Place to put log files
 LOG_DIR = os.path.join(GAME_DIR, "server", "logs")
-LOG_GAME_SERVER = 'server.log'
+LOG_NAME = 'server.log'
 LOG_LEVEL = logging.INFO
 
+
+######################################################################
+# Database config
+######################################################################
 
 ######################################################################
 # Database config
@@ -48,7 +52,28 @@ LOG_LEVEL = logging.INFO
 # PASSWORD - db admin password (unused in sqlite3)
 # HOST - empty string is localhost (unused in sqlite3)
 # PORT - empty string defaults to localhost (unused in sqlite3)
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': os.path.join(GAME_DIR, "server", "muddery.db3"),
+        'USER': '',
+        'PASSWORD': '',
+        'HOST': '',
+        'PORT': ''
+    },
+}
+
 AL_DATABASES = {
+    'worldeditor': {
+        'ENGINE': 'sqlite3',
+        'MODELS': 'worldeditor.models',
+        'NAME': os.path.join(GAME_DIR, "server", "worldeditor.db3"),
+        'USER': '',
+        'PASSWORD': '',
+        'HOST': '',
+        'PORT': '',
+        'DEBUG': True,
+    },
     'worlddata': {
         'ENGINE': 'sqlite3',
         'MODELS': 'worlddata.models',
@@ -85,7 +110,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 # below. If True, show a detailed traceback for the web
 # browser to display. Note however that this will leak memory when
 # active, so make sure to turn it off for a production server!
-DEBUG = False
+DEBUG = True
 
 # If using Sites/Pages from the web admin, this value must be set to the
 # database-id of the Site (domain) we want to use with this game's Pages.
@@ -103,7 +128,7 @@ IMAGE_PATH = 'image'
 
 # The master urlconf file that contains all of the sub-branches to the
 # applications. Change this to add your own URLs to the website.
-ROOT_URLCONF = 'urls'
+ROOT_URLCONF = 'worldeditor.urls'
 
 # URL prefix for admin media -- CSS, JavaScript and images. Make sure
 # to use a trailing slash. Django1.4+ will look for admin files under

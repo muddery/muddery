@@ -11,7 +11,7 @@ creation commands.
 import time, datetime, traceback, ast
 from apscheduler.schedulers.background import BackgroundScheduler
 from django.conf import settings
-from muddery.server.utils.logger import game_server_logger as logger
+from muddery.server.utils.logger import logger
 from muddery.server.elements.base_element import BaseElement
 from muddery.server.combat.combat_handler import COMBAT_HANDLER
 from muddery.server.mappings.element_set import ELEMENT
@@ -20,7 +20,7 @@ from muddery.server.database.worlddata.default_skills import DefaultSkills
 from muddery.server.database.worlddata.worlddata import WorldData
 from muddery.server.database.worlddata.character_states_dict import CharacterStatesDict
 from muddery.server.utils.loot_handler import LootHandler
-from muddery.server.utils.game_settings import GAME_SETTINGS
+from muddery.server.utils.game_settings import GameSettings
 from muddery.server.utils.localized_strings_handler import _
 from muddery.server.utils.defines import CombatType, EventType
 from muddery.server.utils.object_states_handler import ObjectStatesHandler
@@ -37,7 +37,7 @@ class MudderyCharacter(BaseElement):
     Characters can move in rooms.
     """
     element_type = "CHARACTER"
-    element_name = _("Character", "elements")
+    element_name = "Character"
     model_name = "characters"
 
     last_id = 0
@@ -125,8 +125,8 @@ class MudderyCharacter(BaseElement):
         self.ai_choose_skill = ai_choose_skill_class()
 
         # skill's gcd
-        self.skill_gcd = GAME_SETTINGS.get("global_cd")
-        self.auto_cast_skill_cd = GAME_SETTINGS.get("auto_cast_skill_cd")
+        self.skill_gcd = GameSettings.inst().get("global_cd")
+        self.auto_cast_skill_cd = GameSettings.inst().get("auto_cast_skill_cd")
 
         time_now = time.time()
         self.gcd_finish_time = time_now + self.skill_gcd

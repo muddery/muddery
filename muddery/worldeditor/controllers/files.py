@@ -5,7 +5,7 @@ Battle commands. They only can be used when a character is in a combat.
 import os, tempfile, time
 from PIL import Image
 from django.conf import settings
-from muddery.server.utils.logger import game_editor_logger as logger
+from muddery.server.utils.logger import logger
 from muddery.worldeditor.services import exporter, importer
 from muddery.worldeditor.utils.response import success_response, file_response
 from muddery.server.utils.exception import MudderyError, ERR

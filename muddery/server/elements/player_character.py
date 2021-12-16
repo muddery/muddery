@@ -12,14 +12,14 @@ import ast, traceback
 import weakref
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
-from muddery.server.utils.logger import game_server_logger as logger
+from muddery.server.utils.logger import logger
 from muddery.server.server import Server
 from muddery.server.utils.quest_handler import QuestHandler
 from muddery.server.utils.statement_attribute_handler import StatementAttributeHandler
 from muddery.server.utils.exception import MudderyError
 from muddery.server.utils.localized_strings_handler import _
-from muddery.server.utils.game_settings import GAME_SETTINGS
-from muddery.server.utils.dialogue_handler import DIALOGUE_HANDLER
+from muddery.server.utils.game_settings import GameSettings
+from muddery.server.utils.dialogue_handler import DialogueHandler
 from muddery.server.utils.defines import ConversationType
 from muddery.server.utils.defines import CombatType
 from muddery.server.database.worlddata.worlddata import WorldData
@@ -34,14 +34,14 @@ from muddery.server.mappings.element_set import ELEMENT
 from muddery.server.utils import defines
 from muddery.server.utils.data_field_handler import DataFieldHandler, ConstDataHolder
 from muddery.server.combat.combat_handler import COMBAT_HANDLER
-from muddery.server.database.gamedata.honours_mapper import HONOURS_MAPPER
+from muddery.server.database.gamedata.honours_mapper import HonoursMapper
 from muddery.server.database.gamedata.character_inventory import CharacterInventory
 from muddery.server.database.gamedata.character_equipments import CharacterEquipments
 from muddery.server.database.gamedata.character_info import CharacterInfo
 from muddery.server.database.gamedata.character_skills import CharacterSkills
 from muddery.server.database.gamedata.character_combat import CharacterCombat
 from muddery.server.database.gamedata.character_location import CharacterLocation
-from muddery.server.combat.match_pvp import MATCH_COMBAT_HANDLER
+from muddery.server.combat.match_pvp import MatchPVPHandler
 from muddery.server.utils.object_states_handler import ObjectStatesHandler
 from muddery.server.database.gamedata.object_storage import DBObjectStorage
 from muddery.server.events.event_trigger import EventTrigger
@@ -67,7 +67,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
 
     """
     element_type = "PLAYER_CHARACTER"
-    element_name = _("Player Character", "elements")
+    element_name = "Player Character"
     model_name = "player_characters"
 
     def __init__(self):
@@ -226,7 +226,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         # initialize events
         self.event = EventTrigger(self)
 
-        self.solo_mode = GAME_SETTINGS.get("solo_mode")
+        self.solo_mode = GameSettings.inst().get("solo_mode")
         self.available_channels = {}
         self.current_dialogues = set()
 
@@ -353,7 +353,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
             if self.location:
                 self.location.at_character_leave(self)
 
-        MATCH_COMBAT_HANDLER.remove(self)
+        MatchPVPHandler.inst().remove(self)
 
     def refresh_states(self, keep_states):
         """
@@ -1712,7 +1712,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         """
         # Reborn at its home.
         home = None
-        default_home_key = GAME_SETTINGS.get("default_player_home_key")
+        default_home_key = GameSettings.inst().get("default_player_home_key")
         if default_home_key:
             try:
                 home = Server.world.get_room(default_home_key)
@@ -1747,7 +1747,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         else:
             self.current_dialogues = set()
 
-        if not GAME_SETTINGS.get("auto_resume_dialogues"):
+        if not GameSettings.inst().get("auto_resume_dialogues"):
             # Can not auto resume dialogues.
             return
 
@@ -1761,7 +1761,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         Returns:
             None
         """
-        if not GAME_SETTINGS.get("auto_resume_dialogues"):
+        if not GameSettings.inst().get("auto_resume_dialogues"):
             # Can not auto resume dialogues.
             return
 
@@ -1787,7 +1787,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         self.set_target(npc)
 
         # Get NPC's dialogue list.
-        dialogues = DIALOGUE_HANDLER.get_npc_dialogues(self, npc)
+        dialogues = DialogueHandler.inst().get_npc_dialogues(self, npc)
         
         self.save_current_dialogues(dialogues)
         self.msg({"dialogue": dialogues})
@@ -1803,7 +1803,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
             None
         """
         # Get next sentences_list.
-        dialogue = DIALOGUE_HANDLER.get_dialogues_by_key(dlg_key)
+        dialogue = DialogueHandler.inst().get_dialogues_by_key(dlg_key)
 
         # Send the dialogue to the player.
         self.save_current_dialogues(dialogue)
@@ -1826,13 +1826,13 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
 
         try:
             # Finish current dialogue
-            DIALOGUE_HANDLER.finish_dialogue(dlg_key, self, npc)
+            DialogueHandler.inst().finish_dialogue(dlg_key, self, npc)
         except Exception as e:
             ostring = "Can not finish dialogue %s: %s" % (dlg_key, e)
             logger.log_trace(ostring)
 
         # Get next dialogue.
-        next_dialogues = DIALOGUE_HANDLER.get_next_dialogues(dlg_key, self, npc)
+        next_dialogues = DialogueHandler.inst().get_next_dialogues(dlg_key, self, npc)
 
         # Send dialogues_list to the player.
         self.save_current_dialogues(next_dialogues)
@@ -1887,16 +1887,16 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         Show character's rankings.
         """
         honour_settings = HonourSettings.get_first_data()
-        top_rankings = HONOURS_MAPPER.get_top_rankings(honour_settings.top_rankings_number)
-        nearest_rankings = HONOURS_MAPPER.get_nearest_rankings(self, honour_settings.nearest_rankings_number)
+        top_rankings = HonoursMapper.inst().get_top_rankings(honour_settings.top_rankings_number)
+        nearest_rankings = HonoursMapper.inst().get_nearest_rankings(self, honour_settings.nearest_rankings_number)
 
         rankings = top_rankings
         rankings.extend([char_id for char_id in nearest_rankings if char_id not in top_rankings])
 
-        data = [{"name": CharacterInfo.get_nickname(char_id),
+        data = [{"name": CharacterInfo.inst().get_nickname(char_id),
                  "id": char_id,
-                 "ranking": HONOURS_MAPPER.get_ranking(char_id),
-                 "honour": HONOURS_MAPPER.get_honour(char_id)} for char_id in rankings]
+                 "ranking": HonoursMapper.inst().get_ranking(char_id),
+                 "honour": HonoursMapper.inst().get_honour(char_id)} for char_id in rankings]
         self.msg({"rankings": data})
 
     def get_quest_info(self, quest_key):

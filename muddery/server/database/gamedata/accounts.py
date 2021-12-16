@@ -4,22 +4,20 @@ Store object's element key data in memory.
 """
 
 import datetime
-from django.conf import settings
-from muddery.server.utils import utils
+from muddery.server.database.gamedata.base_data import BaseData
+from muddery.server.utils.singleton import Singleton
 
 
-class Accounts(object):
+class Accounts(BaseData, Singleton):
     """
     The storage of player accounts.
     """
-    # data storage
-    storage_class = utils.class_from_path(settings.DATABASE_ACCESS_OBJECT_NO_CACHE)
-    session = settings.GAME_DATA_APP
-    config = settings.AL_DATABASES[session]
-    storage = storage_class(session, config["MODELS"], "accounts", "", "username")
+    __table_name = "accounts"
+    __category_name = ""
+    __key_field = "username"
+    __default_value_field = ""
 
-    @classmethod
-    def add(cls, username, password, account_id, type):
+    def add(self, username, password, account_id, type):
         """
         Add a new account.
 
@@ -29,7 +27,7 @@ class Accounts(object):
         :return:
         """
         current_time = datetime.datetime.now()
-        cls.storage.add("", username, {
+        self.storage.add("", username, {
             "password": password,
             "account_id": account_id,
             "type": type,
@@ -37,65 +35,59 @@ class Accounts(object):
             "last_login": current_time,
         })
 
-    @classmethod
-    def remove(cls, username):
+    def remove(self, username):
         """
         Remove an account.
 
         :param username: account's username
         """
-        cls.storage.delete("", username)
+        self.storage.delete("", username)
 
-    @classmethod
-    def has(cls, username):
+    def has(self, username):
         """
         Check if this username exists.
 
         Args:
             username: (string) username.
         """
-        return cls.storage.has("", username)
+        return self.storage.has("", username)
 
-    @classmethod
-    def get_password(cls, username):
+    def get_password(self, username):
         """
         Get an account's password.
         :param username:
         :return:
         """
-        data = cls.storage.load("", username)
+        data = self.storage.load("", username)
         return data["password"]
 
-    @classmethod
-    def set_password(cls, username, password):
+    def set_password(self, username, password):
         """
         Set a new password.
         :param username:
         :return:
         """
-        cls.storage.save("", username, {
+        self.storage.save("", username, {
             "password": password,
         })
 
-    @classmethod
-    def get_info(cls, username):
+    def get_info(self, username):
         """
         Get an account's information.
         :param username:
         :return:
         """
-        data = cls.storage.load("", username)
+        data = self.storage.load("", username)
         return {
             "id": data["account_id"],
             "type": data["type"],
         }
 
-    @classmethod
-    def update_login_time(cls, username):
+    def update_login_time(self, username):
         """
         Update the account's last login time.
         """
         current_time = datetime.datetime.now()
-        cls.storage.save("", username, {
+        self.storage.save("", username, {
             "last_login": current_time,
         })

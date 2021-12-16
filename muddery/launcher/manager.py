@@ -109,7 +109,7 @@ def migrate_database():
 
     try:
         from muddery.server.server import Server
-        Server.instance().connect_db()
+        Server.inst()
     except Exception as e:
         traceback.print_exc()
         print("Migrate database error: %s" % e)
@@ -140,9 +140,22 @@ def setup_server():
     django.setup()
 
     from muddery.server.server import Server
-    Server.inst().connect_db()
     Server.inst().create_the_world()
     Server.inst().create_command_handler()
+
+
+def setup_editor():
+    """
+    Setup the server.
+    """
+    django.setup()
+
+    if not utils.check_database():
+        print("Migrating databases.")
+        utils.create_editor_database()
+
+    from muddery.worldeditor.server import Server
+    Server.inst()
 
 
 def collect_static():

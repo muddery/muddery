@@ -5,7 +5,6 @@ Event action.
 import random
 from muddery.server.events.base_event_action import BaseEventAction
 from muddery.server.database.worlddata.worlddata import WorldData
-from muddery.server.utils.localized_strings_handler import _
 
 
 class ActionAttack(BaseEventAction):
@@ -13,7 +12,7 @@ class ActionAttack(BaseEventAction):
     Attack a target.
     """
     key = "ACTION_ATTACK"
-    name = _("Attack", category="event_actions")
+    name = "Attack"
     model_name = "action_attack"
     repeatedly = False
 

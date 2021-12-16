@@ -67,7 +67,7 @@ def create_secret_key():
     return secret_key
 
 
-def create_settings_file(gamedir, setting_dict=None):
+def create_server_settings_file(gamedir, setting_dict=None):
     """
     Uses the template settings file to build a working
     settings file.
@@ -82,6 +82,41 @@ def create_settings_file(gamedir, setting_dict=None):
 
     # tweak the settings
     muddery_settings_file = Path(os.path.join(configs.MUDDERY_LIB, "settings_default.py")).as_posix()
+    default_setting_dict = {"MUDDERY_SETTINGS_DEFAULT": muddery_settings_file,
+                            "ALLOWED_HOSTS": "['*']",
+                            "WEBSERVER_PORTS": "[(8000, 5001)]",
+                            "WEBSOCKET_CLIENT_PORT": "8001",
+                            "AMP_PORT": "5000",
+                            "LANGUAGE_CODE": "'en-us'",
+                            "SECRET_KEY":"'%s'" % create_secret_key()}
+
+    if setting_dict:
+        merged_setting_dict = dict(default_setting_dict, **setting_dict)
+    else:
+        merged_setting_dict = default_setting_dict
+
+    # modify the settings
+    settings_string = settings_string.format(**merged_setting_dict)
+
+    with open(settings_path, 'w') as f:
+        f.write(settings_string)
+
+
+def create_editor_settings_file(gamedir, setting_dict=None):
+    """
+    Uses the template settings file to build a working
+    settings file.
+
+    Args:
+        gamedir: (string) game root's path
+        setting_dict: (dict)preset settings.
+    """
+    settings_path = os.path.join(gamedir, "worldeditor", "conf", "settings.py")
+    with open(settings_path, 'r') as f:
+        settings_string = f.read()
+
+    # tweak the settings
+    muddery_settings_file = Path(os.path.join(configs.MUDDERY_LIB, "worldeditor", "settings_default.py")).as_posix()
     default_setting_dict = {"MUDDERY_SETTINGS_DEFAULT": muddery_settings_file,
                             "ALLOWED_HOSTS": "['*']",
                             "WEBSERVER_PORTS": "[(8000, 5001)]",
@@ -198,7 +233,8 @@ def create_game_directory(gamedir, template, port=None):
             "AMP_PORT": "%s" % (port + 2),
         }
 
-    create_settings_file(gamedir, setting_py_dict)
+    create_server_settings_file(gamedir, setting_py_dict)
+    create_editor_settings_file(gamedir, setting_py_dict)
 
     setting_js_dict = None
     if port:
@@ -426,6 +462,27 @@ def create_database():
 
     django_args = ["migrate", "worlddata"]
     django_kwargs = {"database": "worlddata"}
+    try:
+        django.core.management.call_command(*django_args, **django_kwargs)
+    except django.core.management.base.CommandError as exc:
+        raise(configs.ERROR_INPUT.format(traceback=exc, args=django_args, kwargs=django_kwargs))
+
+
+def create_editor_database():
+    """
+    Create the game's database.
+    """
+    # make migrations
+    django_args = ["makemigrations"]
+    django_kwargs = {}
+    try:
+        django.core.management.call_command(*django_args, **django_kwargs)
+    except django.core.management.base.CommandError as exc:
+        raise(configs.ERROR_INPUT.format(traceback=exc, args=django_args, kwargs=django_kwargs))
+
+    # migrate the database
+    django_args = ["migrate"]
+    django_kwargs = {}
     try:
         django.core.management.call_command(*django_args, **django_kwargs)
     except django.core.management.base.CommandError as exc:

@@ -6,14 +6,13 @@ in the character. It controls quest's objectives.
 
 """
 
-from muddery.server.utils.logger import game_server_logger as logger
+from muddery.server.utils.logger import logger
 from muddery.server.utils import defines
 from muddery.server.database.gamedata.quest_objectives import QuestObjectives
 from muddery.server.statements.statement_handler import STATEMENT_HANDLER
-from muddery.server.utils.dialogue_handler import DIALOGUE_HANDLER
 from muddery.server.utils.loot_handler import LootHandler
 from muddery.server.utils.localized_strings_handler import _
-from muddery.server.utils.game_settings import GAME_SETTINGS
+from muddery.server.utils.game_settings import GameSettings
 from muddery.server.database.worlddata.worlddata import WorldData
 from muddery.server.database.worlddata.loot_list import QuestRewardList
 from muddery.server.database.worlddata.quest_objectives import QuestObjectives
@@ -26,7 +25,7 @@ class MudderyQuest(BaseElement):
     This class controls quest's objectives. Hooks are called when a character doing some things.
     """
     element_type = "QUEST"
-    element_name = _("Quest", "elements")
+    element_name = "Quest"
     model_name = "quests"
 
     def __init__(self):
@@ -94,7 +93,7 @@ class MudderyQuest(BaseElement):
         This returns a list of available commands.
         """
         commands = []
-        if GAME_SETTINGS.get("can_give_up_quests"):
+        if GameSettings.inst().get("can_give_up_quests"):
             commands.append({"name": _("Give Up"), "cmd": "giveup_quest", "args": self.const.key})
         return commands
 
