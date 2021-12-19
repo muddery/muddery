@@ -90,15 +90,19 @@ class ElementSet(object):
         if key in self.class_dict:
             return self.class_dict[key]
         elif key in self.module_dict:
-            cls = class_from_path(self.module_dict[key])
-            if key in self.class_dict:
-                if self.class_dict[key] != cls:
-                    logger.log_info("Element %s is replaced by %s." % (key, cls))
+            try:
+                cls = class_from_path(self.module_dict[key])
+                if key in self.class_dict:
+                    if self.class_dict[key] != cls:
+                        logger.log_info("Element %s is replaced by %s." % (key, cls))
+                self.class_dict[key] = cls
+                return cls
+            except Exception as e:
+                logger.log_trace("Load module error: %s" % e)
 
-            self.class_dict[key] = cls
-            return cls
-
-        logger.log_err("Can not find element type: %s." % key)
+        # If can not find the element, return the base element.
+        from muddery.server.elements.base_element import BaseElement
+        return BaseElement
 
     def get_module(self, key):
         """
@@ -112,11 +116,11 @@ class ElementSet(object):
         """
         self.load_classes()
 
-        cls = self.class_dict[group_key]
-        element_types = {group_key: cls}
+        group_class = self.class_dict[group_key]
+        element_types = {group_key: group_class}
 
         for key in self.class_dict:
-            if issubclass(self.class_dict[key], cls):
+            if issubclass(self.class_dict[key], group_class):
                 element_types[key] = self.class_dict[key]
 
         return element_types

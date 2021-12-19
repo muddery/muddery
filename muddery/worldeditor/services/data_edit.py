@@ -4,6 +4,7 @@ Battle commands. They only can be used when a character is in a combat.
 
 from django.db import transaction
 from django.core.exceptions import ObjectDoesNotExist
+from wtforms import fields as wtfields
 from muddery.server.utils.exception import MudderyError, ERR
 from muddery.worldeditor.dao import general_query_mapper
 from muddery.worldeditor.dao.common_mappers import WORLD_AREAS, WORLD_ROOMS
@@ -15,6 +16,7 @@ from muddery.server.mappings.event_action_set import EVENT_ACTION_SET
 from muddery.server.utils.localized_strings_handler import _
 from muddery.worldeditor.forms.location_field import LocationField
 from muddery.worldeditor.forms.image_field import ImageField
+from muddery.worldeditor.dao.general_query_mapper import get_all_fields
 
 
 def query_form(table_name, condition=None):
@@ -44,27 +46,24 @@ def query_form(table_name, condition=None):
         form = form_class()
 
     fields = []
-    fields.append({
-        "name": "id",
-        "label": "",
-        "disabled": True,
-        "help_text": "",
-        "type": "Hidden",
-        "value": record.id if record else "",
-    })
+    model_fields = get_all_fields(table_name)
 
-    for key, field in form.fields.items():
+    label_category = "field_" + table_name
+    help_category = "help_" + table_name
+    for model_field in model_fields:
+        form_field = getattr(form, model_field)
         info = {
-            "name": key,
-            "label": field.label,
-            "disabled": field.disabled,
-            "help_text": field.help_text,
-            "type": field.widget.__class__.__name__,
+            "name": model_field,
+            "label": _(model_field, label_category),
+            "disabled": (model_field == "id"),
+            "help_text": _(model_field, help_category),
+            "type": form_field.__class__.__name__,
         }
 
         if record:
-            info["value"] = str(record.serializable_value(key))
+            info["value"] = getattr(record, form_field)
 
+        """
         if info["type"] == "Select":
             info["choices"] = field.choices
 
@@ -73,6 +72,7 @@ def query_form(table_name, condition=None):
         elif isinstance(field, ImageField):
             info["type"] = "Image"
             info["image_type"] = field.get_type()
+        """
 
         fields.append(info)
 

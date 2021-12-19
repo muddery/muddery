@@ -7,7 +7,7 @@ from django.conf import settings
 from muddery.launcher.upgrader.upgrade_handler import UPGRADE_HANDLER
 from muddery.launcher import configs
 from muddery.launcher.utils import copy_tree
-from muddery.server.database.manager import Manager
+from muddery.server.database.db_manager import DBManager
 from muddery.worldeditor.services.data_importer import import_file
 
 
@@ -101,7 +101,7 @@ def import_data_path(path, clear=True, except_errors=False):
         except_errors: (boolean) except error records and load other records.
     """
     # import tables one by one
-    tables = Manager.inst().get_tables(settings.WORLD_DATA_APP)
+    tables = DBManager.inst().get_tables(settings.WORLD_DATA_APP)
     for table_name in tables:
         file_names = glob.glob(os.path.join(path, table_name) + ".*")
 
@@ -124,7 +124,7 @@ def import_table_path(path, table_name, clear=True, except_errors=False):
         except_errors: (boolean) except error records and load other records.
     """
     if clear:
-        Manager.inst().clear_table(settings.WORLD_DATA_APP, table_name)
+        DBManager.inst().clear_table(settings.WORLD_DATA_APP, table_name)
 
     if not os.path.isdir(path):
         return

@@ -74,6 +74,16 @@ AL_DATABASES = {
         'PORT': '',
         'DEBUG': True,
     },
+    'gamedata': {
+        'ENGINE': 'sqlite3',
+        'MODELS': 'gamedata.models',
+        'NAME': os.path.join(GAME_DIR, "server", "gamedata.db3"),
+        'USER': '',
+        'PASSWORD': '',
+        'HOST': '',
+        'PORT': '',
+        'DEBUG': True,
+    },
     'worlddata': {
         'ENGINE': 'sqlite3',
         'MODELS': 'worlddata.models',

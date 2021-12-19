@@ -8,7 +8,7 @@ from django.conf import settings
 from muddery.server.utils.logger import logger
 from muddery.worldeditor.utils import readers
 from muddery.server.utils.exception import MudderyError, ERR
-from muddery.server.database.manager import Manager
+from muddery.server.database.db_manager import DBManager
 
 
 def import_file(fullname, file_type=None, table_name=None, clear=True, except_errors=False, **kwargs):
@@ -188,10 +188,8 @@ def import_file(fullname, file_type=None, table_name=None, clear=True, except_er
             file_type = ext_name[1:].lower()
 
     # get model
-    session = Manager.inst().get_session(settings.WORLD_DATA_APP)
-    config = settings.AL_DATABASES[settings.WORLD_DATA_APP]
-    module = importlib.import_module(config["MODELS"])
-    model = getattr(module, table_name)
+    session = DBManager.inst().get_session(settings.WORLD_DATA_APP)
+    model = DBManager.inst().get_model(settings.WORLD_DATA_APP, table_name)
 
     if clear:
         session.query(model).delete()

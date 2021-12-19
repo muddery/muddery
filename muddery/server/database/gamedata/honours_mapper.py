@@ -8,7 +8,7 @@ from django.conf import settings
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 from sqlalchemy import select, update, delete
 from muddery.server.utils.utils import class_from_path
-from muddery.server.database.manager import Manager
+from muddery.server.database.db_manager import DBManager
 from muddery.server.utils.singleton import Singleton
 
 
@@ -20,7 +20,7 @@ class HonoursMapper(Singleton):
         self.model_name = "honours"
         module = importlib.import_module(settings.GAME_DATA_MODEL_FILE)
         self.model = getattr(module, self.model_name)
-        self.session = Manager.inst().get_session(settings.GAME_DATA_APP)
+        self.session = DBManager.inst().get_session(settings.GAME_DATA_APP)
         self.honours = {}
         self.rankings = []
 

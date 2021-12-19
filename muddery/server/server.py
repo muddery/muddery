@@ -6,7 +6,7 @@ from django.conf import settings
 from muddery.server.utils.utils import class_from_path
 from muddery.server.utils.singleton import Singleton
 from muddery.server.service.command_handler import CommandHandler
-from muddery.server.database.manager import Manager
+from muddery.server.database.db_manager import DBManager
 
 
 class Server(Singleton):
@@ -36,8 +36,8 @@ class Server(Singleton):
             return
 
         try:
-            Manager.inst().connect()
-            Manager.inst().create_tables()
+            DBManager.inst().connect()
+            DBManager.inst().create_tables()
             self.db_connected = True
         except Exception as e:
             traceback.print_exc()

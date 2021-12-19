@@ -10,7 +10,7 @@ from muddery.server.utils.logger import logger
 from muddery.server.utils.singleton import Singleton
 
 
-class Manager(Singleton):
+class DBManager(Singleton):
     """
     Database manager.
     """

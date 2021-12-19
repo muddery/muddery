@@ -10,7 +10,7 @@ from sqlalchemy import func
 from muddery.server.database.storage.base_kv_storage import BaseKeyValueStorage
 from muddery.server.utils.exception import MudderyError, ERR
 from muddery.server.utils.utils import class_from_path
-from muddery.server.database.manager import Manager
+from muddery.server.database.db_manager import DBManager
 
 
 class KeyValueTableAl(BaseKeyValueStorage):
@@ -34,7 +34,7 @@ class KeyValueTableAl(BaseKeyValueStorage):
         module = importlib.import_module(model_path)
         self.model = getattr(module, model_name)
         self.columns = self.model.__table__.columns.keys()
-        self.session = Manager.inst().get_session(session)
+        self.session = DBManager.inst().get_session(session)
 
         exclude_fields = set()
         self.category_field = category_field

@@ -77,8 +77,8 @@ class Processor(object):
             return error_response(ERR.no_authentication, msg="Need authentication.")
 
         # check staff
-        if processor.staff and not request.user.is_staff and not request.user.is_superuser:
-            return error_response(ERR.no_permission, msg="No permission.")
+        #if processor.staff and not request.user.is_staff and not request.user.is_superuser:
+        #    return error_response(ERR.no_permission, msg="No permission.")
 
         # call function
         try:

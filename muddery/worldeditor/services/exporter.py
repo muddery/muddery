@@ -8,7 +8,7 @@ import zipfile
 from django.conf import settings
 from muddery.launcher import configs
 from muddery.server.utils.exception import MudderyError, ERR
-from muddery.server.database.manager import Manager
+from muddery.server.database.db_manager import DBManager
 from muddery.worldeditor.utils import writers
 from muddery.worldeditor.dao import general_query_mapper
 
@@ -63,7 +63,7 @@ def export_zip_all(file_obj, file_type=None):
         archive = zipfile.ZipFile(file_obj, 'w', zipfile.ZIP_DEFLATED)
 
         # get model names
-        models = Manager.inst().get_tables(settings.WORLD_DATA_APP)
+        models = DBManager.inst().get_tables(settings.WORLD_DATA_APP)
         for model in models:
             model_name = model._meta.object_name
             export_file(temp_filename, model_name, file_type)

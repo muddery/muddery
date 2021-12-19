@@ -5,7 +5,7 @@ Load and cache all worlddata.
 import importlib
 from django.conf import settings
 from sqlalchemy import UniqueConstraint, select
-from muddery.server.database.manager import Manager
+from muddery.server.database.db_manager import DBManager
 from muddery.server.utils.exception import MudderyError
 
 _GA = object.__getattribute__
@@ -44,7 +44,7 @@ class MemoryTableAl(object):
         module = importlib.import_module(model_path)
         self.model = getattr(module, model_name)
         self.columns = self.model.__table__.columns.keys()
-        self.session = Manager.inst().get_session(session)
+        self.session = DBManager.inst().get_session(session)
 
         self.records = []
         self.table_fields = {}

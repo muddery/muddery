@@ -22,10 +22,10 @@ class ObjectStatesHandler(object):
     """
     Handler for adding Attributes to the object.
     """
-    def __init__(self, obj_id, storage):
+    def __init__(self, obj_id, storage_class):
         """Initialize handler."""
         self.obj_id = obj_id
-        self.storage = storage
+        self.storage = storage_class()
 
     def has(self, key):
         """

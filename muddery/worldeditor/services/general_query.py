@@ -4,7 +4,7 @@ Battle commands. They only can be used when a character is in a combat.
 
 from django.conf import settings
 from muddery.worldeditor.dao import general_query_mapper
-from muddery.server.database.manager import Manager
+from muddery.server.database.db_manager import DBManager
 from muddery.server.utils.exception import MudderyError, ERR
 from muddery.server.utils.localized_strings_handler import _
 
@@ -53,7 +53,7 @@ def query_tables():
     """
     Query all tables' names.
     """
-    tables = Manager.inst().get_tables()
+    tables = DBManager.inst().get_tables()
     models_info = [{
         "key": table,
         "name": _(table, category="models") + "(" + table + ")"

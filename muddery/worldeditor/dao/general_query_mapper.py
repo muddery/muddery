@@ -8,7 +8,7 @@ from django.conf import settings
 from django.db import connections
 from django.core.exceptions import ObjectDoesNotExist
 from muddery.server.mappings.element_set import ELEMENT
-from muddery.server.database.manager import Manager
+from muddery.server.database.db_manager import DBManager
 
 
 def get_all_fields(table_name):
@@ -19,9 +19,7 @@ def get_all_fields(table_name):
         table_name: (string) db table's name.
     """
     # get model
-    session_name = settings.WORLD_DATA_MODEL_FILE
-    module = importlib.import_module(session_name)
-    model = getattr(module, table_name)
+    model = DBManager.inst().get_model(settings.WORLD_DATA_APP, table_name)
     return model.__table__.columns.keys()
 
 
@@ -29,10 +27,9 @@ def get_query(table_name, condition=None):
     """
     Get a query of given condition.
     """
-    session_name = settings.WORLD_DATA_MODEL_FILE
-    session = Manager.inst().get_session(session_name)
-    module = importlib.import_module(session_name)
-    model = getattr(module, table_name)
+    session_name = settings.WORLD_DATA_APP
+    session = DBManager.inst().get_session(session_name)
+    model = DBManager.inst().get_model(session_name, table_name)
 
     # set conditions
     stmt = select(model)
@@ -42,7 +39,7 @@ def get_query(table_name, condition=None):
         stmt = stmt.where(**where_condition)
 
     result = session.execute(stmt)
-    return result
+    return result.scalars()
 
 
 def filter_records(table_name, condition=None):
@@ -114,10 +111,9 @@ def delete_records(table_name, condition=None):
     """
     Delete records with the given conditions.
     """
-    session_name = settings.WORLD_DATA_MODEL_FILE
-    session = Manager.inst().get_session(session_name)
-    module = importlib.import_module(session_name)
-    model = getattr(module, table_name)
+    session_name = settings.WORLD_DATA_APP
+    session = DBManager.inst().get_session(session_name)
+    model = DBManager.inst().get_model(session_name, table_name)
 
     # set conditions
     stmt = delete(model)
@@ -166,9 +162,10 @@ def get_all_from_tables(tables, condition=None):
     if not tables:
         return
 
-    session_name = settings.WORLD_DATA_MODEL_FILE
-    session = Manager.inst().get_session(session_name)
-    module = importlib.import_module(session_name)
+    session_name = settings.WORLD_DATA_APP
+    session = DBManager.inst().get_session(session_name)
+    config = settings.AL_DATABASES[session_name]
+    module = importlib.import_module(config["models"])
 
     if len(tables) == 1:
         # only one table

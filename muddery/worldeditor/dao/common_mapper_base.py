@@ -6,7 +6,7 @@ from django.conf import settings
 from sqlalchemy import select, update, delete, func
 from muddery.server.mappings.element_set import ELEMENT
 from muddery.worldeditor.dao import general_query_mapper as query
-from muddery.server.database.manager import Manager
+from muddery.server.database.db_manager import DBManager
 
 
 class CommonMapper(object):
@@ -16,9 +16,9 @@ class CommonMapper(object):
     def __init__(self, model_name):
         self.model_name = model_name
 
-        session_name = settings.WORLD_DATA_MODEL_FILE
-        self.session = Manager.inst().get_session(session_name)
-        self.model = Manager.inst().get_model(session_name, model_name)
+        session_name = settings.WORLD_DATA_APP
+        self.session = DBManager.inst().get_session(session_name)
+        self.model = DBManager.inst().get_model(session_name, model_name)
 
     def all(self):
         stmt = select(self.model)

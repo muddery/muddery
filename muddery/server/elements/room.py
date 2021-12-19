@@ -30,7 +30,7 @@ class MudderyRoom(BaseElement):
     properties and methods available on all Objects.
     """
     element_type = "ROOM"
-    element_name = "Room"
+    element_name = _("Room")
     model_name = "world_rooms"
 
     def __init__(self):

@@ -12,12 +12,13 @@ daphne -p 8001 --proxy-headers server.websocket:application
 
 import os
 from django.core.asgi import get_asgi_application
-from muddery.launcher.manager import setup_editor
+from muddery.launcher.manager import setup_server, setup_editor
 
 # Game directory structure
 SETTINGS_DOTPATH = "worldeditor.conf.settings"
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', SETTINGS_DOTPATH)
 
+setup_server()
 setup_editor()
 
 wsgi_application = get_asgi_application()
