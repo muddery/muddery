@@ -2,10 +2,11 @@
 This model translates default strings into localized strings.
 """
 
+import importlib, inspect
 from django.conf import settings
 from django import forms
 from muddery.server.utils.logger import logger
-from muddery.server.utils.utils import classes_in_path
+from muddery.worldeditor.forms.create_form import Form
 
 
 class FormSet(object):
@@ -21,24 +22,28 @@ class FormSet(object):
         Add all forms from the form path.
         """
         # load classes
-        for cls in classes_in_path(settings.PATH_DATA_FORMS_BASE, forms.ModelForm):
-            if hasattr(cls, "Meta") and hasattr(cls.Meta, "model"):
-                model = cls.Meta.model
-                model_name = model.__name__
+        base_class = Form
+        module = importlib.import_module(settings.PATH_DATA_FORMS_BASE)
+        for name, obj in vars(module).items():
+            if inspect.isclass(obj) and issubclass(obj, base_class) and obj is not base_class:
+                cls = obj
+                if hasattr(cls, "Info"):
+                    info = cls.Info
+                    table_name = info.table_name
 
-                if model_name in self.dict:
-                    logger.log_info("Form %s is replaced by %s." % (model_name, cls))
+                    if table_name in self.dict:
+                        logger.log_info("Form %s is replaced by %s." % (table_name, cls))
 
-                self.dict[model_name] = cls
+                    self.dict[table_name] = cls
 
-    def get(self, model_name):
+    def get(self, table_name):
         """
         Get a form.
 
         Args:
-            model_name: (string) model's name
+            table_name: (string) table's name
         """
-        return self.dict[model_name]
+        return self.dict[table_name]
 
 
 FORM_SET = FormSet()

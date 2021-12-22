@@ -166,7 +166,7 @@ CommonEditor.prototype.createFieldController = function(field, readonly) {
     else if (type == "Image") {
         controller = field_creator.createImageInput(field.image_type, name, label, value, help_text, readonly);
     }
-    else if (type == "Hidden") {
+    else if (type == "HiddenInput") {
         controller = field_creator.createHiddenInput(name, label, value, help_text, readonly);
     }
     else if (type == "TextInput") {
@@ -175,7 +175,7 @@ CommonEditor.prototype.createFieldController = function(field, readonly) {
     else if (type == "NumberInput") {
         controller = field_creator.createNumberInput(name, label, value, help_text, readonly);
     }
-    else if (type == "Textarea") {
+    else if (type == "TextArea") {
         controller = field_creator.createTextArea(name, label, value, help_text, readonly);
     }
     else if (type == "CheckboxInput") {

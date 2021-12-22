@@ -11,7 +11,14 @@ from muddery.server.database.db_manager import DBManager
 from muddery.worldeditor.dao.general_query_mapper import get_all_fields
 
 
-def get_form(table_name):
+class FormInfo(object):
+    """
+    Set form's information.
+    """
+    table_name = ""
+
+
+def create_form(table_name):
     """
     Get a form of a table.
     """
@@ -21,10 +28,14 @@ def get_form(table_name):
 
     cls = Form
 
+    Info = FormInfo
+    setattr(Info, "table_name", table_name)
+    setattr(cls, "Info", Info)
+
     # Add default form fields according to the field type.
     for model_field in model_fields:
         model_column = getattr(model, model_field)
-        form_column_type = None
+
         if model_field == "id":
             form_column_type = fields.HiddenField
         elif type(model_column.type) == Integer:
@@ -43,6 +54,13 @@ def get_form(table_name):
             # default input field
             form_column_type = fields.StringField
 
-        setattr(cls, model_field, form_column_type())
+        attributes = {}
+        validator = []
+        if not model_column.nullable:
+            validator.append(validators.DataRequired())
+
+        attributes["validators"] = validator
+
+        setattr(cls, model_field, form_column_type(**attributes))
 
     return cls

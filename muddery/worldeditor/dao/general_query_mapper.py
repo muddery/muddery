@@ -35,8 +35,8 @@ def get_query(table_name, condition=None):
     stmt = select(model)
 
     if condition:
-        where_condition = {getattr(model, field): value for field, value in condition}
-        stmt = stmt.where(**where_condition)
+        where_condition = [(getattr(model, field)) == value for field, value in condition.items()]
+        stmt = stmt.where(*where_condition)
 
     result = session.execute(stmt)
     return result.scalars()

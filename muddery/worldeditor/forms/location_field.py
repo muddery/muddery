@@ -3,11 +3,20 @@
 World location's field. Group rooms by areas.
 """
 
-from django import forms
+from wtforms import widgets, fields
 
 
-class LocationField(forms.ChoiceField):
+class Location(widgets.TextInput):
+    pass
+
+
+class LocationField(fields.SelectField):
     """
     World location's field.
     """
-    pass
+    def __init__(self, *args, **kwargs):
+        """
+        Args:
+            image_type: (string) image's type, could be "icon" or "image".
+        """
+        super(LocationField, self).__init__(widget=Location, *args, **kwargs)

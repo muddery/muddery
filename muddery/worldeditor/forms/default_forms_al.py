@@ -1,6 +1,7 @@
 
 from wtforms import Form, validators, widgets
-from wtforms.fields import simple
+from wtforms.fields import SelectField
+from django import forms
 from muddery.server.utils.localiztion_handler import localize_form_fields
 from muddery.server.mappings.quest_objective_set import QUEST_OBJECTIVE_SET
 from muddery.server.mappings.quest_status_set import QUEST_STATUS_SET
@@ -10,6 +11,7 @@ from muddery.worldeditor.dao import common_mappers as CM
 from muddery.worldeditor.dao.general_query_mapper import get_element_base_data
 from muddery.worldeditor.forms.location_field import LocationField
 from muddery.worldeditor.forms.image_field import ImageField
+from muddery.worldeditor.forms.create_form import create_form
 
 
 def get_all_pocketable_objects():
@@ -42,422 +44,212 @@ def generate_key(form_obj):
     return form_obj.instance.__class__.__name__ + "_" + str(index)
 
 
-class GameSettingsForm(Form):
-    game_name = simple.StringField(
-        validators=[
-            validators.DataRequired(),
-        ],
-        widget=widgets.TextInput(),
-    )
+class GameSettingsForm(create_form("game_settings")):
+    choices = [("", "---------")]
+    records = get_element_base_data("ROOM")
+    choices.extend([(record.key, record.name + " (" + record.key + ")") for record in records])
+    start_location_key = SelectField(choices=choices)
+    default_player_home_key = SelectField(choices=choices)
 
-    connection_screen = simple.TextAreaField(
-        widget=widgets.TextArea(),
-    )
+    choices = [("", "---------")]
+    records = get_element_base_data("PLAYER_CHARACTER")
+    choices.extend([(record.key, record.name + " (" + record.key + ")") for record in records])
+    default_player_character_key = SelectField(choices=choices)
 
-    def __init__(self, *args, **kwargs):
-        super(GameSettingsForm, self).__init__(*args, **kwargs)
-        
-        choices = [("", "---------")]
-        records = get_element_base_data("ROOM")
-        choices.extend([(record.key, record.name + " (" + record.key + ")") for record in records])
-        self.fields['start_location_key'] = forms.ChoiceField(choices=choices, required=False)
-        self.fields['default_player_home_key'] = forms.ChoiceField(choices=choices, required=False)
+    choices = [("", "---------")]
+    records = get_element_base_data("STAFF_CHARACTER")
+    choices.extend([(record.key, record.name + " (" + record.key + ")") for record in records])
+    default_staff_character_key = SelectField(choices=choices)
 
-        choices = [("", "---------")]
-        records = get_element_base_data("PLAYER_CHARACTER")
-        choices.extend([(record.key, record.name + " (" + record.key + ")") for record in records])
-        self.fields['default_player_character_key'] = forms.ChoiceField(choices=choices, required=False)
 
-        choices = [("", "---------")]
-        records = get_element_base_data("STAFF_CHARACTER")
-        choices.extend([(record.key, record.name + " (" + record.key + ")") for record in records])
-        self.fields['default_staff_character_key'] = forms.ChoiceField(choices=choices, required=False)
+class HonourSettingsForm(create_form("honour_settings")):
+    pass
 
-        localize_form_fields(self)
 
-    class Meta:
-        model = CM.GAME_SETTINGS.model
-        fields = '__all__'
-        list_template = "common_list.html"
-        form_template = "common_form.html"
+class EquipmentTypesForm(create_form("equipment_types")):
+    pass
 
 
-class HonourSettingsForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
-        super(HonourSettingsForm, self).__init__(*args, **kwargs)
+class EquipmentPositionsForm(create_form("equipment_positions")):
+    pass
 
-        localize_form_fields(self)
 
-    class Meta:
-        model = CM.HONOUR_SETTINGS.model
-        fields = '__all__'
-        list_template = "common_list.html"
-        form_template = "common_form.html"
+class WorldAreasForm(create_form("world_areas")):
+    background = ImageField(image_type="background")
 
 
-class EquipmentTypesForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
-        super(EquipmentTypesForm, self).__init__(*args, **kwargs)
-        localize_form_fields(self)
+class WorldRoomsForm(create_form("world_rooms")):
+    choices = [("", "---------")]
+    objects = CM.WORLD_AREAS.all_with_base()
+    choices.extend([(obj["key"], obj["name"] + " (" + obj["key"] + ")") for obj in objects])
+    area = SelectField(choices=choices)
 
-    class Meta:
-        model = CM.EQUIPMENT_TYPES.model
-        fields = '__all__'
+    icon = ImageField(image_type="icon")
 
+    background = ImageField(image_type="background")
 
-class EquipmentPositionsForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
-        super(EquipmentPositionsForm, self).__init__(*args, **kwargs)
-        localize_form_fields(self)
 
-    class Meta:
-        model = CM.EQUIPMENT_POSITIONS.model
-        fields = '__all__'
+class WorldExitsForm(create_form("world_exits")):
+    rooms = CM.WORLD_ROOMS.all_with_base()
+    choices = [(r["key"], r["name"] + " (" + r["key"] + ")") for r in rooms]
+    location = LocationField(choices=choices)
+    destination = LocationField(choices=choices)
 
 
-class WorldAreasForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
-        super(WorldAreasForm, self).__init__(*args, **kwargs)
+class WorldObjectsForm(create_form("world_objects")):
+    rooms = CM.WORLD_ROOMS.all_with_base()
+    choices = [(r["key"], r["name"] + " (" + r["key"] + ")") for r in rooms]
+    location = LocationField(choices=choices)
 
-        self.fields['background'] = ImageField(image_type="background", required=False)
+    icon = ImageField(image_type="icon")
 
-        localize_form_fields(self)
 
-    class Meta:
-        model = CM.WORLD_AREAS.model
-        fields = '__all__'
-        
+class WorldNPCsForm(create_form("world_npcs")):
+    # NPC's location
+    rooms = CM.WORLD_ROOMS.all_with_base()
+    choices = [(r["key"], r["name"] + " (" + r["key"] + ")") for r in rooms]
+    location = LocationField(choices=choices)
 
-class WorldRoomsForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
-        super(WorldRoomsForm, self).__init__(*args, **kwargs)
 
-        choices = [("", "---------")]
-        objects = CM.WORLD_AREAS.all_with_base()
-        choices.extend([(obj["key"], obj["name"] + " (" + obj["key"] + ")") for obj in objects])
-        self.fields['area'] = forms.ChoiceField(choices=choices)
+class ObjectCreatorsForm(create_form("object_creator")):
+    pass
 
-        self.fields['icon'] = ImageField(image_type="icon", required=False)
 
-        self.fields['background'] = ImageField(image_type="background", required=False)
+class CreatorLootListForm(create_form("creator_loot_list")):
+    # providers must be object_creators
+    objects = CM.OBJECT_CREATORS.all_with_base()
+    choices = [(obj["key"], obj["name"] + " (" + obj["key"] + ")") for obj in objects]
+    provider = forms.ChoiceField(choices=choices)
 
-        localize_form_fields(self)
+    # available objects
+    choices = get_all_pocketable_objects()
+    object = forms.ChoiceField(choices=choices)
 
-    class Meta:
-        model = CM.WORLD_ROOMS.model
-        fields = '__all__'
+    # depends on quest
+    choices = [("", "---------")]
+    objects = CM.QUESTS.all_with_base()
+    choices.extend([(obj["key"], obj["name"] + " (" + obj["key"] + ")") for obj in objects])
+    quest = forms.ChoiceField(choices=choices, required=False)
 
 
-class WorldExitsForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
-        super(WorldExitsForm, self).__init__(*args, **kwargs)
+class CharacterLootListForm(create_form("character_loot_list")):
+    # providers can be world_npc or common_character
+    npcs = CM.WORLD_NPCS.all_with_base()
+    choices = [(obj["key"], obj["name"] + " (" + obj["key"] + ")") for obj in npcs]
 
-        rooms = CM.WORLD_ROOMS.all_with_base()
-        choices = [(r["key"], r["name"] + " (" + r["key"] + ")") for r in rooms]
-        self.fields['location'] = LocationField(choices=choices)
-        self.fields['destination'] = LocationField(choices=choices)
+    characters = CM.CHARACTERS.all_with_base()
+    choices.extend([(obj["key"], obj["name"] + " (" + obj["key"] + ")") for obj in characters])
 
-        localize_form_fields(self)
+    provider = forms.ChoiceField(choices=choices)
 
-    class Meta:
-        model = CM.WORLD_EXITS.model
-        fields = '__all__'
+    # available objects
+    choices = get_all_pocketable_objects()
+    object = forms.ChoiceField(choices=choices)
 
+    # depends on quest
+    choices = [("", "---------")]
+    objects = CM.QUESTS.all_with_base()
+    choices.extend([(obj["key"], obj["name"] + " (" + obj["key"] + ")") for obj in objects])
+    quest = forms.ChoiceField(choices=choices, required=False)
 
-class WorldObjectsForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
-        super(WorldObjectsForm, self).__init__(*args, **kwargs)
 
-        rooms = CM.WORLD_ROOMS.all_with_base()
-        choices = [(r["key"], r["name"] + " (" + r["key"] + ")") for r in rooms]
-        self.fields['location'] = LocationField(choices=choices)
+class QuestRewardListForm(create_form("quest_reward_list")):
+    # providers must be object_creators
+    objects = CM.QUESTS.all_with_base()
+    choices = [(obj["key"], obj["name"] + " (" + obj["key"] + ")") for obj in objects]
+    provider = forms.ChoiceField(choices=choices)
 
-        self.fields['icon'] = ImageField(image_type="icon", required=False)
+    # available objects
+    choices = get_all_pocketable_objects()
+    object = forms.ChoiceField(choices=choices)
 
-        localize_form_fields(self)
+    # depends on quest
+    choices = [("", "---------")]
+    objects = CM.QUESTS.all_with_base()
+    choices.extend([(obj["key"], obj["name"] + " (" + obj["key"] + ")") for obj in objects])
+    quest = forms.ChoiceField(choices=choices, required=False)
 
-    class Meta:
-        model = CM.WORLD_OBJECTS.model
-        fields = '__all__'
 
+class CommonObjectsForm(create_form("common_objects")):
+    icon = ImageField(image_type="icon", required=False)
 
-class WorldNPCsForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
-        super(WorldNPCsForm, self).__init__(*args, **kwargs)
-        
-        # NPC's location
-        rooms = CM.WORLD_ROOMS.all_with_base()
-        choices = [(r["key"], r["name"] + " (" + r["key"] + ")") for r in rooms]
-        self.fields['location'] = LocationField(choices=choices)
 
-        localize_form_fields(self)
+class PocketObjectsForm(create_form("pocket_objects")):
+    pass
 
-    class Meta:
-        model = CM.WORLD_NPCS.model
-        fields = '__all__'
 
-
-class ObjectCreatorsForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
-        super(ObjectCreatorsForm, self).__init__(*args, **kwargs)
-        localize_form_fields(self)
-
-    class Meta:
-        model = CM.OBJECT_CREATORS.model
-        fields = '__all__'
-
-
-class CreatorLootListForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
-        super(CreatorLootListForm, self).__init__(*args, **kwargs)
-
-        # providers must be object_creators
-        objects = CM.OBJECT_CREATORS.all_with_base()
-        choices = [(obj["key"], obj["name"] + " (" + obj["key"] + ")") for obj in objects]
-        self.fields['provider'] = forms.ChoiceField(choices=choices)
-
-        # available objects
-        choices = get_all_pocketable_objects()
-        self.fields['object'] = forms.ChoiceField(choices=choices)
-        
-        # depends on quest
-        choices = [("", "---------")]
-        objects = CM.QUESTS.all_with_base()
-        choices.extend([(obj["key"], obj["name"] + " (" + obj["key"] + ")") for obj in objects])
-        self.fields['quest'] = forms.ChoiceField(choices=choices, required=False)
-
-        localize_form_fields(self)
-
-    class Meta:
-        model = CM.CREATOR_LOOT_LIST.model
-        fields = '__all__'
-
-
-class CharacterLootListForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
-        super(CharacterLootListForm, self).__init__(*args, **kwargs)
-
-        # providers can be world_npc or common_character
-        npcs = CM.WORLD_NPCS.all_with_base()
-        choices = [(obj["key"], obj["name"] + " (" + obj["key"] + ")") for obj in npcs]
-
-        characters = CM.CHARACTERS.all_with_base()
-        choices.extend([(obj["key"], obj["name"] + " (" + obj["key"] + ")") for obj in characters])
-
-        self.fields['provider'] = forms.ChoiceField(choices=choices)
-
-        # available objects
-        choices = get_all_pocketable_objects()
-        self.fields['object'] = forms.ChoiceField(choices=choices)
-
-        # depends on quest
-        choices = [("", "---------")]
-        objects = CM.QUESTS.all_with_base()
-        choices.extend([(obj["key"], obj["name"] + " (" + obj["key"] + ")") for obj in objects])
-        self.fields['quest'] = forms.ChoiceField(choices=choices, required=False)
-
-        localize_form_fields(self)
-        
-    class Meta:
-        model = CM.CHARACTER_LOOT_LIST.model
-        fields = '__all__'
-
-
-class QuestRewardListForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
-        super(QuestRewardListForm, self).__init__(*args, **kwargs)
-
-        # providers must be object_creators
-        objects = CM.QUESTS.all_with_base()
-        choices = [(obj["key"], obj["name"] + " (" + obj["key"] + ")") for obj in objects]
-        self.fields['provider'] = forms.ChoiceField(choices=choices)
-
-        # available objects
-        choices = get_all_pocketable_objects()
-        self.fields['object'] = forms.ChoiceField(choices=choices)
-        
-        # depends on quest
-        choices = [("", "---------")]
-        objects = CM.QUESTS.all_with_base()
-        choices.extend([(obj["key"], obj["name"] + " (" + obj["key"] + ")") for obj in objects])
-        self.fields['quest'] = forms.ChoiceField(choices=choices, required=False)
-
-        localize_form_fields(self)
-
-    class Meta:
-        model = CM.QUEST_REWARD_LIST.model
-        fields = '__all__'
-
-
-class CommonObjectsForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
-        super(CommonObjectsForm, self).__init__(*args, **kwargs)
-        
-        self.fields['icon'] = ImageField(image_type="icon", required=False)
-
-        localize_form_fields(self)
-
-    class Meta:
-        model = CM.COMMON_OBJECTS.model
-        fields = '__all__'
-
-
-class PocketObjectsForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
-        super(PocketObjectsForm, self).__init__(*args, **kwargs)
-
-        localize_form_fields(self)
-
-    class Meta:
-        model = CM.POCKET_OBJECTS.model
-        fields = '__all__'
-
-
-class FoodsForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
-        super(FoodsForm, self).__init__(*args, **kwargs)
-
-        localize_form_fields(self)
-
-    class Meta:
-        model = CM.FOODS.model
-        fields = '__all__'
+class FoodsForm(create_form("foods")):
+    pass
         
 
-class SkillBooksForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
-        super(SkillBooksForm, self).__init__(*args, **kwargs)
-        
-        # skills
-        objects = CM.SKILLS.all_with_base()
-        choices = [(obj["key"], obj["name"] + " (" + obj["key"] + ")") for obj in objects]
-        self.fields['skill'] = forms.ChoiceField(choices=choices)
-
-        localize_form_fields(self)
-
-    class Meta:
-        model = CM.SKILL_BOOKS.model
-        fields = '__all__'
+class SkillBooksForm(create_form("skill_books")):
+    # skills
+    objects = CM.SKILLS.all_with_base()
+    choices = [(obj["key"], obj["name"] + " (" + obj["key"] + ")") for obj in objects]
+    skill = forms.ChoiceField(choices=choices)
 
 
-class PropertiesDictForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
-        super(PropertiesDictForm, self).__init__(*args, **kwargs)
-        localize_form_fields(self)
-
-    class Meta:
-        model = CM.PROPERTIES_DICT.model
-        fields = '__all__'
+class PropertiesDictForm(create_form("properties_dict")):
+    pass
 
 
-class CharactersForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
-        super(CharactersForm, self).__init__(*args, **kwargs)
+class CharactersForm(create_form("characters")):
+    icon = ImageField(image_type="icon")
 
-        self.fields['icon'] = ImageField(image_type="icon", required=False)
-
-        choices = [("", "---------")]
-        characters = CM.CHARACTERS.all_with_base()
-        choices.extend([(obj["key"], obj["name"] + " (" + obj["element_type"] + " - " + obj["key"] + ")") for obj in characters])
-        self.fields['clone'] = forms.ChoiceField(choices=choices, required=False)
-
-        localize_form_fields(self)
-
-    class Meta:
-        model = CM.CHARACTERS.model
-        fields = '__all__'
+    choices = [("", "---------")]
+    characters = CM.CHARACTERS.all_with_base()
+    choices.extend([(obj["key"], obj["name"] + " (" + obj["element_type"] + " - " + obj["key"] + ")") for obj in characters])
+    clone = forms.ChoiceField(choices=choices)
 
 
-class PlayerCharactersForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
-        super(PlayerCharactersForm, self).__init__(*args, **kwargs)
-        localize_form_fields(self)
-
-    class Meta:
-        model = CM.PLAYER_CHARACTERS.model
-        fields = '__all__'
+class PlayerCharactersForm(create_form("player_characters")):
+    pass
 
 
-class DefaultObjectsForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
-        super(DefaultObjectsForm, self).__init__(*args, **kwargs)
+class DefaultObjectsForm(create_form("default_objects")):
+    # all character's
+    objects = CM.CHARACTERS.all_with_base()
+    choices = [(obj["key"], obj["name"] + " (" + obj["key"] + ")") for obj in objects]
+    character = forms.ChoiceField(choices=choices)
 
-        # all character's
-        objects = CM.CHARACTERS.all_with_base()
-        choices = [(obj["key"], obj["name"] + " (" + obj["key"] + ")") for obj in objects]
-        self.fields['character'] = forms.ChoiceField(choices=choices)
-
-        # available objects
-        choices = get_all_pocketable_objects()
-        self.fields['object'] = forms.ChoiceField(choices=choices)
-
-        localize_form_fields(self)
-        
-    class Meta:
-        model = CM.DEFAULT_OBJECTS.model
-        fields = '__all__'
+    # available objects
+    choices = get_all_pocketable_objects()
+    object = forms.ChoiceField(choices=choices)
 
 
-class ShopsForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
-        super(ShopsForm, self).__init__(*args, **kwargs)
-        
-        self.fields['icon'] = ImageField(image_type="icon", required=False)
-        
-        localize_form_fields(self)
-        
-    class Meta:
-        model = CM.SHOPS.model
-        fields = '__all__'
+class ShopsForm(create_form("shops")):
+    icon = ImageField(image_type="icon")
 
 
-class ShopGoodsForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
-        super(ShopGoodsForm, self).__init__(*args, **kwargs)
+class ShopGoodsForm(create_form("shop_goods")):
+    # all shops
+    objects = CM.SHOPS.all_with_base()
+    choices = [(obj["key"], obj["name"] + " (" + obj["key"] + ")") for obj in objects]
+    shop = forms.ChoiceField(choices=choices)
 
-        # all shops
-        objects = CM.SHOPS.all_with_base()
-        choices = [(obj["key"], obj["name"] + " (" + obj["key"] + ")") for obj in objects]
-        self.fields['shop'] = forms.ChoiceField(choices=choices)
+    # available objects
+    choices = get_all_pocketable_objects()
+    goods = forms.ChoiceField(choices=choices)
 
-        # available objects
-        choices = get_all_pocketable_objects()
-        self.fields['goods'] = forms.ChoiceField(choices=choices)
-
-        # available units are common objects
-        objects = CM.COMMON_OBJECTS.all_with_base()
-        choices = [(obj["key"], obj["name"] + " (" + obj["key"] + ")") for obj in objects]
-        self.fields['unit'] = forms.ChoiceField(choices=choices)
-
-        localize_form_fields(self)
-        
-    class Meta:
-        model = CM.SHOP_GOODS.model
-        fields = '__all__'
+    # available units are common objects
+    objects = CM.COMMON_OBJECTS.all_with_base()
+    choices = [(obj["key"], obj["name"] + " (" + obj["key"] + ")") for obj in objects]
+    unit = forms.ChoiceField(choices=choices)
 
 
-class NPCShopsForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
-        super(NPCShopsForm, self).__init__(*args, **kwargs)
+class NPCShopsForm(create_form("npc_shops")):
+    # All NPCs.
+    objects = CM.WORLD_NPCS.all_with_base()
+    choices = [(obj["key"], obj["name"] + " (" + obj["key"] + ")") for obj in objects]
+    npc = forms.ChoiceField(choices=choices)
 
-        # All NPCs.
-        objects = CM.WORLD_NPCS.all_with_base()
-        choices = [(obj["key"], obj["name"] + " (" + obj["key"] + ")") for obj in objects]
-        self.fields['npc'] = forms.ChoiceField(choices=choices)
-        
-        # All shops.
-        objects = CM.SHOPS.all_with_base()
-        choices = [(obj["key"], obj["name"] + " (" + obj["key"] + ")") for obj in objects]
-        self.fields['shop'] = forms.ChoiceField(choices=choices)
-
-        localize_form_fields(self)
-        
-    class Meta:
-        model = CM.NPC_SHOPS.model
-        fields = '__all__'
+    # All shops.
+    objects = CM.SHOPS.all_with_base()
+    choices = [(obj["key"], obj["name"] + " (" + obj["key"] + ")") for obj in objects]
+    shop = forms.ChoiceField(choices=choices)
 
 
-class SkillsForm(forms.ModelForm):
+class SkillsForm(create_form("skills")):
     def __init__(self, *args, **kwargs):
         super(SkillsForm, self).__init__(*args, **kwargs)
         
@@ -469,163 +261,85 @@ class SkillsForm(forms.ModelForm):
         self.fields['main_type'] = forms.ChoiceField(choices=choices, required=False)
         self.fields['sub_type'] = forms.ChoiceField(choices=choices, required=False)
 
-        localize_form_fields(self)
 
-    class Meta:
-        model = CM.SKILLS.model
-        fields = '__all__'
-        
-
-class SkillTypesForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
-        super(SkillTypesForm, self).__init__(*args, **kwargs)
-        localize_form_fields(self)
-
-    class Meta:
-        model = CM.SKILL_TYPES.model
-        fields = '__all__'
+class SkillTypesForm(create_form("skill_types")):
+    pass
 
 
-class DefaultSkillsForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
-        super(DefaultSkillsForm, self).__init__(*args, **kwargs)
+class DefaultSkillsForm(create_form("default_skills")):
+    # all character's models
+    objects = CM.CHARACTERS.all_with_base()
+    choices = [(obj["key"], obj["name"] + " (" + obj["key"] + ")") for obj in objects]
+    character = forms.ChoiceField(choices=choices)
 
-        # all character's models
-        objects = CM.CHARACTERS.all_with_base()
-        choices = [(obj["key"], obj["name"] + " (" + obj["key"] + ")") for obj in objects]
-        self.fields['character'] = forms.ChoiceField(choices=choices)
-
-        objects = CM.SKILLS.all_with_base()
-        choices = [(obj["key"], obj["name"] + " (" + obj["key"] + ")") for obj in objects]
-        self.fields['skill'] = forms.ChoiceField(choices=choices)
-
-        localize_form_fields(self)
-        
-    class Meta:
-        model = CM.DEFAULT_SKILLS.model
-        fields = '__all__'
+    objects = CM.SKILLS.all_with_base()
+    choices = [(obj["key"], obj["name"] + " (" + obj["key"] + ")") for obj in objects]
+    skill = forms.ChoiceField(choices=choices)
 
 
-class NPCDialoguesForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
-        super(NPCDialoguesForm, self).__init__(*args, **kwargs)
+class NPCDialoguesForm(create_form("npc_dialogues")):
+    # All NPCs.
+    objects = CM.WORLD_NPCS.all_with_base()
+    choices = [(obj["key"], obj["name"] + " (" + obj["key"] + ")") for obj in objects]
+    npc = forms.ChoiceField(choices=choices)
 
-        # All NPCs.
-        objects = CM.WORLD_NPCS.all_with_base()
-        choices = [(obj["key"], obj["name"] + " (" + obj["key"] + ")") for obj in objects]
-        self.fields['npc'] = forms.ChoiceField(choices=choices)
-        
-        objects = CM.DIALOGUES.objects.all()
-        choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]
-        self.fields['dialogue'] = forms.ChoiceField(choices=choices)
-
-        localize_form_fields(self)
-
-    class Meta:
-        model = CM.NPC_DIALOGUES.model
-        fields = '__all__'
+    objects = CM.DIALOGUES.objects.all()
+    choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]
+    dialogue = forms.ChoiceField(choices=choices)
 
 
-class QuestsForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
-        super(QuestsForm, self).__init__(*args, **kwargs)
-
-        localize_form_fields(self)
-
-    class Meta:
-        model = CM.QUESTS.model
-        fields = '__all__'
+class QuestsForm(create_form("quests")):
+    pass
 
 
-class QuestObjectivesForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
-        super(QuestObjectivesForm, self).__init__(*args, **kwargs)
+class QuestObjectivesForm(create_form("quest_objectives")):
+    objects = CM.QUESTS.all_with_base()
+    choices = [(obj["key"], obj["name"] + " (" + obj["key"] + ")") for obj in objects]
+    quest = forms.ChoiceField(choices=choices)
 
-        objects = CM.QUESTS.all_with_base()
-        choices = [(obj["key"], obj["name"] + " (" + obj["key"] + ")") for obj in objects]
-        self.fields['quest'] = forms.ChoiceField(choices=choices)
-
-        choices = QUEST_OBJECTIVE_SET.choice_all()
-        self.fields['type'] = forms.ChoiceField(choices=choices)
-
-        localize_form_fields(self)
-
-    class Meta:
-        model = CM.QUEST_OBJECTIVES.model
-        fields = '__all__'
+    choices = QUEST_OBJECTIVE_SET.choice_all()
+    type = forms.ChoiceField(choices=choices)
 
 
-class QuestDependenciesForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
-        super(QuestDependenciesForm, self).__init__(*args, **kwargs)
+class QuestDependenciesForm(create_form("quest_dependencies")):
+    objects = CM.QUESTS.all_with_base()
+    choices = [(obj["key"], obj["name"] + " (" + obj["key"] + ")") for obj in objects]
+    quest = forms.ChoiceField(choices=choices)
+    dependency = forms.ChoiceField(choices=choices)
 
-        objects = CM.QUESTS.all_with_base()
-        choices = [(obj["key"], obj["name"] + " (" + obj["key"] + ")") for obj in objects]
-        self.fields['quest'] = forms.ChoiceField(choices=choices)
-        self.fields['dependency'] = forms.ChoiceField(choices=choices)
-        
-        choices = QUEST_STATUS_SET.choice_all()
-        self.fields['type'] = forms.ChoiceField(choices=choices)
-
-        localize_form_fields(self)
-
-    class Meta:
-        model = CM.QUEST_DEPENDENCIES.model
-        fields = '__all__'
+    choices = QUEST_STATUS_SET.choice_all()
+    type = forms.ChoiceField(choices=choices)
 
 
-class DialogueQuestDependenciesForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
-        super(DialogueQuestDependenciesForm, self).__init__(*args, **kwargs)
+class DialogueQuestDependenciesForm(create_form("dialogue_quest_dependencies")):
+    objects = CM.DIALOGUES.objects.all()
+    choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]
+    dialogue = forms.ChoiceField(choices=choices)
 
-        objects = CM.DIALOGUES.objects.all()
-        choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]
-        self.fields['dialogue'] = forms.ChoiceField(choices=choices)
-        
-        objects = CM.QUESTS.all_with_base()
-        choices = [(obj["key"], obj["name"] + " (" + obj["key"] + ")") for obj in objects]
-        self.fields['dependency'] = forms.ChoiceField(choices=choices)
-        
-        choices = QUEST_STATUS_SET.choice_all()
-        self.fields['type'] = forms.ChoiceField(choices=choices)
+    objects = CM.QUESTS.all_with_base()
+    choices = [(obj["key"], obj["name"] + " (" + obj["key"] + ")") for obj in objects]
+    dependency = forms.ChoiceField(choices=choices)
 
-        localize_form_fields(self)
-
-    class Meta:
-        model = CM.DIALOGUE_QUEST_DEPENDENCIES.model
-        fields = '__all__'
+    choices = QUEST_STATUS_SET.choice_all()
+    type = forms.ChoiceField(choices=choices)
 
 
-class EquipmentsForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
-        super(EquipmentsForm, self).__init__(*args, **kwargs)
+class EquipmentsForm(create_form("equipments")):
+    objects = CM.EQUIPMENT_POSITIONS.objects.all()
+    choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]
+    position = forms.ChoiceField(choices=choices)
 
-        objects = CM.EQUIPMENT_POSITIONS.objects.all()
-        choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]
-        self.fields['position'] = forms.ChoiceField(choices=choices)
-        
-        objects = CM.EQUIPMENT_TYPES.objects.all()
-        choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]
-        self.fields['type'] = forms.ChoiceField(choices=choices)
-        
-        localize_form_fields(self)
-
-    class Meta:
-        model = CM.EQUIPMENTS.model
-        fields = '__all__'
+    objects = CM.EQUIPMENT_TYPES.objects.all()
+    choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]
+    type = forms.ChoiceField(choices=choices)
 
 
-class EventDataForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
-        super(EventDataForm, self).__init__(*args, **kwargs)
+class EventDataForm(create_form("event_data")):
+    choices = EVENT_ACTION_SET.choice_all()
+    action = forms.ChoiceField(choices=choices)
 
-        choices = EVENT_ACTION_SET.choice_all()
-        self.fields['action'] = forms.ChoiceField(choices=choices)
-
-        choices = EVENT_TRIGGER_SET.choice_all()
-        self.fields['trigger_type'] = forms.ChoiceField(choices=choices)
-
-        localize_form_fields(self)
+    choices = EVENT_TRIGGER_SET.choice_all()
+    trigger_type = forms.ChoiceField(choices=choices)
 
     def clean(self):
         cleaned_data = super(EventDataForm, self).clean()
@@ -842,3 +556,4 @@ class ImageResourcesForm(forms.ModelForm):
     class Meta:
         model = CM.IMAGE_RESOURCES.model
         fields = '__all__'
+"""
