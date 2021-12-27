@@ -19,4 +19,4 @@ class LocationField(fields.SelectField):
         Args:
             image_type: (string) image's type, could be "icon" or "image".
         """
-        super(LocationField, self).__init__(widget=Location, *args, **kwargs)
+        super(LocationField, self).__init__(widget=Location(), *args, **kwargs)

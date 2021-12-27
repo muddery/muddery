@@ -27,3 +27,15 @@ class SystemDataMapper(CommonMapper, Singleton):
         })
 
         return index
+
+    def get_object_index(self):
+        """
+        Increase the object index and get the new value.
+        """
+        record = self.get({}, for_update=True)
+        index = record.object_index
+        self.update_or_add({}, {
+            "object_index": index,
+        })
+
+        return index

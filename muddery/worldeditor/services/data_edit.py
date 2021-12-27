@@ -2,6 +2,7 @@
 Battle commands. They only can be used when a character is in a combat.
 """
 
+from django.conf import settings
 from django.db import transaction
 from django.core.exceptions import ObjectDoesNotExist
 from wtforms import fields as wtfields
@@ -17,6 +18,7 @@ from muddery.server.utils.localized_strings_handler import _
 from muddery.worldeditor.forms.location_field import LocationField
 from muddery.worldeditor.forms.image_field import ImageField
 from muddery.worldeditor.dao.general_query_mapper import get_all_fields
+from muddery.worldeditor.database.db_manager import DBManager
 
 
 def query_form(table_name, condition=None):
@@ -87,22 +89,35 @@ def save_form(values, table_name, record_id=None):
         raise MudderyError(ERR.no_table, "Can not find table: %s" % table_name)
 
     form = None
+    is_new = True
     if record_id:
         try:
             # Query record's data.
             record = general_query_mapper.get_record_by_id(table_name, record_id)
-            form = form_class(values, instance=record)
+            for key, value in values.items():
+                setattr(record, key, value)
+            form = form_class(obj=record)
+            is_new = False
         except Exception as e:
             form = None
 
-    if not form:
+    if is_new:
         # Get empty data.
-        form = form_class(values)
+        form = form_class(data=values)
 
     # Save data
-    if form.is_valid():
-        instance = form.save()
-        return instance.pk
+    if form.validate():
+        model = DBManager.inst().get_model(settings.WORLD_DATA_APP, table_name)
+        new_record = model()
+        form.populate_obj(new_record)
+        session = DBManager.inst().get_session(settings.WORLD_DATA_APP)
+
+        if is_new:
+            session.add(new_record)
+        else:
+            session.merge(new_record)
+
+        return new_record.id
     else:
         raise MudderyError(ERR.invalid_form, "Invalid form.", data=form.errors)
 

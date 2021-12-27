@@ -34,7 +34,7 @@ class CommonMapper(object):
         if for_update:
             stmt = stmt.with_for_update()
 
-        for field, value in condition:
+        for field, value in condition.items():
             stmt = stmt.where(getattr(self.model, field) == value)
 
         result = self.session.execute(stmt)
@@ -49,7 +49,7 @@ class CommonMapper(object):
         if for_update:
             stmt = stmt.with_for_update()
 
-        for field, value in condition:
+        for field, value in condition.items():
             stmt = stmt.where(getattr(self.model, field) == value)
 
         if order:
@@ -63,7 +63,7 @@ class CommonMapper(object):
         Count the number of records with conditions in kwargs.
         """
         stmt = select(func.count()).select_from(self.model)
-        for field, value in condition:
+        for field, value in condition.items():
             stmt = stmt.where(getattr(self.model, field) == value)
 
         result = self.session.execute(stmt)
@@ -85,7 +85,7 @@ class CommonMapper(object):
         Update or insert a record.
         """
         stmt = update(self.model)
-        for field, value in condition:
+        for field, value in condition.items():
             stmt = stmt.where(getattr(self.model, field) == value)
 
         try:
@@ -106,7 +106,7 @@ class CommonMapper(object):
 
     def delete(self, condition):
         stmt = delete(self.model)
-        for field, value in condition:
+        for field, value in condition.items():
             stmt = stmt.where(getattr(self.model, field) == value)
 
         try:

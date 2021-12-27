@@ -26,11 +26,7 @@ def create_form(table_name):
     model = DBManager.inst().get_model(session_name, table_name)
     model_fields = get_all_fields(table_name)
 
-    cls = Form
-
-    Info = FormInfo
-    setattr(Info, "table_name", table_name)
-    setattr(cls, "Info", Info)
+    form_cls = type(table_name + "_form", (Form,), {"__table_name": table_name})
 
     # Add default form fields according to the field type.
     for model_field in model_fields:
@@ -61,6 +57,6 @@ def create_form(table_name):
 
         attributes["validators"] = validator
 
-        setattr(cls, model_field, form_column_type(**attributes))
+        setattr(form_cls, model_field, form_column_type(**attributes))
 
-    return cls
+    return form_cls

@@ -165,7 +165,9 @@ def get_all_from_tables(tables, condition=None):
     session_name = settings.WORLD_DATA_APP
     session = DBManager.inst().get_session(session_name)
     config = settings.AL_DATABASES[session_name]
-    module = importlib.import_module(config["models"])
+    module = importlib.import_module(config["MODELS"])
+
+    data = []
 
     if len(tables) == 1:
         # only one table
@@ -188,8 +190,15 @@ def get_all_from_tables(tables, condition=None):
         for model in models[1:]:
             stmt = stmt.join(model, getattr(first_model, "key") == getattr(model, "key"))
 
-    result = session.excute(stmt)
-    return result.mappings()
+    result = session.execute(stmt)
+    records = result.all()
+
+    for record in records:
+        data.append({field: getattr(model, field)
+                     for model in record
+                     for field in model.__table__.columns.keys()})
+
+    return data
 
 
 def get_tables_record_by_key(tables, key):

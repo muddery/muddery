@@ -19,7 +19,7 @@ class ImageField(fields.StringField):
         Args:
             image_type: (string) image's type, could be "icon" or "image".
         """
-        super(ImageField, self).__init__(widget=ImageInput, *args, **kwargs)
+        super(ImageField, self).__init__(widget=ImageInput(), *args, **kwargs)
         self.image_type = image_type
 
     def image_type(self):

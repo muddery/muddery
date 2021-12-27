@@ -189,6 +189,11 @@ CommonEditor.prototype.createFieldController = function(field, readonly) {
     else if (type == "Select") {
         controller = field_creator.createSelect(name, label, value, help_text, field.choices, readonly);
     }
+    else {
+        // default controller
+        controller = field_creator.createTextInput(name, label, value, help_text, readonly);
+        console.error("Field " + name + "'s type is unknown: " + type + ".");
+    }
 
     // Add controller name.
     controller.addClass("field-controller");
