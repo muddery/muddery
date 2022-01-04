@@ -8,9 +8,9 @@ import zipfile
 from django.conf import settings
 from muddery.launcher import configs
 from muddery.server.utils.exception import MudderyError, ERR
-from muddery.server.database.db_manager import DBManager
+from muddery.worldeditor.database.db_manager import DBManager
 from muddery.worldeditor.utils import writers
-from muddery.worldeditor.dao import general_query_mapper
+from muddery.worldeditor.dao import general_querys
 
 
 def export_file(filename, table_name, file_type=None):
@@ -31,13 +31,12 @@ def export_file(filename, table_name, file_type=None):
     if not writer:
         raise(MudderyError(ERR.export_data_error, "Can not export table %s" % table_name))
 
-    fields = general_query_mapper.get_all_fields(table_name)
-    header = [field.name for field in fields]
-    writer.writeln(header)
+    fields = general_querys.get_field_names(table_name)
+    writer.writeln(fields)
 
-    records = general_query_mapper.get_all_records(table_name)
+    records = general_querys.get_all_records(table_name)
     for record in records:
-        line = [str(record.serializable_value(field.get_attname())) for field in fields]
+        line = [str(getattr(record, field)) for field in fields]
         writer.writeln(line)
 
     writer.save()

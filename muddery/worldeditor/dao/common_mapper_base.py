@@ -5,8 +5,8 @@ This model translates default strings into localized strings.
 from django.conf import settings
 from sqlalchemy import select, update, delete, func
 from muddery.server.mappings.element_set import ELEMENT
-from muddery.worldeditor.dao import general_query_mapper as query
-from muddery.server.database.db_manager import DBManager
+from muddery.worldeditor.dao import general_querys
+from muddery.worldeditor.database.db_manager import DBManager
 
 
 class CommonMapper(object):
@@ -53,7 +53,7 @@ class CommonMapper(object):
             stmt = stmt.where(getattr(self.model, field) == value)
 
         if order:
-            stmt = stmt.order(*order)
+            stmt = stmt.order_by(*order)
 
         result = self.session.execute(stmt)
         return result.scalars().all()
@@ -76,22 +76,24 @@ class CommonMapper(object):
         record = self.model(**values)
         try:
             self.session.add(record)
+            self.session.commit()
         except Exception as e:
-            self.session.roll_back()
+            self.session.rollback()
             raise
 
     def update_or_add(self, condition, values):
         """
         Update or insert a record.
         """
-        stmt = update(self.model)
+        stmt = update(self.model).values(**values)
         for field, value in condition.items():
             stmt = stmt.where(getattr(self.model, field) == value)
 
         try:
             result = self.session.execute(stmt)
+            self.session.commmit()
         except Exception as e:
-            self.session.roll_back()
+            self.session.rollback()
             raise
 
         if result.rowcount == 0:
@@ -100,8 +102,9 @@ class CommonMapper(object):
             record = self.model(**data)
             try:
                 self.session.add(record)
+                self.session.commmit()
             except Exception as e:
-                self.session.roll_back()
+                self.session.rollback()
                 raise
 
     def delete(self, condition):
@@ -111,8 +114,10 @@ class CommonMapper(object):
 
         try:
             result = self.session.execute(stmt)
+            if result.rowcount > 0:
+                self.session.commit()
         except Exception as e:
-            self.session.roll_back()
+            self.session.rollback()
             raise
 
 
@@ -131,9 +136,9 @@ class ElementsMapper(CommonMapper):
         Get all records with its base data.
         """
         if self.base_model_name == self.model_name:
-            return query.get_all_from_tables([self.model_name])
+            return general_querys.get_all_from_tables([self.model_name])
         else:
-            return query.get_all_from_tables([self.base_model_name, self.model_name])
+            return general_querys.get_all_from_tables([self.base_model_name, self.model_name])
 
     def get_by_key_with_base(self, key):
         """
@@ -143,6 +148,6 @@ class ElementsMapper(CommonMapper):
             key: (string) object's key.
         """
         if self.base_model_name == self.model_name:
-            return query.get_tables_record_by_key([self.model_name], key)
+            return general_querys.get_tables_record_by_key([self.model_name], key)
         else:
-            return query.get_tables_record_by_key([self.base_model_name, self.model_name], key)
+            return general_querys.get_tables_record_by_key([self.base_model_name, self.model_name], key)

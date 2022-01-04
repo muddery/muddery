@@ -3,15 +3,15 @@ Query and deal common tables.
 """
 
 import importlib
-from sqlalchemy import select, delete
+from sqlalchemy import select, delete, update
 from django.conf import settings
-from django.db import connections
-from django.core.exceptions import ObjectDoesNotExist
 from muddery.server.mappings.element_set import ELEMENT
-from muddery.server.database.db_manager import DBManager
+from muddery.worldeditor.database.db_manager import DBManager
+from muddery.worldeditor.dao.dict_record import DictRecord
+from muddery.server.utils.logger import logger
 
 
-def get_all_fields(table_name):
+def get_field_names(table_name):
     """
     Get all columns informatin.
 
@@ -118,10 +118,17 @@ def delete_records(table_name, condition=None):
     # set conditions
     stmt = delete(model)
     if condition:
-        where_condition = {getattr(model, field): value for field, value in condition}
-        stmt = stmt.where(**where_condition)
+        where_condition = [(getattr(model, field)) == value for field, value in condition.items()]
+        stmt = stmt.where(*where_condition)
 
-    result = session.execute(stmt)
+    try:
+        result = session.execute(stmt)
+        if result.rowcount > 0:
+            session.commit()
+    except Exception as e:
+        session.rollback()
+        raise
+
     return result.rowcount
 
 
@@ -167,24 +174,22 @@ def get_all_from_tables(tables, condition=None):
     config = settings.AL_DATABASES[session_name]
     module = importlib.import_module(config["MODELS"])
 
-    data = []
-
     if len(tables) == 1:
         # only one table
         model = getattr(module, tables[0])
         stmt = select(model)
 
         if condition:
-            where_condition = {getattr(model, field): value for field, value in condition}
-            stmt = stmt.where(**where_condition)
+            where_condition = [(getattr(model, field)) == value for field, value in condition.items()]
+            stmt = stmt.where(*where_condition)
     else:
         # join tables
         models = [getattr(module, t) for t in tables]
         stmt = select(*models)
 
         if condition:
-            where_condition = {getattr(models[0], field): value for field, value in condition}
-            stmt = stmt.where(**where_condition)
+            where_condition = [(getattr(models[0], field)) == value for field, value in condition.items()]
+            stmt = stmt.where(*where_condition)
 
         first_model = models[0]
         for model in models[1:]:
@@ -193,10 +198,14 @@ def get_all_from_tables(tables, condition=None):
     result = session.execute(stmt)
     records = result.all()
 
+    # put data in a list of MemoryRecord
+    data = []
     for record in records:
-        data.append({field: getattr(model, field)
-                     for model in record
-                     for field in model.__table__.columns.keys()})
+        data.append(DictRecord({
+            field: getattr(model, field)
+            for model in record
+            for field in model.__table__.columns.keys()
+        }))
 
     return data
 
@@ -224,3 +233,63 @@ def get_element_base_data(element_type):
     """
     base_model = ELEMENT(element_type).get_base_model()
     return filter_records(base_model, {"element_type": element_type})
+
+
+def delete_tables_record_by_key(tables, key):
+    """
+    Delete object's data from tables.
+
+    Args:
+        tables: (string) table's list.
+        key: (string) object's key.
+
+    Return:
+        a dict of values.
+    """
+    session_name = settings.WORLD_DATA_APP
+    session = DBManager.inst().get_session(session_name)
+
+    for table_name in tables:
+        model = DBManager.inst().get_model(session_name, table_name)
+
+        # set conditions
+        stmt = delete(model).where(model.key==key)
+        try:
+            result = session.execute(stmt)
+        except Exception as e:
+            session.rollback()
+            raise
+
+    session.commit()
+    return
+
+
+def update_records(table_name, values, condition=None, commit=True):
+    """
+    Update records with given values.
+
+    Args:
+        table_name: (string) the name of a table
+        values: (dict) keys and values to update
+        condition: (dict) update conditions
+        commit: (boolean) auto commit after update
+    """
+    session_name = settings.WORLD_DATA_APP
+    session = DBManager.inst().get_session(session_name)
+    model = DBManager.inst().get_model(session_name, table_name)
+
+    # set conditions
+    stmt = update(model).values(**values)
+    if condition:
+        where_condition = [(getattr(model, field)) == value for field, value in condition.items()]
+        stmt = stmt.where(*where_condition)
+
+    try:
+        result = session.execute(stmt)
+        if result.rowcount > 0 and commit:
+            session.commit()
+    except Exception as e:
+        session.rollback()
+        raise
+
+    return result.rowcount

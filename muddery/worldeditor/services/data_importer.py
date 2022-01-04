@@ -8,7 +8,7 @@ from django.conf import settings
 from muddery.server.utils.logger import logger
 from muddery.worldeditor.utils import readers
 from muddery.server.utils.exception import MudderyError, ERR
-from muddery.server.database.db_manager import DBManager
+from muddery.worldeditor.database.db_manager import DBManager
 
 
 def import_file(fullname, file_type=None, table_name=None, clear=True, except_errors=False, **kwargs):

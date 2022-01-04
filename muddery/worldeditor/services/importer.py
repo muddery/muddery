@@ -7,7 +7,7 @@ from django.conf import settings
 from muddery.launcher.upgrader.upgrade_handler import UPGRADE_HANDLER
 from muddery.launcher import configs
 from muddery.launcher.utils import copy_tree
-from muddery.server.database.db_manager import DBManager
+from muddery.worldeditor.database.db_manager import DBManager
 from muddery.worldeditor.services.data_importer import import_file
 
 

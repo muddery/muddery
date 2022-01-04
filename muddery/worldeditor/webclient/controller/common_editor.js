@@ -20,7 +20,7 @@ prototype = function(base, el) {
  */
 CommonEditor = function() {
     this.table_name = "";
-    this.record_id = "";
+    this.record_id = null;
     this.fields = [];
     this.areas = {};
     this.file_fields = [];
@@ -29,7 +29,7 @@ CommonEditor = function() {
 
 CommonEditor.prototype.init = function() {
     this.table_name = utils.getQueryString("table");
-    this.record_id = utils.getQueryString("record");
+    this.record_id = parseInt(utils.getQueryString("record"));
     if (sessionStorage.page_param) {
         this.field_values = JSON.parse(sessionStorage.page_param);
     }
@@ -163,7 +163,7 @@ CommonEditor.prototype.createFieldController = function(field, readonly) {
     if (type == "Location") {
         controller = field_creator.createAreaSelect(name, label, value, help_text, this.areas, readonly);
     }
-    else if (type == "Image") {
+    else if (type == "ImageInput") {
         controller = field_creator.createImageInput(field.image_type, name, label, value, help_text, readonly);
     }
     else if (type == "HiddenInput") {

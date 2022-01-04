@@ -65,7 +65,7 @@ class EventTrigger(object):
         """
         Get all event triggers' types and names.
         """
-        return [(key, "%s (%s)" % (value["name"], key)) for key, value in cls.triggers.items()]
+        return [(key.value, "%s (%s)" % (value["name"], key.value)) for key, value in cls.triggers.items()]
 
     def trigger(self, event_type, obj_key="", obj=None):
         """

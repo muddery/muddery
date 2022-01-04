@@ -6,7 +6,8 @@ import inspect
 import traceback
 
 from django.conf import settings
-from muddery.server.database.storage.memory_table_al import MemoryTableAl, RecordData
+from muddery.server.database.storage.memory_record import MemoryRecord
+from muddery.server.database.storage.memory_table_al import MemoryTableAl
 from muddery.server.utils.exception import MudderyError
 
 
@@ -122,4 +123,4 @@ class WorldData(object):
                 all_fields.update(field_pos)
                 row_data.extend([getattr(record, field_name) for field_name in fields])
 
-        return [RecordData(all_fields, row_data)]
+        return [MemoryRecord(all_fields, row_data)]

@@ -3,12 +3,12 @@
 World data forms.
 """
 
-from wtforms import Form, validators, widgets, fields
-from wtforms.fields import simple
+from wtforms import Form, validators, fields
 from sqlalchemy import Integer, Float, String, Unicode, Text, UnicodeText, DateTime, Boolean
 from django.conf import settings
-from muddery.server.database.db_manager import DBManager
-from muddery.worldeditor.dao.general_query_mapper import get_all_fields
+from muddery.worldeditor.database.db_manager import DBManager
+from muddery.worldeditor.dao.general_querys import get_field_names
+from muddery.server.utils.localized_strings_handler import _
 
 
 class FormInfo(object):
@@ -24,9 +24,12 @@ def create_form(table_name):
     """
     session_name = settings.WORLD_DATA_APP
     model = DBManager.inst().get_model(session_name, table_name)
-    model_fields = get_all_fields(table_name)
+    model_fields = get_field_names(table_name)
 
     form_cls = type(table_name + "_form", (Form,), {"__table_name": table_name})
+
+    label_category = "field_" + table_name
+    help_category = "help_" + table_name
 
     # Add default form fields according to the field type.
     for model_field in model_fields:
@@ -50,13 +53,15 @@ def create_form(table_name):
             # default input field
             form_column_type = fields.StringField
 
-        attributes = {}
-        validator = []
-        if not model_column.nullable:
-            validator.append(validators.DataRequired())
+        vali = []
+        if form_column_type != fields.HiddenField and not model_column.nullable:
+            vali.append(validators.DataRequired())
 
-        attributes["validators"] = validator
-
-        setattr(form_cls, model_field, form_column_type(**attributes))
+        setattr(form_cls, model_field, form_column_type(
+            id=model_field,
+            name=_(model_field, label_category),
+            description=_(model_field, help_category),
+            validators=vali,
+        ))
 
     return form_cls

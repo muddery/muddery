@@ -120,13 +120,6 @@ service = {
         this.sendRequest("logout", "", {}, callback_success, callback_failed, context);
     },
 
-    queryFields: function(table_name, callback_success, callback_failed, context) {
-        var args = {
-            table: table_name,
-        };
-        this.sendRequest("query_fields", "", args, callback_success, callback_failed, context);
-    },
-
     queryTable: function(table_name, callback_success, callback_failed, context) {
         var args = {
             table: table_name

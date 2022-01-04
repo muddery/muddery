@@ -56,7 +56,8 @@ class Accounts(Singleton):
 
         try:
             result = self.session.execute(stmt)
-            self.session.commit()
+            if result.rowcount > 0:
+                self.session.commit()
         except Exception as e:
             self.session.rollback()
             raise

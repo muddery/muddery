@@ -3,13 +3,13 @@ Battle commands. They only can be used when a character is in a combat.
 """
 
 import json, traceback
-from muddery.worldeditor.services import data_query, data_edit, general_query
+from muddery.worldeditor.services import data_query, data_edit
 from muddery.server.server import Server
 from muddery.server.utils.exception import MudderyError, ERR
 from muddery.server.utils.logger import logger
 from muddery.worldeditor.utils.response import success_response
 from muddery.worldeditor.controllers.base_request_processer import BaseRequestProcesser
-from muddery.worldeditor.dao import general_query_mapper
+from muddery.worldeditor.dao import general_querys
 from muddery.server.mappings.event_action_set import EVENT_ACTION_SET
 from muddery.server.database.worlddata.worlddata import WorldData
 
@@ -29,26 +29,6 @@ class QueryAllElements(BaseRequestProcesser):
         return success_response(data)
 
 
-class QueryFields(BaseRequestProcesser):
-    """
-    Query all fields of a table.
-
-    Args:
-        None.
-    """
-    path = "query_fields"
-    name = ""
-
-    def func(self, args, request):
-        if 'table' not in args:
-            raise MudderyError(ERR.missing_args, 'Missing the argument: "table".')
-
-        table_name = args["table"]
-
-        data = general_query.query_fields(table_name)
-        return success_response(data)
-
-
 class QueryTable(BaseRequestProcesser):
     """
     Query all records of a table.
@@ -65,7 +45,7 @@ class QueryTable(BaseRequestProcesser):
 
         table_name = args["table"]
 
-        data = general_query.query_table(table_name)
+        data = data_query.query_table(table_name)
         return success_response(data)
 
 
@@ -108,7 +88,7 @@ class QueryRecord(BaseRequestProcesser):
         table_name = args["table"]
         record_id = args["record"]
 
-        data = general_query.query_record(table_name, record_id)
+        data = data_query.query_record(table_name, record_id)
         return success_response(data)
 
 
@@ -324,28 +304,6 @@ class QueryElementEvents(BaseRequestProcesser):
         return success_response(data)
 
 
-class QueryEventActionData(BaseRequestProcesser):
-    """
-    Query an event action's data.
-
-    Args:
-        action: (string) action's type
-        event: (string) event's key
-    """
-    path = "query_event_action_data"
-    name = ""
-
-    def func(self, args, request):
-        if 'action' not in args or 'event' not in args:
-            raise MudderyError(ERR.missing_args, 'Missing arguments.')
-
-        action_type = args["action"]
-        event_key = args["event"]
-
-        data = data_query.query_event_action_data(action_type, event_key)
-        return success_response(data)
-
-
 class QueryEventActionForm(BaseRequestProcesser):
     """
     Query the form of the event action.
@@ -407,7 +365,7 @@ class QueryFormFirstRecord(BaseRequestProcesser):
         table_name = args["table"]
 
         try:
-            record = general_query_mapper.get_the_first_record(table_name)
+            record = general_querys.get_the_first_record(table_name)
             if record:
                 record_id = record.id
             else:
@@ -855,7 +813,7 @@ class QueryTables(BaseRequestProcesser):
     name = ""
 
     def func(self, args, request):
-        data = general_query.query_tables()
+        data = data_query.query_tables()
         return success_response(data)
 
 

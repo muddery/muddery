@@ -21,6 +21,9 @@ urlpatterns = [
     # World Editor API
     url(r'^' + settings.WORLD_EDITOR_API_PATH, Server.inst().handle_request),
 
+    # Medias
+    url(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
+
     # favicon
     url(r'^favicon\.ico$',  RedirectView.as_view(url='images/favicon.ico', permanent=False)),
 ]

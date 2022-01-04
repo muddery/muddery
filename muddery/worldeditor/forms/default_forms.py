@@ -6,7 +6,7 @@ from muddery.server.mappings.quest_status_set import QUEST_STATUS_SET
 from muddery.server.mappings.event_action_set import EVENT_ACTION_SET
 from muddery.server.mappings.event_trigger_set import EVENT_TRIGGER_SET
 from muddery.worldeditor.dao import common_mappers as CM
-from muddery.worldeditor.dao.general_query_mapper import get_element_base_data
+from muddery.worldeditor.dao.general_querys import get_element_base_data
 from muddery.worldeditor.forms.location_field import LocationField
 from muddery.worldeditor.forms.image_field import ImageField
 

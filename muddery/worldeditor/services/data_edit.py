@@ -3,21 +3,15 @@ Battle commands. They only can be used when a character is in a combat.
 """
 
 from django.conf import settings
-from django.db import transaction
-from django.core.exceptions import ObjectDoesNotExist
-from wtforms import fields as wtfields
+from muddery.server.utils.logger import logger
 from muddery.server.utils.exception import MudderyError, ERR
-from muddery.worldeditor.dao import general_query_mapper
-from muddery.worldeditor.dao.common_mappers import WORLD_AREAS, WORLD_ROOMS
+from muddery.worldeditor.dao import general_querys
 from muddery.worldeditor.dao.system_data_mapper import SystemDataMapper
 from muddery.worldeditor.dao.element_properties_mapper import ElementPropertiesMapper
 from muddery.worldeditor.mappings.form_set import FORM_SET
 from muddery.server.mappings.element_set import ELEMENT, ELEMENT_SET
 from muddery.server.mappings.event_action_set import EVENT_ACTION_SET
 from muddery.server.utils.localized_strings_handler import _
-from muddery.worldeditor.forms.location_field import LocationField
-from muddery.worldeditor.forms.image_field import ImageField
-from muddery.worldeditor.dao.general_query_mapper import get_all_fields
 from muddery.worldeditor.database.db_manager import DBManager
 
 
@@ -38,8 +32,8 @@ def query_form(table_name, condition=None):
     if condition:
         try:
             # Query record's data.
-            record = general_query_mapper.get_record(table_name, condition)
-            form = form_class(instance=record)
+            record = general_querys.get_record(table_name, condition)
+            form = form_class(obj=record)
         except Exception as e:
             form = None
 
@@ -48,27 +42,23 @@ def query_form(table_name, condition=None):
         form = form_class()
 
     fields = []
-    model_fields = get_all_fields(table_name)
-
-    label_category = "field_" + table_name
-    help_category = "help_" + table_name
-    for model_field in model_fields:
-        form_field = getattr(form, model_field)
+    for field in form:
         info = {
-            "name": model_field,
-            "label": _(model_field, label_category),
-            "disabled": (model_field == "id"),
-            "help_text": _(model_field, help_category),
-            "type": type(form_field.widget).__name__,
+            "name": field.id,
+            "label": field.name,
+            "default": field.default,
+            "disabled": (field.name == "id"),
+            "help_text": field.description,
+            "type": type(field.widget).__name__,
         }
 
         if record:
-            info["value"] = getattr(record, model_field)
+            info["value"] = getattr(record, field.id)
 
         if info["type"] == "Select":
-            info["choices"] = form_field.choices
+            info["choices"] = field.choices
         elif info["type"] == "ImageInput":
-            info["image_type"] = form_field.image_type()
+            info["image_type"] = field.image_type
 
         fields.append(info)
 
@@ -88,22 +78,24 @@ def save_form(values, table_name, record_id=None):
     if not form_class:
         raise MudderyError(ERR.no_table, "Can not find table: %s" % table_name)
 
-    form = None
     is_new = True
+    current_values = {}
     if record_id:
         try:
             # Query record's data.
-            record = general_query_mapper.get_record_by_id(table_name, record_id)
-            for key, value in values.items():
-                setattr(record, key, value)
-            form = form_class(obj=record)
+            fields = general_querys.get_field_names(table_name)
+            record = general_querys.get_record_by_id(table_name, record_id)
+            current_values = {field: getattr(record, field) for field in fields}
             is_new = False
         except Exception as e:
-            form = None
+            current_values = {}
 
-    if is_new:
-        # Get empty data.
-        form = form_class(data=values)
+    # remove id field, it is an auto increase field.
+    if "id" in values:
+        del(values["id"])
+
+    values_to_save = dict(current_values, **values)
+    form = form_class(data=values_to_save)
 
     # Save data
     if form.validate():
@@ -112,10 +104,17 @@ def save_form(values, table_name, record_id=None):
         form.populate_obj(new_record)
         session = DBManager.inst().get_session(settings.WORLD_DATA_APP)
 
-        if is_new:
-            session.add(new_record)
-        else:
-            session.merge(new_record)
+        try:
+            if is_new:
+                session.add(new_record)
+            else:
+                session.merge(new_record)
+
+            session.commit()
+        except Exception as e:
+            session.rollback()
+            logger.log_trace("Can not save form %s" % e)
+            raise
 
         return new_record.id
     else:
@@ -126,14 +125,14 @@ def delete_record(table_name, record_id):
     """
     Delete a record of a table.
     """
-    general_query_mapper.delete_record_by_id(table_name, record_id)
+    general_querys.delete_record_by_id(table_name, record_id)
 
 
 def delete_records(table_name, condition=None):
     """
     Delete records by conditions.
     """
-    general_query_mapper.delete_records(table_name, condition)
+    general_querys.delete_records(table_name, condition)
 
 
 def query_element_form(base_element_type, obj_element_type, element_key):
@@ -235,36 +234,58 @@ def save_element_form(tables, element_type, element_key):
         for table in tables:
             table["values"]["key"] = new_key
 
-    forms = []
+    forms_to_save = []
     for table in tables:
         table_name = table["table"]
-        form_values = table["values"]
+        values = table["values"]
 
         form_class = FORM_SET.get(table_name)
-        form = None
+        if not form_class:
+            raise MudderyError(ERR.no_table, "Can not find table: %s" % table_name)
+
+        is_new = True
+        current_values = {}
         if element_key:
             try:
-                # Query the current object's data.
-                record = general_query_mapper.get_record_by_key(table_name, element_key)
-                form = form_class(form_values, instance=record)
-            except ObjectDoesNotExist:
-                form = None
+                # Query record's data.
+                fields = general_querys.get_field_names(table_name)
+                record = general_querys.get_record_by_key(table_name, element_key)
+                current_values = {field: getattr(record, field) for field in fields}
+                is_new = False
+            except Exception as e:
+                current_values = {}
 
-        if not form:
-            # Get empty data.
-            form = form_class(form_values)
+        values_to_save = dict(current_values, **values)
+        form = form_class(data=values_to_save)
 
-        forms.append(form)
-
-    # check data
-    for form in forms:
-        if not form.is_valid():
+        # check data
+        if form.validate():
+            forms_to_save.append({
+                "table_name": table_name,
+                "form": form,
+                "is_new": is_new,
+            })
+        else:
             raise MudderyError(ERR.invalid_form, "Invalid form.", data=form.errors)
 
-    # Save data
-    with transaction.atomic():
-        for form in forms:
-            form.save()
+    # Save data.
+    session = DBManager.inst().get_session(settings.WORLD_DATA_APP)
+    try:
+        for item in forms_to_save:
+            model = DBManager.inst().get_model(settings.WORLD_DATA_APP, item["table_name"])
+            new_record = model()
+            item["form"].populate_obj(new_record)
+
+            if item["is_new"]:
+                session.add(new_record)
+            else:
+                session.merge(new_record)
+
+        session.commit()
+    except Exception as e:
+        session.rollback()
+        logger.log_trace("Can not save form %s" % e)
+        raise
 
     return new_key
 
@@ -277,26 +298,34 @@ def save_map_positions(area, rooms):
         area: (dict) area's data.
         rooms: (dict) rooms' data.
     """
-    with transaction.atomic():
-        # area data
-        record = WORLD_AREAS.get(key=area["key"])
-        record.background = area["background"]
-        record.width = area["width"]
-        record.height = area["height"]
+    # area data
+    general_querys.update_records("world_areas", {
+        "background": area["background"],
+        "width": area["width"],
+        "height": area["height"],
+    }, condition={
+        "key": area["key"]
+    }, commit=False)
 
-        record.full_clean()
-        record.save()
+    # rooms
+    for room in rooms:
+        position = ""
+        if len(room["position"]) > 1:
+            position = "(%s,%s)" % (room["position"][0], room["position"][1])
 
-        # rooms
-        for room in rooms:
-            position = ""
-            if len(room["position"]) > 1:
-                position = "(%s,%s)" % (room["position"][0], room["position"][1])
-            record = WORLD_ROOMS.get(key=room["key"])
-            record.position = position
+        general_querys.update_records("world_rooms", {
+            "position": position,
+        }, condition={
+            "key": room["key"],
+        }, commit=False)
 
-            record.full_clean()
-            record.save()
+    session = DBManager.inst().get_session(settings.WORLD_DATA_APP)
+    try:
+        session.commit()
+    except Exception as e:
+        session.rollback()
+        logger.log_trace("Can not save map %s" % e)
+        raise
 
 
 def delete_element(element_key, base_element_type=None):
@@ -308,12 +337,7 @@ def delete_element(element_key, base_element_type=None):
     for key, value in elements.items():
         tables.update(value.get_models())
 
-    with transaction.atomic():
-        for table in tables:
-            try:
-                general_query_mapper.delete_record_by_key(table, element_key)
-            except ObjectDoesNotExist:
-                pass
+    general_querys.delete_tables_record_by_key(tables, element_key)
 
 
 def query_event_action_forms(action_type, event_key):
@@ -332,11 +356,14 @@ def query_event_action_forms(action_type, event_key):
     # Get all forms.
     forms = []
     table_name = action.model_name
-    records = general_query_mapper.filter_records(table_name, event_key=event_key)
-    if records:
-        for record in records:
-            forms.append(query_form(table_name, {"id": record.id}))
-    else:
+    records = general_querys.filter_records(table_name, condition={
+        "event_key": event_key
+    })
+
+    for record in records:
+        forms.append(query_form(table_name, {"id": record.id}))
+
+    if not forms:
         forms.append(query_form(table_name))
 
     return {
@@ -360,20 +387,20 @@ def update_element_key(element_type, old_key, new_key):
         # Update relative room's location.
         model_name = ELEMENT("ROOM").model_name
         if model_name:
-            general_query_mapper.filter_records(model_name, area=old_key).update(area=new_key)
+            general_querys.update_records(model_name, {"area": new_key}, condition={"area": old_key})
     elif issubclass(element, ELEMENT("ROOM")):
         # Update relative exit's location.
         model_name = ELEMENT("EXIT").model_name
         if model_name:
-            general_query_mapper.filter_records(model_name, location=old_key).update(location=new_key)
-            general_query_mapper.filter_records(model_name, destination=old_key).update(destination=new_key)
+            general_querys.update_records(model_name, {"location": new_key}, condition={"location": old_key})
+            general_querys.update_records(model_name, {"destination": new_key}, condition={"destination": old_key})
 
         # Update relative world object's location.
         model_name = ELEMENT("WORLD_OBJECT").model_name
         if model_name:
-            general_query_mapper.filter_records(model_name, location=old_key).update(location=new_key)
+            general_querys.update_records(model_name, {"location": new_key}, condition={"location": old_key})
 
         # Update relative world NPC's location.
         model_name = ELEMENT("WORLD_NPC").model_name
         if model_name:
-            general_query_mapper.filter_records(model_name, location=old_key).update(location=new_key)
+            general_querys.update_records(model_name, {"location": new_key}, condition={"location": old_key})

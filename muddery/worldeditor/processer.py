@@ -64,7 +64,7 @@ class Processor(object):
                 logger.log_err("Parse request body error: %s" % e)
                 pass
 
-        print("request: '%s' '%s' '%s'" % (path, func, args))
+        logger.log_info("[REQUEST] '%s' '%s' '%s'" % (path, func, args))
 
         processor = self.request_set.get(path, func)
         if not processor:
@@ -90,8 +90,6 @@ class Processor(object):
             logger.log_trace("Error: %s" % e)
             response = error_response(ERR.internal, msg=str(e))
 
+        logger.log_info("[RESPOND] '%s' '%s'" % (response.status_code, response.content))
+
         return response
-
-
-
-

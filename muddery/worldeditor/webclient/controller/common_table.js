@@ -150,7 +150,7 @@ CommonTable.prototype.confirmDelete = function(e) {
     window.parent.controller.hideWaiting();
 
     var table = controller.table_name;
-    var record_id = e.data.record;
+    var record_id = parseInt(e.data.record);
     controller.deleteRecord(table, record_id);
 }
 

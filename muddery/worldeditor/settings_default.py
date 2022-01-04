@@ -201,6 +201,11 @@ MIDDLEWARE = [
 ]
 
 
+# Absolute path to the directory that holds file uploads from web apps.
+# Example: "/home/media/media.lawrence.com"
+MEDIA_ROOT = os.path.join(GAME_DIR, "web", "media")
+
+
 ######################################################################
 # Typeclasses and other paths
 ######################################################################

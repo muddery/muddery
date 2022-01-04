@@ -79,7 +79,8 @@ class DBManager(Singleton):
         stmt = delete(model)
         try:
             result = session.execute(stmt)
-            session.commit()
+            if result.rowcount > 0:
+                session.commit()
         except Exception as e:
             session.rollback()
 

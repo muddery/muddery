@@ -4,31 +4,7 @@ Load and cache all worlddata.
 
 from django.apps import apps
 from muddery.server.utils.exception import MudderyError
-
-_GA = object.__getattribute__
-_SA = object.__setattr__
-
-
-class RecordData(object):
-    """
-    Record object.
-    """
-    def __init__(self, fields, data):
-        object.__setattr__(self, "_fields", fields)
-        object.__setattr__(self, "_records", data)
-
-    def __getattribute__(self, attr_name):
-        try:
-            pos = object.__getattribute__(self, "_fields")[attr_name]
-        except KeyError:
-            raise AttributeError("Can not find field %s." % attr_name)
-        return object.__getattribute__(self, "_records")[pos]
-
-    def __setattr__(self, attr_name, value):
-        raise Exception("Cannot assign directly to record attributes!")
-
-    def __delattr__(self, attr_name):
-        raise Exception("Cannot delete record attributes!")
+from muddery.server.database.storage.memory_record import MemoryRecord
 
 
 class MemoryTable(object):
@@ -62,7 +38,7 @@ class MemoryTable(object):
         records = self.model.objects.all()
         for record in records:
             row_data = [record.serializable_value(field_name) for field_name in fields]
-            self.records.append(RecordData(self.table_fields, row_data))
+            self.records.append(MemoryRecord(self.table_fields, row_data))
 
         # set unique index
         for field in self.model._meta.fields:
