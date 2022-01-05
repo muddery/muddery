@@ -3,7 +3,7 @@ Query and deal common tables.
 """
 
 import importlib
-from sqlalchemy import select, delete, update
+from sqlalchemy import select, delete, update, func
 from django.conf import settings
 from muddery.server.mappings.element_set import ELEMENT
 from muddery.worldeditor.database.db_manager import DBManager
@@ -21,6 +21,22 @@ def get_field_names(table_name):
     # get model
     model = DBManager.inst().get_model(settings.WORLD_DATA_APP, table_name)
     return model.__table__.columns.keys()
+
+
+def count(table_name, condition=None):
+    """
+    Count the number of records with conditions in kwargs.
+    """
+    session_name = settings.WORLD_DATA_APP
+    session = DBManager.inst().get_session(session_name)
+    model = DBManager.inst().get_model(session_name, table_name)
+
+    stmt = select(func.count()).select_from(model)
+    for field, value in condition.items():
+        stmt = stmt.where(getattr(model, field) == value)
+
+    result = session.execute(stmt)
+    return result.scalars().all()[0]
 
 
 def get_query(table_name, condition=None):

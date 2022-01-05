@@ -3,7 +3,7 @@ This model translates default strings into localized strings.
 """
 
 from django.conf import settings
-from sqlalchemy import select, update, delete, func
+from sqlalchemy import select, update, delete
 from muddery.server.mappings.element_set import ELEMENT
 from muddery.worldeditor.dao import general_querys
 from muddery.worldeditor.database.db_manager import DBManager
@@ -62,12 +62,7 @@ class CommonMapper(object):
         """
         Count the number of records with conditions in kwargs.
         """
-        stmt = select(func.count()).select_from(self.model)
-        for field, value in condition.items():
-            stmt = stmt.where(getattr(self.model, field) == value)
-
-        result = self.session.execute(stmt)
-        return result.scalars().all()
+        return general_querys.count(self.model_name, condition)
 
     def add(self, values):
         """
@@ -91,7 +86,7 @@ class CommonMapper(object):
 
         try:
             result = self.session.execute(stmt)
-            self.session.commmit()
+            self.session.commit()
         except Exception as e:
             self.session.rollback()
             raise
@@ -102,7 +97,7 @@ class CommonMapper(object):
             record = self.model(**data)
             try:
                 self.session.add(record)
-                self.session.commmit()
+                self.session.commit()
             except Exception as e:
                 self.session.rollback()
                 raise

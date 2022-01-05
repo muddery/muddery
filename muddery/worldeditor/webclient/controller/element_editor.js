@@ -470,6 +470,9 @@ ElementEditor.prototype.saveForm = function(callback_success, callback_failed, c
                 if (control.attr("type") == "checkbox") {
                     values[name] = control.prop("checked");
                 }
+                else if (control.prop("tagName") == "SELECT") {
+                    values[name] = control.val();
+                }
                 else {
                     // Leave the value blank if it is an empty string.
                     var value = control.val();

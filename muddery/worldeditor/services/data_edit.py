@@ -79,23 +79,19 @@ def save_form(values, table_name, record_id=None):
         raise MudderyError(ERR.no_table, "Can not find table: %s" % table_name)
 
     is_new = True
-    current_values = {}
     if record_id:
         try:
             # Query record's data.
-            fields = general_querys.get_field_names(table_name)
             record = general_querys.get_record_by_id(table_name, record_id)
-            current_values = {field: getattr(record, field) for field in fields}
+            values["id"] = record.id
             is_new = False
         except Exception as e:
-            current_values = {}
+            pass
+    else:
+        if "id" in values:
+            del(values["id"])
 
-    # remove id field, it is an auto increase field.
-    if "id" in values:
-        del(values["id"])
-
-    values_to_save = dict(current_values, **values)
-    form = form_class(data=values_to_save)
+    form = form_class(data=values)
 
     # Save data
     if form.validate():
@@ -239,24 +235,24 @@ def save_element_form(tables, element_type, element_key):
         table_name = table["table"]
         values = table["values"]
 
+        if "id" in values:
+            del(values["id"])
+
         form_class = FORM_SET.get(table_name)
         if not form_class:
             raise MudderyError(ERR.no_table, "Can not find table: %s" % table_name)
 
         is_new = True
-        current_values = {}
         if element_key:
             try:
                 # Query record's data.
-                fields = general_querys.get_field_names(table_name)
                 record = general_querys.get_record_by_key(table_name, element_key)
-                current_values = {field: getattr(record, field) for field in fields}
+                values["id"] = record.id
                 is_new = False
             except Exception as e:
-                current_values = {}
+                pass
 
-        values_to_save = dict(current_values, **values)
-        form = form_class(data=values_to_save)
+        form = form_class(data=values)
 
         # check data
         if form.validate():

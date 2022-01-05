@@ -21,7 +21,7 @@ class SystemDataMapper(CommonMapper, Singleton):
         Increase the object index and get the new value.
         """
         record = self.get({}, for_update=True)
-        index = record.object_index
+        index = record.object_index + 1
         self.update_or_add({}, {
             "object_index": index,
         })
