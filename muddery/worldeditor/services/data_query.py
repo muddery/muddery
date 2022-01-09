@@ -24,17 +24,23 @@ def query_fields_info(table_name):
     """
     Query table's data.
     """
+    field_names = general_querys.get_field_names(table_name)
     form_class = FORM_SET.get(table_name)
     form = form_class()
 
-    fields = [{
-        "name": field.id,
-        "label": field.name,
-        "default": field.default,
-        "disabled": (field.name == "id"),
-        "help_text": field.description,
-        "type": type(field.widget).__name__,
-    } for field in form]
+    fields = []
+    for field_name in field_names:
+        field = form[field_name]
+        info = {
+            "name": field.id,
+            "label": field.name,
+            "default": field.default,
+            "disabled": (field.name == "id"),
+            "help_text": field.description,
+            "type": type(field.widget).__name__,
+        }
+        fields.append(info)
+
     return fields
 
 

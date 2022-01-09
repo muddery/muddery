@@ -16,11 +16,35 @@ TEXT_CONTENT_LENGTH = 255
 
 # ------------------------------------------------------------
 #
+# The base of all data models
+#
+# ------------------------------------------------------------
+class BaseModel(Base):
+    """
+    The game world system's data.
+    """
+    __abstract__ = True
+
+    __table_args__ = {
+        "extend_existing": True,
+    }
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+
+    def __eq__(self, other):
+        """
+        Define the equal operator. Two records are equal if they have the same id.
+        """
+        return int(self.id) == int(other.id)
+
+
+# ------------------------------------------------------------
+#
 # The game world system's data.
 # Users should not modify it manually.
 #
 # ------------------------------------------------------------
-class system_data(Base):
+class system_data(BaseModel):
     """
     The game world system's data.
     """
@@ -29,8 +53,6 @@ class system_data(Base):
     __table_args__ = {
         "extend_existing": True,
     }
-
-    id = Column(Integer, primary_key=True, autoincrement=True)
 
     # The last id of accounts.
     object_index = Column(Integer, default=0, nullable=False)
@@ -41,7 +63,7 @@ class system_data(Base):
 # Game's basic settings.
 #
 # ------------------------------------------------------------
-class game_settings(Base):
+class game_settings(BaseModel):
     """
     Game's basic settings.
     NOTE: Only uses the first record!
@@ -51,8 +73,6 @@ class game_settings(Base):
     __table_args__ = {
         "extend_existing": True,
     }
-
-    id = Column(Integer, primary_key=True, autoincrement=True)
 
     # The name of your game.
     game_name = Column(Unicode(NAME_LENGTH))
@@ -102,7 +122,7 @@ class game_settings(Base):
 # Game's basic settings.
 #
 # ------------------------------------------------------------
-class honour_settings(Base):
+class honour_settings(BaseModel):
     """
     honour combat's settings.
     NOTE: Only uses the first record!
@@ -112,8 +132,6 @@ class honour_settings(Base):
     __table_args__ = {
         "extend_existing": True,
     }
-
-    id = Column(Integer, primary_key=True, autoincrement=True)
 
     # The minimum level that a player can attend a honour combat.
     min_honour_level = Column(Integer, default=1, nullable=False)
@@ -140,7 +158,7 @@ class honour_settings(Base):
 # ------------------------------------------------------------
 # Element's basic data.
 # ------------------------------------------------------------
-class BaseElement(Base):
+class BaseElement(BaseModel):
     """
     The base model of all elements. All elements data are linked with keys.
     """
@@ -149,8 +167,6 @@ class BaseElement(Base):
     __table_args__ = {
         "extend_existing": True,
     }
-
-    id = Column(Integer, primary_key=True, autoincrement=True)
 
     # object's key
     key = Column(String(KEY_LENGTH), unique=True, nullable=False)
@@ -534,15 +550,13 @@ class quests(BaseElement):
     action = Column(String(KEY_LENGTH))
 
 
-class shop_goods(Base):
+class shop_goods(BaseModel):
     "All goods that sold in shops."
     __tablename__ = "shop_goods"
 
     __table_args__ = {
         "extend_existing": True,
     }
-
-    id = Column(Integer, primary_key=True, autoincrement=True)
 
     # shop's key
     shop = Column(String(KEY_LENGTH), index=True, nullable=False)
@@ -571,7 +585,7 @@ class shop_goods(Base):
 # store objects loot list
 #
 # ------------------------------------------------------------
-class loot_list(Base):
+class loot_list(BaseModel):
     "Loot list. It is used in object_creators and mods."
     __abstract__ = True
 
@@ -581,8 +595,6 @@ class loot_list(Base):
             "extend_existing": True,
         }
     )
-
-    id = Column(Integer, primary_key=True, autoincrement=True)
 
     # the provider of the object
     provider = Column(String(KEY_LENGTH), index=True)
@@ -658,15 +670,13 @@ class room_profit_list(loot_list):
 # store all equip_types
 #
 # ------------------------------------------------------------
-class equipment_types(Base):
+class equipment_types(BaseModel):
     "Store all equip types."
     __tablename__ = "equipment_types"
 
     __table_args__ = {
         "extend_existing": True,
     }
-
-    id = Column(Integer, primary_key=True, autoincrement=True)
 
     # equipment type's key
     key = Column(String(KEY_LENGTH), unique=True, nullable=False)
@@ -683,15 +693,13 @@ class equipment_types(Base):
 # store all available equipment potisions
 #
 # ------------------------------------------------------------
-class equipment_positions(Base):
+class equipment_positions(BaseModel):
     "Store all equip types."
     __tablename__ = "equipment_positions"
 
     __table_args__ = {
         "extend_existing": True,
     }
-
-    id = Column(Integer, primary_key=True, autoincrement=True)
 
     # position's key
     key = Column(String(KEY_LENGTH), unique=True, nullable=False)
@@ -708,7 +716,7 @@ class equipment_positions(Base):
 # Object's custom properties.
 #
 # ------------------------------------------------------------
-class properties_dict(Base):
+class properties_dict(BaseModel):
     """
     Object's custom properties.
     """
@@ -720,8 +728,6 @@ class properties_dict(Base):
             "extend_existing": True,
         }
     )
-
-    id = Column(Integer, primary_key=True, autoincrement=True)
 
     # The key of a element type.
     element_type = Column(String(KEY_LENGTH), index=True, nullable=False)
@@ -745,7 +751,7 @@ class properties_dict(Base):
 # These states can change in the game.
 #
 # ------------------------------------------------------------
-class character_states_dict(Base):
+class character_states_dict(BaseModel):
     """
     Character's mutable states.
     """
@@ -754,8 +760,6 @@ class character_states_dict(Base):
     __table_args__ = {
         "extend_existing": True,
     }
-
-    id = Column(Integer, primary_key=True, autoincrement=True)
 
     # The key of the state.
     key = Column(String(KEY_LENGTH), unique=True, nullable=False)
@@ -775,7 +779,7 @@ class character_states_dict(Base):
 # element's custom properties
 #
 # ------------------------------------------------------------
-class element_properties(Base):
+class element_properties(BaseModel):
     "Store element's custom properties."
     # The type of an element.
     __tablename__ = "element_properties"
@@ -787,8 +791,6 @@ class element_properties(Base):
             "index_together": [("element", "key", "level")],
         }
     )
-
-    id = Column(Integer, primary_key=True, autoincrement=True)
 
     # The element's type.
     element = Column(String(KEY_LENGTH), nullable=False)
@@ -811,7 +813,7 @@ class element_properties(Base):
 # character's default objects
 #
 # ------------------------------------------------------------
-class default_objects(Base):
+class default_objects(BaseModel):
     "character's default objects"
     __tablename__ = "default_objects"
 
@@ -821,8 +823,6 @@ class default_objects(Base):
             "extend_existing": True,
         }
     )
-
-    id = Column(Integer, primary_key=True, autoincrement=True)
 
     # Character's key.
     character = Column(String(KEY_LENGTH), index=True, nullable=False)
@@ -843,7 +843,7 @@ class default_objects(Base):
 # store npc's shop
 #
 # ------------------------------------------------------------
-class npc_shops(Base):
+class npc_shops(BaseModel):
     "Store npc's shops."
     __tablename__ = "npc_shops"
 
@@ -853,8 +853,6 @@ class npc_shops(Base):
             "extend_existing": True,
         }
     )
-
-    id = Column(Integer, primary_key=True, autoincrement=True)
 
     # The key of an NPC.
     # NPC's key
@@ -870,7 +868,7 @@ class npc_shops(Base):
 # skill types
 #
 # ------------------------------------------------------------
-class skill_types(Base):
+class skill_types(BaseModel):
     """
     Skill's type, used in skill's main_type and sub_type. The type discribes the usage of a
     skill, which is useful in auto casting skills.
@@ -880,8 +878,6 @@ class skill_types(Base):
     __table_args__ = {
         "extend_existing": True,
     }
-
-    id = Column(Integer, primary_key=True, autoincrement=True)
 
     # type's key
     key = Column(String(KEY_LENGTH), unique=True, nullable=False)
@@ -898,7 +894,7 @@ class skill_types(Base):
 # character's default skills
 #
 # ------------------------------------------------------------
-class default_skills(Base):
+class default_skills(BaseModel):
     "character's default skills"
     __tablename__ = "default_skills"
 
@@ -908,8 +904,6 @@ class default_skills(Base):
             "extend_existing": True,
         }
     )
-
-    id = Column(Integer, primary_key=True, autoincrement=True)
 
     # character's key
     character = Column(String(KEY_LENGTH), index=True, nullable=False)
@@ -927,7 +921,7 @@ class default_skills(Base):
 # store quest objectives
 #
 # ------------------------------------------------------------
-class quest_objectives(Base):
+class quest_objectives(BaseModel):
     "Store all quest objectives."
     __tablename__ = "quest_objectives"
 
@@ -937,8 +931,6 @@ class quest_objectives(Base):
             "extend_existing": True,
         }
     )
-
-    id = Column(Integer, primary_key=True, autoincrement=True)
 
     # The key of a quest.
     # quest's key
@@ -963,7 +955,7 @@ class quest_objectives(Base):
 # store quest dependencies
 #
 # ------------------------------------------------------------
-class quest_dependencies(Base):
+class quest_dependencies(BaseModel):
     "Store quest dependency."
     __tablename__ = "quest_dependencies"
 
@@ -973,8 +965,6 @@ class quest_dependencies(Base):
             "extend_existing": True,
         }
     )
-
-    id = Column(Integer, primary_key=True, autoincrement=True)
 
     # The key of a quest.
     # quest's key
@@ -994,7 +984,7 @@ class quest_dependencies(Base):
 # store event data
 #
 # ------------------------------------------------------------
-class event_data(Base):
+class event_data(BaseModel):
     "Store event data."
     __tablename__ = "event_data"
 
@@ -1002,8 +992,6 @@ class event_data(Base):
         "extend_existing": True,
         "index_together": [("trigger_obj", "trigger_type")],
     }
-
-    id = Column(Integer, primary_key=True, autoincrement=True)
 
     # event's key
     key = Column(String(KEY_LENGTH), unique=True, nullable=False)
@@ -1035,15 +1023,13 @@ class event_data(Base):
 # store all dialogues
 #
 # ------------------------------------------------------------
-class dialogues(Base):
+class dialogues(BaseModel):
     "Store all dialogues."
     __tablename__ = "dialogues"
 
     __table_args__ = {
         "extend_existing": True,
     }
-
-    id = Column(Integer, primary_key=True, autoincrement=True)
 
     # dialogue's key
     key = Column(String(KEY_LENGTH), unique=True, nullable=False)
@@ -1063,7 +1049,7 @@ class dialogues(Base):
 # store dialogue quest dependencies
 #
 # ------------------------------------------------------------
-class dialogue_quest_dependencies(Base):
+class dialogue_quest_dependencies(BaseModel):
     "Store dialogue quest dependencies."
     __tablename__ = "dialogue_quest_dependencies"
 
@@ -1073,8 +1059,6 @@ class dialogue_quest_dependencies(Base):
             "extend_existing": True,
         }
     )
-
-    id = Column(Integer, primary_key=True, autoincrement=True)
 
     # The key of a dialogue.
     # dialogue's key
@@ -1094,7 +1078,7 @@ class dialogue_quest_dependencies(Base):
 # store dialogue relations
 #
 # ------------------------------------------------------------
-class dialogue_relations(Base):
+class dialogue_relations(BaseModel):
     "Store dialogue relations."
     __tablename__ = "dialogue_relations"
 
@@ -1104,8 +1088,6 @@ class dialogue_relations(Base):
             "extend_existing": True,
         }
     )
-
-    id = Column(Integer, primary_key=True, autoincrement=True)
 
     # The key of a dialogue.
     # dialogue's key
@@ -1121,7 +1103,7 @@ class dialogue_relations(Base):
 # store npc's dialogue
 #
 # ------------------------------------------------------------
-class npc_dialogues(Base):
+class npc_dialogues(BaseModel):
     "Store npc's dialogues."
     __tablename__ = "npc_dialogues"
 
@@ -1131,8 +1113,6 @@ class npc_dialogues(Base):
             "extend_existing": True,
         }
     )
-
-    id = Column(Integer, primary_key=True, autoincrement=True)
 
     # The key of an NPC.
     # NPC's key
@@ -1151,14 +1131,12 @@ class npc_dialogues(Base):
 # event's data
 #
 # ------------------------------------------------------------
-class BaseEventActionData(Base):
+class BaseEventActionData(BaseModel):
     __abstract__ = True
 
     __table_args__ = {
         "extend_existing": True,
     }
-
-    id = Column(Integer, primary_key=True, autoincrement=True)
 
     # The key of an event.
     event_key = Column(String(KEY_LENGTH), index=True, nullable=False)
@@ -1373,7 +1351,7 @@ class action_get_objects(BaseEventActionData):
 # localized strings
 #
 # ------------------------------------------------------------
-class localized_strings(Base):
+class localized_strings(BaseModel):
     "Store all localized strings."
     __tablename__ = "localized_strings"
 
@@ -1383,8 +1361,6 @@ class localized_strings(Base):
             "extend_existing": True,
         }
     )
-
-    id = Column(Integer, primary_key=True, autoincrement=True)
 
     # is system data or not
     system_data = Column(Boolean, default=False)
@@ -1404,15 +1380,13 @@ class localized_strings(Base):
 # set image resources
 #
 # ------------------------------------------------------------
-class image_resources(Base):
+class image_resources(BaseModel):
     "Store resource's information."
     __tablename__ = "image_resources"
 
     __table_args__ = {
         "extend_existing": True,
     }
-
-    id = Column(Integer, primary_key=True, autoincrement=True)
 
     # image's path
     resource = Column(String(KEY_LENGTH), unique=True, nullable=False)

@@ -3,6 +3,7 @@ Battle commands. They only can be used when a character is in a combat.
 """
 
 from django.conf import settings
+from wtforms_alchemy.validators import Unique
 from muddery.server.utils.logger import logger
 from muddery.server.utils.exception import MudderyError, ERR
 from muddery.worldeditor.dao import general_querys
@@ -13,6 +14,7 @@ from muddery.server.mappings.element_set import ELEMENT, ELEMENT_SET
 from muddery.server.mappings.event_action_set import EVENT_ACTION_SET
 from muddery.server.utils.localized_strings_handler import _
 from muddery.worldeditor.database.db_manager import DBManager
+from muddery.worldeditor.forms.base_form import FormData
 
 
 def query_form(table_name, condition=None):
@@ -41,8 +43,10 @@ def query_form(table_name, condition=None):
         # Get empty data.
         form = form_class()
 
+    field_names = general_querys.get_field_names(table_name)
     fields = []
-    for field in form:
+    for field_name in field_names:
+        field = form[field_name]
         info = {
             "name": field.id,
             "label": field.name,
@@ -78,43 +82,43 @@ def save_form(values, table_name, record_id=None):
     if not form_class:
         raise MudderyError(ERR.no_table, "Can not find table: %s" % table_name)
 
+    form_data = FormData(values)
+
     is_new = True
     if record_id:
         try:
             # Query record's data.
             record = general_querys.get_record_by_id(table_name, record_id)
-            values["id"] = record.id
+            form = form_class(formdata=form_data, obj=record)
+            form.populate_obj(record)
             is_new = False
         except Exception as e:
             pass
-    else:
-        if "id" in values:
-            del(values["id"])
 
-    form = form_class(data=values)
+    if is_new:
+        model = DBManager.inst().get_model(settings.WORLD_DATA_APP, table_name)
+        record = model(**values)
+        form = form_class(formdata=form_data)
+
+    # check data
+    if not form.validate():
+        raise MudderyError(ERR.invalid_form, "Invalid form.", data=form.errors)
 
     # Save data
-    if form.validate():
-        model = DBManager.inst().get_model(settings.WORLD_DATA_APP, table_name)
-        new_record = model()
-        form.populate_obj(new_record)
-        session = DBManager.inst().get_session(settings.WORLD_DATA_APP)
+    session = DBManager.inst().get_session(settings.WORLD_DATA_APP)
+    try:
+        if is_new:
+            session.add(record)
+        else:
+            session.merge(record)
 
-        try:
-            if is_new:
-                session.add(new_record)
-            else:
-                session.merge(new_record)
+        session.commit()
+    except Exception as e:
+        session.rollback()
+        logger.log_trace("Can not save form %s" % e)
+        raise
 
-            session.commit()
-        except Exception as e:
-            session.rollback()
-            logger.log_trace("Can not save form %s" % e)
-            raise
-
-        return new_record.id
-    else:
-        raise MudderyError(ERR.invalid_form, "Invalid form.", data=form.errors)
+    return record.id
 
 
 def delete_record(table_name, record_id):
@@ -235,47 +239,48 @@ def save_element_form(tables, element_type, element_key):
         table_name = table["table"]
         values = table["values"]
 
-        if "id" in values:
-            del(values["id"])
-
         form_class = FORM_SET.get(table_name)
         if not form_class:
             raise MudderyError(ERR.no_table, "Can not find table: %s" % table_name)
 
+        form_data = FormData(values)
+
         is_new = True
+        form = None
         if element_key:
             try:
                 # Query record's data.
                 record = general_querys.get_record_by_key(table_name, element_key)
-                values["id"] = record.id
+                form = form_class(formdata=form_data, obj=record)
+                form.populate_obj(record)
                 is_new = False
             except Exception as e:
                 pass
 
-        form = form_class(data=values)
+        if is_new:
+            model = DBManager.inst().get_model(settings.WORLD_DATA_APP, table_name)
+            record = model(**values)
+            form = form_class(formdata=form_data)
 
         # check data
-        if form.validate():
-            forms_to_save.append({
-                "table_name": table_name,
-                "form": form,
-                "is_new": is_new,
-            })
-        else:
+        if not form.validate():
             raise MudderyError(ERR.invalid_form, "Invalid form.", data=form.errors)
+
+        forms_to_save.append({
+            "table_name": table_name,
+            "record": record,
+            "is_new": is_new,
+            "id": values["id"] if not is_new else None,
+        })
 
     # Save data.
     session = DBManager.inst().get_session(settings.WORLD_DATA_APP)
     try:
         for item in forms_to_save:
-            model = DBManager.inst().get_model(settings.WORLD_DATA_APP, item["table_name"])
-            new_record = model()
-            item["form"].populate_obj(new_record)
-
             if item["is_new"]:
-                session.add(new_record)
+                session.add(record)
             else:
-                session.merge(new_record)
+                session.merge(record)
 
         session.commit()
     except Exception as e:

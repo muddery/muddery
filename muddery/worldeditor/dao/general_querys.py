@@ -58,6 +58,25 @@ def get_query(table_name, condition=None):
     return result.scalars()
 
 
+def get_one(table_name, condition=None):
+    """
+    Get a record of given condition. Compatible with the wtforms_alchemy's unique validator.
+    """
+    session_name = settings.WORLD_DATA_APP
+    session = DBManager.inst().get_session(session_name)
+    model = DBManager.inst().get_model(session_name, table_name)
+
+    # set conditions
+    stmt = session.query(model)
+
+    if condition:
+        where_condition = [(getattr(model, field)) == value for field, value in condition.items()]
+        stmt = stmt.filter(*where_condition)
+
+    result = stmt.first()
+    return result
+
+
 def filter_records(table_name, condition=None):
     """
     Filter records by conditions.
