@@ -75,7 +75,7 @@ def query_tables():
     """
     Query all tables' names.
     """
-    tables = DBManager.inst().get_tables()
+    tables = DBManager.inst().get_tables(settings.WORLD_DATA_APP)
     models_info = [{
         "key": table,
         "name": _(table, category="models") + "(" + table + ")"
@@ -347,9 +347,12 @@ def query_map(area_key):
     Args:
         area_key: (string) area's key.
     """
-    area_info = WORLD_AREAS.get_by_key_with_base(area_key)
-    if not area_info:
+    area_table_fields = general_querys.get_field_names("world_areas")
+    area_records = WORLD_AREAS.get_by_key_with_base(area_key)
+    if not area_records:
         raise MudderyError(ERR.no_data, "Can not find map: %s" % area_key)
+    area_record = area_records[0]
+    area_info = {field: getattr(area_record, field) for field in area_table_fields}
 
     room_records = WorldRoomsMapper.inst().rooms_in_area(area_key)
     room_info = []

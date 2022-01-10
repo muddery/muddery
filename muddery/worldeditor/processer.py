@@ -90,6 +90,11 @@ class Processor(object):
             logger.log_trace("Error: %s" % e)
             response = error_response(ERR.internal, msg=str(e))
 
-        logger.log_info("[RESPOND] '%s' '%s'" % (response.status_code, response.content))
+        if hasattr(response, "content"):
+            logger.log_info("[RESPOND] '%s' '%s'" % (response.status_code, response.content))
+        elif hasattr(response, "streaming_content"):
+            logger.log_info("[RESPOND] '%s' streaming_content" % (response.status_code))
+        else:
+            logger.log_info("[RESPOND] '%s'" % response.status_code)
 
         return response

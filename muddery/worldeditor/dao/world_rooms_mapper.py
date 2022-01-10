@@ -21,6 +21,6 @@ class WorldRoomsMapper(CommonMapper, Singleton):
         Args:
             area_key: (string) an area's key.
         """
-        return self.model.filter({
+        return self.filter({
             "area": area_key
         })

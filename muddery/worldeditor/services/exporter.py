@@ -36,7 +36,7 @@ def export_file(filename, table_name, file_type=None):
 
     records = general_querys.get_all_records(table_name)
     for record in records:
-        line = [str(getattr(record, field)) for field in fields]
+        line = [str(getattr(record, field)) if getattr(record, field) is not None else "" for field in fields]
         writer.writeln(line)
 
     writer.save()
@@ -62,11 +62,10 @@ def export_zip_all(file_obj, file_type=None):
         archive = zipfile.ZipFile(file_obj, 'w', zipfile.ZIP_DEFLATED)
 
         # get model names
-        models = DBManager.inst().get_tables(settings.WORLD_DATA_APP)
-        for model in models:
-            model_name = model._meta.object_name
-            export_file(temp_filename, model_name, file_type)
-            filename = model_name + "." + file_ext
+        table_names = DBManager.inst().get_tables(settings.WORLD_DATA_APP)
+        for table_name in table_names:
+            export_file(temp_filename, table_name, file_type)
+            filename = table_name + "." + file_ext
             archive.write(temp_filename, filename)
 
         # add version file
