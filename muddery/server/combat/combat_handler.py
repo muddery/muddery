@@ -1,5 +1,5 @@
 
-from django.conf import settings
+from muddery.server.server import settings
 from muddery.server.utils.utils import class_from_path
 from muddery.server.utils.defines import CombatType
 

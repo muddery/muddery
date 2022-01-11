@@ -3,7 +3,6 @@ Key value storage in relational database.
 """
 import traceback
 import importlib
-from django.conf import settings
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 from sqlalchemy import select, update, delete
 from sqlalchemy import func

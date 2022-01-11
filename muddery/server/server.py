@@ -1,8 +1,7 @@
 
 import threading
 import traceback
-
-from django.conf import settings
+from muddery.server.conf import settings
 from muddery.server.utils.utils import class_from_path
 from muddery.server.utils.singleton import Singleton
 from muddery.server.service.command_handler import CommandHandler
@@ -23,10 +22,15 @@ class Server(Singleton):
             return self.method(owner)
 
     def __init__(self, *args, **kwargs):
+        self.configs = {}
         self._world = None
         self._command_handler = None
+
         self.db_connected = False
         self.connect_db()
+
+        self.create_the_world()
+        self.create_command_handler()
 
     def connect_db(self):
         """
@@ -48,10 +52,17 @@ class Server(Singleton):
         Create the whole game world.
         :return:
         """
-        from muddery.server.mappings.element_set import ELEMENT
-        world = ELEMENT("WORLD")()
-        world.setup_element("")
-        self._world = world
+        if self._world:
+            return
+
+        try:
+            from muddery.server.mappings.element_set import ELEMENT
+            world = ELEMENT("WORLD")()
+            world.setup_element("")
+            self._world = world
+        except Exception as e:
+            traceback.print_exc()
+            raise
 
     @ClassProperty
     def world(cls):
@@ -67,14 +78,16 @@ class Server(Singleton):
         """
         Create and init the command handler.
         """
+        if self._command_handler:
+            return
+
         session_cmdset = class_from_path(settings.SESSION_CMDSET)
         account_cmdset = class_from_path(settings.ACCOUNT_CMDSET)
         character_cmdset = class_from_path(settings.CHARACTER_CMDSET)
         self._command_handler = CommandHandler(session_cmdset, account_cmdset, character_cmdset)
 
-    def handler_message(self, session, message):
+    async def handler_message(self, session, message):
         """
         Get a message from a session.
         """
-        self._command_handler.handler_command(session, message)
-
+        await self._command_handler.handler_command(session, message)

@@ -2,7 +2,7 @@
 """
 The base of all forms.
 """
-from django.conf import settings
+from muddery.server.conf import settings
 from wtforms import fields
 from wtforms_alchemy import ModelForm
 from muddery.worldeditor.database.db_manager import DBManager

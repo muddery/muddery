@@ -5,7 +5,6 @@ This decorator can add controllers to the controller dict for future usage.
 """
 
 import json
-from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse
 from muddery.server.utils.logger import logger

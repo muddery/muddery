@@ -1,5 +1,5 @@
 
-from django.conf import settings
+from muddery.server.conf import settings
 from wtforms import validators, widgets
 from wtforms.fields import SelectField
 from muddery.server.utils.localiztion_handler import localize_form_fields

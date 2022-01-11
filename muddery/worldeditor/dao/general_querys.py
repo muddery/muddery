@@ -4,7 +4,7 @@ Query and deal common tables.
 
 import importlib
 from sqlalchemy import select, delete, update, func
-from django.conf import settings
+from muddery.server.conf import settings
 from muddery.server.mappings.element_set import ELEMENT
 from muddery.worldeditor.database.db_manager import DBManager
 from muddery.worldeditor.dao.dict_record import DictRecord

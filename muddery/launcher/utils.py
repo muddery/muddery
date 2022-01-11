@@ -10,8 +10,8 @@ import configparser
 import traceback
 from pathlib import Path
 from subprocess import check_output, CalledProcessError, STDOUT
-import django.core.management
 from muddery.launcher import configs
+
 
 # ------------------------------------------------------------
 #
@@ -174,7 +174,7 @@ def copy_tree(source, destination):
     """
     if not os.path.exists(destination):
         # If does not exist, create one.
-        os.mkdir(destination)
+        os.makedirs(destination)
         
     # traverse files and folders
     names = os.listdir(source)
@@ -364,7 +364,7 @@ def import_local_data(clear=False):
     """
     Import all local data files to models.
     """
-    from django.conf import settings
+    from muddery.server.conf import settings
     from muddery.worldeditor.services import importer
 
     # load custom data
@@ -381,7 +381,7 @@ def import_system_data():
     """
     Import all local data files to models.
     """
-    from django.conf import settings
+    from muddery.server.conf import settings
     from muddery.worldeditor.services import importer
 
     # load system default data
@@ -404,11 +404,6 @@ def init_game_env(gamedir):
 
     # Add gamedir to python path
     sys.path.insert(0, gamedir)
-
-    # Game directory structure
-    SETTINGS_DOTPATH = "server.conf.settings"
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', SETTINGS_DOTPATH)
-    django.setup()
 
 
 def create_superuser(username, password):
@@ -494,7 +489,7 @@ def print_info():
     Format info dicts from the Portal/Server for display
 
     """
-    from django.conf import settings
+    from muddery.server.conf import settings
 
     ind = " " * 8
     info = {

@@ -10,7 +10,6 @@ creation commands.
 
 import ast, traceback
 import weakref
-from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from muddery.server.utils.logger import logger
 from muddery.server.server import Server

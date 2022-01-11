@@ -2,7 +2,7 @@
 The World is the base controller of a server. It managers all areas, maps and characters on this server.
 """
 
-from django.conf import settings
+from muddery.server.conf import settings
 from muddery.server.elements.base_element import BaseElement
 from muddery.server.mappings.element_set import ELEMENT
 from muddery.server.database.worlddata.world_areas import WorldAreas

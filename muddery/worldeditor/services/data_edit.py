@@ -2,7 +2,7 @@
 Battle commands. They only can be used when a character is in a combat.
 """
 
-from django.conf import settings
+from muddery.server.conf import settings
 from wtforms_alchemy.validators import Unique
 from muddery.server.utils.logger import logger
 from muddery.server.utils.exception import MudderyError, ERR

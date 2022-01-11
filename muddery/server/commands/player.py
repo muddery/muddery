@@ -3,7 +3,7 @@ General account commands usually availabe to all players.
 """
 
 import re, traceback
-from django.conf import settings
+from muddery.server.conf import settings
 from muddery.server.utils.logger import logger
 from muddery.server.commands.base_command import BaseCommand
 from muddery.server.utils.localized_strings_handler import _

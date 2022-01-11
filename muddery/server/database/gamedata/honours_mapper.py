@@ -3,8 +3,7 @@ This model translates default strings into localized strings.
 """
 
 import importlib
-from django.db import transaction
-from django.conf import settings
+from muddery.server.conf import settings
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 from sqlalchemy import select, update, delete
 from muddery.server.utils.utils import class_from_path

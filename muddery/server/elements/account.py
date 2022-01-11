@@ -9,7 +9,7 @@ distribution systems.
 
 import traceback
 import datetime
-from django.conf import settings
+from muddery.server.conf import settings
 from django.contrib.auth.hashers import check_password, is_password_usable, make_password
 from muddery.server.database.gamedata.accounts import Accounts
 from muddery.server.database.gamedata.server_bans import ServerBans

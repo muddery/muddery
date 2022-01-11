@@ -6,7 +6,7 @@ import re
 import time
 import hashlib
 from collections import defaultdict
-from django.conf import settings
+from muddery.server.conf import settings
 from muddery.server.mappings.element_set import ELEMENT
 from muddery.server.utils.logger import logger
 from muddery.server.commands.base_command import BaseCommand
@@ -240,7 +240,7 @@ class CmdUnloginLook(BaseCommand):
     key = "unloggedin_look"
 
     @classmethod
-    def func(cls, session, args, context):
+    async def func(cls, session, args, context):
         "Show the connect screen."
         game_name = GameSettings.inst().get("game_name")
         connection_screen = GameSettings.inst().get("connection_screen")
@@ -252,7 +252,7 @@ class CmdUnloginLook(BaseCommand):
             "desc": r.desc,
         } for r in records]
 
-        session.msg({
+        await session.msg({
             "game_name": game_name,
             "conn_screen": connection_screen,
             "equipment_pos": equipment_pos,

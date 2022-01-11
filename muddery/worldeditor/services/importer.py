@@ -3,7 +3,9 @@ This module imports data from files to db.
 """
 
 import os, glob, tempfile, zipfile, shutil
-from django.conf import settings
+import traceback
+
+from muddery.server.conf import settings
 from muddery.launcher.upgrader.upgrade_handler import UPGRADE_HANDLER
 from muddery.launcher import configs
 from muddery.launcher.utils import copy_tree
@@ -110,6 +112,7 @@ def import_data_path(path, clear=True, except_errors=False):
             try:
                 import_file(file_names[0], table_name=table_name, clear=clear, except_errors=except_errors)
             except Exception as e:
+                traceback.print_exc()
                 print("Import error: %s" % e)
 
 

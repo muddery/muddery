@@ -2,7 +2,7 @@
 All available event actions.
 """
 
-from django.conf import settings
+from muddery.server.conf import settings
 from muddery.server.utils.logger import logger
 from muddery.server.utils.utils import classes_in_path
 from muddery.server.events.base_event_action import BaseEventAction

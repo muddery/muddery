@@ -3,7 +3,7 @@ This model handle statements.
 """
 
 import re, ast, traceback
-from django.conf import settings
+from muddery.server.conf import settings
 from muddery.server.utils.logger import logger
 from muddery.server.utils.utils import class_from_path
 

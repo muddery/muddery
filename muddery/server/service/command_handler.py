@@ -2,7 +2,6 @@
 import json
 import traceback
 
-from django.conf import settings
 from muddery.server.utils.logger import logger
 from muddery.server.utils.utils import class_from_path
 
@@ -18,7 +17,7 @@ class CommandHandler(object):
         self.account_cmdset = account_cmdset
         self.character_cmdset = character_cmdset
 
-    def handler_command(self, session, raw_string):
+    async def handler_command(self, session, raw_string):
         print("[Receive command][%s]%s" % (session, raw_string))
         logger.log_info("[Receive command][%s]%s" % (session, raw_string))
 
@@ -40,7 +39,7 @@ class CommandHandler(object):
         command = self.session_cmdset.get(command_key)
         if command:
             try:
-                command.func(session, args, context)
+                await command.func(session, args, context)
             except Exception as e:
                 traceback.print_exc()
                 logger.log_err("Run command error, %s: %s %s" % (session, raw_string, e))

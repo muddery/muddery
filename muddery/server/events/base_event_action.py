@@ -3,7 +3,7 @@ Event action's base class.
 """
 
 from django.apps import apps
-from django.conf import settings
+from muddery.server.conf import settings
 from muddery.server.database.worlddata.worlddata import WorldData
 
 

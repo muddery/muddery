@@ -9,9 +9,9 @@ are all directed either to stdout or to $GAME_DIR/server/logs.
 from traceback import format_exc
 import os
 import threading
-from django.conf import settings
 import logging
 from logging.handlers import TimedRotatingFileHandler
+from muddery.server.conf import settings
 
 
 class Logger(object):

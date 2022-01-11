@@ -788,9 +788,10 @@ class element_properties(BaseModel):
         UniqueConstraint("element", "key", "level", "property"),
         {
             "extend_existing": True,
-            "index_together": [("element", "key", "level")],
         }
     )
+
+    __index_together__ = [("element", "key", "level")]
 
     # The element's type.
     element = Column(String(KEY_LENGTH), nullable=False)
@@ -990,8 +991,9 @@ class event_data(BaseModel):
 
     __table_args__ = {
         "extend_existing": True,
-        "index_together": [("trigger_obj", "trigger_type")],
     }
+
+    __index_together__ =  [("trigger_obj", "trigger_type")]
 
     # event's key
     key = Column(String(KEY_LENGTH), unique=True, nullable=False)

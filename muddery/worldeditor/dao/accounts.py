@@ -5,7 +5,7 @@ Store object's element key data in memory.
 
 import datetime
 from sqlalchemy import select, update, delete, func
-from django.conf import settings
+from muddery.server.conf import settings
 from muddery.server.utils.singleton import Singleton
 from muddery.worldeditor.database.db_manager import DBManager
 from muddery.worldeditor.database.worldeditor_models import accounts

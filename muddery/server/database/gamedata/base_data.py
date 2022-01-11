@@ -3,7 +3,7 @@
 Query and deal game data.
 """
 
-from django.conf import settings
+from muddery.server.conf import settings
 from muddery.server.utils import utils
 
 

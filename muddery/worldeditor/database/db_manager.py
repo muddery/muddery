@@ -4,7 +4,7 @@ import importlib
 import inspect
 from sqlalchemy.orm import Session
 from sqlalchemy import select, delete
-from django.conf import settings
+from muddery.server.conf import settings
 from muddery.server.database.engines import get_engine
 from muddery.server.utils.logger import logger
 from muddery.server.utils.singleton import Singleton
@@ -17,11 +17,16 @@ class DBManager(Singleton):
     def __init__(self):
         self.engines = {}
         self.sessions = {}
+        self.connected = False
+        self.connect()
 
     def connect(self):
         """
         Create db connections.
         """
+        if self.connected:
+            return
+
         for key, cfg in settings.AL_DATABASES.items():
             try:
                 engine = get_engine(cfg["ENGINE"], cfg)
@@ -30,6 +35,8 @@ class DBManager(Singleton):
             except Exception as e:
                 logger.log_trace("Can not connect to db.")
                 raise e
+
+        self.connected = True
 
     def create_tables(self):
         """

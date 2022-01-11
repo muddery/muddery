@@ -2,8 +2,6 @@
 Key value storage in relational database with write back memory cache.
 """
 
-from django.apps import apps
-from django.conf import settings
 from django.db import IntegrityError
 from django.db.transaction import atomic
 from muddery.server.database.storage.kv_table import KeyValueTable

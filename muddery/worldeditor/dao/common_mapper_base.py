@@ -2,7 +2,7 @@
 This model translates default strings into localized strings.
 """
 
-from django.conf import settings
+from muddery.server.conf import settings
 from sqlalchemy import select, update, delete
 from muddery.server.mappings.element_set import ELEMENT
 from muddery.worldeditor.dao import general_querys

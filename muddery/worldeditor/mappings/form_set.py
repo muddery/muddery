@@ -3,7 +3,7 @@ This model translates default strings into localized strings.
 """
 
 import importlib, inspect
-from django.conf import settings
+from muddery.server.conf import settings
 from wtforms_alchemy import ModelForm
 from muddery.server.utils.logger import logger
 from sqlalchemy.ext.declarative import declarative_base

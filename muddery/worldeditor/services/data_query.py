@@ -3,7 +3,7 @@ Battle commands. They only can be used when a character is in a combat.
 """
 
 import ast
-from django.conf import settings
+from muddery.server.conf import settings
 from sqlalchemy.sql import text
 from muddery.server.utils.logger import logger
 from muddery.worldeditor.dao.common_mappers import WORLD_AREAS

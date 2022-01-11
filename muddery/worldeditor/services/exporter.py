@@ -5,7 +5,7 @@ This module imports data from files to db.
 import os
 import tempfile
 import zipfile
-from django.conf import settings
+from muddery.server.conf import settings
 from muddery.launcher import configs
 from muddery.server.utils.exception import MudderyError, ERR
 from muddery.worldeditor.database.db_manager import DBManager

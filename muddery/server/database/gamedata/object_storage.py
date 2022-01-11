@@ -4,8 +4,6 @@ Object's attributes cache.
 
 import json
 from collections import OrderedDict
-from django.conf import settings
-from muddery.server.utils import utils
 from muddery.server.utils.exception import MudderyError, ERR
 from muddery.server.database.storage.memory_storage import MemoryStorage
 from muddery.server.database.gamedata.base_data import BaseData

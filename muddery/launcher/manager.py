@@ -1,10 +1,8 @@
 
 import os
-import sys
 import traceback
-import django
-import django.core.management
 from muddery.launcher import configs, utils
+from muddery.server.database.db_manager import DBManager
 
 
 def print_help():
@@ -67,6 +65,9 @@ def load_game_data():
     gamedir = os.path.abspath(configs.CURRENT_DIR)
     utils.init_game_env(gamedir)
 
+    # create tables first
+    DBManager.inst().create_tables()
+
     # load local data
     try:
         utils.import_local_data(clear=True)
@@ -125,20 +126,10 @@ def show_version(about=False):
     print(utils.show_version_info(about))
 
 
-def create_superuser(username, password):
-    """
-    Create the superuser's account.
-    """
-    from evennia.accounts.models import AccountDB
-    AccountDB.objects.create_superuser(username, '', password)
-
-
 def setup_server():
     """
     Setup the server.
     """
-    django.setup()
-
     from muddery.server.server import Server
     Server.inst().create_the_world()
     Server.inst().create_command_handler()
@@ -148,8 +139,6 @@ def setup_editor():
     """
     Setup the server.
     """
-    django.setup()
-
     if not utils.check_database():
         print("Migrating databases.")
         utils.create_editor_database()
@@ -166,67 +155,8 @@ def collect_static():
     gamedir = os.path.abspath(configs.CURRENT_DIR)
     utils.init_game_env(gamedir)
 
-    django_args = ["collectstatic"]
-    django_kwargs = {"verbosity": 0,
-                     "interactive": False}
-    try:
-        django.core.management.call_command(*django_args, **django_kwargs)
-        print("\nStatic file collected.")
-    except django.core.management.base.CommandError as exc:
-        print(configs.ERROR_INPUT.format(traceback=exc, args=django_args, kwargs=django_kwargs))
-
-
-def run_evennia(option):
-    """
-    Run Evennia's launcher.
-
-    :param option: command line's option args
-    :return:
-    """
-    if not utils.check_version():
-        print(configs.NEED_UPGRADE)
-        raise Exception
-
-    gamedir = os.path.abspath(configs.CURRENT_DIR)
-    os.chdir(gamedir)
-    evennia_launcher.init_game_directory(gamedir, check_db=False)
-
-    if not utils.check_database():
-        try:
-            print("Migrating databases.")
-            utils.create_database()
-        except Exception as e:
-            traceback.print_exc()
-            print("Migrate database error: %s" % e)
-            raise
-
-        try:
-            print("Importing local data.")
-            utils.import_local_data()
-        except Exception as e:
-            traceback.print_exc()
-            print("Import local data error: %s" % e)
-            raise
-
-    # pass-through to evennia
-    try:
-        evennia_launcher.main()
-    except Exception as e:
-        traceback.print_exc()
-        raise
-
-    if option == "start":
-        # Collect static files.
-        collect_static()
-
-        utils.print_info()
-
-
-def start(game_dir):
-    """
-    Start the game.
-    :return:
-    """
-    evennia_launcher.init_game_directory(game_dir, check_db=True)
-    evennia_launcher.error_check_python_modules()
-    evennia_launcher.start_evennia()
+    from muddery.server.conf import settings
+    for item in settings.STATICFILES_DIRS:
+        source = item[1]
+        target = os.path.join(settings.WEBCLIENT_ROOT, item[0])
+        utils.copy_tree(source, target)

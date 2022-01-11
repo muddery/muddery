@@ -64,15 +64,14 @@ class MemoryTableAl(object):
 
         # index together or unique together
         indexes = []
+
+        if hasattr(self.model, "__index_together__"):
+            indexes.extend(self.model.__index_together__)
+
         if type(self.model.__table_args__) == tuple:
             for table_args in self.model.__table_args__:
-                if type(table_args) == dict and "index_together" in table_args:
-                    indexes.extend(table_args["index_together"])
                 if type(table_args) == UniqueConstraint:
                     indexes.append(table_args.columns.keys())
-        elif type(self.model.__table_args__) == dict:
-            if "index_together" in self.model.__table_args__:
-                indexes.extend(self.model.__table_args__["index_together"])
 
         for set_fields in indexes:
             index_fields = sorted(set_fields)

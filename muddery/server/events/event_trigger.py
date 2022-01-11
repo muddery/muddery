@@ -4,7 +4,6 @@ EventHandler handles all events. The handler sets on every object.
 
 import random
 import weakref
-from django.conf import settings
 from muddery.server.utils import defines
 from muddery.server.statements.statement_handler import STATEMENT_HANDLER
 from muddery.server.database.worlddata.event_data import EventData

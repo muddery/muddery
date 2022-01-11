@@ -9,7 +9,7 @@ be of use when designing your own game.
 import os, re, inspect
 import importlib
 from pkgutil import iter_modules
-from django.conf import settings
+from muddery.server.conf import settings
 from muddery.launcher import configs
 from muddery.server.database.worlddata.localized_strings import LocalizedStrings
 

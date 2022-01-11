@@ -10,7 +10,7 @@ creation commands.
 
 import time, datetime, traceback, ast
 from apscheduler.schedulers.background import BackgroundScheduler
-from django.conf import settings
+from muddery.server.conf import settings
 from muddery.server.utils.logger import logger
 from muddery.server.elements.base_element import BaseElement
 from muddery.server.combat.combat_handler import COMBAT_HANDLER
