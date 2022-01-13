@@ -20,14 +20,14 @@ class MudderyShop(BaseElement):
     element_name = "Shop"
     model_name = "shops"
 
-    def at_element_setup(self, first_time):
+    async def at_element_setup(self, first_time):
         """
         Set data_info to the object.
 
         Returns:
             None
         """
-        super(MudderyShop, self).at_element_setup(first_time)
+        await super(MudderyShop, self).at_element_setup(first_time)
 
         # load shop goods
         self.load_goods()

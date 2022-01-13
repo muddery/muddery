@@ -13,9 +13,14 @@ class CharacterSkills(BaseData, Singleton):
     __table_name = "character_skills"
     __category_name = "character_id"
     __key_field = "skill"
-    __default_value_field = ""
+    __default_value_field = None
 
-    def save(self, character_id, skill_key, data):
+    def __init__(self):
+        # data storage
+        super(CharacterSkills, self).__init__()
+        self.storage = self.create_storage(self.__table_name, self.__category_name, self.__key_field, self.__default_value_field)
+
+    async def save(self, character_id, skill_key, data):
         """
         Set a skill.
 
@@ -24,9 +29,9 @@ class CharacterSkills(BaseData, Singleton):
             skill_key: (string) skill's key.
             data: (dict) data to save.
         """
-        self.storage.save(character_id, skill_key, data)
+        await self.storage.save(character_id, skill_key, data)
 
-    def has(self, character_id, skill_key):
+    async def has(self, character_id, skill_key):
         """
         Check if the skill exists.
 
@@ -34,9 +39,9 @@ class CharacterSkills(BaseData, Singleton):
             character_id: (number) character's id.
             skill_key: (string) skill's key.
         """
-        return self.storage.has(character_id, skill_key)
+        return await self.storage.has(character_id, skill_key)
 
-    def load(self, character_id, skill_key, **default):
+    async def load(self, character_id, skill_key, **default):
         """
         Get the value of a skill.
 
@@ -49,18 +54,18 @@ class CharacterSkills(BaseData, Singleton):
             KeyError: If `raise_exception` is set and no matching Attribute
                 was found matching `key` and no default value set.
         """
-        return self.storage.load(character_id, skill_key, **default)
+        return await self.storage.load(character_id, skill_key, **default)
 
-    def load_character(self, character_id):
+    async def load_character(self, character_id):
         """
         Get all skills of a character.
 
         Args:
             character_id: (number) character's id.
         """
-        return self.storage.load_category(character_id, {})
+        return await self.storage.load_category(character_id, {})
 
-    def delete(self, character_id, skill_key):
+    async def delete(self, character_id, skill_key):
         """
         delete a skill of a character.
 
@@ -68,13 +73,13 @@ class CharacterSkills(BaseData, Singleton):
             character_id: (number) character's id.
             skill_key: (string) skill's key.
         """
-        self.storage.delete(character_id, skill_key)
+        await self.storage.delete(character_id, skill_key)
 
-    def remove_character(self, character_id):
+    async def remove_character(self, character_id):
         """
         Remove all skills of a character.
 
         Args:
             character_id: (number) character's id.
         """
-        self.storage.delete_category(character_id)
+        await self.storage.delete_category(character_id)

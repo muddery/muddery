@@ -30,11 +30,11 @@ class MudderyBaseNPC(ELEMENT("CHARACTER")):
     element_name = "Base None Player Character"
     model_name = ""
 
-    def at_element_setup(self, first_time):
+    async def at_element_setup(self, first_time):
         """
         Init the character.
         """
-        super(MudderyBaseNPC, self).at_element_setup(first_time)
+        await super(MudderyBaseNPC, self).at_element_setup(first_time)
 
         # Character can auto fight.
         self.auto_fight = True
@@ -43,7 +43,7 @@ class MudderyBaseNPC(ELEMENT("CHARACTER")):
         self.load_dialogues()
 
         # load shops
-        self.load_shops()
+        await self.load_shops()
 
     def load_dialogues(self):
         """
@@ -54,7 +54,7 @@ class MudderyBaseNPC(ELEMENT("CHARACTER")):
         self.default_dialogues = [dialogue.dialogue for dialogue in dialogues if dialogue.dialogue and dialogue.default]
         self.dialogues = [dialogue.dialogue for dialogue in dialogues if dialogue.dialogue and not dialogue.default]
 
-    def load_shops(self):
+    async def load_shops(self):
         """
         Load character's shop.
         """
@@ -71,7 +71,7 @@ class MudderyBaseNPC(ELEMENT("CHARACTER")):
                 table_data = table_data[0]
 
                 shop = ELEMENT(table_data.element_type)()
-                shop.setup_element(key)
+                await shop.setup_element(key)
                 shop.set_owner(self)
                 self.shops[key] = shop
             except Exception as e:
@@ -119,12 +119,12 @@ class MudderyBaseNPC(ELEMENT("CHARACTER")):
 
         self.shops[shop_key].sell_goods(goods_index, caller)
 
-    def get_available_commands(self, caller):
+    async def get_available_commands(self, caller):
         """
         This returns a list of available commands.
         """
         commands = []
-        if self.is_alive():
+        if await self.is_alive():
             if self.dialogues or self.default_dialogues:
                 # If the character have something to talk, add talk command.
                 commands.append({"name": _("Talk"), "cmd": "talk", "args": self.get_id()})

@@ -98,11 +98,11 @@ AL_DATABASES = {
 
 # Database Access Object
 # DATABASE_ACCESS_OBJECT = 'muddery.server.database.storage.kv_table_write_back.KeyValueWriteBackTable'
-DATABASE_ACCESS_OBJECT = 'muddery.server.database.storage.kv_table_al.KeyValueTableAl'
+DATABASE_ACCESS_OBJECT = 'muddery.server.database.storage.kv_table.KeyValueTable'
 
 # Database Access Object without cache
 # DATABASE_ACCESS_OBJECT_NO_CACHE = 'muddery.server.database.storage.kv_table.KeyValueTable'
-DATABASE_ACCESS_OBJECT_NO_CACHE = 'muddery.server.database.storage.kv_table_al.KeyValueTableAl'
+DATABASE_ACCESS_OBJECT_NO_CACHE = 'muddery.server.database.storage.kv_table.KeyValueTable'
 
 # Object's default runtime table. If a typeclass's own runtime table does
 # not exist, will use this table instead.

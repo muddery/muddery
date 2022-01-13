@@ -50,7 +50,7 @@ class CommandHandler(object):
         if account:
             command = self.account_cmdset.get(command_key)
             if command:
-                command.func(account, args, context)
+                await command.func(account, args, context)
                 return
 
             # character commands
@@ -58,7 +58,7 @@ class CommandHandler(object):
             if character:
                 command = self.character_cmdset.get(command_key)
                 if command:
-                    command.func(character, args, context)
+                    await command.func(character, args, context)
                     return
 
         logger.log_err("Can not find command, %s: %s" % (session, raw_string))

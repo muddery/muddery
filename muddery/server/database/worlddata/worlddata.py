@@ -7,7 +7,7 @@ import traceback
 
 from muddery.server.conf import settings
 from muddery.server.database.storage.memory_record import MemoryRecord
-from muddery.server.database.storage.memory_table_al import MemoryTableAl
+from muddery.server.database.storage.memory_table import MemoryTable
 from muddery.server.utils.exception import MudderyError
 
 
@@ -35,7 +35,7 @@ class WorldData(object):
         models = [cls for cls in vars(module).values() if inspect.isclass(cls)]
         for model in models:
             config = settings.AL_DATABASES[settings.WORLD_DATA_APP]
-            cls.tables[model.__name__] = MemoryTableAl(
+            cls.tables[model.__name__] = MemoryTable(
                 settings.WORLD_DATA_APP,
                 config["MODELS"],
                 model.__name__)
@@ -47,7 +47,7 @@ class WorldData(object):
         """
         try:
             config = settings.AL_DATABASES[settings.WORLD_DATA_APP]
-            cls.tables[table_name] = MemoryTableAl(
+            cls.tables[table_name] = MemoryTable(
                 settings.WORLD_DATA_APP,
                 config["MODELS"],
                 table_name)

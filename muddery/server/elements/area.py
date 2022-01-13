@@ -33,11 +33,11 @@ class MudderyArea(BaseElement):
         self.background = None
         self.all_rooms = {}
 
-    def at_element_setup(self, first_time):
+    async def at_element_setup(self, first_time):
         """
         Init the character.
         """
-        super(MudderyArea, self).at_element_setup(first_time)
+        await super(MudderyArea, self).at_element_setup(first_time)
 
         self.set_name(self.const.name)
         self.set_desc(self.const.desc)
@@ -56,7 +56,7 @@ class MudderyArea(BaseElement):
                 logger.log_trace("Load background %s error: %s" % (resource, e))
 
         # load rooms in this area
-        self.load_rooms()
+        await self.load_rooms()
 
     def get_appearance(self, caller):
         """
@@ -122,7 +122,7 @@ class MudderyArea(BaseElement):
         """
         return self.icon
 
-    def load_rooms(self):
+    async def load_rooms(self):
         """
         Load all rooms in this area.
 
@@ -137,7 +137,7 @@ class MudderyArea(BaseElement):
             table_data = table_data[0]
 
             new_obj = ELEMENT(table_data.element_type)()
-            new_obj.setup_element(record.key)
+            await new_obj.setup_element(record.key)
 
             self.all_rooms[new_obj.get_element_key()] = new_obj
 

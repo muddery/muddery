@@ -32,10 +32,10 @@ class CmdQuit(BaseCommand):
     key = "quit"
 
     @classmethod
-    def func(cls, account, args, context):
+    async def func(cls, account, args, context):
         # we are quitting the last available session
         account.disconnect()
-        account.msg({
+        await account.msg({
             "msg": "{RQuitting{n. Hope to see you again, soon.",
             "logout": ""
         })
@@ -57,7 +57,7 @@ class CmdChangePassword(BaseCommand):
     key = "change_pw"
 
     @classmethod
-    def func(cls, account, args, context):
+    async def func(cls, account, args, context):
         "hook function"
         current_password = args["current"]
         new_password = args["new"]
@@ -84,25 +84,25 @@ class CmdPuppet(BaseCommand):
     key = "puppet"
 
     @classmethod
-    def func(cls, account, args, context):
+    async def func(cls, account, args, context):
         """
         Main puppet method
         """
         if not args:
-            account.msg({"alert": _("That is not a valid character choice.")})
+            await account.msg({"alert": _("That is not a valid character choice.")})
             return
 
         char_id = args
-        char_all = account.get_all_characters()
+        char_all = await account.get_all_characters()
         if char_id not in char_all:
-            account.msg({"alert": _("That is not a valid character choice.")})
+            await account.msg({"alert": _("That is not a valid character choice.")})
             return
 
         try:
-            account.puppet_object(char_id)
+            await account.puppet_object(char_id)
         except Exception as e:
             traceback.print_exc()
-            account.msg({"alert": _("That is not a valid character choice.")})
+            await account.msg({"alert": _("That is not a valid character choice.")})
 
 
 class CmdUnpuppet(BaseCommand):
@@ -122,13 +122,13 @@ class CmdUnpuppet(BaseCommand):
     key = "unpuppet"
 
     @classmethod
-    def func(cls, account, args, context):
+    async def func(cls, account, args, context):
         # disconnect
         try:
-            account.unpuppet_object()
-            account.msg({"unpuppet": True})
+            await account.unpuppet_object()
+            await account.msg({"unpuppet": True})
         except RuntimeError as e:
-            account.msg({"alert":_("Could not unpuppet: %s" % e)})
+            await account.msg({"alert":_("Could not unpuppet: %s" % e)})
         except Exception as e:
             logger.log_err("Could not unpuppet: %s" % e)
 
@@ -147,54 +147,54 @@ class CmdCharCreate(BaseCommand):
     key = "char_create"
 
     @classmethod
-    def func(cls, account, args, context):
+    async def func(cls, account, args, context):
         "create the new character"
         if not args:
-            account.msg({"alert":_("You should give the character a name.")})
+            await account.msg({"alert":_("You should give the character a name.")})
             return
         
         name = args["name"]
         if not name:
-            account.msg({"alert":_("Name should not be empty.")})
+            await account.msg({"alert":_("Name should not be empty.")})
             return
 
         # sanity checks
         if not (0 < len(name) <= 30):
             # Nickname's length
             string = "\n\r Name can max be 30 characters or fewer."
-            account.msg({"alert":string})
+            await account.msg({"alert":string})
             return
 
         # check total characters number
-        char_all = account.get_all_characters()
+        char_all = await account.get_all_characters()
         if len(char_all) >= settings.MAX_PLAYER_CHARACTERS:
-            account.msg({"alert": _("You may only create a maximum of %i characters.") % settings.MAX_PLAYER_CHARACTERS})
+            await account.msg({"alert": _("You may only create a maximum of %i characters.") % settings.MAX_PLAYER_CHARACTERS})
             return
 
         # strip excessive spaces in playername
         nickname = re.sub(r"\s+", " ", name).strip()
 
         try:
-            CharacterInfo.get_char_id(nickname)
+            await CharacterInfo.inst().get_char_id(nickname)
             # check if this name already exists.
-            account.msg({"alert":_("{RA character named '{r%s{R' already exists.{n") % name})
+            await account.msg({"alert":_("{RA character named '{r%s{R' already exists.{n") % name})
             return
         except:
             pass
 
         try:
-            create_character(account, name)
+            await create_character(account, name)
         except Exception as e:
             # We are in the middle between logged in and -not, so we have
             # to handle tracebacks ourselves at this point. If we don't,
             # we won't see any errors at all.
-            account.msg({"alert":_("There was an error creating the Player: %s" % e)})
+            await account.msg({"alert":_("There was an error creating the Player: %s" % e)})
             logger.log_trace()
             return
 
-        account.msg({
+        await account.msg({
             "char_created": True,
-            "char_all": account.get_all_nicknames(),
+            "char_all": await account.get_all_nicknames(),
         })
 
 
@@ -212,24 +212,25 @@ class CmdCharDelete(BaseCommand):
     key = "char_delete"
 
     @classmethod
-    def func(cls, account, args, context):
+    async def func(cls, account, args, context):
         "delete the character"
         if not args:
-            account.msg({"alert":_("Please select a character")})
+            await account.msg({"alert":_("Please select a character")})
             return
 
         char_id = args["id"]
 
         try:
-            account.delete_character(char_id)
+            await account.delete_character(char_id)
         except Exception as e:
+            traceback.print_exc()
             logger.log_err("Can not delete character %s: %s")
-            account.msg({"alert": _("You can not delete this character.")})
+            await account.msg({"alert": _("You can not delete this character.")})
             return
 
-        account.msg({
+        await account.msg({
             "char_deleted": True,
-            "char_all": account.get_all_nicknames(),
+            "char_all": await account.get_all_nicknames(),
         })
 
 
@@ -248,31 +249,31 @@ class CmdCharDeleteWithPW(BaseCommand):
     key = "char_delete"
 
     @classmethod
-    def func(cls, account, args, context):
+    async def func(cls, account, args, context):
         "delete the character"
         if not args:
-            account.msg({"alert":_("Please select a character")})
+            await account.msg({"alert":_("Please select a character")})
             return
             
         char_id = args["id"]
         password = args["password"]
             
-        check = account.check_password(password)
+        check = await account.check_password(password)
         if not check:
             # No password match
-            account.msg({"alert":_("Incorrect password.")})
+            await account.msg({"alert":_("Incorrect password.")})
             return
 
         try:
-            account.delete_character(char_id)
+            await account.delete_character(char_id)
         except Exception as e:
             logger.log_err("Can not delete character %s: %s")
-            account.msg({"alert": _("You can not delete this character.")})
+            await account.msg({"alert": _("You can not delete this character.")})
             return
 
-        account.msg({
+        await account.msg({
             "char_deleted": True,
-            "char_all": account.get_all_nicknames(),
+            "char_all": await account.get_all_nicknames(),
         })
 
 
@@ -289,9 +290,9 @@ class CmdCharAll(BaseCommand):
     key = "char_all"
 
     @classmethod
-    def func(cls, account, args, context):
+    async def func(cls, account, args, context):
         "delete the character"
         char_all = account.get_all_characters()
-        account.msg({
+        await account.msg({
             "char_all": [{"name": data["nickname"], "id": char_id} for char_id, data in char_all.items()],
         })

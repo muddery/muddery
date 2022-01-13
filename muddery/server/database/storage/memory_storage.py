@@ -2,8 +2,6 @@
 Key value storage in relational database.
 """
 
-from django.db import IntegrityError
-from django.db.transaction import atomic
 from muddery.server.database.storage.base_kv_storage import BaseKeyValueStorage
 from muddery.server.utils.exception import MudderyError, ERR
 
@@ -19,7 +17,7 @@ class MemoryStorage(BaseKeyValueStorage):
         super(MemoryStorage, self).__init__()
         self.storage = {}
 
-    def add(self, category, key, value=None):
+    async def add(self, category, key, value=None):
         """
         Add a new attribute. If the key already exists, raise an exception.
 
@@ -32,11 +30,11 @@ class MemoryStorage(BaseKeyValueStorage):
             self.storage[category] = {}
 
         if key in self.storage[category]:
-            raise IntegrityError("Duplicate key %s." % key)
+            raise MudderyError(ERR.duplicate_key, "Duplicate key %s." % key)
 
         self.storage[category][key] = value
 
-    def save(self, category, key, value=None):
+    async def save(self, category, key, value=None):
         """
         Set a value to the default value field.
 
@@ -53,7 +51,7 @@ class MemoryStorage(BaseKeyValueStorage):
         else:
             self.storage[category][key] = value
 
-    def has(self, category, key):
+    async def has(self, category, key):
         """
         Check if the key exists.
 
@@ -63,14 +61,14 @@ class MemoryStorage(BaseKeyValueStorage):
         """
         return category in self.storage and key in self.storage[category]
 
-    def all(self):
+    async def all(self):
         """
         Get all data.
         :return:
         """
         return self.storage.copy()
 
-    def load(self, category, key, *default):
+    async def load(self, category, key, *default):
         """
         Get the default field value of a key.
 
@@ -91,7 +89,7 @@ class MemoryStorage(BaseKeyValueStorage):
             else:
                 raise e
 
-    def load_category(self, category):
+    async def load_category(self, category):
         """
         Get all default field's values of a category.
 
@@ -107,7 +105,7 @@ class MemoryStorage(BaseKeyValueStorage):
 
         return self.storage[category].copy()
 
-    def delete(self, category, key):
+    async def delete(self, category, key):
         """
         delete a key.
 
@@ -120,7 +118,7 @@ class MemoryStorage(BaseKeyValueStorage):
         except KeyError:
             pass
 
-    def delete_category(self, category):
+    async def delete_category(self, category):
         """
         Remove all values of a category.
 
@@ -131,9 +129,3 @@ class MemoryStorage(BaseKeyValueStorage):
             del self.storage[category]
         except KeyError:
             pass
-
-    def atomic(self):
-        """
-        Guarantee the atomic execution of a given block.
-        """
-        return atomic()

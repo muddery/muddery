@@ -1,14 +1,23 @@
 # The sanic server.
 import traceback
-
+import asyncio
 from sanic import Sanic
 from asyncio import CancelledError
 from muddery.server.connections.sanic_session import SanicSession
 from muddery.server.conf import settings
 from muddery.server.server import Server
+from muddery.server.database.db_manager import DBManager
 
 
-Server.inst()
+async def init_server():
+    await Server.inst().connect_db()
+    await Server.inst().create_the_world()
+    Server.inst().create_command_handler()
+
+
+loop = asyncio.get_event_loop()
+loop.run_until_complete(init_server())
+loop.close()
 
 
 server_app = Sanic("muddery_server")

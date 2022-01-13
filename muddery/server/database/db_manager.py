@@ -18,7 +18,6 @@ class DBManager(Singleton):
         self.engines = {}
         self.sessions = {}
         self.connected = False
-        self.connect()
 
     def connect(self):
         """
@@ -31,7 +30,7 @@ class DBManager(Singleton):
             try:
                 engine = get_engine(cfg["ENGINE"], cfg)
                 self.engines[key] = engine
-                self.sessions[key] = Session(engine)
+                self.sessions[key] = Session(engine, autocommit=True)
             except Exception as e:
                 logger.log_trace("Can not connect to db.")
                 raise e
@@ -84,11 +83,7 @@ class DBManager(Singleton):
         module = importlib.import_module(config["MODELS"])
         model = getattr(module, table_name)
         stmt = delete(model)
-        try:
-            result = session.execute(stmt)
-            session.commit()
-        except Exception as e:
-            session.rollback()
+        session.execute(stmt)
 
     def get_model(self, scheme, table_name):
         """

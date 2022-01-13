@@ -14,7 +14,12 @@ class ServerBans(BaseData, Singleton):
     __table_name = "server_bans"
     __category_name = "type"
     __key_field = "target"
-    __default_value_field = ""
+    __default_value_field = None
+
+    def __init__(self):
+        # data storage
+        super(ServerBans, self).__init__()
+        self.storage = self.create_storage(self.__table_name, self.__category_name, self.__key_field, self.__default_value_field)
 
     def add(self, ban_type, ban_target, finish_time):
         """
@@ -34,11 +39,11 @@ class ServerBans(BaseData, Singleton):
         """
         self.storage.delete(ban_type, ban_target)
 
-    def get_ban_time(self, ban_type, ban_target):
+    async def get_ban_time(self, ban_type, ban_target):
         """
         Get a ban's finish time.
         :param username:
         :return:
         """
-        data = self.storage.load(ban_type, ban_target)
+        data = await self.storage.load(ban_type, ban_target)
         return data["finish_time"]

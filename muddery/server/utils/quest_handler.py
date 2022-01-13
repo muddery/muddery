@@ -25,19 +25,24 @@ class QuestHandler(object):
         Initialize handler
         """
         self.owner = weakref.proxy(owner)
-        self.load_quests()
 
-    def load_quests(self):
+    async def init(self):
+        """
+        Initial setup.
+        """
+        await self.load_quests()
+
+    async def load_quests(self):
         """
         Load character's quests.
         :return:
         """
-        self.quests = CharacterQuests.get_character(self.owner.get_db_id())
+        self.quests = await CharacterQuests.inst().get_character(self.owner.get_db_id())
         for key in self.quests:
             if not self.quests[key]["finished"]:
-                self.create_quest(key)
+                await self.create_quest(key)
 
-    def accept(self, quest_key):
+    async def accept(self, quest_key):
         """
         Accept a quest.
 
@@ -47,28 +52,28 @@ class QuestHandler(object):
         Returns:
             None
         """
-        all_quests = CharacterQuests.get_character(self.owner.get_db_id())
+        all_quests = await CharacterQuests.inst().get_character(self.owner.get_db_id())
         if quest_key in all_quests:
             return
 
         # Create quest object.
-        quest = self.create_quest(quest_key)
-        CharacterQuests.add(self.owner.get_db_id(), quest_key)
+        quest = await self.create_quest(quest_key)
+        await CharacterQuests.inst().add(self.owner.get_db_id(), quest_key)
 
-        self.owner.msg({"msg": _("Accepted quest {C%s{n.") % quest.get_name()})
-        self.show_quests()
-        self.owner.show_location()
+        await self.owner.msg({"msg": _("Accepted quest {C%s{n.") % quest.get_name()})
+        await self.show_quests()
+        await self.owner.show_location()
         
-    def remove_all(self):
+    async def remove_all(self):
         """
         Remove all quests.
         
         It will be called when quests' owner will be deleted.
         """
         self.quests = {}
-        CharacterQuests.remove_character(self.owner.get_db_id())
+        await CharacterQuests.inst().remove_character(self.owner.get_db_id())
 
-    def give_up(self, quest_key):
+    async def give_up(self, quest_key):
         """
         Accept a quest.
 
@@ -82,17 +87,17 @@ class QuestHandler(object):
             logger.log_trace("Can not give up quests.")
             raise MudderyError(_("Can not give up this quest."))
 
-        quest = CharacterQuests.get_quest(self.owner.get_db_id(), quest_key)
+        quest = await CharacterQuests.inst().get_quest(self.owner.get_db_id(), quest_key)
         if not quest or quest["finished"]:
             raise MudderyError("Can not find this quest.")
 
-        CharacterQuests.remove_quest(self.owner.get_db_id(), quest_key)
+        await CharacterQuests.inst().remove_quest(self.owner.get_db_id(), quest_key)
         if quest_key in self.quests:
             del self.quests[quest_key]
 
-        self.show_quests()
+        await self.show_quests()
 
-    def turn_in(self, quest_key):
+    async def turn_in(self, quest_key):
         """
         Turn in a quest.
 
@@ -102,7 +107,7 @@ class QuestHandler(object):
         Returns:
             None
         """
-        quest_info = CharacterQuests.get_quest(self.owner.get_db_id(), quest_key)
+        quest_info = await CharacterQuests.inst().get_quest(self.owner.get_db_id(), quest_key)
         if not quest_info or quest_info["finished"]:
             raise MudderyError("Can not find this quest.")
 
@@ -112,15 +117,15 @@ class QuestHandler(object):
 
         # Call turn in function in the quest.
         quest.turn_in(self.owner)
-        CharacterQuests.set(self.owner.get_db_id(), quest_key, {"finished": True})
+        await CharacterQuests.inst().set(self.owner.get_db_id(), quest_key, {"finished": True})
 
         # Get quest's name.
         name = quest.get_name()
 
-        self.owner.msg({"msg": _("Turned in quest {C%s{n.") % name})
-        self.show_quests()
-        self.owner.show_status()
-        self.owner.show_location()
+        await self.owner.msg({"msg": _("Turned in quest {C%s{n.") % name})
+        await self.show_quests()
+        await self.owner.show_status()
+        await self.owner.show_location()
 
     def is_accomplished(self, quest_key):
         """
@@ -152,7 +157,7 @@ class QuestHandler(object):
 
         return not self.quests[quest_key]["obj"].is_accomplished()
 
-    def is_finished(self, quest_key):
+    async def is_finished(self, quest_key):
         """
         Whether the character finished this quest or not.
 
@@ -162,13 +167,13 @@ class QuestHandler(object):
         Returns:
             None
         """
-        all_quests = CharacterQuests.get_character(self.owner.get_db_id())
+        all_quests = await CharacterQuests.inst().get_character(self.owner.get_db_id())
         if quest_key not in all_quests:
             return False
 
         return all_quests[quest_key]["finished"]
 
-    def is_in_progress(self, quest_key):
+    async def is_in_progress(self, quest_key):
         """
         If the character is doing this quest.
 
@@ -178,7 +183,7 @@ class QuestHandler(object):
         Returns:
             None
         """
-        all_quests = CharacterQuests.get_character(self.owner.get_db_id())
+        all_quests = await CharacterQuests.inst().get_character(self.owner.get_db_id())
         if quest_key not in all_quests:
             return False
 
@@ -249,20 +254,20 @@ class QuestHandler(object):
             logger.log_err("Can't get quest %s's condition: %s" % (quest_key, e))
         return False
 
-    def show_quests(self):
+    async def show_quests(self):
         """
         Send quests to player.
         """
-        quests = self.return_quests()
-        self.owner.msg({"quests": quests})
+        quests = await self.return_quests()
+        await self.owner.msg({"quests": quests})
 
-    def return_quests(self):
+    async def return_quests(self):
         """
         Get quests' data.
         """
         quests_info = []
 
-        all_quests = CharacterQuests.get_character(self.owner.get_db_id())
+        all_quests = await CharacterQuests.inst().get_character(self.owner.get_db_id())
         for quest_key, info in all_quests.items():
             if info["finished"]:
                 continue
@@ -272,7 +277,7 @@ class QuestHandler(object):
 
         return quests_info
 
-    def at_objective(self, object_type, object_key, number=1):
+    async def at_objective(self, object_type, object_key, number=1):
         """
         Called when the owner may complete some objectives.
         Call relative hooks.
@@ -286,7 +291,7 @@ class QuestHandler(object):
             None
         """
         status_changed = False
-        all_quests = CharacterQuests.get_character(self.owner.get_db_id())
+        all_quests = await CharacterQuests.inst().get_character(self.owner.get_db_id())
         for quest_key, info in all_quests.items():
             if info["finished"]:
                 continue
@@ -301,14 +306,14 @@ class QuestHandler(object):
         if status_changed:
             self.show_quests()
 
-    def create_quest(self, quest_key):
+    async def create_quest(self, quest_key):
         """
         Get a quest object by its key.
         :param quest_key:
         :return:
         """
         quest = ELEMENT("QUEST")()
-        quest.setup_element(quest_key)
+        await quest.setup_element(quest_key)
         quest.set_character(self.owner.get_db_id())
         self.quests[quest_key] = {
             "obj": quest
@@ -329,13 +334,13 @@ class QuestHandler(object):
 
         return quest
 
-    def get_quest_info(self, quest_key):
+    async def get_quest_info(self, quest_key):
         """
         Get a quest's detail information.
         :param quest_key:
         :return:
         """
-        all_quests = CharacterQuests.get_character(self.owner.get_db_id())
+        all_quests = await CharacterQuests.inst().get_character(self.owner.get_db_id())
         if all_quests[quest_key]["finished"]:
             logger.log_err("%s's quest %s is finished." % (self.owner.get_db_id(), quest_key))
             return

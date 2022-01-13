@@ -67,3 +67,5 @@ class ERR(object):
     server_error = 10016
 
     inventory_error = 10017
+
+    duplicate_key = 10018

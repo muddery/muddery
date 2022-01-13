@@ -14,35 +14,40 @@ class CharacterQuests(BaseData, Singleton):
     __table_name = "character_quests"
     __category_name = "character_id"
     __key_field = "quest"
-    __default_value_field = ""
+    __default_value_field = None
 
-    def get_character(self, character_id):
+    def __init__(self):
+        # data storage
+        super(CharacterQuests, self).__init__()
+        self.storage = self.create_storage(self.__table_name, self.__category_name, self.__key_field, self.__default_value_field)
+
+    async def get_character(self, character_id):
         """
         Get a character's quest info.
         :param character_id:
         :return:
         """
-        return self.storage.load_category(character_id, {})
+        return await self.storage.load_category(character_id, {})
 
-    def get_quest(self, character_id, quest):
+    async def get_quest(self, character_id, quest):
         """
         Get a character's quest info.
         :param character_id: (int) character's id
         :param quest: (string) quest's key
         :return:
         """
-        return self.storage.load(character_id, quest)
+        return await self.storage.load(character_id, quest)
 
-    def add(self, character_id, quest):
+    async def add(self, character_id, quest):
         """
         Add a new quest.
         :param character_id:
         :param quest:
         :return:
         """
-        self.storage.add(character_id, quest, {"finished": False})
+        await self.storage.add(character_id, quest, {"finished": False})
 
-    def set(self, character_id, quest, values):
+    async def set(self, character_id, quest, values):
         """
         Set a quest's data.
 
@@ -51,18 +56,18 @@ class CharacterQuests(BaseData, Singleton):
         :param values:
         :return:
         """
-        self.storage.save(character_id, quest, values)
+        await self.storage.save(character_id, quest, values)
 
-    def remove_character(self, character_id):
+    async def remove_character(self, character_id):
         """
         Remove a character's all quests.
 
         :param character_id:
         :return:
         """
-        self.storage.delete_category(character_id)
+        await self.storage.delete_category(character_id)
 
-    def remove_quest(self, character_id, quest):
+    async def remove_quest(self, character_id, quest):
         """
         Remove a quest
 
@@ -70,4 +75,4 @@ class CharacterQuests(BaseData, Singleton):
         :param quest: (string) quest's key
         :return:
         """
-        self.storage.delete(character_id, quest)
+        await self.storage.delete(character_id, quest)

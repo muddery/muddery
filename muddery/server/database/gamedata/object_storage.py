@@ -3,6 +3,7 @@ Object's attributes cache.
 """
 
 import json
+import traceback
 from collections import OrderedDict
 from muddery.server.utils.exception import MudderyError, ERR
 from muddery.server.database.storage.memory_storage import MemoryStorage
@@ -59,8 +60,9 @@ class BaseObjectStorage(BaseData, Singleton):
     """
     The storage of object attributes.
     """
+
     # data storage
-    def save(self, obj_id, key, value):
+    async def save(self, obj_id, key, value):
         """
         Set an attribute.
 
@@ -70,7 +72,7 @@ class BaseObjectStorage(BaseData, Singleton):
             value: (any) attribute's value.
         """
         to_save = to_string(value)
-        self.storage.save(obj_id, key, to_save)
+        await self.storage.save(obj_id, key, to_save)
 
     def save_keys(self, obj_id, value_dict):
         """
@@ -81,9 +83,13 @@ class BaseObjectStorage(BaseData, Singleton):
             value_dict: (dict) a dict of key-values.
         """
         if value_dict:
-            with self.storage.atomic():
-                for key, value in value_dict.items():
-                    self.storage.save(obj_id, key, to_string(value))
+            try:
+                with self.storage.transaction():
+                    for key, value in value_dict.items():
+                        self.storage.save(obj_id, key, to_string(value))
+            except Exception as e:
+                traceback.print_exc()
+
 
     def has(self, obj_id, key):
         """
@@ -95,7 +101,7 @@ class BaseObjectStorage(BaseData, Singleton):
         """
         return self.storage.has(obj_id, key)
 
-    def load(self, obj_id, key, *default):
+    async def load(self, obj_id, key, *default):
         """
         Get the value of an attribute.
 
@@ -109,7 +115,7 @@ class BaseObjectStorage(BaseData, Singleton):
                 was found matching `key` and no default value set.
         """
         try:
-            value = self.storage.load(obj_id, key)
+            value = await self.storage.load(obj_id, key)
             return from_string(value)
         except KeyError as e:
             if len(default) > 0:
@@ -146,12 +152,6 @@ class BaseObjectStorage(BaseData, Singleton):
         """
         self.storage.delete_category(obj_id)
 
-    def atomic(self):
-        """
-        Guarantee the atomic execution of a given block.
-        """
-        return self.storage.atomic()
-
 
 class DBObjectStorage(BaseObjectStorage):
     """
@@ -162,14 +162,17 @@ class DBObjectStorage(BaseObjectStorage):
     __key_field = "key"
     __default_value_field = "value"
 
+    def __init__(self):
+        # data storage
+        super(DBObjectStorage, self).__init__()
+        self.storage = self.create_storage(self.__table_name, self.__category_name, self.__key_field, self.__default_value_field)
+
 
 class MemoryObjectStorage(BaseObjectStorage):
     """
     The storage of object attributes.
     """
-    def create_storage(self):
-        """
-        Create the storage object.
-        """
-        storage_class = MemoryStorage
-        return storage_class()
+    def __init__(self):
+        # data storage
+        super(MemoryObjectStorage, self).__init__()
+        self.storage = MemoryStorage()

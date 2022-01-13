@@ -14,9 +14,14 @@ class AccountCharacters(BaseData, Singleton):
     __table_name = "account_characters"
     __category_name = "account_id"
     __key_field = "char_id"
-    __default_value_field = ""
+    __default_value_field = None
 
-    def add(self, account_id, char_id):
+    def __init__(self):
+        # data storage
+        super(AccountCharacters, self).__init__()
+        self.storage = self.create_storage(self.__table_name, self.__category_name, self.__key_field, self.__default_value_field)
+
+    async def add(self, account_id, char_id):
         """
         Add a new player character.
 
@@ -24,9 +29,9 @@ class AccountCharacters(BaseData, Singleton):
         :param char_id: character's db id
         :return:
         """
-        self.storage.add(account_id, char_id)
+        await self.storage.add(account_id, char_id)
 
-    def remove_character(self, account_id, char_id):
+    async def remove_character(self, account_id, char_id):
         """
         Remove an character.
 
@@ -34,12 +39,12 @@ class AccountCharacters(BaseData, Singleton):
         :param char_id: character's db id
         :return:
         """
-        self.storage.delete(account_id, char_id)
+        await self.storage.delete(account_id, char_id)
 
-    def get_account_characters(self, account_id):
+    async def get_account_characters(self, account_id):
         """
         Get all characters of an account.
         :param account_id:
         :return:
         """
-        return self.storage.load_category(account_id, {})
+        return await self.storage.load_category(account_id, {})

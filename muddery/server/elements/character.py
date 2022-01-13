@@ -106,12 +106,12 @@ class MudderyCharacter(BaseElement):
             self.scheduler.start()
         return self.scheduler
 
-    def at_element_setup(self, first_time):
+    async def at_element_setup(self, first_time):
         """
         Called when the object is loaded and initialized.
 
         """
-        super(MudderyCharacter, self).at_element_setup(first_time)
+        await super(MudderyCharacter, self).at_element_setup(first_time)
 
         self.set_name(self.const.name)
         self.set_desc(self.const.desc)
@@ -140,23 +140,23 @@ class MudderyCharacter(BaseElement):
         self.combat_id = None
 
         # load default skills
-        self.load_skills()
+        await self.load_skills()
 
         # initialize loot handler
         self.loot_handler = LootHandler(CharacterLootList.get(self.get_element_key()))
 
-    def after_element_setup(self, first_time):
+    async def after_element_setup(self, first_time):
         """
         Called after the element is setting up.
 
         :arg
             first_time: (bool) the first time to setup the element.
         """
-        super(MudderyCharacter, self).after_element_setup(first_time)
+        await super(MudderyCharacter, self).after_element_setup(first_time)
 
-        self.refresh_states(not first_time)
+        await self.refresh_states(not first_time)
 
-    def refresh_states(self, keep_states):
+    async def refresh_states(self, keep_states):
         """
         Refresh character's states.
 
@@ -166,7 +166,7 @@ class MudderyCharacter(BaseElement):
         # set states
         records = CharacterStatesDict.all()
         for record in records:
-            if keep_states and self.states.has(record.key):
+            if keep_states and await self.states.has(record.key):
                 # Do not change existent states.
                 continue
 
@@ -182,9 +182,9 @@ class MudderyCharacter(BaseElement):
                     value = record.default
 
             # set the value.
-            self.states.save(record.key, value)
+            await self.states.save(record.key, value)
 
-    def load_custom_level_data(self, element_type, element_key, level):
+    async def load_custom_level_data(self, element_type, element_key, level):
         """
         Load custom's level data.
 
@@ -193,22 +193,22 @@ class MudderyCharacter(BaseElement):
         """
         # Get object level.
         if level is None:
-            level = self.get_level()
+            level = await self.get_level()
 
         # Clone another element's values.
         element_key = self.const.clone if self.const.clone else element_key
-        super(MudderyCharacter, self).load_custom_level_data(self.element_type, element_key, level)
+        await super(MudderyCharacter, self).load_custom_level_data(self.element_type, element_key, level)
 
-    def set_level(self, level):
+    async def set_level(self, level):
         """
         Set element's level.
         :param level:
         :return:
         """
         self.level = level
-        self.load_custom_level_data(self.element_type, self.element_key, level)
+        await self.load_custom_level_data(self.element_type, self.element_key, level)
 
-        self.refresh_states(True)
+        await self.refresh_states(True)
 
     def set_name(self, name):
         """
@@ -219,12 +219,12 @@ class MudderyCharacter(BaseElement):
         """
         self.name = name
 
-    def get_name(self):
+    async def get_name(self):
         """
         Get player character's name.
         """
         name = self.name
-        if not self.is_alive():
+        if not await self.is_alive():
             name += _(" [DEAD]")
 
         return name
@@ -272,14 +272,14 @@ class MudderyCharacter(BaseElement):
         """
         return True
 
-    def get_appearance(self, caller):
+    async def get_appearance(self, caller):
         """
         This is a convenient hook for a 'look'
         command to call.
         """
         info = {
             "id": self.get_id(),
-            "name": self.get_name(),
+            "name": await self.get_name(),
             "desc": self.get_desc(),
             "icon": self.get_icon(),
             "key": self.get_element_key(),
@@ -304,13 +304,13 @@ class MudderyCharacter(BaseElement):
             EventType.EVENT_TRIGGER_DIE
         ]
 
-    def get_combat_status(self):
+    async def get_combat_status(self):
         """
         Get character status used in combats.
         """
         return {}
 
-    def load_skills(self):
+    async def load_skills(self):
         """
         Load character's skills.
         """
@@ -324,7 +324,7 @@ class MudderyCharacter(BaseElement):
             try:
                 # Create skill object.
                 skill_obj = ELEMENT("SKILL")()
-                skill_obj.setup_element(key, item.level)
+                await skill_obj.setup_element(key, item.level)
             except Exception as e:
                 logger.log_err("Can not load skill %s: (%s) %s" % (key, type(e).__name__, e))
                 continue
@@ -411,7 +411,7 @@ class MudderyCharacter(BaseElement):
         """
         return self.skills.get(key, None)
 
-    def cast_skill(self, skill_key, target):
+    async def cast_skill(self, skill_key, target):
         """
         Cast a skill.
 
@@ -466,21 +466,21 @@ class MudderyCharacter(BaseElement):
 
         return
 
-    def cast_combat_skill(self, skill_key, target_id):
+    async def cast_combat_skill(self, skill_key, target_id):
         """
         Cast a skill in combat.
         """
         combat = self.get_combat()
         if combat:
-            combat.prepare_skill(skill_key, self, target_id)
+            await combat.prepare_skill(skill_key, self, target_id)
         else:
             logger.log_err("Character %s is not in combat." % self.id)
 
-    def auto_cast_skill(self):
+    async def auto_cast_skill(self):
         """
         Cast a new skill automatically.
         """
-        if not self.is_alive():
+        if not await self.is_alive():
             return
 
         if not self.is_in_combat():
@@ -492,7 +492,7 @@ class MudderyCharacter(BaseElement):
         result = self.ai_choose_skill.choose(self)
         if result:
             skill, target = result
-            self.cast_combat_skill(skill, target)
+            await self.cast_combat_skill(skill, target)
 
     def is_auto_cast_skill(self):
         """
@@ -551,7 +551,7 @@ class MudderyCharacter(BaseElement):
         """
         self.target = None
 
-    def attack_target(self, target, desc=""):
+    async def attack_target(self, target, desc=""):
         """
         Attack a target.
 
@@ -592,11 +592,11 @@ class MudderyCharacter(BaseElement):
             )
         except Exception as e:
             logger.log_err("Can not create combat: [%s] %s" % (type(e).__name__, e))
-            self.msg(_("You can not attack %s.") % target.get_name())
+            self.msg(_("You can not attack %s.") % await target.get_name())
 
         return True
 
-    def attack_temp_target(self, target_key, target_level, desc=""):
+    async def attack_temp_target(self, target_key, target_level, desc=""):
         """
         Attack a temporary clone of a target. This creates a new character object for attack.
         The origin target will not be affected.
@@ -615,7 +615,7 @@ class MudderyCharacter(BaseElement):
         table_data = table_data[0]
 
         target = ELEMENT(table_data.element_type)()
-        target.setup_element(target_key, level=target_level, first_time=True, temp=True)
+        await target.setup_element(target_key, level=target_level, first_time=True, temp=True)
         if not target:
             logger.log_err("Can not create the target %s." % target_key)
             return False
@@ -672,7 +672,7 @@ class MudderyCharacter(BaseElement):
         """
         self.combat_id = None
 
-    def is_alive(self):
+    async def is_alive(self):
         """
         Check if the character is alive.
 

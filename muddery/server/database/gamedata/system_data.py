@@ -12,26 +12,29 @@ class SystemData(BaseData, Singleton):
     The storage of system data.
     """
     __table_name = "system_data"
-    __category_name = ""
-    __key_field = ""
-    __default_value_field = ""
+    __category_name = None
+    __key_field = None
+    __default_value_field = None
 
-    def save(self, key, value):
+    def __init__(self):
+        # data storage
+        super(SystemData, self).__init__()
+        self.storage = self.create_storage(self.__table_name, self.__category_name, self.__key_field, self.__default_value_field)
+
+    async def save(self, key, value):
         """
         Store a value.
         :return:
         """
-        self.storage.save("", "", {
-            key: value
-        })
+        await self.storage.save("", "", {key: value})
 
-    def load(self, key, *default):
+    async def load(self, key, *default, for_update=False):
         """
         Load a value.
         :return:
         """
         try:
-            data = self.storage.load("", "")
+            data = await self.storage.load("", "", {}, for_update=for_update)
             return data[key]
         except KeyError as e:
             if len(default) > 0:

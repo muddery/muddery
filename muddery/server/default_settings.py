@@ -103,11 +103,11 @@ class Settings(object):
 
     # Database Access Object
     # DATABASE_ACCESS_OBJECT = 'muddery.server.database.storage.kv_table_write_back.KeyValueWriteBackTable'
-    DATABASE_ACCESS_OBJECT = 'muddery.server.database.storage.kv_table_al.KeyValueTableAl'
+    DATABASE_ACCESS_OBJECT = 'muddery.server.database.storage.kv_table.KeyValueTable'
 
     # Database Access Object without cache
     # DATABASE_ACCESS_OBJECT_NO_CACHE = 'muddery.server.database.storage.kv_table.KeyValueTable'
-    DATABASE_ACCESS_OBJECT_NO_CACHE = 'muddery.server.database.storage.kv_table_al.KeyValueTableAl'
+    DATABASE_ACCESS_OBJECT_NO_CACHE = 'muddery.server.database.storage.kv_table.KeyValueTable'
 
 
     ######################################################################
@@ -168,6 +168,9 @@ class Settings(object):
 
     # Path of custom elements.
     PATH_ELEMENTS_CUSTOM = "elements"
+
+    # Game data dao's path.
+    PATH_GAMEDATA_DAO = "muddery.server.database.gamedata"
 
     # Path of base event actions.
     PATH_EVENT_ACTION_BASE = "muddery.server.events.event_actions"

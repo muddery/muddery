@@ -55,7 +55,7 @@ class SanicSession(object):
         # Pass messages to the muddery server.
         await Server.inst().handler_message(self, text_data)
 
-    def login(self, account):
+    async def login(self, account):
         """
         Login an account.
         """
@@ -67,7 +67,7 @@ class SanicSession(object):
         self.account = account
 
         # call hook
-        self.account.at_post_login(self)
+        await self.account.at_post_login(self)
 
     def logout(self):
         """
@@ -75,7 +75,7 @@ class SanicSession(object):
         """
         if self.account:
             # call hook
-            self.account.at_pre_logout(self)
+            self.account.at_pre_logout()
 
         self.account = None
         self.authed = False

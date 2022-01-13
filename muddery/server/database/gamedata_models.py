@@ -1,46 +1,31 @@
 
-from django.db import models
-
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import Column, Integer, String, DateTime, Boolean
+from sqlalchemy import UniqueConstraint
+Base = declarative_base()
 
 KEY_LENGTH = 80
 NAME_LENGTH = 80
+VALUE_LENGTH = 80
 
 
-class system_data(models.Model):
+class system_data(Base):
     """
     Store system data. Only use the first record.
     """
+    __tablename__ = "system_data"
+
+    __table_args__ = {
+        "extend_existing": True,
+    }
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+
     # The last id of accounts.
-    last_account_id = models.PositiveIntegerField(default=0)
+    last_account_id = Column(Integer, default=0, nullable=False)
 
     # The last id of player characters.
-    last_player_character_id = models.PositiveIntegerField(default=0)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "gamedata"
-
-
-# ------------------------------------------------------------
-#
-# Set object's key.
-#
-# ------------------------------------------------------------
-class object_keys(models.Model):
-    # object's id
-    object_id = models.PositiveIntegerField(unique=True)
-
-    # object's key
-    object_key = models.CharField(max_length=KEY_LENGTH, db_index=True)
-
-    # world unique object's type
-    unique_type = models.CharField(max_length=KEY_LENGTH, blank=True, null=True, db_index=True)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "gamedata"
+    last_player_character_id = Column(Integer, default=0, nullable=False)
 
 
 # ------------------------------------------------------------
@@ -48,38 +33,29 @@ class object_keys(models.Model):
 # The base of runtime attributes.
 #
 # ------------------------------------------------------------
-class BaseAttributes(models.Model):
+class object_states(Base):
     """
     Object's runtime attributes.
     """
+    __tablename__ = "object_states"
+
+    __table_args__ = (
+        UniqueConstraint("obj_id", "key"),
+        {
+            "extend_existing": True,
+        }
+    )
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+
     # object's id
-    obj_id = models.PositiveIntegerField(db_index=True)
+    obj_id = Column(Integer, index=True, nullable=False)
 
     # attribute's name
-    key = models.CharField(max_length=KEY_LENGTH, db_index=True)
+    key = Column(String(KEY_LENGTH), index=True, nullable=False)
 
-    # In solo mode, a player can not see or affect other players.
-    value = models.TextField()
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "gamedata"
-        unique_together = ("obj_id", "key")
-
-
-# ------------------------------------------------------------
-#
-# Game object's runtime attributes.
-#
-# ------------------------------------------------------------
-class object_states(BaseAttributes):
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "gamedata"
-        unique_together = ("obj_id", "key")
+    # attribute's value
+    value = Column(String(VALUE_LENGTH))
 
 
 # ------------------------------------------------------------
@@ -87,25 +63,32 @@ class object_states(BaseAttributes):
 # server bans
 #
 # ------------------------------------------------------------
-class server_bans(models.Model):
+class server_bans(Base):
+    """
+    Banned players.
+    """
+    __tablename__ = "server_bans"
+
+    __table_args__ = (
+        UniqueConstraint("type", "target"),
+        {
+            "extend_existing": True,
+        }
+    )
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
 
     # ban's type, should be "IP" or "USERNAME"
-    type = models.CharField(max_length=KEY_LENGTH, db_index=True)
+    type = Column(String(KEY_LENGTH), index=True, nullable=False)
 
     # IP or name
-    target = models.CharField(max_length=KEY_LENGTH)
+    target = Column(String(KEY_LENGTH), nullable=False)
 
     # create time
-    create_time = models.DateTimeField(auto_now_add=True)
+    create_time = Column(DateTime)
 
     # finish time
-    finish_time = models.DateTimeField()
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "gamedata"
-        unique_together = ("type", "target")
+    finish_time = Column(DateTime)
 
 
 # ------------------------------------------------------------
@@ -113,30 +96,38 @@ class server_bans(models.Model):
 # player's accounts
 #
 # ------------------------------------------------------------
-class accounts(models.Model):
+class accounts(Base):
+    """
+    User accounts.
+    """
+    __tablename__ = "accounts"
+
+    __table_args__ = {
+        "extend_existing": True,
+    }
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
 
     # account's username
-    username = models.CharField(max_length=KEY_LENGTH, unique=True)
+    username = Column(String(KEY_LENGTH), unique=True, nullable=False)
 
     # account's password
-    password = models.CharField(max_length=128)
+    password = Column(String(128), nullable=False)
+
+    # password's salt
+    salt = Column(String(128), nullable=False)
 
     # account's id
-    account_id = models.PositiveIntegerField(unique=True)
+    account_id = Column(Integer, unique=True, nullable=False)
 
     # account's type
-    type = models.CharField(max_length=KEY_LENGTH, db_index=True)
+    type = Column(String(KEY_LENGTH), index=True, nullable=False)
 
     # account's create time
-    create_time = models.DateTimeField(blank=True, null=True)
+    create_time = Column(DateTime, nullable=True)
 
     # account's last login time
-    last_login = models.DateTimeField(blank=True, null=True)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "gamedata"
+    last_login = Column(DateTime, nullable=True)
 
 
 # ------------------------------------------------------------
@@ -144,18 +135,22 @@ class accounts(models.Model):
 # player account's characters
 #
 # ------------------------------------------------------------
-class account_characters(models.Model):
-    "Player character's data."
+class account_characters(Base):
+    "Account's player characters."
+
+    __tablename__ = "account_characters"
+
+    __table_args__ = {
+        "extend_existing": True,
+    }
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+
     # player's account id
-    account_id = models.PositiveIntegerField(db_index=True)
+    account_id = Column(Integer, index=True, nullable=False)
 
     # playable character's id
-    char_id = models.PositiveIntegerField(unique=True)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "gamedata"
+    char_id = Column(Integer, unique=True, nullable=False)
 
 
 # ------------------------------------------------------------
@@ -163,22 +158,25 @@ class account_characters(models.Model):
 # player character's basic information
 #
 # ------------------------------------------------------------
-class character_info(models.Model):
+class character_info(Base):
     "player character's basic information"
 
+    __tablename__ = "character_info"
+
+    __table_args__ = {
+        "extend_existing": True,
+    }
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+
     # playable character's id
-    char_id = models.PositiveIntegerField(unique=True)
+    char_id = Column(Integer, unique=True, nullable=False)
 
     # character's nickname
-    nickname = models.CharField(max_length=KEY_LENGTH)
+    nickname = Column(String(KEY_LENGTH), nullable=False)
 
     # character's level
-    level = models.PositiveIntegerField(default=0)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "gamedata"
+    level = Column(Integer, default=0)
 
 
 # ------------------------------------------------------------
@@ -186,19 +184,22 @@ class character_info(models.Model):
 # player character's info
 #
 # ------------------------------------------------------------
-class character_location(models.Model):
+class character_location(Base):
     "player character's location"
 
+    __tablename__ = "character_location"
+
+    __table_args__ = {
+        "extend_existing": True,
+    }
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+
     # player character's id
-    char_id = models.PositiveIntegerField(unique=True)
+    char_id = Column(Integer, unique=True, nullable=False)
 
     # location (room's key)
-    location = models.CharField(max_length=KEY_LENGTH)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "gamedata"
+    location = Column(String(KEY_LENGTH))
 
 
 # ------------------------------------------------------------
@@ -206,29 +207,34 @@ class character_location(models.Model):
 # player character's inventory
 #
 # ------------------------------------------------------------
-class character_inventory(models.Model):
+class character_inventory(Base):
     "Player character's inventory."
 
+    __tablename__ = "character_inventory"
+
+    __table_args__ = (
+        UniqueConstraint("character_id", "position"),
+        {
+            "extend_existing": True,
+        }
+    )
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+
     # character's id
-    character_id = models.PositiveIntegerField(db_index=True)
+    character_id = Column(Integer, index=True, nullable=False)
 
     # position in the inventory
-    position = models.PositiveIntegerField()
+    position = Column(Integer, nullable=False)
 
     # object's key
-    object_key = models.CharField(max_length=KEY_LENGTH)
+    object_key = Column(String(KEY_LENGTH), nullable=False)
 
     # object's number
-    number = models.PositiveIntegerField(default=0)
+    number = Column(Integer, default=0)
 
     # object's level
-    level = models.PositiveIntegerField(null=True)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "gamedata"
-        unique_together = ("character_id", "position")
+    level = Column(Integer)
 
 
 # ------------------------------------------------------------
@@ -236,26 +242,31 @@ class character_inventory(models.Model):
 # player character's equipments
 #
 # ------------------------------------------------------------
-class character_equipments(models.Model):
+class character_equipments(Base):
     "Player character's equipments."
 
+    __tablename__ = "character_equipments"
+
+    __table_args__ = (
+        UniqueConstraint("character_id", "position"),
+        {
+            "extend_existing": True,
+        }
+    )
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+
     # character's id
-    character_id = models.PositiveIntegerField(db_index=True)
+    character_id = Column(Integer, index=True, nullable=False)
 
     # the position to put on equipments
-    position = models.CharField(max_length=KEY_LENGTH)
+    position = Column(String(KEY_LENGTH), nullable=False)
 
     # object's key
-    object_key = models.CharField(max_length=KEY_LENGTH)
+    object_key = Column(String(KEY_LENGTH), nullable=False)
 
     # object's level
-    level = models.PositiveIntegerField(null=True)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "gamedata"
-        unique_together = ("character_id", "position")
+    level = Column(Integer)
 
 
 # ------------------------------------------------------------
@@ -263,29 +274,34 @@ class character_equipments(models.Model):
 # player character's skills
 #
 # ------------------------------------------------------------
-class character_skills(models.Model):
+class character_skills(Base):
     "Player character's skills."
 
+    __tablename__ = "character_skills"
+
+    __table_args__ = (
+        UniqueConstraint("character_id", "skill"),
+        {
+            "extend_existing": True,
+        }
+    )
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+
     # character's id
-    character_id = models.PositiveIntegerField(db_index=True)
+    character_id = Column(Integer, index=True, nullable=False)
 
     # skill's key
-    skill = models.CharField(max_length=KEY_LENGTH)
+    skill = Column(String(KEY_LENGTH), nullable=False)
 
     # skill's level
-    level = models.PositiveIntegerField(null=True)
+    level = Column(Integer)
 
     # is default skill
-    is_default = models.BooleanField(default=False)
+    is_default = Column(Boolean, default=False)
 
     # CD's finish time
-    cd_finish = models.PositiveIntegerField(default=0)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "gamedata"
-        unique_together = ("character_id", "skill")
+    cd_finish = Column(Integer, default=0)
 
 
 # ------------------------------------------------------------
@@ -293,19 +309,22 @@ class character_skills(models.Model):
 # player character's combat information
 #
 # ------------------------------------------------------------
-class character_combat(models.Model):
+class character_combat(Base):
     "Player character's combat."
 
+    __tablename__ = "character_combat"
+
+    __table_args__ = {
+        "extend_existing": True,
+    }
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+
     # character's id
-    character_id = models.PositiveIntegerField(unique=True)
+    character_id = Column(Integer, unique=True, nullable=False)
 
     # combat's id
-    combat = models.PositiveIntegerField()
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "gamedata"
+    combat = Column(Integer, nullable=False)
 
 
 # ------------------------------------------------------------
@@ -313,23 +332,28 @@ class character_combat(models.Model):
 # player character's quests
 #
 # ------------------------------------------------------------
-class character_quests(models.Model):
+class character_quests(Base):
     "Player character's quests."
 
+    __tablename__ = "character_quests"
+
+    __table_args__ = (
+        UniqueConstraint("character_id", "quest"),
+        {
+            "extend_existing": True,
+        }
+    )
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+
     # character's id
-    character_id = models.PositiveIntegerField(db_index=True)
+    character_id = Column(Integer, index=True, nullable=False)
 
     # quest's key
-    quest = models.CharField(max_length=KEY_LENGTH, db_index=True)
+    quest = Column(String(KEY_LENGTH), index=True, nullable=False)
 
     # quest is finished
-    finished = models.BooleanField(default=False, db_index=True)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "gamedata"
-        unique_together = ("character_id", "quest")
+    finished = Column(Boolean, default=False, index=True, nullable=False)
 
 
 # ------------------------------------------------------------
@@ -337,24 +361,29 @@ class character_quests(models.Model):
 # quest objectives
 #
 # ------------------------------------------------------------
-class quest_objectives(models.Model):
+class quest_objectives(Base):
     "Quests' objectives."
 
+    __tablename__ = "quest_objectives"
+
+    __table_args__ = (
+        UniqueConstraint("character_quest", "objective"),
+        {
+            "extend_existing": True,
+        }
+    )
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+
     # character's id and quest's key, separated by colon
-    character_quest = models.CharField(max_length=KEY_LENGTH+KEY_LENGTH, db_index=True)
+    character_quest = Column(String(KEY_LENGTH + KEY_LENGTH), index=True, nullable=False)
 
     # Quest's objective.
     # objective's type and relative object's key, separated by colon
-    objective = models.CharField(max_length=KEY_LENGTH+KEY_LENGTH)
+    objective = Column(String(KEY_LENGTH + KEY_LENGTH), nullable=False)
 
     # objective's progress
-    progress = models.PositiveIntegerField(blank=True, default=0)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "gamedata"
-        unique_together = ("character_quest", "objective")
+    progress = Column(Integer, default=0)
 
 
 # ------------------------------------------------------------
@@ -362,16 +391,19 @@ class quest_objectives(models.Model):
 # character's honour
 #
 # ------------------------------------------------------------
-class honours(models.Model):
+class honours(Base):
     "All character's honours."
 
+    __tablename__ = "honours"
+
+    __table_args__ = {
+        "extend_existing": True,
+    }
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+
     # character's database id
-    character = models.IntegerField(unique=True)
+    character = Column(Integer, unique=0, nullable=False)
 
     # character's honour. special character's honour is -1, such as the superuser.
-    honour = models.IntegerField(blank=True, default=-1, db_index=True)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "gamedata"
+    honour = Column(Integer, default=-1, index=True)

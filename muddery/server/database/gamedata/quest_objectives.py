@@ -16,6 +16,11 @@ class QuestObjectives(BaseData, Singleton):
     __key_field = "objective"
     __default_value_field = "progress"
 
+    def __init__(self):
+        # data storage
+        super(QuestObjectives, self).__init__()
+        self.storage = self.create_storage(self.__table_name, self.__category_name, self.__key_field, self.__default_value_field)
+
     def get_character_quest(self, character_id, quest):
         """
         Get a character's quest objectives.

@@ -95,7 +95,7 @@ class MudderyShopGoods(BaseElement):
 
         return info
 
-    def sell_to(self, caller):
+    async def sell_to(self, caller):
         """
         Buy this goods.
 
@@ -108,12 +108,12 @@ class MudderyShopGoods(BaseElement):
         # check price
         unit_number = caller.total_object_number(self.unit_key)
         if unit_number < self.price:
-            caller.msg({"alert": _("Sorry, %s is not enough.") % self.unit_name})
+            await caller.msg({"alert": _("Sorry, %s is not enough.") % self.unit_name})
             return
 
         # check if can get these objects
         if not caller.can_get_object(self.obj_key, self.number):
-            caller.msg({"alert": _("Sorry, you can not take more %s.") % self.obj_name})
+            await caller.msg({"alert": _("Sorry, you can not take more %s.") % self.obj_name})
             return
 
         remove_list = [
@@ -131,7 +131,7 @@ class MudderyShopGoods(BaseElement):
         ]
 
         # Reduce price units and give goods.
-        caller.exchange_objects(remove_list, receive_list, show=True)
-        caller.msg({"alert": _("Purchase successful!")})
+        await caller.exchange_objects(remove_list, receive_list, show=True)
+        await caller.msg({"alert": _("Purchase successful!")})
 
         return

@@ -22,11 +22,11 @@ class MudderyChannel(BaseElement):
     element_name = "Channel"
     model_name = ""
 
-    def at_element_setup(self, first_time):
+    async def at_element_setup(self, first_time):
         """
         Set data_info to the object.
         """
-        super(MudderyChannel, self).at_element_setup(first_time)
+        await super(MudderyChannel, self).at_element_setup(first_time)
 
         # character_list: {
         #   character's db id: character's object

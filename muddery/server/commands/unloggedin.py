@@ -83,7 +83,7 @@ class CmdConnectAccount(BaseCommand):
     key = "connect"
 
     @classmethod
-    def func(cls, session, args, context):
+    async def func(cls, session, args, context):
         """
         Uses the Django admin api. Note that unlogged-in commands
         have a unique position in that their func() receives
@@ -97,17 +97,17 @@ class CmdConnectAccount(BaseCommand):
         except Exception:
             string = 'Can not log in.'
             logger.log_err(string)
-            session.msg({"alert":string})
+            await session.msg({"alert":string})
             return
 
         # check for too many login errors too quick.
         if _throttle(session, maxlim=5, timeout=5*60, storage=_LATEST_FAILED_LOGINS):
             # timeout is 5 minutes.
-            session.msg({"alert":_("{RYou made too many connection attempts. Try again in a few minutes.{n")})
+            await session.msg({"alert":_("{RYou made too many connection attempts. Try again in a few minutes.{n")})
             return
 
         if not password:
-            session.msg({"alert":_("Please input password.")})
+            await session.msg({"alert":_("Please input password.")})
             return
 
         # Get the account.
@@ -116,13 +116,13 @@ class CmdConnectAccount(BaseCommand):
 
         # Set the account with username and password.
         try:
-            account.set_user(username, password)
+            await account.set_user(username, password)
         except MudderyError as e:
             if e.code == ERR.no_authentication:
                 # Wrong username or password.
-                session.msg({"alert": str(e)})
+                await session.msg({"alert": str(e)})
             else:
-                session.msg({"alert": _("You can not login.")})
+                await session.msg({"alert": _("You can not login.")})
 
             # this just updates the throttle
             _throttle(session)
@@ -134,7 +134,7 @@ class CmdConnectAccount(BaseCommand):
         #   player.at_first_login()  # only once, for player-centric setup
         #   player.at_pre_login()
         #   player.at_post_login(session=session)
-        session.login(account)
+        await session.login(account)
 
 
 class CmdCreateAccount(BaseCommand):
@@ -157,18 +157,18 @@ class CmdCreateAccount(BaseCommand):
     key = "create"
 
     @classmethod
-    def func(cls, session, args, context):
+    async def func(cls, session, args, context):
         "Do checks, create account and login."
         if not args:
-            session.msg({"alert": _("Syntax error!")})
+            await session.msg({"alert": _("Syntax error!")})
             return
 
         if "username" not in args:
-            session.msg({"alert": _("You should appoint a username.")})
+            await session.msg({"alert": _("You should appoint a username.")})
             return
 
         if "password" not in args:
-            session.msg({"alert": _("You should appoint a password.")})
+            await session.msg({"alert": _("You should appoint a password.")})
             return
 
         username = args["username"]
@@ -186,20 +186,20 @@ class CmdCreateAccount(BaseCommand):
 
         # Set the account with username and password.
         try:
-            account.new_user(username, password, "")
+            await account.new_user(username, password, "")
         except MudderyError as e:
             if e.code == ERR.no_authentication:
                 # Wrong username or password.
-                session.msg({"alert": str(e)})
+                await session.msg({"alert": str(e)})
             else:
-                session.msg({"alert": _("There was an error creating the Player: %s" % e)})
+                await session.msg({"alert": _("There was an error creating the Player: %s" % e)})
 
             return None
 
         if connect:
-            session.login(account)
+            await session.login(account)
         else:
-            session.msg({"created":{"name": session, "id": account.get_id()}})
+            await session.msg({"created":{"name": session, "id": account.get_id()}})
 
 
 class CmdQuitAccount(BaseCommand):
@@ -219,7 +219,7 @@ class CmdQuitAccount(BaseCommand):
     key = "quit"
 
     @classmethod
-    def func(cls, session, args, context):
+    async def func(cls, session, args, context):
         session.logout()
 
 

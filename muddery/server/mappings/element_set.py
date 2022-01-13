@@ -3,6 +3,7 @@ All available requests.
 """
 
 import os, re
+import traceback
 from importlib import import_module
 from muddery.server.conf import settings
 from muddery.server.utils.logger import logger
@@ -98,6 +99,7 @@ class ElementSet(object):
                 self.class_dict[key] = cls
                 return cls
             except Exception as e:
+                traceback.print_exc()
                 logger.log_trace("Load module error: %s" % e)
 
         # If can not find the element, return the base element.

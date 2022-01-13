@@ -26,11 +26,11 @@ class MudderyObjectCreator(ELEMENT("WORLD_OBJECT")):
 
         self.loot_handler = None
 
-    def at_element_setup(self, first_time):
+    async def at_element_setup(self, first_time):
         """
         Set data_info to the object."
         """
-        super(MudderyObjectCreator, self).at_element_setup(first_time)
+        await super(MudderyObjectCreator, self).at_element_setup(first_time)
 
         # Load creator info.
         self.loot_verb = self.const.loot_verb if self.const.loot_verb else _("Loot")

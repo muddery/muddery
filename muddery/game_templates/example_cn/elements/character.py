@@ -19,7 +19,7 @@ class Character(MudderyCharacter):
     """
     element_type = "CHARACTER"
 
-    def recover(self):
+    async def recover(self):
         """
         Recover properties.
         """
@@ -30,7 +30,7 @@ class Character(MudderyCharacter):
             "hp": self.const.max_hp,
             "mp": self.const.max_mp
         }
-        self.states.saves(values)
+        await self.states.saves(values)
         
     def level_up(self):
         """
@@ -59,27 +59,28 @@ class Character(MudderyCharacter):
 
         return info
 
-    def get_combat_status(self):
+    async def get_combat_status(self):
         """
         Get character status used in combats.
         """
-        status = super(Character, self).get_combat_status()
+        status = await super(Character, self).get_combat_status()
 
         status["max_hp"] = self.const.max_hp
-        status["hp"] = self.states.load("hp")
+        status["hp"] = await self.states.load("hp")
         status["max_mp"] = self.const.max_mp
-        status["mp"] = self.states.load("mp")
+        status["mp"] = await self.states.load("mp")
 
         return status
 
-    def is_alive(self):
+    async def is_alive(self):
         """
         Check if the character is alive.
 
         Returns:
             (boolean) the character is alive or not
         """
-        return round(self.states.load("hp")) > 0
+        hp = await self.states.load("hp")
+        return round(hp) > 0
 
     def provide_exp(self, killer):
         """
@@ -92,7 +93,7 @@ class Character(MudderyCharacter):
         """
         return self.const.give_exp
 
-    def add_exp(self, exp):
+    async def add_exp(self, exp):
         """
         Add character's exp.
         Args:
@@ -103,7 +104,7 @@ class Character(MudderyCharacter):
         """
         super(Character, self).add_exp(exp)
 
-        current_exp = self.states.load("exp")
+        current_exp = await self.states.load("exp")
         new_exp = current_exp + exp
         while new_exp >= self.const.max_exp:
             if self.const.max_exp > 0:
@@ -116,4 +117,4 @@ class Character(MudderyCharacter):
                 break
 
         if new_exp != current_exp:
-            self.states.save("exp", new_exp)
+            await self.states.save("exp", new_exp)

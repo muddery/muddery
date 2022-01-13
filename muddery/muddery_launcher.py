@@ -110,7 +110,7 @@ def main():
             manager.load_game_data()
             manager.collect_static()
         except Exception as e:
-            print(e)
+            traceback.print_exc()
             sys.exit(-1)
         sys.exit()
 

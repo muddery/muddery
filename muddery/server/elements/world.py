@@ -38,7 +38,7 @@ class MudderyWorld(BaseElement):
         # all_characters: {character's db id: character's object
         self.all_characters = {}
 
-    def load_data(self, key, level=None):
+    async def load_data(self, key, level=None):
         """
         Load the object's data.
 
@@ -49,11 +49,11 @@ class MudderyWorld(BaseElement):
         :return:
         """
         # Load data.
-        self.load_channels()
-        self.load_areas()
+        await self.load_channels()
+        await self.load_areas()
         self.load_commands()
 
-    def load_channels(self):
+    async def load_channels(self):
         """
         Load all channels.
         """
@@ -66,11 +66,11 @@ class MudderyWorld(BaseElement):
             table_data = table_data[0]
 
             new_channel = ELEMENT(table_data.element_type)()
-            new_channel.setup_element(record.key)
+            await new_channel.setup_element(record.key)
 
             self.all_channels[new_channel.get_element_key()] = new_channel
 
-    def load_areas(self):
+    async def load_areas(self):
         """
         Load all areas.
         """
@@ -87,7 +87,7 @@ class MudderyWorld(BaseElement):
             table_data = table_data[0]
 
             new_area = ELEMENT(table_data.element_type)()
-            new_area.setup_element(record.key)
+            await new_area.setup_element(record.key)
 
             self.all_areas[new_area.get_element_key()] = new_area
 
@@ -173,7 +173,7 @@ class MudderyWorld(BaseElement):
         """
         return self.all_channels[channel_key]
 
-    def send_message(self, caller, target_type, target, message):
+    async def send_message(self, caller, target_type, target, message):
         """
         Send a player's message to the target.
         """
@@ -182,10 +182,10 @@ class MudderyWorld(BaseElement):
             channel.get_message(caller, message)
         elif target_type == ConversationType.LOCAL.value:
             room = self.get_room(target)
-            room.get_message(caller, message)
+            await room.get_message(caller, message)
         elif target_type == ConversationType.PRIVATE.value:
             character = self.get_character(int(target))
-            character.get_message(caller, message)
+            await character.get_message(caller, message)
 
     def broadcast(self, message):
         """

@@ -242,7 +242,8 @@ def classes_in_path(path, cls):
     """
     modules = load_modules(path)
     for module in modules:
-        for name, obj in vars(module).items():
+        items = vars(module).items()
+        for name, obj in items:
             if inspect.isclass(obj) and issubclass(obj, cls) and obj is not cls:
                 yield obj
 

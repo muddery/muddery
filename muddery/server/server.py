@@ -6,14 +6,14 @@ from muddery.server.utils.utils import class_from_path
 from muddery.server.utils.singleton import Singleton
 from muddery.server.service.command_handler import CommandHandler
 from muddery.server.database.db_manager import DBManager
+from muddery.server.utils.utils import classes_in_path
+from muddery.server.database.gamedata.base_data import BaseData
 
 
 class Server(Singleton):
     """
     The game world.
     """
-    _instance_lock = threading.Lock()
-
     class ClassProperty:
         def __init__(self, method):
             self.method = method
@@ -25,14 +25,9 @@ class Server(Singleton):
         self.configs = {}
         self._world = None
         self._command_handler = None
-
         self.db_connected = False
-        self.connect_db()
 
-        self.create_the_world()
-        self.create_command_handler()
-
-    def connect_db(self):
+    async def connect_db(self):
         """
         Create the db connection.
         """
@@ -47,7 +42,11 @@ class Server(Singleton):
             traceback.print_exc()
             raise
 
-    def create_the_world(self):
+        # load classes
+        for cls in classes_in_path(settings.PATH_GAMEDATA_DAO, BaseData):
+            await cls.inst().init()
+
+    async def create_the_world(self):
         """
         Create the whole game world.
         :return:
@@ -58,7 +57,7 @@ class Server(Singleton):
         try:
             from muddery.server.mappings.element_set import ELEMENT
             world = ELEMENT("WORLD")()
-            world.setup_element("")
+            await world.setup_element("")
             self._world = world
         except Exception as e:
             traceback.print_exc()

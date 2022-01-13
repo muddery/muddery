@@ -2,9 +2,9 @@
 Event action's base class.
 """
 
-from django.apps import apps
 from muddery.server.conf import settings
 from muddery.server.database.worlddata.worlddata import WorldData
+from muddery.worldeditor.database.db_manager import DBManager
 
 
 class BaseEventAction(object):
@@ -34,7 +34,7 @@ class BaseEventAction(object):
         if cls.__model__:
             return cls.__model__
 
-        cls.__model__ = apps.get_model(settings.WORLD_DATA_APP, cls.model_name)
+        cls.__model__ = DBManager.inst().get_model(settings.WORLD_DATA_APP, cls.model_name)
         return cls.__model__
 
     def func(self, event_key, character, obj):

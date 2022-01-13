@@ -28,22 +28,22 @@ class CmdLook(BaseCommand):
     key = "look"
 
     @classmethod
-    def func(cls, caller, args, context):
+    async def func(cls, caller, args, context):
         """
         Handle the looking.
         """
-        if not caller.is_alive():
-            caller.msg({"alert": _("You are died.")})
+        if not await caller.is_alive():
+            await caller.msg({"alert": _("You are died.")})
             return
 
         # Observes the caller's location
         looking_at_obj = caller.location
         if not looking_at_obj:
-            caller.msg({"msg": _("You have nothing to look at!")})
+            await caller.msg({"msg": _("You have nothing to look at!")})
             return
 
         # Clear caller's target.
-        caller.show_location()
+        await caller.show_location()
 
         combat = caller.get_combat()
         if combat:
@@ -51,7 +51,7 @@ class CmdLook(BaseCommand):
             # This happens when a player is in combat and he logout and login again.
 
             # Send "joined_combat" message first. It will set the player to combat status.
-            caller.msg({"joined_combat": True})
+            await caller.msg({"joined_combat": True})
 
             # Send combat infos.
             appearance = combat.get_appearance()
@@ -59,7 +59,7 @@ class CmdLook(BaseCommand):
                 "combat_info": appearance,
                 "combat_commands": caller.get_combat_commands(),
             }
-            caller.msg(message)
+            await caller.msg(message)
 
 
 class CmdInventory(BaseCommand):
@@ -76,10 +76,10 @@ class CmdInventory(BaseCommand):
     key = "inventory"
 
     @classmethod
-    def func(cls, caller, args, context):
+    async def func(cls, caller, args, context):
         "check inventory"
         inv = caller.get_inventory_appearance()
-        caller.msg({"inventory":inv})
+        await caller.msg({"inventory":inv})
 
 
 class CmdInventoryObject(BaseCommand):
@@ -97,19 +97,19 @@ class CmdInventoryObject(BaseCommand):
     key = "inventory_obj"
 
     @classmethod
-    def func(cls, caller, args, context):
+    async def func(cls, caller, args, context):
         """
         Handle the looking.
         """
         if not args:
-            caller.msg({"alert": _("You should select something in your inventory.")})
+            await caller.msg({"alert": _("You should select something in your inventory.")})
             return
 
-        appearance = caller.get_inventory_object_appearance(args)
+        appearance = await caller.get_inventory_object_appearance(args)
         if appearance:
-            caller.msg({"inventory_obj": appearance}, context=context)
+            await caller.msg({"inventory_obj": appearance}, context=context)
         else:
-            caller.msg({"alert": _("Can not find it in your inventory.")})
+            await caller.msg({"alert": _("Can not find it in your inventory.")})
 
 
 class CmdEquipmentsObject(BaseCommand):
@@ -127,19 +127,19 @@ class CmdEquipmentsObject(BaseCommand):
     key = "equipments_obj"
 
     @classmethod
-    def func(cls, caller, args, context):
+    async def func(cls, caller, args, context):
         """
         Handle the looking.
         """
         if not args:
-            caller.msg({"alert": _("You should select something in your equipments.")})
+            await caller.msg({"alert": _("You should select something in your equipments.")})
             return
 
         appearance = caller.return_equipments_object(args)
         if appearance:
-            caller.msg({"equipments_obj": appearance}, context=context)
+            await caller.msg({"equipments_obj": appearance}, context=context)
         else:
-            caller.msg({"alert": _("Can not find it in your equipments.")})
+            await caller.msg({"alert": _("Can not find it in your equipments.")})
 
 
 #------------------------------------------------------------
@@ -161,17 +161,17 @@ class CmdSay(BaseCommand):
     key = "say"
 
     @classmethod
-    def func(cls, caller, args, context):
+    async def func(cls, caller, args, context):
         "Run the say command"
         if not args:
             return
 
         if "target" not in args:
-            caller.msg({"alert": _("You should choose a target to say.")})
+            await caller.msg({"alert": _("You should choose a target to say.")})
             return
 
         if "message" not in args:
-            caller.msg({"alert": _("You should say something.")})
+            await caller.msg({"alert": _("You should say something.")})
             return
 
         target_type = args["type"]
@@ -196,24 +196,24 @@ class CmdLookRoomObj(BaseCommand):
     key = "look_room_obj"
 
     @classmethod
-    def func(cls, caller, args, context):
-        if not caller.is_alive():
-            caller.msg({"alert": _("You are died.")})
+    async def func(cls, caller, args, context):
+        if not await caller.is_alive():
+            await caller.msg({"alert": _("You are died.")})
             return
 
         if not args:
-            caller.msg({"alert": _("You should appoint an object.")})
+            await caller.msg({"alert": _("You should appoint an object.")})
             return
 
         try:
             room = caller.get_location()
             obj = room.get_object(args)
         except Exception as e:
-            caller.msg({"alert": _("Can not find the object.")})
+            await caller.msg({"alert": _("Can not find the object.")})
             return
 
         appearance = obj.get_appearance(caller)
-        caller.msg({"look_obj": appearance})
+        await caller.msg({"look_obj": appearance})
 
 
 #------------------------------------------------------------
@@ -231,13 +231,13 @@ class CmdLookRoomChar(BaseCommand):
     key = "look_room_char"
 
     @classmethod
-    def func(cls, caller, args, context):
-        if not caller.is_alive():
-            caller.msg({"alert": _("You are died.")})
+    async def func(cls, caller, args, context):
+        if not await caller.is_alive():
+            await caller.msg({"alert": _("You are died.")})
             return
 
         if not args:
-            caller.msg({"alert": _("You should appoint a character.")})
+            await caller.msg({"alert": _("You should appoint a character.")})
             return
 
         try:
@@ -245,11 +245,11 @@ class CmdLookRoomChar(BaseCommand):
             room = caller.get_location()
             obj = room.get_character(char_id)
         except Exception as e:
-            caller.msg({"alert": _("Can not find the object.")})
+            await caller.msg({"alert": _("Can not find the object.")})
             return
 
         appearance = obj.get_appearance(caller)
-        caller.msg({"look_obj": appearance})
+        await caller.msg({"look_obj": appearance})
 
 
 #------------------------------------------------------------
@@ -269,21 +269,21 @@ class CmdTraverse(BaseCommand):
     key = "traverse"
 
     @classmethod
-    def func(cls, caller, args, context):
+    async def func(cls, caller, args, context):
         "Move caller to the exit."
-        if not caller.is_alive():
-            caller.msg({"alert": _("You are died.")})
+        if not await caller.is_alive():
+            await caller.msg({"alert": _("You are died.")})
             return
 
         if not args:
-            caller.msg({"alert": _("Should appoint an exit to go.")})
+            await caller.msg({"alert": _("Should appoint an exit to go.")})
             return
 
         try:
             room = caller.get_location()
             exit = room.get_exit(args)
         except:
-            caller.msg({"alert": _("Can not find the exit.")})
+            await caller.msg({"alert": _("Can not find the exit.")})
             return
 
         exit.traverse(caller)
@@ -306,10 +306,10 @@ class CmdTalk(BaseCommand):
     key = "talk"
 
     @classmethod
-    def func(cls, caller, args, context):
+    async def func(cls, caller, args, context):
         "Talk to an NPC."
         if not args:
-            caller.msg({"alert":_("You should talk to someone.")})
+            await caller.msg({"alert":_("You should talk to someone.")})
             return
 
         try:
@@ -318,10 +318,10 @@ class CmdTalk(BaseCommand):
             npc = room.get_character(npc_id)
         except:
             # Can not find the NPC in the caller's location.
-            caller.msg({"alert":_("Can not find the one to talk.")})
+            await caller.msg({"alert":_("Can not find the one to talk.")})
             return
 
-        caller.talk_to_npc(npc)
+        await caller.talk_to_npc(npc)
 
 
 #------------------------------------------------------------
@@ -345,15 +345,15 @@ class CmdDialogue(BaseCommand):
     key = "finish_dialogue"
 
     @classmethod
-    def func(cls, caller, args, context):
+    async def func(cls, caller, args, context):
         "Continue a dialogue."
         if not args:
-            caller.msg({"alert":_("You should talk to someone.")})
+            await caller.msg({"alert":_("You should talk to someone.")})
             return
 
         # Get the dialogue.
         if "dialogue" not in args:
-            caller.msg({"alert": _("You should say something.")})
+            await caller.msg({"alert": _("You should say something.")})
             return
         dlg_key = args["dialogue"]
 
@@ -386,19 +386,19 @@ class CmdLoot(BaseCommand):
     key = "loot"
 
     @classmethod
-    def func(cls, caller, args, context):
+    async def func(cls, caller, args, context):
         "Loot objects."
         caller = caller
 
         if not args:
-            caller.msg({"alert":_("You should loot something.")})
+            await caller.msg({"alert":_("You should loot something.")})
             return
 
         try:
             room = caller.get_location()
             obj = room.get_object(args)
         except:
-            caller.msg({"alert": _("Can not find the object.")})
+            await caller.msg({"alert": _("Can not find the object.")})
             return
 
         try:
@@ -408,7 +408,7 @@ class CmdLoot(BaseCommand):
             ostring = "Can not loot %s: %s" % (obj.get_element_key(), e)
             logger.log_trace(ostring)
             
-        caller.show_location()
+        await caller.show_location()
 
 
 #------------------------------------------------------------
@@ -430,21 +430,21 @@ class CmdUse(BaseCommand):
     key = "use"
 
     @classmethod
-    def func(cls, caller, args, context):
-        if not caller.is_alive():
-            caller.msg({"alert": _("You are died.")})
+    async def func(cls, caller, args, context):
+        if not await caller.is_alive():
+            await caller.msg({"alert": _("You are died.")})
             return
 
         if not args or "position" not in args:
-            caller.msg({"alert": _("You should use something.")})
+            await caller.msg({"alert": _("You should use something.")})
             return
         position = args["position"]
 
         result = ""
         try:
             # Use the object and get the result.
-            result = caller.use_object(int(position))
-            caller.show_location()
+            result = await caller.use_object(int(position))
+            await caller.show_location()
         except Exception as e:
             ostring = "Can not use %s: %s" % (args, e)
             logger.log_trace(ostring)
@@ -453,7 +453,7 @@ class CmdUse(BaseCommand):
         if not result:
             result = _("No result.")
 
-        caller.msg({"alert": result})
+        await caller.msg({"alert": result})
 
 
 #------------------------------------------------------------
@@ -475,26 +475,26 @@ class CmdDiscard(BaseCommand):
     key = "discard"
 
     @classmethod
-    def func(cls, caller, args, context):
+    async def func(cls, caller, args, context):
         "Use an object."
         caller = caller
 
-        if not caller.is_alive():
-            caller.msg({"alert":_("You are died.")})
+        if not await caller.is_alive():
+            await caller.msg({"alert":_("You are died.")})
             return
 
         if not args or "position" not in args:
-            caller.msg({"alert":_("You should discard something.")})
+            await caller.msg({"alert":_("You should discard something.")})
             return
         position = args["position"]
 
         # remove object
         try:
-            caller.remove_all_objects_by_position(int(position))
-            caller.show_location()
+            await caller.remove_all_objects_by_position(int(position))
+            await caller.show_location()
         except Exception as e:
             # If the caller does not have this object.
-            caller.msg({"alert": _("Can not discard this object.")})
+            await caller.msg({"alert": _("Can not discard this object.")})
             logger.log_trace("Can not discard object %s: %s" % (args, e))
             return
 
@@ -516,26 +516,26 @@ class CmdEquip(BaseCommand):
     key = "equip"
 
     @classmethod
-    def func(cls, caller, args, context):
+    async def func(cls, caller, args, context):
         "Put on an equipment."
         caller = caller
 
         if not args or "position" not in args:
-            caller.msg({"alert": _("You should equip something.")})
+            await caller.msg({"alert": _("You should equip something.")})
             return
         position = args["position"]
 
         try:
             # equip
-            caller.equip_object(int(position))
+            await caller.equip_object(int(position))
         except Exception as e:
-            caller.msg({"alert": _("Can not use this equipment.")})
+            await caller.msg({"alert": _("Can not use this equipment.")})
             logger.log_trace("Can not use equipment %s: %s" % (args, e))
             return
 
         # Send lastest status to the player.
         message = {"alert": _("Equipped!")}
-        caller.msg(message)
+        await caller.msg(message)
 
 
 #------------------------------------------------------------
@@ -555,27 +555,27 @@ class CmdTakeOff(BaseCommand):
     key = "takeoff"
 
     @classmethod
-    def func(cls, caller, args, context):
+    async def func(cls, caller, args, context):
         "Take off an equipment."
         if not args or "position" not in args:
-            caller.msg({"alert":_("You should take off something.")})
+            await caller.msg({"alert":_("You should take off something.")})
             return
         position = args["position"]
 
         try:
             # Take off the equipment.
-            caller.take_off_equipment(position)
+            await caller.take_off_equipment(position)
         except MudderyError as e:
-            caller.msg({"alert": str(e)})
+            await caller.msg({"alert": str(e)})
             return
         except Exception as e:
-            caller.msg({"alert": _("Can not take off this equipment.")})
+            await caller.msg({"alert": _("Can not take off this equipment.")})
             logger.log_trace("Can not take off %s: %s" % (args, e))
             return
 
         # Send lastest status to the player.
         message = {"alert": _("Taken off!")}
-        caller.msg(message)
+        await caller.msg(message)
 
 
 #------------------------------------------------------------
@@ -606,18 +606,18 @@ class CmdCastSkill(BaseCommand):
     key = "cast_skill"
 
     @classmethod
-    def func(cls, caller, args, context):
+    async def func(cls, caller, args, context):
         "Cast a skill."
-        if not caller.is_alive():
-            caller.msg({"alert":_("You are died.")})
+        if not await caller.is_alive():
+            await caller.msg({"alert":_("You are died.")})
             return
 
         if caller.is_in_combat():
-            caller.msg({"alert": _("You can not cast this skill in a combat.")})
+            await caller.msg({"alert": _("You can not cast this skill in a combat.")})
             return
 
         if not args:
-            caller.msg({"alert":_("You should select a skill to cast.")})
+            await caller.msg({"alert":_("You should select a skill to cast.")})
             return
 
         # get skill and target
@@ -629,7 +629,7 @@ class CmdCastSkill(BaseCommand):
         else:
             # If the args is skill's key and target.
             if "skill" not in args:
-                caller.msg({"alert":_("You should select a skill to cast.")})
+                await caller.msg({"alert":_("You should select a skill to cast.")})
                 return
             skill_key = args["skill"]
 
@@ -642,9 +642,9 @@ class CmdCastSkill(BaseCommand):
                 target = None
 
         try:
-            caller.cast_skill(skill_key, target)
+            await caller.cast_skill(skill_key, target)
         except Exception as e:
-            caller.msg({"alert":_("Can not cast this skill.")})
+            await caller.msg({"alert":_("Can not cast this skill.")})
             logger.log_trace("Can not cast skill %s: %s" % (skill_key, e))
             return
 
@@ -667,17 +667,17 @@ class CmdAttack(BaseCommand):
     key = "attack"
 
     @classmethod
-    def func(cls, caller, args, context):
+    async def func(cls, caller, args, context):
         "Handle command"
         if not caller:
             return
 
-        if not caller.is_alive():
-            caller.msg({"alert":_("You are died.")})
+        if not await caller.is_alive():
+            await caller.msg({"alert":_("You are died.")})
             return
 
         if not args:
-            caller.msg({"alert":_("You should select a target.")})
+            await caller.msg({"alert":_("You should select a target.")})
             return
 
         try:
@@ -685,19 +685,19 @@ class CmdAttack(BaseCommand):
             room = caller.get_location()
             target = room.get_character(target_id)
         except:
-            caller.msg({"alert": _("You should select a target.")})
+            await caller.msg({"alert": _("You should select a target.")})
             return
 
         if not caller.location or caller.location.peaceful:
-            caller.msg({"alert": _("You can not attack in this place.")})
+            await caller.msg({"alert": _("You can not attack in this place.")})
             return
 
-        if not target.is_alive():
-            caller.msg({"alert": _("%s is died." % target.get_name())})
+        if not await target.is_alive():
+            await caller.msg({"alert": _("%s is died." % await target.get_name())})
             return
 
         if caller.location != target.location:
-            caller.msg({"alert": _("You can not attack %s.") % target.get_name()})
+            await caller.msg({"alert": _("You can not attack %s.") % await target.get_name()})
             return
 
         # Set caller's target.
@@ -707,13 +707,13 @@ class CmdAttack(BaseCommand):
         if caller.is_in_combat():
             # caller is in battle
             message = {"alert": _("You are in another combat.")}
-            caller.msg(message)
+            await caller.msg(message)
             return
 
         if target.is_in_combat():
             # target is in battle
             message = {"alert": _("%s is in another combat." % target.name)}
-            caller.msg(message)
+            await caller.msg(message)
             return
 
         # create a new combat
@@ -726,11 +726,11 @@ class CmdAttack(BaseCommand):
             )
         except Exception as e:
             logger.log_err("Can not create combat: [%s] %s" % (type(e).__name__, e))
-            caller.msg(_("You can not attack %s.") % target.get_name())
+            await caller.msg(_("You can not attack %s.") % await target.get_name())
             return
 
-        caller.msg(_("You are attacking {R%s{n! You are in combat.") % target.get_name())
-        target.msg(_("{R%s{n is attacking you! You are in combat.") % caller.get_name())
+        await caller.msg(_("You are attacking {R%s{n! You are in combat.") % await target.get_name())
+        await target.msg(_("{R%s{n is attacking you! You are in combat.") % await caller.get_name())
 
 
 # ------------------------------------------------------------
@@ -748,17 +748,17 @@ class CmdQueueUpCombat(BaseCommand):
     key = "queue_up_combat"
 
     @classmethod
-    def func(cls, caller, args, context):
+    async def func(cls, caller, args, context):
         "Handle command"
         if not caller:
             return
 
         honour_settings = HonourSettings.get_first_data()
-        if caller.get_level() < honour_settings.min_honour_level:
-            caller.msg({"alert": _("You need to reach level %s." % honour_settings.min_honour_level)})
+        if await caller.get_level() < honour_settings.min_honour_level:
+            await caller.msg({"alert": _("You need to reach level %s." % honour_settings.min_honour_level)})
             return
 
-        MatchPVPHandler.inst().add(caller)
+        await MatchPVPHandler.inst().add(caller)
 
 
 # ------------------------------------------------------------
@@ -776,12 +776,12 @@ class CmdQuitCombatQueue(BaseCommand):
     key = "quit_combat_queue"
 
     @classmethod
-    def func(cls, caller, args, context):
+    async def func(cls, caller, args, context):
         "Handle command"
         if not caller:
             return
 
-        MatchPVPHandler.inst().remove(caller)
+        await MatchPVPHandler.inst().remove(caller)
 
 
 # ------------------------------------------------------------
@@ -799,7 +799,7 @@ class CmdConfirmCombat(BaseCommand):
     key = "confirm_combat"
 
     @classmethod
-    def func(cls, caller, args, context):
+    async def func(cls, caller, args, context):
         "Handle command"
         if not caller:
             return
@@ -822,7 +822,7 @@ class CmdRejectCombat(BaseCommand):
     key = "reject_combat"
 
     @classmethod
-    def func(cls, caller, args, context):
+    async def func(cls, caller, args, context):
         "Handle command"
 
         caller = caller
@@ -847,7 +847,7 @@ class CmdGetRankings(BaseCommand):
     key = "get_rankings"
 
     @classmethod
-    def func(cls, caller, args, context):
+    async def func(cls, caller, args, context):
         """
         Get characters rankings.
 
@@ -857,7 +857,7 @@ class CmdGetRankings(BaseCommand):
         if not caller:
             return
 
-        caller.show_rankings()
+        await caller.show_rankings()
 
 
 #------------------------------------------------------------
@@ -875,7 +875,7 @@ class CmdGiveUpQuest(BaseCommand):
     key = "giveup_quest"
 
     @classmethod
-    def func(cls, caller, args, context):
+    async def func(cls, caller, args, context):
         """
         Give up a quest.
 
@@ -886,7 +886,7 @@ class CmdGiveUpQuest(BaseCommand):
             return
 
         if not args:
-            caller.msg({"alert":_("You should give up a quest.")})
+            await caller.msg({"alert":_("You should give up a quest.")})
             return
 
         quest_key = args
@@ -895,16 +895,16 @@ class CmdGiveUpQuest(BaseCommand):
             # Give up the quest.
             caller.quest_handler.give_up(quest_key)
         except MudderyError as e:
-            caller.msg({"alert": str(e)})
+            await caller.msg({"alert": str(e)})
             return
         except Exception as e:
-            caller.msg({"alert": _("Can not give up this quest.")})
+            await caller.msg({"alert": _("Can not give up this quest.")})
             logger.log_trace("Can not give up quest %s: %s" % (quest_key, e))
             return
 
         # Send lastest status to the player.
         message = {"alert": _("Given up!")}
-        caller.msg(message)
+        await caller.msg(message)
 
 
 #------------------------------------------------------------
@@ -923,10 +923,10 @@ class CmdUnlockExit(BaseCommand):
     key = "unlock_exit"
 
     @classmethod
-    def func(cls, caller, args, context):
+    async def func(cls, caller, args, context):
         "Open a locked exit."
         if not args:
-            caller.msg({"alert": _("You should unlock something.")})
+            await caller.msg({"alert": _("You should unlock something.")})
             return
 
         exit_key = args
@@ -934,10 +934,10 @@ class CmdUnlockExit(BaseCommand):
         try:
             # Unlock the exit.
             if not caller.unlock_exit(exit_key):
-                caller.msg({"alert": _("Can not open this exit.")})
+                await caller.msg({"alert": _("Can not open this exit.")})
                 return
         except Exception as e:
-            caller.msg({"alert": _("Can not open this exit.")})
+            await caller.msg({"alert": _("Can not open this exit.")})
             logger.log_trace("Can not open exit %s: %s" % (exit_key, e))
             return
 
@@ -961,10 +961,10 @@ class CmdShopping(BaseCommand):
     key = "shopping"
 
     @classmethod
-    def func(cls, caller, args, context):
+    async def func(cls, caller, args, context):
         "Do shopping."
         if not args or "npc" not in args or "shop" not in args:
-            caller.msg({"alert": _("You should shopping in someplace.")})
+            await caller.msg({"alert": _("You should shopping in someplace.")})
             return
 
         shop_key = args["shop"]
@@ -974,10 +974,10 @@ class CmdShopping(BaseCommand):
             room = caller.get_location()
             npc = room.get_character(npc_id)
         except:
-            caller.msg({"alert": _("Can not find this NPC.")})
+            await caller.msg({"alert": _("Can not find this NPC.")})
             return
 
-        caller.msg({"shop": npc.get_shop_info(shop_key, caller)})
+        await caller.msg({"shop": npc.get_shop_info(shop_key, caller)})
 
 
 #------------------------------------------------------------
@@ -1000,10 +1000,10 @@ class CmdBuy(BaseCommand):
     key = "buy"
 
     @classmethod
-    def func(cls, caller, args, context):
+    async def func(cls, caller, args, context):
         "Buy a goods."
         if not args or "npc" not in args or "shop" not in args or "goods" not in args:
-            caller.msg({"alert": _("You should buy something.")})
+            await caller.msg({"alert": _("You should buy something.")})
             return
 
         try:
@@ -1011,7 +1011,7 @@ class CmdBuy(BaseCommand):
             room = caller.get_location()
             npc = room.get_character(npc_id)
         except:
-            caller.msg({"alert": _("Can not find this NPC.")})
+            await caller.msg({"alert": _("Can not find this NPC.")})
             return
 
         shop = args["shop"]
@@ -1021,7 +1021,7 @@ class CmdBuy(BaseCommand):
         try:
             npc.sell_goods(shop, int(goods), caller)
         except Exception as e:
-            caller.msg({"alert": _("Can not buy this goods.")})
+            await caller.msg({"alert": _("Can not buy this goods.")})
             logger.log_err("Can not buy %s %s %s: %s" % (args["npc"], shop, goods, e))
             return
 
@@ -1043,18 +1043,18 @@ class CmdQueryQuest(BaseCommand):
     key = "query_quest"
 
     @classmethod
-    def func(cls, caller, args, context):
+    async def func(cls, caller, args, context):
         """
         Handle the looking.
         """
         if not args or "key" not in args:
-            caller.msg({"alert": _("Can not find it.")})
+            await caller.msg({"alert": _("Can not find it.")})
             return
 
         quest_key = args["key"]
 
         try:
-            caller.msg({"quest_info": caller.get_quest_info(quest_key)})
+            await caller.msg({"quest_info": caller.get_quest_info(quest_key)})
         except Exception as e:
             logger.log_err("Can not get %s's quest %s." % (caller.id, quest_key))
 
@@ -1076,18 +1076,18 @@ class CmdQuerySkill(BaseCommand):
     key = "query_skill"
 
     @classmethod
-    def func(cls, caller, args, context):
+    async def func(cls, caller, args, context):
         """
         Handle the looking.
         """
         if not args or "key" not in args:
-            caller.msg({"alert": _("Can not find it.")})
+            await caller.msg({"alert": _("Can not find it.")})
             return
 
         skill_key = args["key"]
 
         try:
-            caller.msg({"skill_info": caller.get_skill_info(skill_key)})
+            await caller.msg({"skill_info": caller.get_skill_info(skill_key)})
         except Exception as e:
             logger.log_err("Can not get %s's skill %s." % (caller.id, skill_key))
 
@@ -1105,7 +1105,7 @@ class CmdTest(BaseCommand):
     key = "test"
 
     @classmethod
-    def func(cls, caller, args, context):
+    async def func(cls, caller, args, context):
         """
         Put your test here.
         """

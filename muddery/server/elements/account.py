@@ -10,7 +10,7 @@ distribution systems.
 import traceback
 import datetime
 from muddery.server.conf import settings
-from django.contrib.auth.hashers import check_password, is_password_usable, make_password
+from muddery.server.utils.password import hash_password, check_password, make_salt
 from muddery.server.database.gamedata.accounts import Accounts
 from muddery.server.database.gamedata.server_bans import ServerBans
 from muddery.server.database.gamedata.system_data import SystemData
@@ -67,46 +67,46 @@ class MudderyAccount(BaseElement):
             output += "-" + str(self.puppet_obj)
         return output
 
-    def new_user(self, username, password, type):
+    async def new_user(self, username, raw_password, type):
         # Create a new account with the username and password.
-        if Accounts.has(username):
+        if await Accounts.inst().has(username):
             raise MudderyError(ERR.invalid_input, _("Sorry, there is already a player with the name '%s'.") % username)
 
         # Check name bans
         current_time = datetime.datetime.now()
         try:
-            finish_time = ServerBans.get_ban_time("USERNAME", username)
+            finish_time = await ServerBans.inst().get_ban_time("USERNAME", username)
             if current_time <= finish_time:
                 # This username is banned.
                 raise MudderyError(ERR.no_authentication, _("You have been banned."))
         except KeyError:
             pass
 
-        if not is_password_usable(password):
+        if len(raw_password) < 6:
             raise MudderyError(ERR.invalid_input, _("The password is too simple."))
 
-        raw_password = make_password(password)
+        salt = make_salt()
+        password = hash_password(raw_password, salt)
 
         # Get a new player character id.
-        # TODO: load for update
-        account_id = SystemData.load("last_account_id", 0)
+        account_id = await SystemData.inst().load("last_account_id", 0, for_update=True)
         account_id += 1
-        SystemData.save("last_account_id", account_id)
+        await SystemData.inst().save("last_account_id", account_id)
 
-        Accounts.add(username, raw_password, account_id, type)
+        await Accounts.inst().add(username, password, salt, account_id, type)
         self.username = username
         self.id = account_id
         self.type = type
 
-    def set_user(self, username, password):
+    async def set_user(self, username, password):
         # Match account name and check password
-        if not self.check_password(username, password):
+        if not await self.check_password(username, password):
             # Password not match.
             raise MudderyError(ERR.no_authentication, _("Incorrect username or password."))
 
         # Check name bans
         try:
-            finish_time = ServerBans.inst().get_ban_time("USERNAME", username)
+            finish_time = await ServerBans.inst().get_ban_time("USERNAME", username)
             current_time = datetime.datetime.now()
             if current_time <= finish_time:
                 # This username is banned.
@@ -114,7 +114,7 @@ class MudderyAccount(BaseElement):
         except KeyError:
             pass
 
-        info = Accounts.inst().get_info(username)
+        info = await Accounts.inst().get_info(username)
         self.username = username
         self.id = info["id"]
         self.type = info["type"]
@@ -136,24 +136,24 @@ class MudderyAccount(BaseElement):
         if self.session:
             return self.session.uid
 
-    def at_post_login(self, session):
+    async def at_post_login(self, session):
         """
         Called at the end of the login process.
         """
-        Accounts.update_login_time(self.username)
+        await Accounts.inst().update_login_time(self.username)
 
         self.session = session
 
         # Inform the client that we logged in first.
-        session.msg({
+        await session.msg({
             "login": {
                 "name": self.username,
                 "id": self.get_id(),
             },
         })
 
-        session.msg({
-            "char_all": self.get_all_nicknames(),
+        await session.msg({
+            "char_all": await self.get_all_nicknames(),
             "max_char": settings.MAX_PLAYER_CHARACTERS
         })
 
@@ -163,20 +163,20 @@ class MudderyAccount(BaseElement):
         """
         pass
 
-    def get_all_characters(self):
+    async def get_all_characters(self):
         """
         Get this player's all playable characters.
         """
-        return AccountCharacters.get_account_characters(self.id)
+        return await AccountCharacters.inst().get_account_characters(self.id)
 
-    def get_all_nicknames(self):
+    async def get_all_nicknames(self):
         """
         Get this player's all playable characters' nicknames.
         """
-        char_all = self.get_all_characters()
-        return [{"name": CharacterInfo.get_nickname(char_id), "id": char_id} for char_id in char_all]
+        char_all = await self.get_all_characters()
+        return [{"name": await CharacterInfo.inst().get_nickname(char_id), "id": char_id} for char_id in char_all]
 
-    def msg(self, text, context=None):
+    async def msg(self, text, context=None):
         """
         Element -> User
         This is the main route for sending data back to the user from the
@@ -196,9 +196,9 @@ class MudderyAccount(BaseElement):
         # session relay
         logger.log_info("Account %s send message: %s" % (self.get_id(), text))
         if self.session:
-            self.session.msg(text=text, context=context)
+            await self.session.msg(text=text, context=context)
 
-    def puppet_object(self, char_db_id):
+    async def puppet_object(self, char_db_id):
         """
         Use the given session to control (puppet) the given object (usually
         a Character type).
@@ -220,7 +220,7 @@ class MudderyAccount(BaseElement):
         current_obj = self.puppet_obj
         if current_obj and current_obj.get_db_id() == char_db_id:
             # already puppeting this object
-            self.msg("You are already puppeting this object.")
+            await self.msg("You are already puppeting this object.")
             return
 
         self.puppet_obj = None
@@ -241,26 +241,26 @@ class MudderyAccount(BaseElement):
 
             # do the connection
             new_char.set_account(self)
-            new_char.setup_element(character_key)
+            await new_char.setup_element(character_key)
         except Exception as e:
             traceback.print_exc()
-            self.msg({"alert": _("That is not a valid character choice.")})
+            await self.msg({"alert": _("That is not a valid character choice.")})
             return
 
         # Send puppet info to the client first.
-        self.msg({
+        await self.msg({
             "puppet": {
                 "id": new_char.get_id(),
-                "name": new_char.get_name(),
+                "name": await new_char.get_name(),
                 "icon": getattr(new_char, "icon", None),
             }
         })
 
         # Set location
         try:
-            location_key = CharacterLocation.load(char_db_id)
+            location_key = await CharacterLocation.inst().load(char_db_id)
             location = Server.world.get_room(location_key)
-            new_char.move_to(location)
+            await new_char.move_to(location)
         except KeyError:
             pass
 
@@ -271,9 +271,9 @@ class MudderyAccount(BaseElement):
         Server.world.on_char_puppet(new_char)
 
         # final hook
-        new_char.at_post_puppet()
+        await new_char.at_post_puppet()
 
-    def unpuppet_object(self):
+    async def unpuppet_object(self):
         """
         Disengage control over an object.
 
@@ -283,7 +283,7 @@ class MudderyAccount(BaseElement):
         """
         obj = self.puppet_obj
         if obj:
-            obj.at_pre_unpuppet()
+            await obj.at_pre_unpuppet()
             obj.set_session(None)
 
             Server.world.on_char_unpuppet(obj)
@@ -300,7 +300,7 @@ class MudderyAccount(BaseElement):
         """
         return self.puppet_obj
 
-    def delete_character(self, char_db_id):
+    async def delete_character(self, char_db_id):
         """
         Delete an character.
 
@@ -308,50 +308,51 @@ class MudderyAccount(BaseElement):
         :return:
         """
         # use the playable_characters list to search
-        characters = AccountCharacters.inst().get_account_characters(self.id)
+        characters = await AccountCharacters.inst().get_account_characters(self.id)
         if char_db_id not in characters:
             raise KeyError("Can not find the character.")
 
-        self.unpuppet_object()
+        await self.unpuppet_object()
 
         # delete all character data.
-        AccountCharacters.inst().remove_character(self.id, char_db_id)
-        CharacterInfo.inst().remove_character(char_db_id)
-        CharacterLocation.inst().remove_character(char_db_id)
-        CharacterInventory.inst().remove_character(char_db_id)
-        CharacterEquipments.inst().remove_character(char_db_id)
-        CharacterQuests.inst().remove_character(char_db_id)
-        CharacterSkills.inst().remove_character(char_db_id)
-        CharacterCombat.inst().remove_character(char_db_id)
-        HonoursMapper.inst().remove_character(char_db_id)
+        await AccountCharacters.inst().remove_character(self.id, char_db_id)
+        await CharacterInfo.inst().remove_character(char_db_id)
+        await CharacterLocation.inst().remove_character(char_db_id)
+        await CharacterInventory.inst().remove_character(char_db_id)
+        await CharacterEquipments.inst().remove_character(char_db_id)
+        await CharacterQuests.inst().remove_character(char_db_id)
+        await CharacterSkills.inst().remove_character(char_db_id)
+        await CharacterCombat.inst().remove_character(char_db_id)
+        await HonoursMapper.inst().remove_character(char_db_id)
 
     def at_cmdset_get(self):
         pass
 
-    def check_password(self, username, password):
+    async def check_password(self, username, raw_password):
         """
         Check if the password is correct.
         """
         try:
-            raw_password = Accounts.inst().get_password(username)
+            password, salt = await Accounts.inst().get_password(username)
         except KeyError:
             # Wrong username.
             return False
 
-        return check_password(password, raw_password)
+        return check_password(raw_password, password, salt)
 
-    def change_password(self, current_password, new_password):
+    async def change_password(self, current_password, new_password):
         """
         Change the account's password.
         """
         if not self.check_password(self.username, current_password):
-            self.msg({"alert":_("Incorrect password.")})
+            await self.msg({"alert":_("Incorrect password.")})
             return
 
-        raw_password = make_password(new_password)
-        Accounts.set_password(self.username, raw_password)
+        salt = make_salt()
+        password = hash_password(new_password, salt)
+        await Accounts.inst().set_password(self.username, password, salt)
 
-        self.msg({
+        await self.msg({
             "alert":_("Password changed."),
             "pw_changed": True
         })

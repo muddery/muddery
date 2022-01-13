@@ -21,7 +21,7 @@ class MudderyDialogue(BaseElement):
     element_type = "DIALOGUE"
     element_name = "Dialogue"
 
-    def load_data(self, key, level=None):
+    async def load_data(self, key, level=None):
         """
         Load the object's data.
 

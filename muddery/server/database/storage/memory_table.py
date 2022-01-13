@@ -2,7 +2,9 @@
 Load and cache all worlddata.
 """
 
-from django.apps import apps
+import importlib
+from sqlalchemy import UniqueConstraint, select
+from muddery.server.database.db_manager import DBManager
 from muddery.server.utils.exception import MudderyError
 from muddery.server.database.storage.memory_record import MemoryRecord
 
@@ -12,10 +14,12 @@ class MemoryTable(object):
     Load and cache a table's data.
     """
 
-    def __init__(self, data_app, table_name):
-        self.records_app = data_app
-        self.table_name = table_name
-        self.model = apps.get_model(self.records_app, self.table_name)
+    def __init__(self, session, model_path, model_name):
+        self.model_name = model_name
+        module = importlib.import_module(model_path)
+        self.model = getattr(module, model_name)
+        self.columns = self.model.__table__.columns.keys()
+        self.session = DBManager.inst().get_session(session)
 
         self.records = []
         self.table_fields = {}
@@ -30,36 +34,46 @@ class MemoryTable(object):
     def reload(self):
         self.clear()
 
-        fields = [field.name for field in self.model._meta.fields]
-        for i, field_name in enumerate(fields):
+        for i, field_name in enumerate(self.columns):
             self.table_fields[field_name] = i
 
         # load records
-        records = self.model.objects.all()
-        for record in records:
-            row_data = [record.serializable_value(field_name) for field_name in fields]
+        stmt = select(self.model)
+        result = self.session.execute(stmt)
+        records = result.scalars()
+        for r in records:
+            row_data = [getattr(r, field_name) for field_name in self.columns]
             self.records.append(MemoryRecord(self.table_fields, row_data))
 
         # set unique index
-        for field in self.model._meta.fields:
-            if field.name != "id" and field.unique:
-                self.index[field.name] = dict((getattr(record, field.name), [i]) for i, record in enumerate(self.records))
+        for field_name in self.columns:
+            if field_name != "id" and self.model.__table__.columns[field_name].unique:
+                self.index[field_name] = dict((getattr(record, field_name), [i]) for i, record in enumerate(self.records))
 
         # set common index
-        for field in self.model._meta.fields:
-            if field.db_index:
+        for field_name in self.columns:
+            if field_name != "id" and self.model.__table__.columns[field_name].index:
                 all_values = {}
                 for i, record in enumerate(self.records):
-                    key = getattr(record, field.name)
+                    key = getattr(record, field_name)
                     if key in all_values:
                         all_values[key].append(i)
                     else:
                         all_values[key] = [i]
-                self.index[field.name] = all_values
+                self.index[field_name] = all_values
 
-        # index together
-        for index_together in self.model._meta.index_together:
-            set_fields = index_together
+        # index together or unique together
+        indexes = []
+
+        if hasattr(self.model, "__index_together__"):
+            indexes.extend(self.model.__index_together__)
+
+        if type(self.model.__table_args__) == tuple:
+            for table_args in self.model.__table_args__:
+                if type(table_args) == UniqueConstraint:
+                    indexes.append(table_args.columns.keys())
+
+        for set_fields in indexes:
             index_fields = sorted(set_fields)
             all_values = {}
             for i, record in enumerate(self.records):
@@ -69,20 +83,6 @@ class MemoryTable(object):
                 else:
                     all_values[keys] = [i]
             index_name = ".".join(index_fields)
-            self.index[index_name] = all_values
-
-        # unique together
-        for unique_together in self.model._meta.unique_together:
-            set_fields = unique_together
-            unique_fields = sorted(set_fields)
-            all_values = {}
-            for i, record in enumerate(self.records):
-                keys = tuple(getattr(record, field_name) for field_name in set_fields)
-                if keys in all_values:
-                    all_values[keys].append(i)
-                else:
-                    all_values[keys] = [i]
-            index_name = ".".join(unique_fields)
             self.index[index_name] = all_values
 
     def fields(self):

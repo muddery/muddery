@@ -34,14 +34,14 @@ class MudderySkill(BaseElement):
         else:
             return "%(" + char + ")s"
 
-    def at_element_setup(self, first_time):
+    async def at_element_setup(self, first_time):
         """
         Set data_info to the object.
 
         Returns:
             None
         """
-        super(MudderySkill, self).at_element_setup(first_time)
+        await super(MudderySkill, self).at_element_setup(first_time)
 
         # set data
         self.function = self.const.function
@@ -69,7 +69,7 @@ class MudderySkill(BaseElement):
         commands = [{"name": _("Cast"), "cmd": "cast_skill", "args": self.get_element_key()}]
         return commands
 
-    def cast(self, caller, target):
+    async def cast(self, caller, target):
         """
         Cast this skill.
 
@@ -79,7 +79,7 @@ class MudderySkill(BaseElement):
         Returns:
             skill_cast: (dict) skill's result
         """
-        case_message = self.cast_message(caller, target)
+        case_message = await self.cast_message(caller, target)
 
         # traceback.print_stack()
         results = self.do_skill(caller, target)
@@ -95,12 +95,12 @@ class MudderySkill(BaseElement):
         if caller:
             skill_cast["caller"] = caller.get_id()
             skill_cast["status"] = {
-                caller.get_id(): caller.get_combat_status(),
+                caller.get_id(): await caller.get_combat_status(),
             }
 
         if target:
             skill_cast["target"] = target.get_id()
-            skill_cast["status"][target.get_id()] = target.get_combat_status()
+            skill_cast["status"][target.get_id()] = await target.get_combat_status()
 
         if results:
             skill_cast["result"] = " ".join(results)
@@ -129,7 +129,7 @@ class MudderySkill(BaseElement):
 
         return True
 
-    def cast_message(self, caller, target):
+    async def cast_message(self, caller, target):
         """
         Create skill's result message.
         """
@@ -138,10 +138,10 @@ class MudderySkill(BaseElement):
         message = ""
 
         if caller:
-            caller_name = caller.get_name()
+            caller_name = await caller.get_name()
 
         if target:
-            target_name = target.get_name()
+            target_name = await target.get_name()
 
         if self.message_model:
             values = {"n": self.get_name(),

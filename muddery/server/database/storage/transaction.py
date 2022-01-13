@@ -1,7 +1,7 @@
 
-class Atomic(object):
+class Transaction(object):
     """
-    Guarantee the atomic execution of a given block.
+    Guarantee the transaction execution of a given block.
     """
     def __init__(self, storage):
         self.storage = storage

@@ -14,38 +14,43 @@ class CharacterEquipments(BaseData, Singleton):
     __table_name = "character_equipments"
     __category_name = "character_id"
     __key_field = "position"
-    __default_value_field = ""
+    __default_value_field = None
 
-    def get_character(self, character_id):
+    def __init__(self):
+        # data storage
+        super(CharacterEquipments, self).__init__()
+        self.storage = self.create_storage(self.__table_name, self.__category_name, self.__key_field, self.__default_value_field)
+
+    async def get_character(self, character_id):
         """
         Get a character's inventory.
         :param character_id:
         :return:
         """
-        return self.storage.load_category(character_id, {})
+        return await self.storage.load_category(character_id, {})
 
-    def get_equipment(self, character_id, position):
+    async def get_equipment(self, character_id, position):
         """
         Get an equipment's info in the inventory.
         :param character_id: (int) character's id
         :param position: (string) position on the body
         :return:
         """
-        return self.storage.load(character_id, position)
+        return await self.storage.load(character_id, position)
 
-    def add(self, character_id, position, object_key, level):
+    async def add(self, character_id, position, object_key, level):
         """
         Add a new object to the inventory.
         :param character_id:
         :param object_key:
         :return:
         """
-        self.storage.add(character_id, position, {
+        await self.storage.add(character_id, position, {
             "object_key": object_key,
             "level": level,
         })
 
-    def set(self, character_id, position, object_key, level):
+    async def set(self, character_id, position, object_key, level):
         """
         Set a object's data.
 
@@ -54,21 +59,21 @@ class CharacterEquipments(BaseData, Singleton):
         :param values:
         :return:
         """
-        self.storage.save(character_id, position, {
+        await self.storage.save(character_id, position, {
             "object_key": object_key,
             "level": level,
         })
 
-    def remove_character(self, character_id):
+    async def remove_character(self, character_id):
         """
         Remove a character's all equipments.
 
         :param character_id:
         :return:
         """
-        self.storage.delete_category(character_id)
+        await self.storage.delete_category(character_id)
 
-    def remove_equipment(self, character_id, position):
+    async def remove_equipment(self, character_id, position):
         """
         Remove an equipment.
 
@@ -76,4 +81,4 @@ class CharacterEquipments(BaseData, Singleton):
         :param position: (string) position on the body
         :return:
         """
-        self.storage.delete(character_id, position)
+        await self.storage.delete(character_id, position)

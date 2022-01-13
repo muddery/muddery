@@ -33,7 +33,7 @@ class PlayerCharacter(MudderyPlayerCharacter):
     """
     element_type = "PLAYER_CHARACTER"
 
-    def cast_skill(self, skill_key, target):
+    async def cast_skill(self, skill_key, target):
         """
         Cast a skill.
 
@@ -45,7 +45,7 @@ class PlayerCharacter(MudderyPlayerCharacter):
         skill_mp = skill_obj.get_mp()
         mp = self.states.load("mp")
         if mp < skill_mp:
-            self.msg({"msg": _("Not enough mana to cast {b%s{n!") % skill_obj.get_name()})
+            await self.msg({"msg": _("Not enough mana to cast {b%s{n!") % await skill_obj.get_name()})
             return
 
-        super(PlayerCharacter, self).cast_skill(skill_key, target)
+        await super(PlayerCharacter, self).cast_skill(skill_key, target)

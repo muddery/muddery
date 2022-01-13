@@ -24,7 +24,7 @@ class DialogueHandler(Singleton):
         self.can_close_dialogue = GameSettings.inst().get("can_close_dialogue")
         self.dialogue_storage = {}
     
-    def load_cache(self, dlg_key):
+    async def load_cache(self, dlg_key):
         """
         To reduce database accesses, add a cache.
 
@@ -40,7 +40,7 @@ class DialogueHandler(Singleton):
 
         # Add cache of the whole dialogue.
         dlg = ELEMENT("DIALOGUE")()
-        dlg.setup_element(dlg_key)
+        await dlg.setup_element(dlg_key)
         self.dialogue_storage[dlg_key] = dlg
 
 
@@ -63,7 +63,7 @@ class DialogueHandler(Singleton):
 
         return self.dialogue_storage[dlg_key]
 
-    def get_npc_dialogues(self, caller, npc):
+    async def get_npc_dialogues(self, caller, npc):
         """
         Get NPC's dialogues that can show to the caller.
 
@@ -116,7 +116,7 @@ class DialogueHandler(Singleton):
         return {
             "target": {
                 "id": npc.get_id(),
-                "name": npc.get_name(),
+                "name": await npc.get_name(),
                 "icon": getattr(npc, "icon", None),
             },
             "dialogues": dialogues,
@@ -144,7 +144,7 @@ class DialogueHandler(Singleton):
             }],
         }
 
-    def get_next_dialogues(self, dlg_key, caller, npc):
+    async def get_next_dialogues(self, dlg_key, caller, npc):
         """
         Get dialogues next to this dialogue.
 
@@ -165,7 +165,7 @@ class DialogueHandler(Singleton):
         if npc:
             target = {
                 "id": npc.get_id(),
-                "name": npc.get_name(),
+                "name": await npc.get_name(),
                 "icon": getattr(npc, "icon", None),
             }
 
@@ -194,7 +194,7 @@ class DialogueHandler(Singleton):
             "dialogues": dialogues,
         }
 
-    def get_dialogue_speaker_name(self, caller, npc, speaker_model):
+    async def get_dialogue_speaker_name(self, caller, npc, speaker_model):
         """
         Get the speaker's text.
         'p' means player.
@@ -205,9 +205,9 @@ class DialogueHandler(Singleton):
         npc_name = ""
 
         if caller:
-            caller_name = caller.get_name()
+            caller_name = await caller.get_name()
         if npc:
-            npc_name = npc.get_name()
+            npc_name = await npc.get_name()
 
         values = {"p": caller_name,
                   "n": npc_name}

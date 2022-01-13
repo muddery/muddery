@@ -23,7 +23,7 @@ class HonoursMapper(Singleton):
         self.honours = {}
         self.rankings = []
 
-    def reload(self):
+    async def reload(self):
         """
         Reload all data.
         """
@@ -147,7 +147,7 @@ class HonoursMapper(Singleton):
         else:
             return [id for id in self.rankings[-number:]]
 
-    def create_honour(self, char_id, honour):
+    async def create_honour(self, char_id, honour):
         """
         Add a new character's honour.
 
@@ -161,7 +161,7 @@ class HonoursMapper(Singleton):
                 honour=honour
             )
             self.session.add(record)
-            self.session.commit()
+
             self.honours[char_id] = {
                 "honour": honour,
                 "place": 0,
@@ -171,7 +171,7 @@ class HonoursMapper(Singleton):
         except Exception as e:
             print("Can not create character's honour: %s" % e)
 
-    def set_honour(self, char_id, honour):
+    async def set_honour(self, char_id, honour):
         """
         Set a character's honour.
         
@@ -183,18 +183,16 @@ class HonoursMapper(Singleton):
         result = self.session.execute(stmt)
         if result.rowcount > 0:
             try:
-                self.session.commit()
                 self.honours[char_id]["honour"] = honour
             except Exception as e:
-                self.session.rollback()
                 print("Can not set character's honour: %s" % e)
         else:
             # Add a new honour record.
-            self.create_honour(char_id, honour)
+            await self.create_honour(char_id, honour)
 
         self.make_rankings()
 
-    def set_honours(self, new_honours):
+    async def set_honours(self, new_honours):
         """
         Set a set of characters' honours.
         
@@ -203,14 +201,13 @@ class HonoursMapper(Singleton):
         """
         for key in new_honours:
             if key not in self.honours:
-                self.create_honour(key, 0)
+                await self.create_honour(key, 0)
 
         success = False
         with self.session.begin():
             for key, value in new_honours.items():
                 stmt = update(self.model).where(character=key).values(honour=value)
                 result = self.session.execute(stmt)
-                self.session.commit()
             success = True
         
         if success:
@@ -220,18 +217,16 @@ class HonoursMapper(Singleton):
         else:
             print("Can not set character's honours")
             
-    def remove_character(self, char_db_id):
+    async def remove_character(self, char_db_id):
         """
         Remove a character's honour.
         """
         try:
             stmt = delete(self.model).where(character=char_db_id)
-            result = self.session.execute(stmt)
-            self.session.commit()
+            self.session.execute(stmt)
             del self.honours[char_db_id]
             self.make_rankings()
         except Exception as e:
-            self.session.rollback()
             print("Can not remove character's honour: %s" % e)
 
     def get_characters(self, character, number):

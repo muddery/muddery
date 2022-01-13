@@ -36,11 +36,11 @@ class MudderyQuest(BaseElement):
 
         self.loot_handler = None
 
-    def at_element_setup(self, first_time):
+    async def at_element_setup(self, first_time):
         """
         Set data_info to the object.
         """
-        super(MudderyQuest, self).at_element_setup(first_time)
+        await super(MudderyQuest, self).at_element_setup(first_time)
 
         # initialize loot handler
         self.loot_handler = LootHandler(QuestRewardList.get(self.get_element_key()))

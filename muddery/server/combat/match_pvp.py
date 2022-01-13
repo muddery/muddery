@@ -7,6 +7,7 @@ import time
 import datetime
 import math
 from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from muddery.server.database.gamedata.honours_mapper import HonoursMapper
 from muddery.server.utils.localized_strings_handler import _
 from muddery.server.utils.defines import CombatType
@@ -42,7 +43,7 @@ class MatchPVPHandler(Singleton):
         #   }
         self.preparing = {}
 
-        self.scheduler = BackgroundScheduler()
+        self.scheduler = AsyncIOScheduler()
         self.loop = None
         self.key = "MATCH_PVP_HANDLER"
 
@@ -102,7 +103,7 @@ class MatchPVPHandler(Singleton):
             self.scheduler.add_job(self.match, "interval", seconds=self.match_interval, id=self.key)
             self.scheduler.start()
 
-    def add(self, character):
+    async def add(self, character):
         """
         Add a character to the queue.
         """
@@ -112,9 +113,9 @@ class MatchPVPHandler(Singleton):
             return
         
         self.waiting_queue.append(char_db_id)
-        character.msg({"in_combat_queue": ""})
+        await character.msg({"in_combat_queue": ""})
 
-    def remove(self, character):
+    async def remove(self, character):
         """
         Remove a character from the queue.
         """
@@ -130,9 +131,9 @@ class MatchPVPHandler(Singleton):
         except KeyError:
             pass
 
-        character.msg({"left_combat_queue": ""})
+        await character.msg({"left_combat_queue": ""})
 
-    def match(self):
+    async def match(self):
         """
         Match opponents according to character's scores.
         The longer a character in the queue, the score is higher.
@@ -160,13 +161,13 @@ class MatchPVPHandler(Singleton):
                     # can match
                     try:
                         character = Server.world.get_character(char_id_A)
-                        character.msg({"prepare_match": self.preparing_time})
+                        await character.msg({"prepare_match": self.preparing_time})
                     except KeyError:
                         pass
 
                     try:
                         character = Server.world.get_character(char_id_B)
-                        character.msg({"prepare_match": self.preparing_time})
+                        await character.msg({"prepare_match": self.preparing_time})
                     except KeyError:
                         pass
 
@@ -196,7 +197,7 @@ class MatchPVPHandler(Singleton):
         except KeyError:
             pass
 
-    def reject(self, character):
+    async def reject(self, character):
         """
         Reject an honour combat.
         """
@@ -214,7 +215,7 @@ class MatchPVPHandler(Singleton):
         del self.preparing[char_db_id]
         try:
             character = Server.world.get_character(char_db_id)
-            character.msg({"match_rejected": char_db_id})
+            await character.msg({"match_rejected": char_db_id})
         except KeyError:
             pass
 
@@ -222,13 +223,13 @@ class MatchPVPHandler(Singleton):
         del self.preparing[opponent_db_id]
         try:
             character = Server.world.get_character(opponent_db_id)
-            character.msg({"match_rejected": char_db_id})
+            await character.msg({"match_rejected": char_db_id})
         except KeyError:
             pass
 
-        self.remove(character)
+        await self.remove(character)
 
-    def fight(self, opponents_id):
+    async def fight(self, opponents_id):
         """
         Create a combat.
         """
@@ -256,7 +257,7 @@ class MatchPVPHandler(Singleton):
 
             try:
                 character = Server.world.get_character(opponents_id[0])
-                character.msg({
+                await character.msg({
                     "match_rejected": opponents_id[0],
                     "left_combat_queue": "",
                 })
@@ -265,7 +266,7 @@ class MatchPVPHandler(Singleton):
 
             try:
                 character = Server.world.get_character(opponents_id[1])
-                character.msg({
+                await character.msg({
                     "match_rejected": opponents_id[1],
                     "left_combat_queue": "",
                 })
@@ -280,7 +281,7 @@ class MatchPVPHandler(Singleton):
 
             try:
                 character = Server.world.get_character(opponents_id[0])
-                character.msg({
+                await character.msg({
                     "match_rejected": opponents_id[0],
                     "left_combat_queue": "",
                 })
@@ -295,7 +296,7 @@ class MatchPVPHandler(Singleton):
 
             try:
                 character = Server.world.get_character(opponents_id[1])
-                character.msg({
+                await character.msg({
                     "match_rejected": opponents_id[0],
                 })
             except KeyError:
@@ -309,7 +310,7 @@ class MatchPVPHandler(Singleton):
 
             try:
                 character = Server.world.get_character(opponents_id[1])
-                character.msg({
+                await character.msg({
                     "match_rejected": opponents_id[1],
                     "left_combat_queue": "",
                 })
@@ -324,7 +325,7 @@ class MatchPVPHandler(Singleton):
 
             try:
                 character = Server.world.get_character(opponents_id[0])
-                character.msg({
+                await character.msg({
                     "match_rejected": opponents_id[1],
                 })
             except KeyError:
@@ -348,5 +349,5 @@ class MatchPVPHandler(Singleton):
             remove_by_id(opponents_id[0])
             remove_by_id(opponents_id[1])
 
-            opponent0.msg({"left_combat_queue": ""})
-            opponent1.msg({"left_combat_queue": ""})
+            await opponent0.msg({"left_combat_queue": ""})
+            await opponent1.msg({"left_combat_queue": ""})

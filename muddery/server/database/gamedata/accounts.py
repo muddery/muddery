@@ -13,11 +13,16 @@ class Accounts(BaseData, Singleton):
     The storage of player accounts.
     """
     __table_name = "accounts"
-    __category_name = ""
+    __category_name = None
     __key_field = "username"
-    __default_value_field = ""
+    __default_value_field = None
 
-    def add(self, username, password, account_id, type):
+    def __init__(self):
+        # data storage
+        super(Accounts, self).__init__()
+        self.storage = self.create_storage(self.__table_name, self.__category_name, self.__key_field, self.__default_value_field)
+
+    async def add(self, username, password, salt, account_id, type):
         """
         Add a new account.
 
@@ -27,67 +32,69 @@ class Accounts(BaseData, Singleton):
         :return:
         """
         current_time = datetime.datetime.now()
-        self.storage.add("", username, {
+        await self.storage.add("", username, {
             "password": password,
+            "salt": salt,
             "account_id": account_id,
             "type": type,
             "create_time": current_time,
             "last_login": current_time,
         })
 
-    def remove(self, username):
+    async def remove(self, username):
         """
         Remove an account.
 
         :param username: account's username
         """
-        self.storage.delete("", username)
+        await self.storage.delete("", username)
 
-    def has(self, username):
+    async def has(self, username):
         """
         Check if this username exists.
 
         Args:
             username: (string) username.
         """
-        return self.storage.has("", username)
+        return await self.storage.has("", username)
 
-    def get_password(self, username):
+    async def get_password(self, username):
         """
         Get an account's password.
         :param username:
         :return:
         """
-        data = self.storage.load("", username)
-        return data["password"]
+        data = await self.storage.load("", username)
+        return data["password"], data["salt"]
 
-    def set_password(self, username, password):
+    async def set_password(self, username, password, salt):
         """
         Set a new password.
         :param username:
         :return:
         """
-        self.storage.save("", username, {
+        await self.storage.save("", username, {
             "password": password,
+            "salt": salt,
         })
 
-    def get_info(self, username):
+    async def get_info(self, username):
         """
         Get an account's information.
         :param username:
         :return:
         """
-        data = self.storage.load("", username)
+        data = await self.storage.load("", username)
         return {
             "id": data["account_id"],
             "type": data["type"],
         }
 
-    def update_login_time(self, username):
+    async def update_login_time(self, username):
         """
         Update the account's last login time.
         """
         current_time = datetime.datetime.now()
-        self.storage.save("", username, {
+        await self.storage.save("", username, {
             "last_login": current_time,
         })

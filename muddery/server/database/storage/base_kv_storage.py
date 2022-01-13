@@ -7,7 +7,7 @@ class BaseKeyValueStorage(object):
     """
     The storage of key-values.
     """
-    def add(self, category, key, value=None):
+    async def add(self, category, key, value=None):
         """
         Add a new attribute. If the key already exists, raise an exception.
 
@@ -18,7 +18,7 @@ class BaseKeyValueStorage(object):
         """
         pass
 
-    def save(self, category, key, value=None):
+    async def save(self, category, key, value=None):
         """
         Set an attribute.
 
@@ -29,7 +29,7 @@ class BaseKeyValueStorage(object):
         """
         pass
 
-    def has(self, category, key):
+    async def has(self, category, key):
         """
         Check if the attribute exists.
 
@@ -39,14 +39,14 @@ class BaseKeyValueStorage(object):
         """
         pass
 
-    def all(self):
+    async def all(self):
         """
         Get all data.
         :return:
         """
         pass
 
-    def load(self, category, key, *default):
+    async def load(self, category, key, *default):
         """
         Get the value of an attribute.
 
@@ -61,7 +61,7 @@ class BaseKeyValueStorage(object):
         """
         pass
 
-    def load_category(self, category):
+    async def load_category(self, category):
         """
         Get all a category's data.
 
@@ -70,7 +70,7 @@ class BaseKeyValueStorage(object):
         """
         pass
 
-    def delete(self, category, key):
+    async def delete(self, category, key):
         """
         delete an attribute of an object.
 
@@ -80,7 +80,7 @@ class BaseKeyValueStorage(object):
         """
         pass
 
-    def delete_category(self, category):
+    async def delete_category(self, category):
         """
         Remove all values of a category.
 
@@ -89,8 +89,8 @@ class BaseKeyValueStorage(object):
         """
         pass
 
-    def atomic(self):
+    def transaction(self):
         """
-        Guarantee the atomic execution of a given block.
+        Guarantee the transaction execution of a given block.
         """
         pass

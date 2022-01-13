@@ -34,13 +34,13 @@ class HonourCombat(BaseCombat):
         # send messages in order
         character.msg({"combat_commands": character.get_combat_commands()})
 
-    def calc_winners(self):
+    async def calc_winners(self):
         """
         Calculate combat winners and losers.
         """
         winner_team = None
         for char in self.characters.values():
-            if char["status"] == CStatus.ACTIVE and char["char"].is_alive():
+            if char["status"] == CStatus.ACTIVE and await char["char"].is_alive():
                 winner_team = char["team"]
                 break
 

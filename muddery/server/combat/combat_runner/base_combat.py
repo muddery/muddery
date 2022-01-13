@@ -153,7 +153,7 @@ class BaseCombat(object):
         # send messages in order
         character.msg({"combat_info": self.get_appearance()})
 
-    def prepare_skill(self, skill_key, caller, target_id):
+    async def prepare_skill(self, skill_key, caller, target_id):
         """
         Cast a skill.
 
@@ -171,13 +171,13 @@ class BaseCombat(object):
             target = self.characters[target_id]["char"]
 
         if caller:
-            caller.cast_skill(skill_key, target)
+            await caller.cast_skill(skill_key, target)
 
             if self.can_finish():
                 # if there is only one team left, kill this handler
                 self.finish()
 
-    def can_finish(self):
+    async def can_finish(self):
         """
         Check if can finish this combat. The combat finishes when a team's members
         are all dead.
@@ -191,7 +191,7 @@ class BaseCombat(object):
         for char in self.characters.values():
             if char["status"] == CStatus.ACTIVE:
                 character = char["char"]
-                if character.is_alive():
+                if await character.is_alive():
                     teams.add(char["team"])
                     if len(teams) > 1:
                         # More than one team has alive characters.
@@ -279,13 +279,13 @@ class BaseCombat(object):
         for char in self.characters.values():
             char["char"].combat_result(self.combat_type, defines.COMBAT_DRAW)
 
-    def calc_winners(self):
+    async def calc_winners(self):
         """
         Calculate combat winners and losers.
         """
         winner_team = None
         for char in self.characters.values():
-            if char["status"] == CStatus.ACTIVE and char["char"].is_alive():
+            if char["status"] == CStatus.ACTIVE and await char["char"].is_alive():
                 winner_team = char["team"]
                 break
 

@@ -32,11 +32,11 @@ class MudderyProfitRoom(ELEMENT("ROOM")):
         self.last_trigger_time = {}
         self.loot_handler = None
 
-    def at_element_setup(self, first_time):
+    async def at_element_setup(self, first_time):
         """
         Set data_info to the object.
         """
-        super(MudderyProfitRoom, self).at_element_setup(first_time)
+        await super(MudderyProfitRoom, self).at_element_setup(first_time)
 
         # initialize loot handler
         self.loot_handler = LootHandler(RoomProfitList.get(self.get_element_key()))

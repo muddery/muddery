@@ -2,7 +2,6 @@
 Actions are used to do somethings.
 """
 
-from django.core.exceptions import ObjectDoesNotExist
 from muddery.server.statements.statement_function import StatementFunction
 from muddery.server.server import Server
 
@@ -186,7 +185,7 @@ class FuncFightTarget(StatementFunction):
     key = "fight_target"
     const = False
 
-    def func(self):
+    async def func(self):
         """
         Implement the function.
         """
@@ -197,4 +196,4 @@ class FuncFightTarget(StatementFunction):
         if self.args:
             desc = self.args[0]
 
-        return self.caller.attack_temp_target(self.obj.get_element_key(), self.obj.get_level(), desc)
+        return self.caller.attack_temp_target(self.obj.get_element_key(), await self.obj.get_level(), desc)

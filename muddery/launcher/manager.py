@@ -2,7 +2,6 @@
 import os
 import traceback
 from muddery.launcher import configs, utils
-from muddery.server.database.db_manager import DBManager
 
 
 def print_help():
@@ -63,10 +62,21 @@ def load_game_data():
     print("Importing local data.")
 
     gamedir = os.path.abspath(configs.CURRENT_DIR)
-    utils.init_game_env(gamedir)
+
+    try:
+        utils.init_game_env(gamedir)
+    except Exception as e:
+        traceback.print_exc()
+        raise
 
     # create tables first
-    DBManager.inst().create_tables()
+    try:
+        from muddery.server.database.db_manager import DBManager
+        DBManager.inst().connect()
+        DBManager.inst().create_tables()
+    except Exception as e:
+        traceback.print_exc()
+        raise
 
     # load local data
     try:

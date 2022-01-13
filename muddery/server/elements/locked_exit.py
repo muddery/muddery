@@ -21,7 +21,7 @@ class MudderyLockedExit(ELEMENT("EXIT")):
     element_name = "Locked Exit"
     model_name = "exit_locks"
 
-    def can_traverse(self, character):
+    async def can_traverse(self, character):
         """
         Called just before an object uses this object to traverse to
         another object (i.e. this object is a type of Exit)
@@ -44,7 +44,7 @@ class MudderyLockedExit(ELEMENT("EXIT")):
             return True
 
         # Only can pass exits which have already been unlocked.
-        if character.is_exit_unlocked(self.get_element_key()):
+        if await character.is_exit_unlocked(self.get_element_key()):
             if not self.const.unlock_forever:
                 # lock the exit again
                 character.lock_exit(self.get_element_key())
@@ -69,25 +69,25 @@ class MudderyLockedExit(ELEMENT("EXIT")):
         # Only can unlock exits which match there conditions.
         return STATEMENT_HANDLER.match_condition(self.const.unlock_condition, caller, self)
 
-    def get_desc(self, caller):
+    async def get_desc(self, caller):
         """
         Get the exit's description.
         :param caller:
         :return:
         """
         # Get name and description.
-        if caller.is_exit_unlocked(self.get_element_key()):
+        if await caller.is_exit_unlocked(self.get_element_key()):
             # If is unlocked, use common appearance.
             return self.const.unlocked_desc
         else:
             return self.const.locked_desc
 
-    def get_available_commands(self, caller):
+    async def get_available_commands(self, caller):
         """
         This returns a list of available commands.
         "args" must be a string without ' and ", usually it is self.id.
         """
-        if caller.is_exit_unlocked(self.get_element_key()):
+        if await caller.is_exit_unlocked(self.get_element_key()):
             # If is unlocked, use common commands.
             return super(MudderyLockedExit, self).get_available_commands(caller)
         elif not self.can_unlock(caller):

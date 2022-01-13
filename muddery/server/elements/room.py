@@ -54,11 +54,11 @@ class MudderyRoom(BaseElement):
         # }
         self.all_characters = {}
 
-    def at_element_setup(self, first_time):
+    async def at_element_setup(self, first_time):
         """
         Set data_info to the object.
         """
-        super(MudderyRoom, self).at_element_setup(first_time)
+        await super(MudderyRoom, self).at_element_setup(first_time)
 
         self.set_name(self.const.name)
         self.set_desc(self.const.desc)
@@ -97,15 +97,15 @@ class MudderyRoom(BaseElement):
                 logger.log_trace("Load background %s error: %s" % (resource, e))
 
         # load exits
-        self.load_exits()
+        await self.load_exits()
 
         # load objects
-        self.load_objects()
+        await self.load_objects()
 
         # load npcs
-        self.load_npcs()
+        await self.load_npcs()
 
-    def load_npcs(self):
+    async def load_npcs(self):
         """
         Load NPCs in this room.
 
@@ -119,13 +119,13 @@ class MudderyRoom(BaseElement):
             tables_data = tables_data[0]
 
             new_obj = ELEMENT(tables_data.element_type)()
-            new_obj.setup_element(tables_data.key, level=tables_data.level, first_time=True)
+            await new_obj.setup_element(tables_data.key, level=tables_data.level, first_time=True)
 
             # Set the character's location.
             new_obj.set_location(self)
             self.all_characters[new_obj.get_id()] = new_obj
 
-    def load_exits(self):
+    async def load_exits(self):
         """
         Load exits in this room.
 
@@ -139,7 +139,7 @@ class MudderyRoom(BaseElement):
             tables_data = tables_data[0]
 
             new_obj = ELEMENT(tables_data.element_type)()
-            new_obj.setup_element(tables_data.key)
+            await new_obj.setup_element(tables_data.key)
 
             self.all_exits[record.key] = {
                 "destination": tables_data.destination,
@@ -148,7 +148,7 @@ class MudderyRoom(BaseElement):
                 "obj": new_obj,
             }
 
-    def load_objects(self):
+    async def load_objects(self):
         """
         Load objects in this room.
 
@@ -162,7 +162,7 @@ class MudderyRoom(BaseElement):
             tables_data = tables_data[0]
 
             new_obj = ELEMENT(tables_data.element_type)()
-            new_obj.setup_element(record.key)
+            await new_obj.setup_element(record.key)
 
             self.all_objects[record.key] = {
                 "condition": tables_data.condition,
@@ -221,7 +221,7 @@ class MudderyRoom(BaseElement):
         exit_obj = self.all_exits[exit_key]["obj"]
         return exit_obj.get_appearance(caller)
 
-    def msg_characters(self, msg, exclude=None):
+    async def msg_characters(self, msg, exclude=None):
         """
         Send a message to all characters in the room.
         :param msg:
@@ -234,9 +234,9 @@ class MudderyRoom(BaseElement):
             chars = self.all_characters.values()
 
         for char in chars:
-            char.msg(msg)
+            await char.msg(msg)
 
-    def at_character_arrive(self, character):
+    async def at_character_arrive(self, character):
         """
         Called after an object has been moved into this object.
 
@@ -254,11 +254,11 @@ class MudderyRoom(BaseElement):
                 change = {
                     "type": "players" if character.is_player() else "npcs",
                     "id": character.get_id(),
-                    "name": character.get_name()
+                    "name": await character.get_name()
                 }
-                self.msg_characters({"obj_moved_in": change}, {character.get_id()})
+                await self.msg_characters({"obj_moved_in": change}, {character.get_id()})
 
-    def at_character_leave(self, character):
+    async def at_character_leave(self, character):
         """
         Called when a character leave this room.
 
@@ -278,9 +278,9 @@ class MudderyRoom(BaseElement):
                 change = {
                     "type": "players" if character.is_player() else "npcs",
                     "id": character.get_id(),
-                    "name": character.get_name()
+                    "name": await character.get_name()
                 }
-                self.msg_characters({"obj_moved_out": change}, {character.get_id()})
+                await self.msg_characters({"obj_moved_out": change}, {character.get_id()})
 
     def set_name(self, name):
         """
@@ -389,7 +389,7 @@ class MudderyRoom(BaseElement):
         """
         return [EventType.EVENT_TRIGGER_ARRIVE]
 
-    def get_message(self, caller, message):
+    async def get_message(self, caller, message):
         """
         Receive a message from a character.
 
@@ -400,11 +400,11 @@ class MudderyRoom(BaseElement):
             "type": ConversationType.LOCAL.value,
             "channel": self.get_name(),
             "from_id": caller.get_id(),
-            "from_name": caller.get_name(),
+            "from_name": await caller.get_name(),
             "msg": message
         }
 
         if GameSettings.inst().get("solo_mode"):
-            caller.msg({"conversation": output})
+            await caller.msg({"conversation": output})
         else:
-            self.msg_characters({"conversation": output})
+            await self.msg_characters({"conversation": output})
