@@ -10,7 +10,9 @@ from muddery.server.utils.utils import class_from_path
 
 #re_words = re.compile(r'([a-zA-Z_][a-zA-Z0-9_]*)|("(.*)")')
 re_function = re.compile(r'[a-zA-Z_][a-zA-Z0-9_\.]*\(.*?\)')
-def exec_condition(func_set, condition, caller, obj, **kwargs):
+
+
+async def exec_condition(func_set, condition, caller, obj, **kwargs):
     """
     Execute the statements.
 
@@ -23,18 +25,29 @@ def exec_condition(func_set, condition, caller, obj, **kwargs):
     Returns:
         result
     """
-    func = get_condition_func(func_set, caller, obj, **kwargs)
+    values = {}
+    matches = re_function.findall(condition)
+    for match in matches:
+        try:
+            result = await exec_function(func_set, match, caller, obj, **kwargs)
+            if result:
+                value = "True"
+            else:
+                value = "False"
+        except Exception as e:
+            logger.log_err("Exec function error: %s %s" % (match, repr(e)))
+            traceback.print_exc()
+            value = "None"
+
+        values[match] = value
+
+    func = get_condition_func(values)
     return re_function.sub(func, condition)
 
 
-def get_condition_func(func_set, caller, obj, **kwargs):
+def get_condition_func(values):
     """
     Get a function used in re's sub.
-
-    Args:
-        func_set: (object) condition function set
-        caller: (object) statement's caller
-        obj: (object) caller's target
 
     Returns:
         function
@@ -51,21 +64,15 @@ def get_condition_func(func_set, caller, obj, **kwargs):
         """
         func_word = word.group()
 
-        try:
-            result = exec_function(func_set, func_word, caller, obj, **kwargs)
-            if result:
-                return "True"
-            else:
-                return "False"
-        except Exception as e:
-            logger.log_err("Exec function error: %s %s" % (function, repr(e)))
-            traceback.print_exc()
+        if func_word in values:
+            return values[func_word]
+        else:
             return "None"
 
     return function
 
 
-def exec_function(func_set, func_word, caller, obj, **kwargs):
+async def exec_function(func_set, func_word, caller, obj, **kwargs):
     """
     Do function.
 
@@ -97,7 +104,7 @@ def exec_function(func_set, func_word, caller, obj, **kwargs):
 
     func_obj = func_class()
     func_obj.set(caller, obj, func_args, **kwargs)
-    return func_obj.func()
+    return await func_obj.func()
 
 
 class StatementHandler(object):
@@ -118,7 +125,7 @@ class StatementHandler(object):
         skill_func_set_class = class_from_path(settings.SKILL_FUNC_SET)
         self.skill_func_set = skill_func_set_class()
 
-    def do_action(self, action, caller, obj, **kwargs):
+    async def do_action(self, action, caller, obj, **kwargs):
         """
         Do a function.
 
@@ -137,14 +144,14 @@ class StatementHandler(object):
         functions = action.split(";")
         for function in functions:
             try:
-                exec_function(self.action_func_set, function, caller, obj, **kwargs)
+                await exec_function(self.action_func_set, function, caller, obj, **kwargs)
             except Exception as e:
                 logger.log_err("Exec function error: %s %s" % (function, repr(e)))
                 traceback.print_exc()
 
         return
 
-    def do_skill(self, action, caller, obj, **kwargs):
+    async def do_skill(self, action, caller, obj, **kwargs):
         """
         Do a function.
 
@@ -164,7 +171,7 @@ class StatementHandler(object):
         results = []
         for function in functions:
             try:
-                result = exec_function(self.skill_func_set, function, caller, obj, **kwargs)
+                result = await exec_function(self.skill_func_set, function, caller, obj, **kwargs)
                 if result:
                     results.append(result)
             except Exception as e:
@@ -173,7 +180,7 @@ class StatementHandler(object):
 
         return results
 
-    def match_condition(self, condition, caller, obj, **kwargs):
+    async def match_condition(self, condition, caller, obj, **kwargs):
         """
         Check a condition.
 
@@ -189,7 +196,7 @@ class StatementHandler(object):
             return True
 
         # calculate functions first
-        exec_string = exec_condition(self.condition_func_set, condition, caller, obj, **kwargs)
+        exec_string = await exec_condition(self.condition_func_set, condition, caller, obj, **kwargs)
 
         try:
             # do condition

@@ -6,7 +6,7 @@ Rooms are simple containers that has no location of their own.
 """
 
 import time
-from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from muddery.server.utils.loot_handler import LootHandler
 from muddery.server.database.worlddata.loot_list import RoomProfitList
 from muddery.server.statements.statement_handler import STATEMENT_HANDLER
@@ -28,7 +28,7 @@ class MudderyProfitRoom(ELEMENT("ROOM")):
         """
         super(MudderyProfitRoom, self).__init__()
 
-        self.scheduler = BackgroundScheduler()
+        self.scheduler = AsyncIOScheduler()
         self.last_trigger_time = {}
         self.loot_handler = None
 
@@ -46,7 +46,7 @@ class MudderyProfitRoom(ELEMENT("ROOM")):
             self.scheduler.add_job(self.put_profits, "interval", seconds=1, id=self.get_element_key())
             self.scheduler.start()
 
-    def at_character_arrive(self, character):
+    async def at_character_arrive(self, character):
         """
         Called after an object has been moved into this object.
 
@@ -54,16 +54,16 @@ class MudderyProfitRoom(ELEMENT("ROOM")):
         character (Object): The character moved into this one
 
         """
-        super(MudderyProfitRoom, self).at_character_arrive(character)
+        await super(MudderyProfitRoom, self).at_character_arrive(character)
 
         if character.is_player():
-            if STATEMENT_HANDLER.match_condition(self.const.condition, character, None):
+            if await STATEMENT_HANDLER.match_condition(self.const.condition, character, None):
                 self.last_trigger_time[character.get_id()] = time.time()
 
                 if self.const.begin_message:
-                    character.msg({"msg": self.const.begin_message})
+                    await character.msg({"msg": self.const.begin_message})
 
-    def at_character_leave(self, character):
+    async def at_character_leave(self, character):
         """
         Called when a character leave this room.
 
@@ -75,9 +75,9 @@ class MudderyProfitRoom(ELEMENT("ROOM")):
             del self.last_trigger_time[char_id]
 
             if self.const.end_message:
-                character.msg({"msg": self.const.end_message})
+                await character.msg({"msg": self.const.end_message})
 
-    def put_profits(self):
+    async def put_profits(self):
         """
         Set profits to all characters in this room.
 
@@ -87,13 +87,13 @@ class MudderyProfitRoom(ELEMENT("ROOM")):
         for char_id, last_time in self.last_trigger_time.items():
             if current_time - last_time >= self.const.interval:
                 char = self.all_characters[char_id]
-                obj_list = self.loot_handler.get_obj_list(char)
+                obj_list = await self.loot_handler.get_obj_list(char)
                 self.last_trigger_time[char_id] = current_time
 
                 if not obj_list:
                     continue
 
-                get_objects = char.receive_objects(obj_list, mute=True)
+                get_objects = await char.receive_objects(obj_list, mute=True)
                 if not get_objects:
                     continue
 

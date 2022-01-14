@@ -38,7 +38,7 @@ class LootHandler(object):
 
         self.loot_list = loot_list
 
-    def get_obj_list(self, looter, times=1):
+    async def get_obj_list(self, looter, times=1):
         """
         Get loot objects list.
 
@@ -48,8 +48,8 @@ class LootHandler(object):
         """
         # get available loot list
         available_list = [item for item in self.loot_list
-            if (not item["quest"] or looter.quest_handler.is_not_accomplished(item["quest"]))
-                and STATEMENT_HANDLER.match_condition(item["condition"], looter, None)]
+            if (not item["quest"] or await looter.quest_handler.is_not_accomplished(item["quest"]))
+                and await STATEMENT_HANDLER.match_condition(item["condition"], looter, None)]
 
         # get object list
         objects_dict = {}

@@ -20,7 +20,7 @@ class HonourCombat(BaseCombat):
             character = char["char"]
             character.stop_auto_combat_skill()
 
-    def show_combat(self, character):
+    async def show_combat(self, character):
         """
         Show combat information to a character.
         Args:
@@ -29,10 +29,10 @@ class HonourCombat(BaseCombat):
         Returns:
             None
         """
-        super(HonourCombat, self).show_combat(character)
+        await super(HonourCombat, self).show_combat(character)
 
         # send messages in order
-        character.msg({"combat_commands": character.get_combat_commands()})
+        await character.msg({"combat_commands": character.get_combat_commands()})
 
     async def calc_winners(self):
         """
@@ -52,7 +52,7 @@ class HonourCombat(BaseCombat):
 
         return winners, losers
 
-    def calc_combat_rewards(self, winners, losers):
+    async def calc_combat_rewards(self, winners, losers):
         """
         Called when the character wins the combat.
 
@@ -63,13 +63,13 @@ class HonourCombat(BaseCombat):
         Returns:
             None
         """
-        rewards = super(HonourCombat, self).calc_combat_rewards(winners, losers)
+        rewards = await super(HonourCombat, self).calc_combat_rewards(winners, losers)
 
         # set honour
         winners_db_id = [char.get_db_id() for char in winners.values()]
         losers_db_id = [char.get_db_id() for char in losers.values()]
 
-        honour_changes = HONOURS_HANDLER.set_honours(winners_db_id, losers_db_id)
+        honour_changes = await HONOURS_HANDLER.set_honours(winners_db_id, losers_db_id)
         for char_id in self.characters:
             if char_id not in rewards:
                 rewards[char_id] = {}

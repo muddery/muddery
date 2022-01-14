@@ -6,7 +6,6 @@ from collections import deque
 import time
 import datetime
 import math
-from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from muddery.server.database.gamedata.honours_mapper import HonoursMapper
 from muddery.server.utils.localized_strings_handler import _
@@ -339,7 +338,7 @@ class MatchPVPHandler(Singleton):
             opponent1 = Server.world.get_character(opponents_id[1])
 
             # create a new combat
-            COMBAT_HANDLER.create_combat(
+            await COMBAT_HANDLER.create_combat(
                 combat_type=CombatType.HONOUR,
                 teams={1:[opponent0], 2:[opponent1]},
                 desc=_("Fight of Honour"),

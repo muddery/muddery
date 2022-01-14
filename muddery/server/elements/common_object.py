@@ -35,7 +35,7 @@ class MudderyCommonObject(BaseElement):
         """
         return self.const.icon
 
-    def get_appearance(self, caller):
+    async def get_appearance(self, caller):
         """
         This is a convenient hook for a 'look'
         command to call.
@@ -46,11 +46,11 @@ class MudderyCommonObject(BaseElement):
             "desc": self.get_desc(),
             "icon": self.get_icon(),
             "key": self.get_element_key(),
-            "cmds": self.get_available_commands(caller),
+            "cmds": await self.get_available_commands(caller),
         }
         return info
 
-    def get_available_commands(self, caller):
+    async def get_available_commands(self, caller):
         """
         This returns a list of available commands.
         "args" must be a string without ' and ", usually it is self.id.

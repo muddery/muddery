@@ -12,12 +12,12 @@ class InProgress(BaseQuestStatus):
     key = "IN_PROGRESS"
     name = "Quest In Progress"
 
-    def match(self, caller, quest_key):
+    async def match(self, caller, quest_key):
         """
         Check.
         """
         if not caller:
             return False
 
-        return caller.quest_handler.is_in_progress(quest_key)
+        return await caller.quest_handler.is_in_progress(quest_key)
     

@@ -53,7 +53,7 @@ class MudderySkill(BaseElement):
         message_model = self.const.message
         self.message_model = self.msg_escape.sub(self.escape_fun, message_model)
 
-    def get_available_commands(self, caller):
+    async def get_available_commands(self, caller):
         """
         This returns a list of available commands.
 
@@ -82,7 +82,7 @@ class MudderySkill(BaseElement):
         case_message = await self.cast_message(caller, target)
 
         # traceback.print_stack()
-        results = self.do_skill(caller, target)
+        results = await self.do_skill(caller, target)
 
         # set message
         skill_cast = {
@@ -107,14 +107,14 @@ class MudderySkill(BaseElement):
 
         return skill_cast
         
-    def do_skill(self, caller, target):
+    async def do_skill(self, caller, target):
         """
         Do this skill.
         """
         # call skill function
-        return STATEMENT_HANDLER.do_skill(self.function, caller, target)
+        return await STATEMENT_HANDLER.do_skill(self.function, caller, target)
 
-    def is_available(self, caller, passive):
+    async def is_available(self, caller, passive):
         """
         If this skill is available.
 
@@ -189,7 +189,7 @@ class MudderySkill(BaseElement):
         """
         return self.const.icon
 
-    def get_appearance(self, caller):
+    async def get_appearance(self, caller):
         """
         This is a convenient hook for a 'look'
         command to call.
@@ -198,7 +198,7 @@ class MudderySkill(BaseElement):
             "key": self.const.key,
             "name": self.get_name(),
             "desc": self.get_desc(),
-            "cmds": self.get_available_commands(caller),
+            "cmds": await self.get_available_commands(caller),
             "icon": self.get_icon(),
             "passive": self.is_passive(),
             "cd": self.get_cd(),

@@ -16,7 +16,7 @@ class ActionDialogue(BaseEventAction):
     model_name = "action_dialogue"
     repeatedly = False
 
-    def func(self, event_key, character, obj):
+    async def func(self, event_key, character, obj):
         """
         Start a dialogue.
 
@@ -36,7 +36,7 @@ class ActionDialogue(BaseEventAction):
         for record in records:
             if rand <= record.odds:
                 # Make dialogue.
-                character.show_dialogue(record.dialogue)
+                await character.show_dialogue(record.dialogue)
                 return
 
             rand -= record.odds

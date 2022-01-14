@@ -39,7 +39,7 @@ class StatementFunction(object):
         self.args = args
         self.kwargs = kwargs
 
-    def func(self):
+    async def func(self):
         """
         Implement the function.
         """

@@ -3,6 +3,8 @@ This model translates default strings into localized strings.
 """
 
 import importlib
+import traceback
+
 from muddery.server.conf import settings
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 from sqlalchemy import select, update, delete
@@ -20,10 +22,17 @@ class HonoursMapper(Singleton):
         module = importlib.import_module(settings.GAME_DATA_MODEL_FILE)
         self.model = getattr(module, self.model_name)
         self.session = DBManager.inst().get_session(settings.GAME_DATA_APP)
+
         self.honours = {}
         self.rankings = []
 
-    async def reload(self):
+    async def init(self):
+        """
+        Init async processes.
+        """
+        await self.load()
+
+    async def load(self):
         """
         Reload all data.
         """
@@ -179,7 +188,7 @@ class HonoursMapper(Singleton):
             char_id: character's id
             honour: character's honour
         """
-        stmt = update(self.model).where(character=char_id).values(honour=honour)
+        stmt = update(self.model).where(getattr(self.model, "character") == char_id).values(honour=honour)
         result = self.session.execute(stmt)
         if result.rowcount > 0:
             try:
@@ -206,7 +215,7 @@ class HonoursMapper(Singleton):
         success = False
         with self.session.begin():
             for key, value in new_honours.items():
-                stmt = update(self.model).where(character=key).values(honour=value)
+                stmt = update(self.model).where(getattr(self.model, "character") == key).values(honour=value)
                 result = self.session.execute(stmt)
             success = True
         
@@ -222,11 +231,15 @@ class HonoursMapper(Singleton):
         Remove a character's honour.
         """
         try:
-            stmt = delete(self.model).where(character=char_db_id)
+            stmt = delete(self.model).where(getattr(self.model, "character") == char_db_id)
             self.session.execute(stmt)
-            del self.honours[char_db_id]
+
+            if char_db_id in self.honours:
+                del self.honours[char_db_id]
+
             self.make_rankings()
         except Exception as e:
+            traceback.print_exc()
             print("Can not remove character's honour: %s" % e)
 
     def get_characters(self, character, number):

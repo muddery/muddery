@@ -66,7 +66,7 @@ class EventTrigger(object):
         """
         return [(key.value, "%s (%s)" % (value["name"], key.value)) for key, value in cls.triggers.items()]
 
-    def trigger(self, event_type, obj_key="", obj=None):
+    async def trigger(self, event_type, obj_key="", obj=None):
         """
         Trigger an event.
 
@@ -87,8 +87,8 @@ class EventTrigger(object):
             return False
 
         # Get available events.
-        candidates = [e for e in events if not self.owner.is_event_closed(e.key) and
-                      STATEMENT_HANDLER.match_condition(e.condition, self.owner, obj)]
+        candidates = [e for e in events if not await self.owner.is_event_closed(e.key) and
+                      await STATEMENT_HANDLER.match_condition(e.condition, self.owner, obj)]
 
         triggered = False
         rand = random.random()
@@ -97,14 +97,14 @@ class EventTrigger(object):
                 if rand < event.odds:
                     func = EVENT_ACTION_SET.func(event.action)
                     if func:
-                        func(event.key, self.owner, obj)
+                        await func(event.key, self.owner, obj)
                     triggered = True
                 rand = random.random()
             else:
                 if rand < event.odds:
                     func = EVENT_ACTION_SET.func(event.action)
                     if func:
-                        func(event.key, self.owner, obj)
+                        await func(event.key, self.owner, obj)
                     triggered = True
                     break
                 rand -= event.odds
@@ -116,11 +116,11 @@ class EventTrigger(object):
     # Event triggers
     #
     #########################
-    def at_character_move_in(self, location):
+    async def at_character_move_in(self, location):
         """
         Called when a character moves in the event handler's owner, usually a room.
         """
-        self.trigger(EventType.EVENT_TRIGGER_ARRIVE, location.get_element_key(), location)
+        await self.trigger(EventType.EVENT_TRIGGER_ARRIVE, location.get_element_key(), location)
 
     def at_character_move_out(self, location):
         """
@@ -134,22 +134,22 @@ class EventTrigger(object):
                 script.stop()
         """
 
-    def at_character_die(self):
+    async def at_character_die(self):
         """
         Called when a character is killed.
         """
-        self.trigger(EventType.EVENT_TRIGGER_DIE)
+        await self.trigger(EventType.EVENT_TRIGGER_DIE)
 
-    def at_character_kill(self, opponent):
+    async def at_character_kill(self, opponent):
         """
         Called when a character kills another one.
         """
         # If has kill event.
-        self.trigger(EventType.EVENT_TRIGGER_KILL, opponent.get_element_key(), opponent)
+        await self.trigger(EventType.EVENT_TRIGGER_KILL, opponent.get_element_key(), opponent)
 
-    def at_dialogue(self, dlg_key):
+    async def at_dialogue(self, dlg_key):
         """
         Called when a character finishes a dialogue.
         """
-        triggered = self.trigger(EventType.EVENT_TRIGGER_DIALOGUE, dlg_key)
+        triggered = await self.trigger(EventType.EVENT_TRIGGER_DIALOGUE, dlg_key)
         return not triggered

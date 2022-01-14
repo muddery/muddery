@@ -37,7 +37,7 @@ class BaseEventAction(object):
         cls.__model__ = DBManager.inst().get_model(settings.WORLD_DATA_APP, cls.model_name)
         return cls.__model__
 
-    def func(self, event_key, character, obj):
+    async def func(self, event_key, character, obj):
         """
         Event action's function.
 

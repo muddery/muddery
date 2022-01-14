@@ -9,7 +9,7 @@ creation commands.
 """
 
 import time, datetime, traceback, ast
-from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from muddery.server.conf import settings
 from muddery.server.utils.logger import logger
 from muddery.server.elements.base_element import BaseElement
@@ -102,7 +102,7 @@ class MudderyCharacter(BaseElement):
     def get_scheduler(self):
         # get the apscheduler
         if not self.scheduler:
-            self.scheduler = BackgroundScheduler()
+            self.scheduler = AsyncIOScheduler()
             self.scheduler.start()
         return self.scheduler
 
@@ -283,11 +283,11 @@ class MudderyCharacter(BaseElement):
             "desc": self.get_desc(),
             "icon": self.get_icon(),
             "key": self.get_element_key(),
-            "cmds": self.get_available_commands(caller),
+            "cmds": await self.get_available_commands(caller),
         }
         return info
 
-    def get_available_commands(self, caller):
+    async def get_available_commands(self, caller):
         """
         This returns a list of available commands.
         "args" must be a string without ' and ", usually it is self.id.
@@ -343,14 +343,14 @@ class MudderyCharacter(BaseElement):
         """
         self.location = location
 
-    def move_to(self, location):
+    async def move_to(self, location):
         """
         The character moves from a room to another.
         :param location: a room
         :return:
         """
         if self.location:
-            self.location.at_character_leave(self)
+            await self.location.at_character_leave(self)
 
         self.set_location(location)
 
@@ -364,7 +364,7 @@ class MudderyCharacter(BaseElement):
         """
         return self.location
 
-    def msg(self, content):
+    async def msg(self, content):
         """
         Send a message to the character's player if it has.
         :param content:
@@ -385,7 +385,7 @@ class MudderyCharacter(BaseElement):
         """
         return self.skills
 
-    def get_available_skills(self):
+    async def get_available_skills(self):
         """
         Get current available skills of a character.
         :param caller:
@@ -396,7 +396,7 @@ class MudderyCharacter(BaseElement):
             return
 
         skills = [skill["obj"] for skill in self.skills.values() if time_now >= skill["cd_finish"] and
-                  skill["obj"].is_available(self, passive=False)]
+                  await skill["obj"].is_available(self, passive=False)]
         return skills
 
     def get_skill(self, key):
@@ -422,7 +422,7 @@ class MudderyCharacter(BaseElement):
         skill_info = self.skills[skill_key]
         skill_obj = skill_info["obj"]
 
-        if not skill_obj.is_available(self, False):
+        if not await skill_obj.is_available(self, False):
             return
 
         time_now = time.time()
@@ -430,7 +430,7 @@ class MudderyCharacter(BaseElement):
             # In cd.
             return
 
-        cast_result = skill_obj.cast(self, target)
+        cast_result = await skill_obj.cast(self, target)
 
         if self.skill_gcd > 0:
             # set GCD
@@ -451,18 +451,18 @@ class MudderyCharacter(BaseElement):
             "skill_cast": cast_result
         }
 
-        self.msg(skill_cd)
+        await self.msg(skill_cd)
 
         # send skill result to the player's location
-        combat = self.get_combat()
+        combat = await self.get_combat()
         if combat:
-            combat.msg_all(skill_result)
+            await combat.msg_all(skill_result)
         else:
             if self.location:
                 # send skill result to its location
-                self.location.msg_characters(skill_result)
+                await self.location.msg_characters(skill_result)
             else:
-                self.msg(skill_result)
+                await self.msg(skill_result)
 
         return
 
@@ -470,7 +470,7 @@ class MudderyCharacter(BaseElement):
         """
         Cast a skill in combat.
         """
-        combat = self.get_combat()
+        combat = await self.get_combat()
         if combat:
             await combat.prepare_skill(skill_key, self, target_id)
         else:
@@ -489,7 +489,7 @@ class MudderyCharacter(BaseElement):
             return
 
         # Choose a skill and the skill's target.
-        result = self.ai_choose_skill.choose(self)
+        result = await self.ai_choose_skill.choose(self)
         if result:
             skill, target = result
             await self.cast_combat_skill(skill, target)
@@ -584,15 +584,16 @@ class MudderyCharacter(BaseElement):
 
         # create a new combat handler
         try:
-            COMBAT_HANDLER.create_combat(
+            await COMBAT_HANDLER.create_combat(
                 combat_type=CombatType.NORMAL,
                 teams={1: [target], 2: [self]},
                 desc=desc,
                 timeout=0
             )
         except Exception as e:
+            traceback.print_exc()
             logger.log_err("Can not create combat: [%s] %s" % (type(e).__name__, e))
-            self.msg(_("You can not attack %s.") % await target.get_name())
+            await self.msg({"alert": _("You can not attack %s.") % await target.get_name()})
 
         return True
 
@@ -620,9 +621,9 @@ class MudderyCharacter(BaseElement):
             logger.log_err("Can not create the target %s." % target_key)
             return False
 
-        return self.attack_target(target, desc)
+        return await self.attack_target(target, desc)
 
-    def join_combat(self, combat_id):
+    async def join_combat(self, combat_id):
         """
         The character joins a combat.
 
@@ -640,7 +641,7 @@ class MudderyCharacter(BaseElement):
         """
         return self.combat_id is not None
 
-    def get_combat(self):
+    async def get_combat(self):
         """
         Get the character's combat. If the character is not in combat, return None.
         :return:
@@ -655,7 +656,7 @@ class MudderyCharacter(BaseElement):
 
         return combat
 
-    def combat_result(self, combat_type, result, opponents=None, rewards=None):
+    async def combat_result(self, combat_type, result, opponents=None, rewards=None):
         """
         Set the combat result.
 
@@ -666,7 +667,7 @@ class MudderyCharacter(BaseElement):
         """
         pass
 
-    def remove_from_combat(self):
+    async def remove_from_combat(self):
         """
         Leave the current combat.
         """
@@ -697,7 +698,7 @@ class MudderyCharacter(BaseElement):
         """
         return False
 
-    def die(self, killers):
+    async def die(self, killers):
         """
         This character die.
 
@@ -713,23 +714,23 @@ class MudderyCharacter(BaseElement):
             scheduler = self.get_scheduler()
             scheduler.add_job(self.reborn, "date", run_date=reborn_time, id=self.reborn_scheduler_id)
 
-    def reborn(self):
+    async def reborn(self):
         """
         Reborn after being killed.
         """
         # Recover properties.
-        self.recover()
+        await self.recover()
 
         # Reborn at its default location.
         location_key = self.const.location
         if location_key:
             try:
                 home = Server.world.get_room(location_key)
-                self.move_to(home)
+                await self.move_to(home)
             except KeyError:
                 pass
 
-    def recover(self):
+    async def recover(self):
         """
         Recover properties.
         """
@@ -769,7 +770,7 @@ class MudderyCharacter(BaseElement):
         """
         return 0
 
-    def add_exp(self, exp):
+    async def add_exp(self, exp):
         """
         Add character's exp.
         Args:
@@ -786,7 +787,7 @@ class MudderyCharacter(BaseElement):
         """
         pass
 
-    def validate_property(self, key, value):
+    async def validate_property(self, key, value):
         """
         Check a property's value limit, return a validated value.
 
@@ -800,8 +801,8 @@ class MudderyCharacter(BaseElement):
         # check limits
         max_value = None
         max_key = "max_" + key
-        if self.states.has(max_key):
-            max_value = self.states.load(max_key)
+        if await self.states.has(max_key):
+            max_value = await self.states.load(max_key)
         elif self.const_data_handler.has(max_key):
             max_value = self.const_data_handler.get(max_key)
 
@@ -811,8 +812,8 @@ class MudderyCharacter(BaseElement):
 
         min_value = 0
         min_key = "min_" + key
-        if self.states.has(min_key):
-            min_value = self.states.load(min_key)
+        if await self.states.has(min_key):
+            min_value = await self.states.load(min_key)
         elif self.const_data_handler.has(min_key):
             min_value = self.const_data_handler.get(min_key)
 
@@ -821,7 +822,7 @@ class MudderyCharacter(BaseElement):
 
         return value
 
-    def change_state(self, key, increment):
+    async def change_state(self, key, increment):
         """
         Change a state's value with validation.
         :return:
@@ -829,16 +830,16 @@ class MudderyCharacter(BaseElement):
         """
         change = 0
 
-        if self.states.has(key):
-            current_value = self.states.load(key)
-            new_value = self.validate_property(key, current_value + increment)
+        if await self.states.has(key):
+            current_value = await self.states.load(key)
+            new_value = await self.validate_property(key, current_value + increment)
             if new_value != current_value:
                 change = new_value - current_value
-                self.states.save(key, new_value)
+                await self.states.save(key, new_value)
 
         return change
 
-    def change_states(self, increments):
+    async def change_states(self, increments):
         """
         Change a dict of states with validation.
 
@@ -851,19 +852,19 @@ class MudderyCharacter(BaseElement):
         for key, increment in increments.items():
             changes[key] = 0
 
-            if self.states.has(key):
-                current_value = self.states.load(key)
-                new_value = self.validate_property(key, current_value + increment)
+            if await self.states.has(key):
+                current_value = await self.states.load(key)
+                new_value = await self.validate_property(key, current_value + increment)
                 if new_value != current_value:
                     changes[key] = new_value - current_value
                     state_values[key] = new_value
 
         if state_values:
-            self.states.saves(state_values)
+            await self.states.saves(state_values)
 
         return changes
 
-    def change_const_property(self, key, increment):
+    async def change_const_property(self, key, increment):
         """
         Change a const property with validation.
         :return:
@@ -873,13 +874,13 @@ class MudderyCharacter(BaseElement):
 
         if self.const_data_handler.has(key):
             current_value = self.const_data_handler.get(key)
-            new_value = self.validate_property(key, current_value + increment)
+            new_value = await self.validate_property(key, current_value + increment)
             change = new_value - current_value
             self.const_data_handler.add(key, new_value)
 
         return change
 
-    def change_const_properties(self, increments):
+    async def change_const_properties(self, increments):
         """
         Change a dict of const properties with validation.
 
@@ -893,7 +894,7 @@ class MudderyCharacter(BaseElement):
 
             if self.const_data_handler.has(key):
                 current_value = self.const_data_handler.get(key)
-                new_value = self.validate_property(key, current_value + increment)
+                new_value = await self.validate_property(key, current_value + increment)
                 changes[key] = new_value - current_value
                 self.const_data_handler.add(key, new_value)
 

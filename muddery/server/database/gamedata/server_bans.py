@@ -31,13 +31,13 @@ class ServerBans(BaseData, Singleton):
             "finish_time": finish_time,
         })
 
-    def remove(self, ban_type, ban_target):
+    async def remove(self, ban_type, ban_target):
         """
         Remove a ban.
 
         :param username: account's username
         """
-        self.storage.delete(ban_type, ban_target)
+        await self.storage.delete(ban_type, ban_target)
 
     async def get_ban_time(self, ban_type, ban_target):
         """

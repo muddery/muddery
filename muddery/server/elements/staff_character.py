@@ -72,7 +72,7 @@ class MudderyStaffCharacter(ELEMENT("PLAYER_CHARACTER")):
             "status": await self.return_status(),
             "equipments": await self.return_equipments(),
             "inventory": self.get_inventory_appearance(),
-            "skills": self.return_skills(),
+            "skills": await self.return_skills(),
             "quests": await self.quest_handler.return_quests(),
             "revealed_map": await self.get_revealed_map(),
             "channels": self.available_channels
@@ -81,11 +81,11 @@ class MudderyStaffCharacter(ELEMENT("PLAYER_CHARACTER")):
 
         await self.show_location()
 
-    def get_appearance(self, caller):
+    async def get_appearance(self, caller):
         """
         This is a convenient hook for a 'look'
         command to call.
         """
-        info = super(MudderyStaffCharacter, self).get_appearance(caller)
+        info = await super(MudderyStaffCharacter, self).get_appearance(caller)
         info["is_staff"] = True
         return info

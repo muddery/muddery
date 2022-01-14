@@ -63,6 +63,15 @@ def load_game_data():
 
     gamedir = os.path.abspath(configs.CURRENT_DIR)
 
+    # Load settings.
+    try:
+        from muddery.server.conf import settings
+        from server.settings import Settings
+        settings.update(Settings())
+    except Exception as e:
+        traceback.print_exc()
+        raise
+
     try:
         utils.init_game_env(gamedir)
     except Exception as e:
@@ -166,7 +175,9 @@ def collect_static():
     utils.init_game_env(gamedir)
 
     from muddery.server.conf import settings
-    for item in settings.STATICFILES_DIRS:
+
+    # webpage files
+    for item in settings.WEBCLIENT_SOURCE_DIRS:
         source = item[1]
-        target = os.path.join(settings.WEBCLIENT_ROOT, item[0])
+        target = item[0]
         utils.copy_tree(source, target)

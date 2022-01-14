@@ -196,7 +196,7 @@ class MudderyRoom(BaseElement):
         """
         return self.all_exits[exit_key]["obj"]
 
-    def can_unlock_exit(self, caller, exit_key):
+    async def can_unlock_exit(self, caller, exit_key):
         """
         Unlock an exit. Add the exit's key to the character's unlock list.
         """
@@ -205,13 +205,13 @@ class MudderyRoom(BaseElement):
             return False
 
         exit_obj = self.all_exits[exit_key]["obj"]
-        if not exit_obj.can_unlock(caller):
+        if not await exit_obj.can_unlock(caller):
             caller.msg({"msg": _("Can not unlock this exit.")})
             return False
 
         return True
 
-    def get_exit_appearance(self, caller, exit_key):
+    async def get_exit_appearance(self, caller, exit_key):
         """
         Get the appearance of an exit.
         :param caller:
@@ -219,7 +219,7 @@ class MudderyRoom(BaseElement):
         :return:
         """
         exit_obj = self.all_exits[exit_key]["obj"]
-        return exit_obj.get_appearance(caller)
+        return await exit_obj.get_appearance(caller)
 
     async def msg_characters(self, msg, exclude=None):
         """
@@ -331,7 +331,7 @@ class MudderyRoom(BaseElement):
         """
         return self.icon
 
-    def get_appearance(self, caller):
+    async def get_appearance(self, caller):
         """
         This is a convenient hook for a 'look'
         command to call.
@@ -360,7 +360,7 @@ class MudderyRoom(BaseElement):
                 }
         return exits
 
-    def get_surroundings(self, caller):
+    async def get_surroundings(self, caller):
         """
         This is a convenient hook for a 'look'
         command to call.
@@ -370,15 +370,15 @@ class MudderyRoom(BaseElement):
 
         if not GameSettings.inst().get("solo_mode"):
             # Players can not see other players in solo mode.
-            info["players"] = [item.get_appearance(caller) for key, item in self.all_characters.items()
+            info["players"] = [await item.get_appearance(caller) for key, item in self.all_characters.items()
                                if item.is_player() and item.get_id() != caller.get_id() and item.is_visible(caller)]
 
-        info["npcs"] = [item.get_appearance(caller) for key, item in self.all_characters.items()
-                         if not item.is_player() and item.is_visible(caller)]
-        info["exits"] = [item["obj"].get_appearance(caller) for key, item in self.all_exits.items()
-                         if item["obj"].is_visible(caller)]
-        info["objects"] = [item["obj"].get_appearance(caller) for key, item in self.all_objects.items()
-                           if item["obj"].is_visible(caller)]
+        info["npcs"] = [await item.get_appearance(caller) for key, item in self.all_characters.items()
+                         if not item.is_player() and await item.is_visible(caller)]
+        info["exits"] = [await item["obj"].get_appearance(caller) for key, item in self.all_exits.items()
+                         if await item["obj"].is_visible(caller)]
+        info["objects"] = [await item["obj"].get_appearance(caller) for key, item in self.all_objects.items()
+                           if await item["obj"].is_visible(caller)]
 
         return info
 

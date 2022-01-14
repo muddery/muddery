@@ -17,7 +17,7 @@ class ActionLearnSkill(BaseEventAction):
     model_name = "action_learn_skill"
     repeatedly = False
 
-    def func(self, event_key, character, obj):
+    async def func(self, event_key, character, obj):
         """
         Learn a skill.
 
@@ -32,7 +32,7 @@ class ActionLearnSkill(BaseEventAction):
         # Learn skills.
         for record in records:
             try:
-                character.learn_skill(record.skill, record.level, False)
+                await character.learn_skill(record.skill, record.level, False)
             except Exception as e:
                 traceback.print_exc()
                 logger.log_err("Can not learn skill %s %s" % (type(e).__name__, e))

@@ -25,6 +25,7 @@ class QuestHandler(object):
         Initialize handler
         """
         self.owner = weakref.proxy(owner)
+        self.quests = {}
 
     async def init(self):
         """
@@ -111,12 +112,12 @@ class QuestHandler(object):
         if not quest_info or quest_info["finished"]:
             raise MudderyError("Can not find this quest.")
 
-        quest = self.get_quest(quest_key)
-        if not quest.is_accomplished():
+        quest = await self.get_quest(quest_key)
+        if not await quest.is_accomplished():
             raise MudderyError(_("Can not turn in this quest."))
 
         # Call turn in function in the quest.
-        quest.turn_in(self.owner)
+        await quest.turn_in(self.owner)
         await CharacterQuests.inst().set(self.owner.get_db_id(), quest_key, {"finished": True})
 
         # Get quest's name.
@@ -127,7 +128,7 @@ class QuestHandler(object):
         await self.owner.show_status()
         await self.owner.show_location()
 
-    def is_accomplished(self, quest_key):
+    async def is_accomplished(self, quest_key):
         """
         All objectives of this quest are accomplished.
 
@@ -137,12 +138,12 @@ class QuestHandler(object):
         Returns:
             None
         """
-        if not self.is_in_progress(quest_key):
+        if not await self.is_in_progress(quest_key):
             return False
 
-        return self.quests[quest_key]["obj"].is_accomplished()
+        return await self.quests[quest_key]["obj"].is_accomplished()
 
-    def is_not_accomplished(self, quest_key):
+    async def is_not_accomplished(self, quest_key):
         """
         Whether the character accomplished this quest or not.
 
@@ -152,10 +153,10 @@ class QuestHandler(object):
         Returns:
             None
         """
-        if not self.is_in_progress(quest_key):
+        if not await self.is_in_progress(quest_key):
             return False
 
-        return not self.quests[quest_key]["obj"].is_accomplished()
+        return not await self.quests[quest_key]["obj"].is_accomplished()
 
     async def is_finished(self, quest_key):
         """
@@ -192,7 +193,7 @@ class QuestHandler(object):
 
         return True
 
-    def can_provide(self, quest_key):
+    async def can_provide(self, quest_key):
         """
         If can provide this quest to the owner.
 
@@ -202,21 +203,21 @@ class QuestHandler(object):
         Returns:
             None
         """
-        if self.is_finished(quest_key):
+        if await self.is_finished(quest_key):
             return False
 
-        if self.is_in_progress(quest_key):
+        if await self.is_in_progress(quest_key):
             return False
 
-        if not self.match_dependencies(quest_key):
+        if not await self.match_dependencies(quest_key):
             return False
 
-        if not self.match_condition(quest_key):
+        if not await self.match_condition(quest_key):
             return False
 
         return True
 
-    def match_dependencies(self, quest_key):
+    async def match_dependencies(self, quest_key):
         """
         Check quest's dependencies
 
@@ -228,11 +229,11 @@ class QuestHandler(object):
         """
         for dep in QuestDependencies.get(quest_key):
             status = QUEST_STATUS_SET.get(dep.type)
-            if not status.match(self.owner, dep.dependency):
+            if not await status.match(self.owner, dep.dependency):
                 return False
         return True
 
-    def match_condition(self, quest_key):
+    async def match_condition(self, quest_key):
         """
         Check if the quest matches its condition.
         Args:
@@ -249,7 +250,7 @@ class QuestHandler(object):
         try:
             record = WorldData.get_table_data(model_name, key=quest_key)
             record = record[0]
-            return STATEMENT_HANDLER.match_condition(record.condition, self.owner, None)
+            return await STATEMENT_HANDLER.match_condition(record.condition, self.owner, None)
         except Exception as e:
             logger.log_err("Can't get quest %s's condition: %s" % (quest_key, e))
         return False
@@ -272,8 +273,8 @@ class QuestHandler(object):
             if info["finished"]:
                 continue
 
-            quest = self.get_quest(quest_key)
-            quests_info.append(quest.return_info())
+            quest = await self.get_quest(quest_key)
+            quests_info.append(await quest.return_info())
 
         return quests_info
 
@@ -296,15 +297,15 @@ class QuestHandler(object):
             if info["finished"]:
                 continue
 
-            quest = self.get_quest(quest_key)
+            quest = await self.get_quest(quest_key)
 
-            if quest.at_objective(object_type, object_key, number):
+            if await quest.at_objective(object_type, object_key, number):
                 status_changed = True
-                if quest.is_accomplished():
-                    self.owner.msg({"msg": _("Quest {C%s{n's goals are accomplished.") % quest.get_name()})
+                if await quest.is_accomplished():
+                    await self.owner.msg({"msg": _("Quest {C%s{n's goals are accomplished.") % quest.get_name()})
 
         if status_changed:
-            self.show_quests()
+            await self.show_quests()
 
     async def create_quest(self, quest_key):
         """
@@ -321,7 +322,7 @@ class QuestHandler(object):
 
         return quest
 
-    def get_quest(self, quest_key):
+    async def get_quest(self, quest_key):
         """
         Get a quest object by its key.
         :param quest_key:
@@ -330,7 +331,7 @@ class QuestHandler(object):
         if quest_key in self.quests:
             quest = self.quests[quest_key]["obj"]
         else:
-            quest = self.create_quest(quest_key)
+            quest = await self.create_quest(quest_key)
 
         return quest
 
@@ -345,5 +346,5 @@ class QuestHandler(object):
             logger.log_err("%s's quest %s is finished." % (self.owner.get_db_id(), quest_key))
             return
 
-        quest = self.get_quest(quest_key)
-        return quest.return_info()
+        quest = await self.get_quest(quest_key)
+        return await quest.return_info()

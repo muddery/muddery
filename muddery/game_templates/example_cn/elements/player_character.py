@@ -43,7 +43,7 @@ class PlayerCharacter(MudderyPlayerCharacter):
         """
         skill_obj = self.skills[skill_key]["obj"]
         skill_mp = skill_obj.get_mp()
-        mp = self.states.load("mp")
+        mp = await self.states.load("mp")
         if mp < skill_mp:
             await self.msg({"msg": _("Not enough mana to cast {b%s{n!") % await skill_obj.get_name()})
             return

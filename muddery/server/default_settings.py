@@ -114,28 +114,20 @@ class Settings(object):
     # Web features
     ######################################################################
 
-    # resource's location
-    IMAGE_PATH = 'image'
-
-    # The master urlconf file that contains all of the sub-branches to the
-    # applications. Change this to add your own URLs to the website.
-    ROOT_URLCONF = 'web.urls'
-
-    # URL prefix for admin media -- CSS, JavaScript and images. Make sure
-    # to use a trailing slash. Django1.4+ will look for admin files under
-    # STATIC_URL/admin.
-    STATIC_URL = '/static/'
-    STATIC_ROOT = os.path.join(GAME_DIR, "web", "static")
-
-    # URL that handles the webclient.
-    WEBCLIENT_ROOT = os.path.join(GAME_DIR, "web", "static", "webclient")
+    # Webclient files root dir.
+    WEBCLIENT_ROOT = os.path.join(GAME_DIR, "web", "webclient")
 
     # Directories from which static files will be gathered from.
-    STATICFILES_DIRS = (
-        ("", os.path.join(MUDDERY_DIR, "webclient")),
-        ("", os.path.join(GAME_DIR, "web", "webclient_overrides", "webclient")),
-        ("media", os.path.join(GAME_DIR, "web", "media")),
+    WEBCLIENT_SOURCE_DIRS = (
+        (WEBCLIENT_ROOT, os.path.join(MUDDERY_DIR, "webclient")),
+        (WEBCLIENT_ROOT, os.path.join(GAME_DIR, "web", "webclient_overrides", "webclient")),
     )
+
+    # Media files root dir
+    MEDIA_ROOT = os.path.join(GAME_DIR, "web", "media")
+
+    # resource's location
+    IMAGE_PATH = 'image'
 
     ######################################################################
     # Typeclasses and other paths

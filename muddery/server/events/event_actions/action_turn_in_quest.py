@@ -15,7 +15,7 @@ class ActionTurnInQuest(BaseEventAction):
     model_name = "action_turn_in_quest"
     repeatedly = False
 
-    def func(self, event_key, character, obj):
+    async def func(self, event_key, character, obj):
         """
         Turn in a quest.
 
@@ -30,7 +30,7 @@ class ActionTurnInQuest(BaseEventAction):
         # Turn in quests.
         for record in records:
             quest_key = record.quest
-            character.quest_handler.turn_in(quest_key)
+            await character.quest_handler.turn_in(quest_key)
 
     def get_quests(self, event_key):
         """

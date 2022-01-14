@@ -3,7 +3,7 @@ Import table data.
 """
 
 import os, traceback
-import importlib
+from sqlalchemy import delete
 from muddery.server.conf import settings
 from muddery.server.utils.logger import logger
 from muddery.worldeditor.utils import readers
@@ -192,7 +192,8 @@ def import_file(fullname, file_type=None, table_name=None, clear=True, except_er
     model = DBManager.inst().get_model(settings.WORLD_DATA_APP, table_name)
 
     if clear:
-        session.query(model).delete()
+        stmt = delete(model)
+        session.execute(stmt)
 
     reader_class = readers.get_reader(file_type)
     if not reader_class:

@@ -63,7 +63,7 @@ class MudderyShopGoods(BaseElement):
 
         self.available = True
 
-    def is_available(self, caller):
+    async def is_available(self, caller):
         """
         Is it available to the customer.
 
@@ -73,7 +73,7 @@ class MudderyShopGoods(BaseElement):
         if not self.available:
             return False
 
-        return STATEMENT_HANDLER.match_condition(self.condition, caller, None)
+        return await STATEMENT_HANDLER.match_condition(self.condition, caller, None)
 
     def get_info(self, caller):
         """

@@ -31,7 +31,7 @@ class MudderyWorldNPC(ELEMENT("BASE_NPC")):
             if not await self.is_alive() and self.reborn_time > 0:
                 self.reborn()
 
-    def is_visible(self, caller):
+    async def is_visible(self, caller):
         """
         If this object is visible to the caller.
 
@@ -41,4 +41,4 @@ class MudderyWorldNPC(ELEMENT("BASE_NPC")):
         if not self.const.condition:
             return True
 
-        return STATEMENT_HANDLER.match_condition(self.const.condition, caller, self)
+        return await STATEMENT_HANDLER.match_condition(self.const.condition, caller, self)

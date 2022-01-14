@@ -11,7 +11,7 @@ class MudderyWorldObject(ELEMENT("COMMON_OBJECT")):
     element_name = "World Object"
     model_name = "world_objects"
 
-    def is_visible(self, caller):
+    async def is_visible(self, caller):
         """
         If this object is visible to the caller.
 
@@ -21,14 +21,14 @@ class MudderyWorldObject(ELEMENT("COMMON_OBJECT")):
         if not self.const.condition:
             return True
 
-        return STATEMENT_HANDLER.match_condition(self.const.condition, caller, self)
+        return await STATEMENT_HANDLER.match_condition(self.const.condition, caller, self)
 
-    def get_available_commands(self, caller):
+    async def get_available_commands(self, caller):
         """
         This returns a list of available commands.
         "args" must be a string without ' and ", usually it is self.id.
         """
-        commands = super(MudderyWorldObject, self).get_available_commands(caller)
+        commands = await super(MudderyWorldObject, self).get_available_commands(caller)
 
         if self.const.action:
             commands.append({

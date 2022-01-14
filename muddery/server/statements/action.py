@@ -20,7 +20,7 @@ class FuncLearnSkill(StatementFunction):
     key = "learn_skill"
     const = False
 
-    def func(self):
+    async def func(self):
         """
         Implement the function.
         """
@@ -53,7 +53,7 @@ class FuncGiveObject(StatementFunction):
     key = "give_object"
     const = False
 
-    def func(self):
+    async def func(self):
         """
         Implement the function.
         """
@@ -68,7 +68,7 @@ class FuncGiveObject(StatementFunction):
         obj_list = [{"object_key": obj_key,
                      "number": number}]
 
-        objects = self.caller.receive_objects(obj_list)
+        objects = await self.caller.receive_objects(obj_list)
         success = True
         for item in objects:
             if item["reject"]:
@@ -90,7 +90,7 @@ class FuncRemoveObjects(StatementFunction):
     key = "remove_objects"
     const = False
 
-    def func(self):
+    async def func(self):
         """
         Implement the function.
         """
@@ -119,7 +119,7 @@ class FuncTeleportTo(StatementFunction):
     key = "teleport_to"
     const = False
 
-    def func(self):
+    async def func(self):
         """
         Implement the function.
         """
@@ -151,7 +151,7 @@ class FuncFightMob(StatementFunction):
     key = "fight_mob"
     const = False
 
-    def func(self):
+    async def func(self):
         """
         Implement the function.
         """
@@ -168,7 +168,7 @@ class FuncFightMob(StatementFunction):
         if len(self.args) > 2:
             desc = self.args[2]
 
-        return self.caller.attack_temp_target(mob_key, level, desc)
+        return await self.caller.attack_temp_target(mob_key, level, desc)
 
 
 class FuncFightTarget(StatementFunction):
@@ -196,4 +196,4 @@ class FuncFightTarget(StatementFunction):
         if self.args:
             desc = self.args[0]
 
-        return self.caller.attack_temp_target(self.obj.get_element_key(), await self.obj.get_level(), desc)
+        return await self.caller.attack_temp_target(self.obj.get_element_key(), await self.obj.get_level(), desc)

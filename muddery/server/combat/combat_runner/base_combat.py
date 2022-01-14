@@ -17,7 +17,7 @@ The life of a combat:
 from enum import Enum
 import time
 import datetime
-from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from muddery.server.utils.logger import logger
 from muddery.server.utils import defines
 from muddery.server.database.worlddata.worlddata import WorldData
@@ -69,7 +69,7 @@ class BaseCombat(object):
         if self.scheduler:
             self.scheduler.stop()
 
-    def at_timeout(self):
+    async def at_timeout(self):
         """
         Combat timeout.
 
@@ -79,9 +79,9 @@ class BaseCombat(object):
         if self.finished:
             return
 
-        self.set_combat_draw()
+        await self.set_combat_draw()
 
-    def set_combat(self, handler, combat_id, combat_type, teams, desc, timeout):
+    async def set_combat(self, handler, combat_id, combat_type, teams, desc, timeout):
         """
         Add combatant to handler
 
@@ -112,10 +112,10 @@ class BaseCombat(object):
             character = char["char"]
 
             # add the combat handler
-            character.join_combat(combat_id)
+            await character.join_combat(combat_id)
 
             if character.is_player():
-                self.show_combat(character)
+                await self.show_combat(character)
 
     def start(self):
         """
@@ -124,7 +124,7 @@ class BaseCombat(object):
         if self.timeout:
             # Set finish time.
             finish_time = datetime.datetime.fromtimestamp(time.time() + self.timeout)
-            self.scheduler = BackgroundScheduler()
+            self.scheduler = AsyncIOScheduler()
             self.scheduler.add_job(self.at_timeout, "date", run_date=finish_time)
             self.scheduler.start()
 
@@ -138,7 +138,7 @@ class BaseCombat(object):
         """
         self.handler.remove_combat(self.combat_id)
 
-    def show_combat(self, character):
+    async def show_combat(self, character):
         """
         Show combat information to a character.
         Args:
@@ -148,10 +148,10 @@ class BaseCombat(object):
             None
         """
         # Show combat information to the player.
-        character.msg({"joined_combat": True})
+        await character.msg({"joined_combat": True})
 
         # send messages in order
-        character.msg({"combat_info": self.get_appearance()})
+        await character.msg({"combat_info": await self.get_appearance()})
 
     async def prepare_skill(self, skill_key, caller, target_id):
         """
@@ -173,9 +173,9 @@ class BaseCombat(object):
         if caller:
             await caller.cast_skill(skill_key, target)
 
-            if self.can_finish():
+            if await self.can_finish():
                 # if there is only one team left, kill this handler
-                self.finish()
+                await self.finish()
 
     async def can_finish(self):
         """
@@ -199,7 +199,7 @@ class BaseCombat(object):
 
         return True
 
-    def finish(self):
+    async def finish(self):
         """
         Finish a combat. Send results to players, and kill all failed characters.
         """
@@ -210,17 +210,17 @@ class BaseCombat(object):
             self.scheduler = None
 
         # get winners and losers
-        self.winners, self.losers = self.calc_winners()
+        self.winners, self.losers = await self.calc_winners()
 
         for char in self.characters.values():
             char["status"] = CStatus.FINISHED
 
         # calculate combat rewards
-        self.rewards = self.calc_combat_rewards(self.winners, self.losers)
+        self.rewards = await self.calc_combat_rewards(self.winners, self.losers)
 
-        self.notify_combat_results(self.winners, self.losers)
+        await self.notify_combat_results(self.winners, self.losers)
 
-    def escape_combat(self, caller):
+    async def escape_combat(self, caller):
         """
         Character escaped.
 
@@ -232,9 +232,9 @@ class BaseCombat(object):
         """
         if caller and caller.id in self.characters:
             self.characters[caller.id]["status"] = CStatus.ESCAPED
-            caller.combat_result(self.combat_type, defines.COMBAT_ESCAPED)
+            await caller.combat_result(self.combat_type, defines.COMBAT_ESCAPED)
 
-    def leave_combat(self, character):
+    async def leave_combat(self, character):
         """
         Remove combatant from handler.
 
@@ -258,18 +258,18 @@ class BaseCombat(object):
                 if char["status"] != CStatus.LEFT:
                     char["status"] = CStatus.LEFT
                     try:
-                        char["char"].remove_from_combat()
+                        await char["char"].remove_from_combat()
                     except Exception as e:
                         logger.log_err("Leave combat error: %s" % e)
 
             self.stop()
 
-    def msg_all(self, message):
+    async def msg_all(self, message):
         "Send message to all combatants"
         for char in self.characters.values():
-            char["char"].msg(message)
+            await char["char"].msg(message)
 
-    def set_combat_draw(self):
+    async def set_combat_draw(self):
         """
         Called when the combat ended in a draw.
 
@@ -277,7 +277,7 @@ class BaseCombat(object):
             None.
         """
         for char in self.characters.values():
-            char["char"].combat_result(self.combat_type, defines.COMBAT_DRAW)
+            await char["char"].combat_result(self.combat_type, defines.COMBAT_DRAW)
 
     async def calc_winners(self):
         """
@@ -296,7 +296,7 @@ class BaseCombat(object):
                     if char["status"] == CStatus.ACTIVE and char["team"] != winner_team}
         return winners, losers
 
-    def calc_combat_rewards(self, winners, losers):
+    async def calc_combat_rewards(self, winners, losers):
         """
         Called when the character wins the combat.
 
@@ -314,7 +314,7 @@ class BaseCombat(object):
             for loser in losers:
                 loser_char = self.characters[loser]["char"]
                 exp += loser_char.provide_exp(self)
-                obj_list = loser_char.loot_handler.get_obj_list(winner_char)
+                obj_list = await loser_char.loot_handler.get_obj_list(winner_char)
                 if obj_list:
                     loots.extend(obj_list)
 
@@ -352,7 +352,7 @@ class BaseCombat(object):
         """
         return self.rewards.get(char_id, None)
 
-    def notify_combat_results(self, winners, losers):
+    async def notify_combat_results(self, winners, losers):
         """
         Called when the character wins the combat.
 
@@ -364,12 +364,12 @@ class BaseCombat(object):
             None
         """
         for char_id, char in winners.items():
-            char.combat_result(self.combat_type, defines.COMBAT_WIN, losers.values(), self.get_combat_rewards(char_id))
+            await char.combat_result(self.combat_type, defines.COMBAT_WIN, losers.values(), self.get_combat_rewards(char_id))
 
         for char_id, char in losers.items():
-            char.combat_result(self.combat_type, defines.COMBAT_LOSE, winners.values())
+            await char.combat_result(self.combat_type, defines.COMBAT_LOSE, winners.values())
 
-    def get_appearance(self):
+    async def get_appearance(self):
         """
         Get the combat appearance.
         """
@@ -379,7 +379,7 @@ class BaseCombat(object):
         
         for char in self.characters.values():
             character = char["char"]
-            info = character.get_appearance(self)
+            info = await character.get_appearance(self)
             info["team"] = char["team"]
 
             appearance["characters"].append(info)

@@ -55,7 +55,7 @@ class MudderyShop(BaseElement):
             goods.set_data(item)
             self.goods.append(goods)
 
-    def get_info(self, caller):
+    async def get_info(self, caller):
         """
         Get shop information.
 
@@ -71,7 +71,7 @@ class MudderyShop(BaseElement):
         }
 
         for index, item in enumerate(self.goods):
-            if item.is_available(caller):
+            if await item.is_available(caller):
                 goods = item.get_info(caller)
                 goods["index"] = index
                 info["goods"].append(goods)
@@ -85,7 +85,7 @@ class MudderyShop(BaseElement):
         """
         return self.const.verb if self.const.verb else self.const.name
 
-    def is_available(self, caller):
+    async def is_available(self, caller):
         """
         Is it available to the customer.
 
@@ -95,13 +95,13 @@ class MudderyShop(BaseElement):
         if not self.const.condition:
             return True
 
-        return STATEMENT_HANDLER.match_condition(self.const.condition, caller, None)
+        return await STATEMENT_HANDLER.match_condition(self.const.condition, caller, None)
 
-    def sell_goods(self, goods_index, caller):
+    async def sell_goods(self, goods_index, caller):
         """
         Sell goods to the caller.
         :param goods_index:
         :param caller:
         :return:
         """
-        self.goods[goods_index].sell_to(caller)
+        await self.goods[goods_index].sell_to(caller)

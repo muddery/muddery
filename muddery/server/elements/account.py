@@ -194,7 +194,9 @@ class MudderyAccount(BaseElement):
 
         """
         # session relay
-        logger.log_info("Account %s send message: %s" % (self.get_id(), text))
+        log_info = "Account %s send message: %s" % (self.get_id(), text)
+        print(log_info)
+        logger.log_info(log_info)
         if self.session:
             await self.session.msg(text=text, context=context)
 
@@ -284,7 +286,6 @@ class MudderyAccount(BaseElement):
         obj = self.puppet_obj
         if obj:
             await obj.at_pre_unpuppet()
-            obj.set_session(None)
 
             Server.world.on_char_unpuppet(obj)
 

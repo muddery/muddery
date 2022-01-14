@@ -12,11 +12,11 @@ class CanProvide(BaseQuestStatus):
     key = "CAN_PROVIDE"
     name = "Can Provide Quest"
 
-    def match(self, caller, quest_key):
+    async def match(self, caller, quest_key):
         """
         Check.
         """
         if not caller:
             return False
 
-        return caller.quest_handler.can_provide(quest_key)
+        return await caller.quest_handler.can_provide(quest_key)

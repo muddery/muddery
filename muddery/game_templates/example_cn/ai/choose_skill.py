@@ -14,22 +14,22 @@ class ChooseSkill(object):
     type_attack = "ATTACK"
     type_heal = "HEAL"
 
-    def choose(cls, caller):
+    async def choose(cls, caller):
         """
         Choose a skill and the skill's target.
         """
         if not caller:
             return
 
-        combat = caller.get_combat()
+        combat = await caller.get_combat()
         if not combat:
             return
 
-        skills = caller.get_available_skills()
+        skills = await caller.get_available_skills()
         if not skills:
             return
 
-        hp = caller.states.load("hp")
+        hp = await caller.states.load("hp")
         max_hp = caller.const.max_hp
         if hp < max_hp / 2:
             # heal self
@@ -53,8 +53,9 @@ class ChooseSkill(object):
                 skill = random.choice(attack_skills)
 
                 # find the lowest hp
-                sorted_opponents = sorted(opponents, key=lambda t: t.states.load("hp"))
-                target_id = sorted_opponents[0].get_id()
+                opponents_hp = [(await t.states.load("hp"), t) for t in opponents]
+                sorted_opponents = sorted(opponents_hp, key=lambda t: t[1])
+                target_id = sorted_opponents[0][1].get_id()
                 return skill.get_element_key(), target_id
 
         return

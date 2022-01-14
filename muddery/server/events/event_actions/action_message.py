@@ -15,7 +15,7 @@ class ActionMessage(BaseIntervalAction):
     model_name = "action_message"
     repeatedly = True
 
-    def func(self, event_key, character, obj):
+    async def func(self, event_key, character, obj):
         """
         Send a message to the character.
 
@@ -29,4 +29,4 @@ class ActionMessage(BaseIntervalAction):
 
         # send messages
         for record in records:
-            character.msg(record.message)
+            await character.msg(record.message)

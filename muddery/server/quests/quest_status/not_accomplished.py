@@ -12,13 +12,13 @@ class NotAccomplished(BaseQuestStatus):
     key = "NOT_ACCOMPLISHED"
     name = "Objectives Not Accomplished"
 
-    def match(self, caller, quest_key):
+    async def match(self, caller, quest_key):
         """
         Check.
         """
         if not caller:
             return False
 
-        return caller.quest_handler.is_in_progress(quest_key) and \
-            not caller.quest_handler.is_accomplished(quest_key)
+        return await caller.quest_handler.is_in_progress(quest_key) and \
+            not await caller.quest_handler.is_accomplished(quest_key)
 

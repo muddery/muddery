@@ -58,7 +58,7 @@ class MudderyArea(BaseElement):
         # load rooms in this area
         await self.load_rooms()
 
-    def get_appearance(self, caller):
+    async def get_appearance(self, caller):
         """
         This is a convenient hook for a 'look'
         command to call.

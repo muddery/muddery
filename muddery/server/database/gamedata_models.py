@@ -358,13 +358,13 @@ class character_quests(Base):
 
 # ------------------------------------------------------------
 #
-# quest objectives
+# Player character's quest objectives.
 #
 # ------------------------------------------------------------
-class quest_objectives(Base):
+class character_quest_objectives(Base):
     "Quests' objectives."
 
-    __tablename__ = "quest_objectives"
+    __tablename__ = "character_quest_objectives"
 
     __table_args__ = (
         UniqueConstraint("character_quest", "objective"),

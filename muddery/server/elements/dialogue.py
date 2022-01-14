@@ -63,7 +63,7 @@ class MudderyDialogue(BaseElement):
         """
         return self.content
 
-    def match_condition(self, caller, npc):
+    async def match_condition(self, caller, npc):
         """
         Check the dialogue's condition.
 
@@ -71,9 +71,9 @@ class MudderyDialogue(BaseElement):
         :param npc:
         :return:
         """
-        return STATEMENT_HANDLER.match_condition(self.condition, caller, npc)
+        return await STATEMENT_HANDLER.match_condition(self.condition, caller, npc)
 
-    def match_dependencies(self, caller):
+    async def match_dependencies(self, caller):
         """
         Check the dialogue's dependencies.
 
@@ -83,12 +83,12 @@ class MudderyDialogue(BaseElement):
         """
         for dep in self.dependencies:
             status = QUEST_STATUS_SET.get(dep["type"])
-            if not status.match(caller, dep["quest"]):
+            if not await status.match(caller, dep["quest"]):
                 return False
 
         return True
 
-    def can_finish_quest(self, caller):
+    async def can_finish_quest(self, caller):
         """
         Check whether the dialogue can finish quests to the caller.
 
@@ -96,12 +96,12 @@ class MudderyDialogue(BaseElement):
         :return:
         """
         for quest_key in self.finish_quest:
-            if caller.quest_handler.is_accomplished(quest_key):
+            if await caller.quest_handler.is_accomplished(quest_key):
                 return True
 
         return False
 
-    def can_provide_quest(self, caller):
+    async def can_provide_quest(self, caller):
         """
         Check whether the dialogue can provide quests to the caller.
 
@@ -109,7 +109,7 @@ class MudderyDialogue(BaseElement):
         :return:
         """
         for quest_key in self.provide_quest:
-            if caller.quest_handler.can_provide(quest_key):
+            if await caller.quest_handler.can_provide(quest_key):
                 return True
 
         return False

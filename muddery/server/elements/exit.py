@@ -32,7 +32,7 @@ class MudderyExit(BaseElement):
 
         self.destination_obj = None
 
-    def is_visible(self, caller):
+    async def is_visible(self, caller):
         """
         If this object is visible to the caller.
 
@@ -42,30 +42,30 @@ class MudderyExit(BaseElement):
         if not self.const.condition:
             return True
 
-        return STATEMENT_HANDLER.match_condition(self.const.condition, caller, self)
+        return await STATEMENT_HANDLER.match_condition(self.const.condition, caller, self)
 
-    def traverse(self, character):
+    async def traverse(self, character):
         """
         Traverse to the destination.
 
         :param character:
         :return:
         """
-        if not self.can_traverse(character):
-            character.msg({"msg": _("You can not pass.")})
+        if not await self.can_traverse(character):
+            await character.msg({"msg": _("You can not pass.")})
             return
 
         if not self.destination_obj:
             self.destination_obj = weakref.ref(Server.world.get_room(self.const.destination))
 
         try:
-            character.move_to(self.destination_obj())
+            await character.move_to(self.destination_obj())
         except Exception as e:
             traceback.print_exc()
             logger.log_err("%s cannot set location: (%s)%s." % (character.get_id(), type(e).__name__, e))
-            character.msg({"msg": _("You can not go there.")})
+            await character.msg({"msg": _("You can not go there.")})
 
-    def can_traverse(self, character):
+    async def can_traverse(self, character):
         """
         If the character can traverse the exit return True else False.
 
@@ -87,7 +87,7 @@ class MudderyExit(BaseElement):
         else:
             return _("Exit")
 
-    def get_desc(self, caller):
+    async def get_desc(self, caller):
         """
         Get the exit's description.
         :param caller:
@@ -95,7 +95,7 @@ class MudderyExit(BaseElement):
         """
         return _("This is an exit")
 
-    def get_appearance(self, caller):
+    async def get_appearance(self, caller):
         """
         Get the appearance of the exit.
         :param caller:
@@ -104,11 +104,11 @@ class MudderyExit(BaseElement):
         return {
             "key": self.get_element_key(),
             "name": self.get_name(),
-            "desc": self.get_desc(caller),
-            "cmds": self.get_available_commands(caller),
+            "desc": await self.get_desc(caller),
+            "cmds": await self.get_available_commands(caller),
         }
 
-    def get_available_commands(self, caller):
+    async def get_available_commands(self, caller):
         """
         This returns a list of available commands.
         "args" must be a string without ' and ", usually it is self.id.

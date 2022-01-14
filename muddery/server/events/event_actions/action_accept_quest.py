@@ -15,7 +15,7 @@ class ActionAcceptQuest(BaseEventAction):
     model_name = "action_accept_quest"
     repeatedly = False
 
-    def func(self, event_key, character, obj):
+    async def func(self, event_key, character, obj):
         """
         Accept a quest.
 
@@ -30,7 +30,7 @@ class ActionAcceptQuest(BaseEventAction):
         # Accept quests.
         for record in records:
             quest_key = record.quest
-            character.quest_handler.accept(quest_key)
+            await character.quest_handler.accept(quest_key)
 
     def get_quests(self, event_key):
         """

@@ -20,7 +20,7 @@ class FuncOdd(StatementFunction):
     key = "odd"
     const = True
 
-    def func(self):
+    async def func(self):
         """
         Implement the function.
         """
@@ -48,7 +48,7 @@ class FuncRand(StatementFunction):
     key = "rand"
     const = True
 
-    def func(self):
+    async def func(self):
         """
         Implement the function.
         """
@@ -80,7 +80,7 @@ class FuncRandInt(StatementFunction):
     key = "randint"
     const = True
 
-    def func(self):
+    async def func(self):
         """
         Implement the function.
         """

@@ -37,7 +37,7 @@ class MudderyLockedExit(ELEMENT("EXIT")):
             before it is even started.
 
         """
-        if not super(MudderyLockedExit, self).can_traverse(character):
+        if not await super(MudderyLockedExit, self).can_traverse(character):
             return False
 
         if character.is_staff():
@@ -50,24 +50,24 @@ class MudderyLockedExit(ELEMENT("EXIT")):
                 character.lock_exit(self.get_element_key())
             return True
 
-        if self.const.auto_unlock and self.can_unlock(character):
+        if self.const.auto_unlock and await self.can_unlock(character):
             # Can unlock the exit automatically.
             if self.const.unlock_forever:
                 # Unlock it.
-                character.unlock_exit(self.get_element_key())
+                await character.unlock_exit(self.get_element_key())
             return True
 
         # Show the object's appearance.
-        appearance = self.get_appearance(character)
-        character.msg({"look_obj": appearance})
+        appearance = await self.get_appearance(character)
+        await character.msg({"look_obj": appearance})
         return False
 
-    def can_unlock(self, caller):
+    async def can_unlock(self, caller):
         """
         Unlock an exit.
         """
         # Only can unlock exits which match there conditions.
-        return STATEMENT_HANDLER.match_condition(self.const.unlock_condition, caller, self)
+        return await STATEMENT_HANDLER.match_condition(self.const.unlock_condition, caller, self)
 
     async def get_desc(self, caller):
         """
@@ -89,8 +89,8 @@ class MudderyLockedExit(ELEMENT("EXIT")):
         """
         if await caller.is_exit_unlocked(self.get_element_key()):
             # If is unlocked, use common commands.
-            return super(MudderyLockedExit, self).get_available_commands(caller)
-        elif not self.can_unlock(caller):
+            return await super(MudderyLockedExit, self).get_available_commands(caller)
+        elif not await self.can_unlock(caller):
             return []
         else:
             # show unlock command

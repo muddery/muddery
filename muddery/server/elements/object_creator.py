@@ -39,20 +39,20 @@ class MudderyObjectCreator(ELEMENT("WORLD_OBJECT")):
         # initialize loot handler
         self.loot_handler = LootHandler(CreatorLootList.get(self.get_element_key()))
 
-    def get_available_commands(self, caller):
+    async def get_available_commands(self, caller):
         """
         This returns a list of available commands.
         "args" must be a string without ' and ", usually it is self.id.
         """
-        if not STATEMENT_HANDLER.match_condition(self.loot_condition, caller, self):
+        if not await STATEMENT_HANDLER.match_condition(self.loot_condition, caller, self):
             return []
 
         commands = [{"name": self.loot_verb, "cmd": "loot", "args": self.get_element_key()}]
         return commands
 
-    def loot(self, caller):
+    async def loot(self, caller):
         """
         Loot objects.
         """
-        obj_list = self.loot_handler.get_obj_list(caller)
-        caller.receive_objects(obj_list)
+        obj_list = await self.loot_handler.get_obj_list(caller)
+        await caller.receive_objects(obj_list)

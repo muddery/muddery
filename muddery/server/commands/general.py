@@ -45,7 +45,7 @@ class CmdLook(BaseCommand):
         # Clear caller's target.
         await caller.show_location()
 
-        combat = caller.get_combat()
+        combat = await caller.get_combat()
         if combat:
             # If the caller is in combat, add combat info.
             # This happens when a player is in combat and he logout and login again.
@@ -54,7 +54,7 @@ class CmdLook(BaseCommand):
             await caller.msg({"joined_combat": True})
 
             # Send combat infos.
-            appearance = combat.get_appearance()
+            appearance = await combat.get_appearance()
             message = {
                 "combat_info": appearance,
                 "combat_commands": caller.get_combat_commands(),
@@ -135,7 +135,7 @@ class CmdEquipmentsObject(BaseCommand):
             await caller.msg({"alert": _("You should select something in your equipments.")})
             return
 
-        appearance = caller.return_equipments_object(args)
+        appearance = await caller.return_equipments_object(args)
         if appearance:
             await caller.msg({"equipments_obj": appearance}, context=context)
         else:
@@ -212,7 +212,7 @@ class CmdLookRoomObj(BaseCommand):
             await caller.msg({"alert": _("Can not find the object.")})
             return
 
-        appearance = obj.get_appearance(caller)
+        appearance = await obj.get_appearance(caller)
         await caller.msg({"look_obj": appearance})
 
 
@@ -248,7 +248,7 @@ class CmdLookRoomChar(BaseCommand):
             await caller.msg({"alert": _("Can not find the object.")})
             return
 
-        appearance = obj.get_appearance(caller)
+        appearance = await obj.get_appearance(caller)
         await caller.msg({"look_obj": appearance})
 
 
@@ -286,7 +286,7 @@ class CmdTraverse(BaseCommand):
             await caller.msg({"alert": _("Can not find the exit.")})
             return
 
-        exit.traverse(caller)
+        await exit.traverse(caller)
 
 
 #------------------------------------------------------------
@@ -365,7 +365,7 @@ class CmdDialogue(BaseCommand):
         except:
             npc = None
 
-        caller.finish_dialogue(dlg_key, npc)
+        await caller.finish_dialogue(dlg_key, npc)
 
 
 #------------------------------------------------------------
@@ -403,7 +403,7 @@ class CmdLoot(BaseCommand):
 
         try:
             # do loot
-            obj.loot(caller)
+            await obj.loot(caller)
         except Exception as e:
             ostring = "Can not loot %s: %s" % (obj.get_element_key(), e)
             logger.log_trace(ostring)
@@ -718,15 +718,16 @@ class CmdAttack(BaseCommand):
 
         # create a new combat
         try:
-            COMBAT_HANDLER.create_combat(
+            await COMBAT_HANDLER.create_combat(
                 combat_type=CombatType.NORMAL,
                 teams={1: [target], 2: [caller]},
                 desc="",
                 timeout=0
             )
         except Exception as e:
+            traceback.print_exc()
             logger.log_err("Can not create combat: [%s] %s" % (type(e).__name__, e))
-            await caller.msg(_("You can not attack %s.") % await target.get_name())
+            await caller.msg({"alert": _("You can not attack %s.") % await target.get_name()})
             return
 
         await caller.msg(_("You are attacking {R%s{n! You are in combat.") % await target.get_name())
@@ -933,7 +934,7 @@ class CmdUnlockExit(BaseCommand):
 
         try:
             # Unlock the exit.
-            if not caller.unlock_exit(exit_key):
+            if not await caller.unlock_exit(exit_key):
                 await caller.msg({"alert": _("Can not open this exit.")})
                 return
         except Exception as e:
@@ -977,7 +978,7 @@ class CmdShopping(BaseCommand):
             await caller.msg({"alert": _("Can not find this NPC.")})
             return
 
-        await caller.msg({"shop": npc.get_shop_info(shop_key, caller)})
+        await caller.msg({"shop": await npc.get_shop_info(shop_key, caller)})
 
 
 #------------------------------------------------------------
@@ -1019,7 +1020,7 @@ class CmdBuy(BaseCommand):
 
         # buy goods
         try:
-            npc.sell_goods(shop, int(goods), caller)
+            await npc.sell_goods(shop, int(goods), caller)
         except Exception as e:
             await caller.msg({"alert": _("Can not buy this goods.")})
             logger.log_err("Can not buy %s %s %s: %s" % (args["npc"], shop, goods, e))
@@ -1054,7 +1055,7 @@ class CmdQueryQuest(BaseCommand):
         quest_key = args["key"]
 
         try:
-            await caller.msg({"quest_info": caller.get_quest_info(quest_key)})
+            await caller.msg({"quest_info": await caller.get_quest_info(quest_key)})
         except Exception as e:
             logger.log_err("Can not get %s's quest %s." % (caller.id, quest_key))
 
@@ -1087,7 +1088,7 @@ class CmdQuerySkill(BaseCommand):
         skill_key = args["key"]
 
         try:
-            await caller.msg({"skill_info": caller.get_skill_info(skill_key)})
+            await caller.msg({"skill_info": await caller.get_skill_info(skill_key)})
         except Exception as e:
             logger.log_err("Can not get %s's skill %s." % (caller.id, skill_key))
 

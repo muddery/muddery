@@ -15,7 +15,7 @@ class ActionCloseEvent(BaseEventAction):
     model_name = "action_close_event"
     repeatedly = False
 
-    def func(self, event_key, character, obj):
+    async def func(self, event_key, character, obj):
         """
         Close an event.
 
@@ -29,4 +29,4 @@ class ActionCloseEvent(BaseEventAction):
 
         for record in records:
             # Close event.
-            character.close_event(record.event)
+            await character.close_event(record.event)

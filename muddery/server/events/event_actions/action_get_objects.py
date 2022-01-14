@@ -18,7 +18,7 @@ class ActionGetObjects(BaseIntervalAction):
     model_name = "action_get_objects"
     repeatedly = True
 
-    def func(self, event_key, character, obj):
+    async def func(self, event_key, character, obj):
         """
         Add objects to the character.
 
@@ -27,9 +27,9 @@ class ActionGetObjects(BaseIntervalAction):
             character: (object) relative character.
             obj: (object) the event object.
         """
-        self.get_object(event_key, character, 1)
+        await self.get_object(event_key, character, 1)
 
-    def get_object(self, event_key, character, times):
+    async def get_object(self, event_key, character, times):
         """
         The character get objects.
 
@@ -43,8 +43,8 @@ class ActionGetObjects(BaseIntervalAction):
 
         # get object list
         loot_handler = LootHandler(records)
-        obj_list = loot_handler.get_obj_list(character, times)
-        get_objects = character.receive_objects(obj_list, mute=True)
+        obj_list = await loot_handler.get_obj_list(character, times)
+        get_objects = await character.receive_objects(obj_list, mute=True)
 
         if get_objects:
             msg_templates = {item["object_key"]: item["message"] for item in obj_list}
@@ -62,4 +62,4 @@ class ActionGetObjects(BaseIntervalAction):
                 else:
                     message += _("Get") + " " + item["name"] + " " + str(item["number"])
 
-            character.msg({"msg": message})
+            await character.msg({"msg": message})

@@ -25,7 +25,7 @@ class LocalizedStringsHandler(Singleton):
         """
         self.dict = {}
 
-    def reload(self):
+    def load(self):
         """
         Reload local string data.
         """
@@ -46,7 +46,7 @@ class LocalizedStringsHandler(Singleton):
         Translate origin string to local string.
         """
         if not self.loaded:
-            self.reload()
+            self.load()
 
         try:
             # Get local string.

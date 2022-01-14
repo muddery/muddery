@@ -78,21 +78,21 @@ class MudderyBaseNPC(ELEMENT("CHARACTER")):
                 logger.log_err("Can not create shop %s: (%s)%s" % (key, type(e).__name__, e))
                 continue
 
-    def get_appearance(self, caller):
+    async def get_appearance(self, caller):
         """
         This is a convenient hook for a 'look'
         command to call.
         """
-        info = super(MudderyBaseNPC, self).get_appearance(caller)
+        info = await super(MudderyBaseNPC, self).get_appearance(caller)
 
         # quest mark
-        provide_quest, complete_quest = self.have_quest(caller)
+        provide_quest, complete_quest = await self.have_quest(caller)
         info["provide_quest"] = provide_quest
         info["complete_quest"] = complete_quest
 
         return info
 
-    def get_shop_info(self, shop_key, caller):
+    async def get_shop_info(self, shop_key, caller):
         """
         Show shop's information to the player.
         :param shop_key:
@@ -102,11 +102,11 @@ class MudderyBaseNPC(ELEMENT("CHARACTER")):
         if shop_key not in self.shops:
             return None
 
-        shop_info = self.shops[shop_key].get_info(caller)
+        shop_info = await self.shops[shop_key].get_info(caller)
         shop_info["npc"] = self.get_id()
         return shop_info
 
-    def sell_goods(self, shop_key, goods_index, caller):
+    async def sell_goods(self, shop_key, goods_index, caller):
         """
         Sell goods to the caller.
         :param shop_key:
@@ -117,7 +117,7 @@ class MudderyBaseNPC(ELEMENT("CHARACTER")):
         if shop_key not in self.shops:
             return None
 
-        self.shops[shop_key].sell_goods(goods_index, caller)
+        await self.shops[shop_key].sell_goods(goods_index, caller)
 
     async def get_available_commands(self, caller):
         """
@@ -131,7 +131,7 @@ class MudderyBaseNPC(ELEMENT("CHARACTER")):
 
             # Add shops.
             for key, obj in self.shops.items():
-                if not obj.is_available(caller):
+                if not await obj.is_available(caller):
                     continue
 
                 verb = obj.get_verb()
@@ -149,14 +149,14 @@ class MudderyBaseNPC(ELEMENT("CHARACTER")):
 
         return commands
 
-    def have_quest(self, caller):
+    async def have_quest(self, caller):
         """
         If the npc can complete or provide quests.
         Returns (can_provide_quest, can_complete_quest).
         """
-        return DialogueHandler.inst().have_quest(caller, self)
+        return await DialogueHandler.inst().have_quest(caller, self)
 
-    def remove_from_combat(self):
+    async def remove_from_combat(self):
         """
         Removed from the current combat.
         """
@@ -164,7 +164,7 @@ class MudderyBaseNPC(ELEMENT("CHARACTER")):
         opponents = None
         rewards = None
 
-        combat = self.get_combat()
+        combat = await self.get_combat()
         if combat:
             result = combat.get_combat_result(self.id)
             if result:
@@ -172,10 +172,10 @@ class MudderyBaseNPC(ELEMENT("CHARACTER")):
 
         if not self.is_temp:
             if status == defines.COMBAT_LOSE:
-                self.die(opponents)
+                await self.die(opponents)
 
-        super(MudderyBaseNPC, self).remove_from_combat()
+        await super(MudderyBaseNPC, self).remove_from_combat()
 
         if not self.is_temp:
             if status != defines.COMBAT_LOSE:
-                self.recover()
+                await self.recover()

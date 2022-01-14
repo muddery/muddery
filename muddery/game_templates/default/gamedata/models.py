@@ -134,7 +134,7 @@ class character_quests(BaseModels.character_quests):
 # player character's quests
 #
 # ------------------------------------------------------------
-class quest_objectives(BaseModels.quest_objectives):
+class character_quest_objectives(BaseModels.character_quest_objectives):
     """
     Quests' objectives.
     """

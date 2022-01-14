@@ -9,7 +9,7 @@ class HonoursHandler(object):
     """
     This model stores all descriptions on all conditions.
     """
-    def set_honours(self, winners, losers):
+    async def set_honours(self, winners, losers):
         """
         Set combat winner's honour.
 
@@ -82,7 +82,7 @@ class HonoursHandler(object):
 
         # Set new honours.
         print("total_honours: %s" % total_honours)
-        HONOURS_MAPPER.set_honours(total_honours)
+        await HONOURS_MAPPER.set_honours(total_honours)
 
         return honour_changes
 

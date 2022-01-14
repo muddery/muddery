@@ -74,7 +74,7 @@ class BaseObjectStorage(BaseData, Singleton):
         to_save = to_string(value)
         await self.storage.save(obj_id, key, to_save)
 
-    def save_keys(self, obj_id, value_dict):
+    async def save_keys(self, obj_id, value_dict):
         """
         Set attributes.
 
@@ -86,12 +86,11 @@ class BaseObjectStorage(BaseData, Singleton):
             try:
                 with self.storage.transaction():
                     for key, value in value_dict.items():
-                        self.storage.save(obj_id, key, to_string(value))
+                        await self.storage.save(obj_id, key, to_string(value))
             except Exception as e:
                 traceback.print_exc()
 
-
-    def has(self, obj_id, key):
+    async def has(self, obj_id, key):
         """
         Check if the attribute exists.
 
@@ -99,7 +98,7 @@ class BaseObjectStorage(BaseData, Singleton):
             obj_id: (number) object's id.
             key: (string) attribute's key.
         """
-        return self.storage.has(obj_id, key)
+        return await self.storage.has(obj_id, key)
 
     async def load(self, obj_id, key, *default):
         """
@@ -123,17 +122,17 @@ class BaseObjectStorage(BaseData, Singleton):
             else:
                 raise e
 
-    def load_obj(self, obj_id):
+    async def load_obj(self, obj_id):
         """
         Get values of an object.
 
         Args:
             obj_id: (number) object's id.
         """
-        values = self.storage.load_category(obj_id, {})
+        values = await self.storage.load_category(obj_id, {})
         return {key: from_string(value) for key, value in values.items()}
 
-    def delete(self, obj_id, key):
+    async def delete(self, obj_id, key):
         """
         delete an attribute of an object.
 
@@ -141,16 +140,16 @@ class BaseObjectStorage(BaseData, Singleton):
             obj_id: (number) object's id.
             key: (string) attribute's key.
         """
-        self.storage.delete(obj_id, key)
+        await self.storage.delete(obj_id, key)
 
-    def remove_obj(self, obj_id):
+    async def remove_obj(self, obj_id):
         """
         Remove an object's all attributes.
 
         Args:
             obj_id: (number) object's id.
         """
-        self.storage.delete_category(obj_id)
+        await self.storage.delete_category(obj_id)
 
 
 class DBObjectStorage(BaseObjectStorage):

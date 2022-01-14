@@ -27,14 +27,14 @@ class CmdCombatInfo(BaseCommand):
         """
         if not caller.is_in_combat():
             # If the caller is not in combat.
-            caller.msg({"msg":_("You are not in combat!")})
+            await caller.msg({"msg":_("You are not in combat!")})
             return
 
         # Get combat's appearance and the character's available commands.
-        appearance = caller.ndb.combat_handler.get_appearance()
+        appearance = await caller.ndb.combat_handler.get_appearance()
         message = {"combat_info": appearance,
                    "combat_commands": caller.get_combat_commands()}
-        caller.msg(message)
+        await caller.msg(message)
 
 
 class CmdLeaveCombat(BaseCommand):
@@ -60,7 +60,7 @@ class CmdLeaveCombat(BaseCommand):
             caller.msg({"msg":_("You are not in combat!")})
             return
 
-        caller.leave_combat()
+        await caller.leave_combat()
 
 
 # ------------------------------------------------------------

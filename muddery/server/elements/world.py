@@ -5,6 +5,7 @@ The World is the base controller of a server. It managers all areas, maps and ch
 from muddery.server.conf import settings
 from muddery.server.elements.base_element import BaseElement
 from muddery.server.mappings.element_set import ELEMENT
+from muddery.server.database.gamedata.honours_mapper import HonoursMapper
 from muddery.server.database.worlddata.world_areas import WorldAreas
 from muddery.server.database.worlddata.world_channels import WorldChannels
 from muddery.server.database.worlddata.worlddata import WorldData
@@ -49,6 +50,7 @@ class MudderyWorld(BaseElement):
         :return:
         """
         # Load data.
+        await HonoursMapper.inst().init()
         await self.load_channels()
         await self.load_areas()
         self.load_commands()

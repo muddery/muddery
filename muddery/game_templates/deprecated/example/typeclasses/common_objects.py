@@ -12,7 +12,7 @@ class Food(MudderyFood):
     This is a food. Players can use it to change their properties, such as hp, mp,
     strength, etc.
     """
-    def take_effect(self, user, number):
+    async def take_effect(self, user, number):
         """
         Use this object.
 

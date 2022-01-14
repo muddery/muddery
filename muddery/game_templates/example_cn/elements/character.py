@@ -23,7 +23,7 @@ class Character(MudderyCharacter):
         """
         Recover properties.
         """
-        super(Character, self).recover()
+        await super(Character, self).recover()
         
         # Recover hp and mp.
         values = {
@@ -32,30 +32,30 @@ class Character(MudderyCharacter):
         }
         await self.states.saves(values)
         
-    def level_up(self):
+    async def level_up(self):
         """
         Upgrade level.
 
         Returns:
             None
         """
-        super(Character, self).level_up()
+        await super(Character, self).level_up()
 
         # Recover hp and mp.
-        self.recover()
+        await self.recover()
 
-    def get_appearance(self, caller):
+    async def get_appearance(self, caller):
         """
         This is a convenient hook for a 'look'
         command to call.
         """
         # get name, description and available commands.
-        info = super(Character, self).get_appearance(caller)
+        info = await super(Character, self).get_appearance(caller)
 
         info["max_hp"] = self.const.max_hp
-        info["hp"] = self.states.load("hp")
+        info["hp"] = await self.states.load("hp")
         info["max_mp"] = self.const.max_mp
-        info["mp"] = self.states.load("mp")
+        info["mp"] = await self.states.load("mp")
 
         return info
 
@@ -102,7 +102,7 @@ class Character(MudderyCharacter):
         Returns:
             None
         """
-        super(Character, self).add_exp(exp)
+        await super(Character, self).add_exp(exp)
 
         current_exp = await self.states.load("exp")
         new_exp = current_exp + exp
@@ -110,7 +110,7 @@ class Character(MudderyCharacter):
             if self.const.max_exp > 0:
                 # can upgrade
                 new_exp -= self.const.max_exp
-                self.level_up()
+                await self.level_up()
             else:
                 # can not upgrade
                 new_exp = 0

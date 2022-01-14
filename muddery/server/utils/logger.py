@@ -91,16 +91,23 @@ class Logger(object):
         try:
             if trace_string:
                 for line in trace_string.splitlines():
+                    msg = "[::] %s" % line
+                    print(msg)
                     self.logger.error("[::] %s" % line)
             if errmsg:
                 try:
                     errmsg = str(errmsg)
                 except Exception as e:
                     errmsg = str(e)
+
                 for line in errmsg.splitlines():
-                    self.logger.error("[EE] %s" % line)
-        except Exception:
-            self.logger.error("[EE] %s" % errmsg)
+                    msg = "[EE] %s" % line
+                    print(msg)
+                    self.logger.error(msg)
+        except Exception as e:
+            msg = "[EE] %s" % errmsg
+            print(msg)
+            self.logger.error(msg)
 
     def log_err(self, errmsg):
         """
@@ -116,7 +123,9 @@ class Logger(object):
             errmsg = str(e)
 
         for line in errmsg.splitlines():
-            self.logger.error("[EE] %s" % line)
+            msg = "[EE] %s" % line
+            print(msg)
+            self.logger.error(msg)
 
     def log_warn(self, warnmsg):
         """

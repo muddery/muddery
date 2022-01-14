@@ -20,11 +20,11 @@ class FuncEscape(StatementFunction):
     key = "escape"
     const = False
 
-    def func(self):
+    async def func(self):
         """
         Implement the function.
         """
-        combat = self.caller.get_combat()
+        combat = await self.caller.get_combat()
         if not combat:
             # caller is not in combat.
             return
@@ -40,5 +40,5 @@ class FuncEscape(StatementFunction):
             # escape failed
             return _("Failed.")
 
-        combat.escape_combat(self.caller)
+        await combat.escape_combat(self.caller)
         return _("Succeeded!")

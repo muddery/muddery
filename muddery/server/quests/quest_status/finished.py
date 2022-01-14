@@ -12,12 +12,12 @@ class Finished(BaseQuestStatus):
     key = "FINISHED"
     name = "Quest Finished"
 
-    def match(self, caller, quest_key):
+    async def match(self, caller, quest_key):
         """
         Check.
         """
         if not caller:
             return False
 
-        return caller.quest_handler.is_finished(quest_key)
+        return await caller.quest_handler.is_finished(quest_key)
     

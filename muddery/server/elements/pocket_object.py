@@ -42,26 +42,26 @@ class MudderyPocketObject(ELEMENT("COMMON_OBJECT")):
         """
         return self.const.icon
 
-    def get_appearance(self, caller):
+    async def get_appearance(self, caller):
         """
         This is a convenient hook for a 'look'
         command to call.
         """
         # Get name, description and available commands.
-        info = super(MudderyPocketObject, self).get_appearance(caller)
+        info = await super(MudderyPocketObject, self).get_appearance(caller)
         info["can_remove"] = self.const.can_remove
         info["can_discard"] = self.const.can_discard
 
         return info
 
-    def get_available_commands(self, caller):
+    async def get_available_commands(self, caller):
         """
         This returns a list of available commands.
         "args" must be a string without ' and ", usually it is self.id.
         """
-        return super(MudderyPocketObject, self).get_available_commands(caller)
+        return await super(MudderyPocketObject, self).get_available_commands(caller)
 
-    def take_effect(self, user, number):
+    async def take_effect(self, user, number):
         """
         Use this object.
 
@@ -93,7 +93,7 @@ class MudderyFood(ELEMENT("POCKET_OBJECT")):
     element_name = "Food"
     model_name = "foods"
 
-    def take_effect(self, user, number):
+    async def take_effect(self, user, number):
         """
         Use this object.
 
@@ -111,7 +111,7 @@ class MudderyFood(ELEMENT("POCKET_OBJECT")):
 
         properties = {key: self.const_data_handler.get(key) for key, info in self.get_properties_info().items()}
         to_change = {key: value * number for key, value in properties.items() if value != 0}
-        changes = user.change_states(to_change)
+        changes = await user.change_states(to_change)
         user.show_status()
 
         results = []
@@ -125,7 +125,7 @@ class MudderyFood(ELEMENT("POCKET_OBJECT")):
 
         return ", ".join(results), number
 
-    def get_available_commands(self, caller):
+    async def get_available_commands(self, caller):
         """
         This returns a list of available commands.
         "args" must be a string without ' and ", usually it is self.id.
@@ -134,7 +134,7 @@ class MudderyFood(ELEMENT("POCKET_OBJECT")):
             "name": _("Use"),
             "cmd": "use",
         }]
-        commands.extend(super(MudderyFood, self).get_available_commands(caller))
+        commands.extend(await super(MudderyFood, self).get_available_commands(caller))
 
         return commands
 
@@ -155,7 +155,7 @@ class MudderyEquipment(ELEMENT("POCKET_OBJECT")):
         """
         return self.const.position
 
-    def equip_to(self, user):
+    async def equip_to(self, user):
         """
         Equip this equipment to the user. It is called when a character equip
         this equipment.
@@ -176,9 +176,9 @@ class MudderyEquipment(ELEMENT("POCKET_OBJECT")):
 
         properties = {key: self.const_data_handler.get(key) for key, info in self.get_properties_info().items()}
         to_change = {key: value for key, value in properties.items() if value != 0}
-        user.change_const_properties(to_change)
+        await user.change_const_properties(to_change)
 
-    def get_available_commands(self, caller):
+    async def get_available_commands(self, caller):
         """
         This returns a list of available commands.
         "args" must be a string without ' and ", usually it is self.id.
@@ -187,7 +187,7 @@ class MudderyEquipment(ELEMENT("POCKET_OBJECT")):
             "name": _("Equip"),
             "cmd": "equip",
         }]
-        commands.extend(super(MudderyEquipment, self).get_available_commands(caller))
+        commands.extend(await super(MudderyEquipment, self).get_available_commands(caller))
 
         return commands
 
@@ -200,7 +200,7 @@ class MudderySkillBook(ELEMENT("POCKET_OBJECT")):
     element_name = "Skill Book"
     model_name = "skill_books"
 
-    def get_available_commands(self, caller):
+    async def get_available_commands(self, caller):
         """
         This returns a list of available commands.
         "args" must be a string without ' and ", usually it is self.id.
@@ -209,11 +209,11 @@ class MudderySkillBook(ELEMENT("POCKET_OBJECT")):
             "name": _("Use"),
             "cmd": "use",
         }]
-        commands.extend(super(MudderySkillBook, self).get_available_commands(caller))
+        commands.extend(await super(MudderySkillBook, self).get_available_commands(caller))
 
         return commands
 
-    def take_effect(self, user, number):
+    async def take_effect(self, user, number):
         """
         Use this object.
 
@@ -232,7 +232,7 @@ class MudderySkillBook(ELEMENT("POCKET_OBJECT")):
             return _("No effect."), 0
 
         try:
-            user.learn_skill(skill_key, skill_level, False)
+            await user.learn_skill(skill_key, skill_level, False)
             return _("You learned skill."), 1
         except:
             return _("No effect."), 0

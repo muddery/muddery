@@ -16,7 +16,7 @@ class CombatHandler(object):
         self.combat_id = 0
         self.combats = {}
 
-    def create_combat(self, combat_type, teams, desc, timeout):
+    async def create_combat(self, combat_type, teams, desc, timeout):
         """
         Create a new combat.
 
@@ -36,7 +36,7 @@ class CombatHandler(object):
         else:
             combat = class_from_path(settings.NORMAL_COMBAT_HANDLER)()
 
-        combat.set_combat(self, new_combat_id, combat_type, teams, desc, timeout)
+        await combat.set_combat(self, new_combat_id, combat_type, teams, desc, timeout)
         combat.start()
         self.combats[new_combat_id] = combat
 
