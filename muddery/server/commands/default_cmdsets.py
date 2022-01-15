@@ -83,6 +83,7 @@ class AccountCmdSet(CommandSet):
         cls.add(player.CmdQuit())
         cls.add(player.CmdChangePassword())
         cls.add(player.CmdPuppet())
+        cls.add(player.CmdPuppetName())
         cls.add(player.CmdUnpuppet())
         cls.add(player.CmdCharCreate())
         cls.add(player.CmdCharDelete())

@@ -152,7 +152,6 @@ class account_characters(Base):
     # playable character's id
     char_id = Column(Integer, unique=True, nullable=False)
 
-
 # ------------------------------------------------------------
 #
 # player character's basic information
@@ -171,6 +170,12 @@ class character_info(Base):
 
     # playable character's id
     char_id = Column(Integer, unique=True, nullable=False)
+
+    # character's element type
+    element_type = Column(String(KEY_LENGTH), nullable=False)
+
+    # character's key
+    element_key = Column(String(KEY_LENGTH), nullable=False)
 
     # character's nickname
     nickname = Column(String(KEY_LENGTH), nullable=False)

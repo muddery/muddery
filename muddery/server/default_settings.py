@@ -31,6 +31,9 @@ class Settings(object):
     # Muddery base server config
     ######################################################################
 
+    # Set test mode.
+    TEST_MODE = False
+
     # This is the name of your server.
     GAME_SERVERNAME = "Muddery"
 
@@ -141,6 +144,12 @@ class Settings(object):
 
     # Element type for player characters.
     PLAYER_CHARACTER_ELEMENT_TYPE = "PLAYER_CHARACTER"
+
+    # Element type for player characters in test mode.
+    PLAYER_CHARACTER_TYPE_TEST_MODE = "TESTER_CHARACTER"
+
+    # Element key for player characters in test mode.
+    PLAYER_CHARACTER_KEY_TEST_MODE = "tester"
 
     # Element type for player characters.
     STAFF_CHARACTER_ELEMENT_TYPE = "STAFF_CHARACTER"

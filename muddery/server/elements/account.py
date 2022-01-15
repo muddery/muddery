@@ -208,6 +208,7 @@ class MudderyAccount(BaseElement):
         Args:
             session (Session): session to use for puppeting
             char_db_id (Int): the character's db id
+            char_key (String): the character's key
 
         Raises:
             RuntimeError: If puppeting is not possible, the
@@ -234,16 +235,19 @@ class MudderyAccount(BaseElement):
         # Find the character to puppet.
         try:
             if self.type == "STAFF":
-                new_char = ELEMENT(settings.STAFF_CHARACTER_ELEMENT_TYPE)()
-                character_key = GameSettings.inst().get("default_staff_character_key")
+                char_type = settings.STAFF_CHARACTER_ELEMENT_TYPE
+                char_key = await GameSettings.inst().get("default_staff_character_key")
             else:
-                new_char = ELEMENT(settings.PLAYER_CHARACTER_ELEMENT_TYPE)()
-                character_key = GameSettings.inst().get("default_player_character_key")
+                char_info = await CharacterInfo.inst().get(char_db_id)
+                char_type = char_info["element_type"]
+                char_key = char_info["element_key"]
+
+            new_char = ELEMENT(char_type)()
             new_char.set_db_id(char_db_id)
 
             # do the connection
             new_char.set_account(self)
-            await new_char.setup_element(character_key)
+            await new_char.setup_element(char_key)
         except Exception as e:
             traceback.print_exc()
             await self.msg({"alert": _("That is not a valid character choice.")})

@@ -395,11 +395,6 @@ class player_characters(BaseElement):
     __tablename__ = "player_characters"
 
 
-class staff_characters(BaseElement):
-    "Staff's character."
-    __tablename__ = "staff_characters"
-
-
 # ------------------------------------------------------------
 #
 # exits connecting between rooms.

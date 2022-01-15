@@ -8,7 +8,7 @@ They can not be seen in game.
 from muddery.server.mappings.element_set import ELEMENT
 
 
-class MudderyStaffCharacter(ELEMENT("PLAYER_CHARACTER")):
+class MudderyTesterCharacter(ELEMENT("PLAYER_CHARACTER")):
     """
     The Character defaults to implementing some of its hook methods with the
     following standard functionality:
@@ -27,8 +27,8 @@ class MudderyStaffCharacter(ELEMENT("PLAYER_CHARACTER")):
                     has connected" message echoed to the room
 
     """
-    element_type = "STAFF_CHARACTER"
-    element_name = "Staff Character"
+    element_type = "TESTER_CHARACTER"
+    element_name = "Tester Character"
 
     def is_staff(self):
         """
@@ -36,7 +36,7 @@ class MudderyStaffCharacter(ELEMENT("PLAYER_CHARACTER")):
 
         :return:
         """
-        return True
+        return False
 
     def bypass_events(self):
         """
@@ -53,46 +53,4 @@ class MudderyStaffCharacter(ELEMENT("PLAYER_CHARACTER")):
         Return:
             boolean: visible
         """
-        return False
-
-    async def at_post_puppet(self):
-        """
-        Called just after puppeting has been completed and all
-        Player<->Object links have been established.
-
-        """
-        self.available_channels = await self.get_available_channels()
-
-        # Send puppet info to the client first.
-        output = {
-            "id": self.get_id(),
-            "name": await self.get_name(),
-            "is_staff": self.is_staff(),
-            "icon": getattr(self, "icon", None),
-            "allow_commands": True,
-        }
-
-        await self.msg({"puppet": output})
-
-        # send character's data to player
-        message = {
-            "status": await self.return_status(),
-            "equipments": await self.return_equipments(),
-            "inventory": self.get_inventory_appearance(),
-            "skills": await self.return_skills(),
-            "quests": await self.quest_handler.return_quests(),
-            "revealed_map": await self.get_revealed_map(),
-            "channels": self.available_channels
-        }
-        await self.msg(message)
-
-        await self.show_location()
-
-    async def get_appearance(self, caller):
-        """
-        This is a convenient hook for a 'look'
-        command to call.
-        """
-        info = await super(MudderyStaffCharacter, self).get_appearance(caller)
-        info["is_staff"] = True
-        return info
+        return True

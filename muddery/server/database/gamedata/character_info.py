@@ -26,7 +26,7 @@ class CharacterInfo(BaseData, Singleton):
         char_info = await self.storage.load_category("", {})
         self.nicknames = {info["nickname"]: char_id for char_id, info in char_info.items()}
 
-    async def add(self, char_id, nickname="", level=1):
+    async def add(self, char_id, element_type, element_key, nickname="", level=1):
         """
         Add a new player character.
         :param char_id:
@@ -34,6 +34,8 @@ class CharacterInfo(BaseData, Singleton):
         :return:
         """
         await self.storage.add("", char_id, {
+            "element_type": element_type,
+            "element_key": element_key,
             "nickname": nickname,
             "level": level,
         })
@@ -65,6 +67,14 @@ class CharacterInfo(BaseData, Singleton):
 
         if current_info["nickname"]:
             del self.nicknames[current_info["nickname"]]
+
+    async def get(self, char_id):
+        """
+        Get a player character's nickname.
+        :param char_id:
+        :return:
+        """
+        return await self.storage.load("", char_id)
 
     async def get_nickname(self, char_id):
         """

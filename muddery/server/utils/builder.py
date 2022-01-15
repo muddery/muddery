@@ -13,7 +13,7 @@ from muddery.server.database.gamedata.system_data import SystemData
 from muddery.server.database.gamedata.character_location import CharacterLocation
 
 
-async def create_character(new_player, nickname, character_key=None,
+async def create_character(account, nickname, character_key=None,
                      level=1, element_type=None, location_key=None, home_key=None):
     """
     Helper function, creates a character based on a player's name.
@@ -24,18 +24,9 @@ async def create_character(new_player, nickname, character_key=None,
     if not element_type:
         element_type = settings.PLAYER_CHARACTER_ELEMENT_TYPE
 
-    new_character = ELEMENT(element_type)()
+    if not nickname:
+        nickname = character_key
 
-    # set player's account id
-    new_character.set_account(new_player)
-
-    # Get a new player character id.
-    char_db_id = await SystemData.inst().load("last_player_character_id", 0, for_update=True)
-    char_db_id += 1
-    await SystemData.inst().save("last_player_character_id", char_db_id)
-    new_character.set_db_id(char_db_id)
-
-    # set location
     if not location_key:
         location_key = GameSettings.inst().get("start_location_key")
         if not location_key:
@@ -43,20 +34,24 @@ async def create_character(new_player, nickname, character_key=None,
             if not location_key:
                 location_key = ""
 
-    await CharacterLocation.inst().save(char_db_id, location_key)
-
-    # Add nickname
-    if not nickname:
-        nickname = character_key
+    # Get a new player character id.
+    char_db_id = await SystemData.inst().load("last_player_character_id", 0, for_update=True)
+    char_db_id += 1
+    await SystemData.inst().save("last_player_character_id", char_db_id)
 
     # save data
-    await AccountCharacters.inst().add(new_player.get_id(), char_db_id)
-    await CharacterInfo.inst().add(char_db_id, nickname, level)
+    await AccountCharacters.inst().add(account.get_id(), char_db_id)
+    await CharacterInfo.inst().add(char_db_id, element_type, character_key, nickname, level)
 
-    # set nickname
-    await new_character.set_nickname(nickname)
+    # set location
+    await CharacterLocation.inst().save(char_db_id, location_key)
 
     # set character info
-    await new_character.setup_element(character_key, level=level, first_time=True)
+    new_char = ELEMENT(element_type)()
+    new_char.set_db_id(char_db_id)
 
-    return new_character
+    # set player's account id
+    new_char.set_account(account)
+    await new_char.setup_element(character_key, level=level, first_time=True)
+
+    return

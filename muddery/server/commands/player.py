@@ -92,14 +92,61 @@ class CmdPuppet(BaseCommand):
             await account.msg({"alert": _("That is not a valid character choice.")})
             return
 
-        char_id = args
+        puppet_id = args
         char_all = await account.get_all_characters()
-        if char_id not in char_all:
+        if puppet_id not in char_all:
             await account.msg({"alert": _("That is not a valid character choice.")})
             return
 
         try:
-            await account.puppet_object(char_id)
+            await account.puppet_object(puppet_id)
+        except Exception as e:
+            traceback.print_exc()
+            await account.msg({"alert": _("That is not a valid character choice.")})
+
+
+class CmdPuppetName(BaseCommand):
+    """
+    Control an object you have permission to puppet
+
+    Usage:
+        {
+            "cmd":"puppet",
+            "args":<character's name>
+        }
+
+    Puppet a given Character.
+
+    This will attempt to "become" a different character assuming you have
+    the right to do so. Note that it's the PLAYER character that puppets
+    characters/objects and which needs to have the correct permission!
+
+    """
+    key = "puppet_name"
+
+    @classmethod
+    async def func(cls, account, args, context):
+        """
+        Main puppet method
+        """
+        if not args:
+            await account.msg({"alert": _("That is not a valid character choice.")})
+            return
+
+        puppet_name = args
+        char_all = await account.get_all_characters()
+        puppet_id = None
+        for char_id, char_name in char_all:
+            if puppet_name == char_name:
+                puppet_id = char_id
+                break
+
+        if puppet_id is None:
+            await account.msg({"alert": _("That is not a valid character choice.")})
+            return
+
+        try:
+            await account.puppet_object(puppet_id)
         except Exception as e:
             traceback.print_exc()
             await account.msg({"alert": _("That is not a valid character choice.")})
@@ -183,7 +230,15 @@ class CmdCharCreate(BaseCommand):
             pass
 
         try:
-            await create_character(account, name)
+            if settings.TEST_MODE:
+                await create_character(
+                    account,
+                    name,
+                    element_type=settings.PLAYER_CHARACTER_TYPE_TEST_MODE,
+                    character_key=settings.PLAYER_CHARACTER_KEY_TEST_MODE,
+                )
+            else:
+                await create_character(account, name)
         except Exception as e:
             # We are in the middle between logged in and -not, so we have
             # to handle tracebacks ourselves at this point. If we don't,

@@ -698,6 +698,14 @@ class MudderyCharacter(BaseElement):
         """
         return False
 
+    def bypass_events(self):
+        """
+        Check if this is a staff character.
+
+        :return:
+        """
+        return False
+
     async def die(self, killers):
         """
         This character die.
