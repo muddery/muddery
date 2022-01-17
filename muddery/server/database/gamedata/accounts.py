@@ -38,7 +38,6 @@ class Accounts(BaseData, Singleton):
             "account_id": account_id,
             "type": type,
             "create_time": current_time,
-            "last_login": current_time,
         })
 
     async def remove(self, username):

@@ -164,6 +164,7 @@ class MudderyCharacter(BaseElement):
             keep_states (boolean): states values keep last values.
         """
         # set states
+        to_save = {}
         records = CharacterStatesDict.all()
         for record in records:
             if keep_states and await self.states.has(record.key):
@@ -182,7 +183,10 @@ class MudderyCharacter(BaseElement):
                     value = record.default
 
             # set the value.
-            await self.states.save(record.key, value)
+            to_save[record.key] = value
+
+        if to_save:
+            await self.states.saves(to_save)
 
     async def load_custom_level_data(self, element_type, element_key, level):
         """

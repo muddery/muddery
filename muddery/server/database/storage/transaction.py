@@ -1,9 +1,13 @@
 
-class Transaction(object):
+from muddery.server.database.storage.base_transaction import BaseTransaction
+
+
+class Transaction(BaseTransaction):
     """
     Guarantee the transaction execution of a given block.
     """
     def __init__(self, storage):
+        super(Transaction, self).__init__()
         self.storage = storage
 
     def __enter__(self):

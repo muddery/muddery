@@ -1,12 +1,16 @@
 """
 The base class of key value storage.
 """
+from muddery.server.database.storage.base_transaction import BaseTransaction
 
 
 class BaseKeyValueStorage(object):
     """
     The storage of key-values.
     """
+    def __init__(self):
+        self.trans = BaseTransaction()
+
     async def add(self, category, key, value=None):
         """
         Add a new attribute. If the key already exists, raise an exception.
@@ -93,4 +97,4 @@ class BaseKeyValueStorage(object):
         """
         Guarantee the transaction execution of a given block.
         """
-        pass
+        return self.trans

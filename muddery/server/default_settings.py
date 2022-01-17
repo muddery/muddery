@@ -90,7 +90,7 @@ class Settings(object):
             'PASSWORD': '',
             'HOST': '',
             'PORT': '',
-            'DEBUG': False,
+            'DEBUG': True,
         },
         'worlddata': {
             'ENGINE': 'sqlite3',
@@ -100,7 +100,7 @@ class Settings(object):
             'PASSWORD': '',
             'HOST': '',
             'PORT': '',
-            'DEBUG': False,
+            'DEBUG': True,
         },
     }
 
