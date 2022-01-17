@@ -1,6 +1,7 @@
 
 import json, traceback
 from muddery.server.server import Server
+from muddery.server.utils.logger import logger
 
 
 class SanicSession(object):
@@ -38,11 +39,12 @@ class SanicSession(object):
         self.connection = connection
         self.address = "%s:%s" % (request.ip, request.port)
 
-    def disconnect(self, close_code):
+    async def disconnect(self, close_code):
         """
         Called on a client disconnected.
         """
-        pass
+        if self.account:
+            await self.logout()
 
     async def receive(self, text_data=None, bytes_data=None):
         """
@@ -62,20 +64,20 @@ class SanicSession(object):
         self.authed = True
 
         if self.account:
-            self.logout()
+            await self.logout()
 
         self.account = account
 
         # call hook
         await self.account.at_post_login(self)
 
-    def logout(self):
+    async def logout(self):
         """
         Logout an account
         """
         if self.account:
             # call hook
-            self.account.at_pre_logout()
+            await self.account.at_pre_logout()
 
         self.account = None
         self.authed = False
@@ -91,4 +93,7 @@ class SanicSession(object):
         out_text = json.dumps({"data": text, "context": context}, ensure_ascii=False)
 
         # send message
-        await self.connection.send(out_text)
+        try:
+            await self.connection.send(out_text)
+        except Exception as e:
+            logger.log_err("Send message error: %s" % e)

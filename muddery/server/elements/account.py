@@ -98,9 +98,22 @@ class MudderyAccount(BaseElement):
         self.id = account_id
         self.type = type
 
-    async def set_user(self, username, password):
+    async def delete_user(self, username, raw_password):
+        """
+        Delete a user.
+        :param username:
+        :param raw_password:
+        :return:
+        """
+        if not await self.check_password(username, raw_password):
+            # Password not match.
+            raise MudderyError(ERR.no_authentication, _("Incorrect username or password."))
+
+        await Accounts.inst().remove(username)
+
+    async def set_user(self, username, raw_password):
         # Match account name and check password
-        if not await self.check_password(username, password):
+        if not await self.check_password(username, raw_password):
             # Password not match.
             raise MudderyError(ERR.no_authentication, _("Incorrect username or password."))
 
@@ -157,11 +170,12 @@ class MudderyAccount(BaseElement):
             "max_char": settings.MAX_PLAYER_CHARACTERS
         })
 
-    def at_pre_logout(self):
+    async def at_pre_logout(self):
         """
         Called before the logout process.
         """
-        pass
+        if self.puppet_obj:
+            await self.unpuppet_character()
 
     async def get_all_characters(self):
         """
@@ -200,7 +214,7 @@ class MudderyAccount(BaseElement):
         if self.session:
             await self.session.msg(text=text, context=context)
 
-    async def puppet_object(self, char_db_id):
+    async def puppet_character(self, char_db_id):
         """
         Use the given session to control (puppet) the given object (usually
         a Character type).
@@ -279,7 +293,7 @@ class MudderyAccount(BaseElement):
         # final hook
         await new_char.at_post_puppet()
 
-    async def unpuppet_object(self):
+    async def unpuppet_character(self):
         """
         Disengage control over an object.
 
@@ -317,7 +331,7 @@ class MudderyAccount(BaseElement):
         if char_db_id not in characters:
             raise KeyError("Can not find the character.")
 
-        await self.unpuppet_object()
+        await self.unpuppet_character()
 
         # delete all character data.
         await AccountCharacters.inst().remove_character(self.id, char_db_id)
@@ -329,6 +343,29 @@ class MudderyAccount(BaseElement):
         await CharacterSkills.inst().remove_character(char_db_id)
         await CharacterCombat.inst().remove_character(char_db_id)
         await HonoursMapper.inst().remove_character(char_db_id)
+
+    async def delete_all_characters(self):
+        """
+        Delete an character.
+
+        :param char_db_id:
+        :return:
+        """
+        # use the playable_characters list to search
+        all_characters = await self.get_all_characters()
+        for char_db_id in all_characters:
+            await self.unpuppet_character()
+
+            # delete all character data.
+            await AccountCharacters.inst().remove_character(self.id, char_db_id)
+            await CharacterInfo.inst().remove_character(char_db_id)
+            await CharacterLocation.inst().remove_character(char_db_id)
+            await CharacterInventory.inst().remove_character(char_db_id)
+            await CharacterEquipments.inst().remove_character(char_db_id)
+            await CharacterQuests.inst().remove_character(char_db_id)
+            await CharacterSkills.inst().remove_character(char_db_id)
+            await CharacterCombat.inst().remove_character(char_db_id)
+            await HonoursMapper.inst().remove_character(char_db_id)
 
     def at_cmdset_get(self):
         pass
@@ -362,10 +399,10 @@ class MudderyAccount(BaseElement):
             "pw_changed": True
         })
 
-    def disconnect(self, reason):
+    async def disconnect(self, reason):
         """
         Disconnect the session
         """
         if self.session:
-            self.session.disconnect(reason)
+            await self.session.disconnect(reason)
             self.session = None

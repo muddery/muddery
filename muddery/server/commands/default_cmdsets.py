@@ -88,6 +88,7 @@ class AccountCmdSet(CommandSet):
         cls.add(player.CmdCharCreate())
         cls.add(player.CmdCharDelete())
         cls.add(player.CmdCharAll())
+        cls.add(player.CmdDeleteAccount())
 
 
 class SessionCmdSet(CommandSet):

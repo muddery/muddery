@@ -120,17 +120,21 @@ class MatchPVPHandler(Singleton):
         """
         char_db_id = character.get_db_id()
 
+        in_queue = False
         try:
             self.waiting_queue.remove(char_db_id)
+            in_queue = True
         except ValueError:
             pass
 
         try:
             del self.preparing[char_db_id]
+            in_queue = True
         except KeyError:
             pass
 
-        await character.msg({"left_combat_queue": ""})
+        if in_queue:
+            await character.msg({"left_combat_queue": ""})
 
     async def match(self):
         """

@@ -75,7 +75,7 @@ class Session(WebsocketConsumer):
         """
         if self.account:
             # call hook
-            self.account.at_pre_logout(self)
+            await self.account.at_pre_logout(self)
 
         self.account = None
         self.authed = False

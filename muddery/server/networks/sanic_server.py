@@ -29,10 +29,11 @@ def run_server():
                 data = await ws.recv()
                 await session.receive(data)
         except CancelledError as e:
-            pass
+            await session.disconnect(0)
         except Exception as e:
             traceback.print_exc()
+            await session.disconnect(-1)
 
-        session.disconnect(0)
+        await ws.close()
 
     server_app.run(port=settings.WEBSERVER_PORT)

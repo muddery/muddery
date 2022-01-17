@@ -17,6 +17,53 @@ from muddery.server.database.gamedata.character_info import CharacterInfo
 # is used to make sure returns go to the right session
 
 
+class CmdDeleteAccount(BaseCommand):
+    """
+    Delete a player's account.
+
+    Usage:
+        {
+            "cmd":"delete_account",
+            "args":{
+                "playername":<playername>,
+                "password":<password>,
+            }
+        }
+
+    args:
+        connect: (boolean)connect after created
+    """
+    key = "delete_account"
+
+    @classmethod
+    async def func(cls, account, args, context):
+        "Do checks, create account and login."
+        if not args:
+            await account.msg({"alert": _("Syntax error!")})
+            return
+
+        if "username" not in args:
+            await account.msg({"alert": _("You should appoint a username.")})
+            return
+
+        if "password" not in args:
+            await account.msg({"alert": _("You should appoint a password.")})
+            return
+
+        username = args["username"]
+        username = re.sub(r"\s+", " ", username).strip()
+
+        password = args["password"]
+
+        # Set the account with username and password.
+        if not await account.check_password(username, password):
+            await account.msg({"alert": _("Incorrect password.")})
+            return
+
+        await account.delete_all_characters()
+        await account.delete_user(username, password)
+
+
 class CmdQuit(BaseCommand):
     """
     Quit the game.
@@ -34,11 +81,11 @@ class CmdQuit(BaseCommand):
     @classmethod
     async def func(cls, account, args, context):
         # we are quitting the last available session
-        account.disconnect()
         await account.msg({
             "msg": "{RQuitting{n. Hope to see you again, soon.",
             "logout": ""
         })
+        await account.disconnect()
 
 
 class CmdChangePassword(BaseCommand):
@@ -99,7 +146,7 @@ class CmdPuppet(BaseCommand):
             return
 
         try:
-            await account.puppet_object(puppet_id)
+            await account.puppet_character(puppet_id)
         except Exception as e:
             traceback.print_exc()
             await account.msg({"alert": _("That is not a valid character choice.")})
@@ -134,11 +181,11 @@ class CmdPuppetName(BaseCommand):
             return
 
         puppet_name = args
-        char_all = await account.get_all_characters()
+        char_all = await account.get_all_nicknames()
         puppet_id = None
-        for char_id, char_name in char_all:
-            if puppet_name == char_name:
-                puppet_id = char_id
+        for char_info in char_all:
+            if puppet_name == char_info["name"]:
+                puppet_id = char_info["id"]
                 break
 
         if puppet_id is None:
@@ -146,7 +193,7 @@ class CmdPuppetName(BaseCommand):
             return
 
         try:
-            await account.puppet_object(puppet_id)
+            await account.puppet_character(puppet_id)
         except Exception as e:
             traceback.print_exc()
             await account.msg({"alert": _("That is not a valid character choice.")})
@@ -172,7 +219,7 @@ class CmdUnpuppet(BaseCommand):
     async def func(cls, account, args, context):
         # disconnect
         try:
-            await account.unpuppet_object()
+            await account.unpuppet_character()
             await account.msg({"unpuppet": True})
         except RuntimeError as e:
             await account.msg({"alert":_("Could not unpuppet: %s" % e)})
@@ -347,7 +394,4 @@ class CmdCharAll(BaseCommand):
     @classmethod
     async def func(cls, account, args, context):
         "delete the character"
-        char_all = account.get_all_characters()
-        await account.msg({
-            "char_all": [{"name": data["nickname"], "id": char_id} for char_id, data in char_all.items()],
-        })
+        await account.msg({"char_all": account.get_all_nicknames()})
