@@ -69,3 +69,5 @@ class ERR(object):
     inventory_error = 10017
 
     duplicate_key = 10018
+
+    no_cache = 10019

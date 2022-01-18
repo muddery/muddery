@@ -5,7 +5,7 @@ Query and deal game data.
 
 from muddery.server.conf import settings
 from muddery.server.utils import utils
-from muddery.server.database.storage.transaction import Transaction
+from muddery.server.database.storage.storage_with_cache import StorageWithCache
 
 
 class BaseData(object):
@@ -31,9 +31,32 @@ class BaseData(object):
         """
         Create the storage object.
         """
-        storage_class = utils.class_from_path(settings.DATABASE_ACCESS_OBJECT)
         session = settings.GAME_DATA_APP
         config = settings.AL_DATABASES[session]
+
+        storage_class = utils.class_from_path(settings.DATABASE_STORAGE_OBJECT)
+        storage = storage_class(
+            session,
+            config["MODELS"],
+            table_name,
+            category_name,
+            key_field,
+            default_value_field
+        )
+
+        cache_class = utils.class_from_path(settings.DATABASE_CACHE_OBJECT)
+        cache = cache_class()
+
+        return StorageWithCache(storage, cache)
+
+    def create_storage_no_cache(self, table_name, category_name, key_field, default_value_field):
+        """
+        Create the storage object.
+        """
+        session = settings.GAME_DATA_APP
+        config = settings.AL_DATABASES[session]
+
+        storage_class = utils.class_from_path(settings.DATABASE_STORAGE_OBJECT)
         return storage_class(
             session,
             config["MODELS"],

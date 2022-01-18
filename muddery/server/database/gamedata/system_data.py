@@ -19,7 +19,7 @@ class SystemData(BaseData, Singleton):
     def __init__(self):
         # data storage
         super(SystemData, self).__init__()
-        self.storage = self.create_storage(self.__table_name, self.__category_name, self.__key_field, self.__default_value_field)
+        self.storage = self.create_storage_no_cache(self.__table_name, self.__category_name, self.__key_field, self.__default_value_field)
 
     async def save(self, key, value):
         """

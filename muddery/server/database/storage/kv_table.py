@@ -1,6 +1,7 @@
 """
 Key value storage in relational database.
 """
+
 import traceback
 import importlib
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
@@ -16,7 +17,13 @@ class KeyValueTable(BaseKeyValueStorage):
     """
     The storage of object attributes.
     """
-    def __init__(self, session_name, model_path, model_name, category_field, key_field, default_value_field=None):
+    def __init__(self,
+                 session_name: str,
+                 model_path: str,
+                 model_name: str,
+                 category_field: str,
+                 key_field: str,
+                 default_value_field: str = None):
         """
 
         :param model_name: table's model

@@ -1,7 +1,8 @@
 """
 The base class of key value storage.
 """
-from muddery.server.database.storage.base_transaction import BaseTransaction
+
+from asyncio import Lock
 
 
 class BaseKeyValueStorage(object):
@@ -9,9 +10,9 @@ class BaseKeyValueStorage(object):
     The storage of key-values.
     """
     def __init__(self):
-        self.trans = BaseTransaction()
+        self.lock = Lock()
 
-    async def add(self, category, key, value=None):
+    async def add(self, category: str, key: str, value: any = None) -> None:
         """
         Add a new attribute. If the key already exists, raise an exception.
 
@@ -22,7 +23,7 @@ class BaseKeyValueStorage(object):
         """
         pass
 
-    async def save(self, category, key, value=None):
+    async def save(self, category: str, key: str, value: any = None) -> None:
         """
         Set an attribute.
 
@@ -33,7 +34,7 @@ class BaseKeyValueStorage(object):
         """
         pass
 
-    async def has(self, category, key):
+    async def has(self, category: str, key: str) -> bool:
         """
         Check if the attribute exists.
 
@@ -43,14 +44,14 @@ class BaseKeyValueStorage(object):
         """
         pass
 
-    async def all(self):
+    async def all(self) -> dict:
         """
         Get all data.
         :return:
         """
         pass
 
-    async def load(self, category, key, *default):
+    async def load(self, category: str, key: str, *default, for_update=False) -> any:
         """
         Get the value of an attribute.
 
@@ -65,7 +66,7 @@ class BaseKeyValueStorage(object):
         """
         pass
 
-    async def load_category(self, category):
+    async def load_category(self, category: str, *default) -> any:
         """
         Get all a category's data.
 
@@ -74,7 +75,7 @@ class BaseKeyValueStorage(object):
         """
         pass
 
-    async def delete(self, category, key):
+    async def delete(self, category: str, key: str) -> any:
         """
         delete an attribute of an object.
 
@@ -84,7 +85,7 @@ class BaseKeyValueStorage(object):
         """
         pass
 
-    async def delete_category(self, category):
+    async def delete_category(self, category: str) -> dict:
         """
         Remove all values of a category.
 
@@ -93,8 +94,8 @@ class BaseKeyValueStorage(object):
         """
         pass
 
-    def transaction(self):
+    def transaction(self) -> any:
         """
         Guarantee the transaction execution of a given block.
         """
-        return self.trans
+        pass

@@ -2,20 +2,19 @@
 Key value storage in relational database.
 """
 
-from muddery.server.database.storage.base_kv_storage import BaseKeyValueStorage
+from muddery.server.database.storage.base_kv_cache import BaseKeyValueCache
+from muddery.server.database.storage.cache_transaction import CacheTransaction
 from muddery.server.utils.exception import MudderyError, ERR
 
 
-class MemoryStorage(BaseKeyValueStorage):
+class MemoryCache(BaseKeyValueCache):
     """
     The storage of object attributes.
     """
     def __init__(self):
-        """
-
-        """
-        super(MemoryStorage, self).__init__()
+        super(MemoryCache, self).__init__()
         self.storage = {}
+        self.trans = CacheTransaction(self)
 
     async def add(self, category, key, value=None):
         """
@@ -32,6 +31,7 @@ class MemoryStorage(BaseKeyValueStorage):
         if key in self.storage[category]:
             raise MudderyError(ERR.duplicate_key, "Duplicate key %s." % key)
 
+        self.trans.set_dirty_category(category)
         self.storage[category][key] = value
 
     async def save(self, category, key, value=None):
@@ -46,6 +46,7 @@ class MemoryStorage(BaseKeyValueStorage):
         if category not in self.storage:
             self.storage[category] = {}
 
+        self.trans.set_dirty_category(category)
         if key in self.storage[category] and type(self.storage[category][key]) == dict:
             self.storage[category][key].update(value)
         else:
@@ -61,14 +62,20 @@ class MemoryStorage(BaseKeyValueStorage):
         """
         return category in self.storage and key in self.storage[category]
 
-    async def all(self):
+    async def set_all(self, all_data: dict) -> None:
+        """
+        Set all data.
+        """
+        self.storage = all_data
+
+    async def all(self) -> dict:
         """
         Get all data.
         :return:
         """
         return self.storage.copy()
 
-    async def load(self, category, key, *default):
+    async def load(self, category, key, *default, for_update=False):
         """
         Get the default field value of a key.
 
@@ -89,7 +96,20 @@ class MemoryStorage(BaseKeyValueStorage):
             else:
                 raise e
 
-    async def load_category(self, category):
+    async def delete(self, category, key):
+        """
+        delete a key.
+
+        Args:
+            category: (string) the category of data.
+            key: (string) attribute's key.
+        """
+        try:
+            del self.storage[category][key]
+        except KeyError:
+            pass
+
+    async def load_category(self, category, *default):
         """
         Get all default field's values of a category.
 
@@ -105,18 +125,17 @@ class MemoryStorage(BaseKeyValueStorage):
 
         return self.storage[category].copy()
 
-    async def delete(self, category, key):
+    async def set_category(self, category: str, data: dict) -> None:
         """
-        delete a key.
+        Set a category of data to cache.
+        """
+        self.storage[category] = data
 
-        Args:
-            category: (string) the category of data.
-            key: (string) attribute's key.
+    async def has_category(self, category: str) -> bool:
         """
-        try:
-            del self.storage[category][key]
-        except KeyError:
-            pass
+        Check if the category is in cache.
+        """
+        return category in self.storage
 
     async def delete_category(self, category):
         """
@@ -129,3 +148,7 @@ class MemoryStorage(BaseKeyValueStorage):
             del self.storage[category]
         except KeyError:
             pass
+
+    def transaction(self) -> any:
+        return self.trans
+
