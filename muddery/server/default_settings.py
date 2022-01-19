@@ -105,10 +105,10 @@ class Settings(object):
     }
 
     # Database Access Object
-    DATABASE_STORAGE_OBJECT = 'muddery.server.database.storage.kv_table.KeyValueTable'
+    DATABASE_STORAGE_OBJECT = 'muddery.server.database.storage.table_kv_storage.TableKVStorage'
 
     # Database Access Object without cache
-    DATABASE_CACHE_OBJECT = 'muddery.server.database.storage.memory_cache.MemoryCache'
+    DATABASE_CACHE_OBJECT = 'muddery.server.database.storage.memory_kv_storage.MemoryKVStorage'
 
     ######################################################################
     # Web features

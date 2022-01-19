@@ -13,7 +13,7 @@ from muddery.server.utils.utils import class_from_path
 from muddery.server.database.db_manager import DBManager
 
 
-class KeyValueTable(BaseKeyValueStorage):
+class TableKVStorage(BaseKeyValueStorage):
     """
     The storage of object attributes.
     """
@@ -33,7 +33,7 @@ class KeyValueTable(BaseKeyValueStorage):
                 If set the default value field, it can only store a simple value.
                 If the default value field is not set, value should be a dict.
         """
-        super(KeyValueTable, self).__init__()
+        super(TableKVStorage, self).__init__()
 
         # db model
         self.model_name = model_name
@@ -41,6 +41,8 @@ class KeyValueTable(BaseKeyValueStorage):
         self.model = getattr(module, model_name)
         self.columns = self.model.__table__.columns.keys()
         self.session = DBManager.inst().get_session(session_name)
+
+        self.trans = None
 
         exclude_fields = set()
         self.category_field = category_field
@@ -136,42 +138,6 @@ class KeyValueTable(BaseKeyValueStorage):
         record = result.scalars().one()
         return record > 0
 
-    async def all(self):
-        """
-        Get all data.
-        :return:
-        """
-        stmt = select(self.model)
-        result = self.session.execute(stmt)
-        records = result.scalars().all()
-
-        all_data = {}
-        if self.category_field:
-            for r in records:
-                category = getattr(r, self.category_field)
-                if category not in all_data:
-                    all_data[category] = {}
-
-                key = getattr(r, self.key_field) if self.key_field else ""
-                all_data[category][key] = {k: getattr(r, k) for k in self.columns}
-        elif self.key_field:
-            all_data[""] = {
-                getattr(r, self.key_field): {
-                    k: getattr(r, k) for k in self.columns
-                } for r in records
-            }
-        elif len(records) > 0:
-            all_data[""][""] = {k: getattr(records[0], k) for k in self.columns}
-        else:
-            all_data[""][""] = {}
-
-        if self.default_value_field is not None:
-            all_data = {
-                key: value[self.default_value_field] for category, data in all_data.items() for key, value in data.items()
-            }
-
-        return all_data
-
     async def load(self, category, key, *default, for_update=False):
         """
         Get the default field value of a key.
@@ -213,42 +179,6 @@ class KeyValueTable(BaseKeyValueStorage):
                 k: getattr(record, k) for k in self.columns
             }
 
-    async def load_category(self, category, *default):
-        """
-        Get all default field's values of a category.
-
-        Args:
-            category: (string) category's name.
-        """
-        stmt = select(self.model)
-
-        if self.category_field:
-            stmt = stmt.where(getattr(self.model, self.category_field) == category)
-
-        result = self.session.execute(stmt)
-        records = result.scalars().all()
-
-        if self.key_field:
-            data = {
-                getattr(record, self.key_field): {
-                    k: getattr(record, k) for k in self.columns
-                } for record in records
-            }
-        else:
-            data = {
-                "": {
-                    k: getattr(record, k) for k in self.columns
-                } for record in records
-            }
-
-        if len(data) == 0:
-            if len(default) > 0:
-                return default[0]
-            else:
-                raise KeyError
-
-        return data
-
     async def delete(self, category, key):
         """
         delete a key.
@@ -267,6 +197,137 @@ class KeyValueTable(BaseKeyValueStorage):
 
         self.session.execute(stmt)
 
+    async def set_all(self, all_data: dict) -> None:
+        """
+        Set all data to the storage.
+        """
+        with self.session.begin():
+            # remove old data
+            stmt = delete(self.model)
+            self.session.execute(stmt)
+
+            for cate_name, cate_data in all_data.items():
+                for key_name, key_data in cate_data.items():
+                    data = key_data
+                    if self.category_field:
+                        data[self.category_field] = cate_name
+                    if self.key_field:
+                        data[self.key_field] = key_name
+
+                    record = self.model(**data)
+                    self.session.add(record)
+
+    async def load_all(self) -> dict:
+        """
+        Get all data.
+        :return:
+        """
+        stmt = select(self.model)
+        result = self.session.execute(stmt)
+        records = result.scalars().all()
+
+        all_data = {}
+        if self.category_field:
+            for r in records:
+                category = getattr(r, self.category_field)
+                if category not in all_data:
+                    all_data[category] = {}
+
+                key = getattr(r, self.key_field) if self.key_field else ""
+                all_data[category][key] = {k: getattr(r, k) for k in self.columns}
+        elif self.key_field:
+            all_data[""] = {
+                getattr(r, self.key_field): {
+                    k: getattr(r, k) for k in self.columns
+                } for r in records
+            }
+        elif len(records) > 0:
+            all_data[""][""] = {k: getattr(records[0], k) for k in self.columns}
+        else:
+            all_data[""][""] = {}
+
+        if self.default_value_field is not None:
+            all_data = {
+                key: value[self.default_value_field] for category, data in all_data.items() for key, value in data.items()
+            }
+
+        return all_data
+
+    async def set_category(self, category: str, data: dict) -> None:
+        """
+        Set a category of data.
+        """
+        with self.session.begin():
+            # remove old data
+            stmt = delete(self.model)
+            if self.category_field:
+                stmt = stmt.where(getattr(self.model, self.category_field) == category)
+            self.session.execute(stmt)
+
+            for key_name, key_data in data.items():
+                data = key_data
+                if self.category_field:
+                    data[self.category_field] = category
+                if self.key_field:
+                    data[self.key_field] = key_name
+
+                record = self.model(**data)
+                self.session.add(record)
+
+    async def has_category(self, category: str) -> bool:
+        """
+        Check if the category exists.
+        """
+        stmt = select(func.count()).select_from(self.model)
+
+        if self.category_field:
+            stmt = stmt.where(getattr(self.model, self.category_field) == category)
+
+        result = self.session.execute(stmt)
+        record = result.scalars().one()
+        return record > 0
+
+    async def load_category(self, category, *default):
+        """
+        Get all default field's values of a category.
+
+        Args:
+            category: (string) category's name.
+        """
+        stmt = select(self.model)
+
+        if self.category_field:
+            stmt = stmt.where(getattr(self.model, self.category_field) == category)
+
+        result = self.session.execute(stmt)
+        records = result.scalars().all()
+
+        if self.key_field:
+            if self.default_value_field:
+                data = {
+                    getattr(record, self.key_field): getattr(record, self.default_value_field) for record in records
+                }
+            else:
+                data = {
+                    getattr(record, self.key_field): {
+                        k: getattr(record, k) for k in self.columns
+                    } for record in records
+                }
+        else:
+            data = {
+                "": {
+                    k: getattr(record, k) for k in self.columns
+                } for record in records
+            }
+
+        if len(data) == 0:
+            if len(default) > 0:
+                return default[0]
+            else:
+                raise KeyError
+
+        return data
+
     async def delete_category(self, category):
         """
         Remove all values of a category.
@@ -281,8 +342,14 @@ class KeyValueTable(BaseKeyValueStorage):
 
         self.session.execute(stmt)
 
-    def transaction(self):
-        """
-        Guarantee the transaction execution of a given block.
-        """
-        return self.session.begin()
+    def transaction_enter(self) -> None:
+        self.trans = self.session.begin()
+        self.trans.__enter__()
+
+    def transaction_success(self, exc_type, exc_value, trace) -> None:
+        self.trans.__exit__(exc_type, exc_value, trace)
+        self.trans = None
+
+    def transaction_failed(self, exc_type, exc_value, trace) -> None:
+        self.trans.__exit__(exc_type, exc_value, trace)
+        self.trans = None

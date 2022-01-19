@@ -3,39 +3,14 @@ Key value storage in relational database with write back memory cache.
 """
 
 from muddery.server.database.storage.base_kv_storage import BaseKeyValueStorage
-from muddery.server.database.storage.base_kv_cache import BaseKeyValueCache
+from muddery.server.database.storage.transaction import Transaction
 
 
 class StorageWithCache(BaseKeyValueStorage):
     """
     The storage of object attributes.
     """
-
-    class CacheTransaction(BaseTransaction):
-        """
-        Guarantee the transaction execution of a given block.
-        """
-
-        def __init__(self, storage):
-            super(CacheTransaction, self).__init__()
-            self.storage = weakref.proxy(storage)
-            self.dirty_categories = set()
-
-        def __enter__(self):
-            self.dirty_categories = set()
-
-        def set_dirty_category(self, category: str) -> None:
-            self.dirty_categories.add(category)
-
-        def __exit__(self, exc_type, exc_value, traceback):
-            if exc_type is None:
-                self.dirty_categories = set()
-            else:
-                # Remove dirty categories, so they can get correct values from the storage.
-                for category in self.dirty_categories:
-                    self.storage.delete_category(category)
-
-    def __init__(self, storage: BaseKeyValueStorage, cache: BaseKeyValueCache,):
+    def __init__(self, storage: BaseKeyValueStorage, cache: BaseKeyValueStorage):
         super(StorageWithCache, self).__init__()
 
         self.storage = storage
@@ -98,7 +73,7 @@ class StorageWithCache(BaseKeyValueStorage):
         """
         async with self.lock:
             if self.all_cached:
-                return await self.cache.all()
+                return await self.cache.load_all()
             else:
                 return await self.set_all_cache()
 
@@ -186,7 +161,7 @@ class StorageWithCache(BaseKeyValueStorage):
         Load all data from db if have not loaded this category.
         :return:
         """
-        all_data = await self.storage.all()
+        all_data = await self.storage.load_all()
         await self.cache.set_all(all_data)
         self.all_cached = True
         return all_data
@@ -205,5 +180,15 @@ class StorageWithCache(BaseKeyValueStorage):
         await self.cache.set_category(category, data)
         return data
 
-    def transaction(self) -> any:
-        return self.trans
+    def transaction_enter(self):
+        self.storage.transaction_enter()
+        self.cache.transaction_enter()
+
+    def transaction_success(self, exc_type, exc_value, trace) -> None:
+        self.storage.transaction_success(exc_type, exc_value, trace)
+        self.cache.transaction_success(exc_type, exc_value, trace)
+
+    def transaction_failed(self, exc_type, exc_value, trace) -> None:
+        # Remove dirty caches.
+        self.storage.transaction_failed(exc_type, exc_value, trace)
+        self.cache.transaction_failed(exc_type, exc_value, trace)

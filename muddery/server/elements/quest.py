@@ -119,8 +119,8 @@ class MudderyQuest(BaseElement):
                 # Or make a desc by other data.
                 obj_num = item["number"]
                 character_quest = "%s:%s" % (item["type"], item["object"])
-                objective = all_objectives.get(character_quest)
-                accomplished = objective["progress"] if objective else 0
+                accomplished = all_objectives.get(character_quest)
+                accomplished = accomplished if accomplished else 0
                 
                 if item["type"] == defines.OBJECTIVE_TALK:
                     # talk to a character
@@ -230,8 +230,8 @@ class MudderyQuest(BaseElement):
 
         for item in self.objectives.values():
             character_quest = "%s:%s" % (item["type"], item["object"])
-            objective = all_objectives.get(character_quest)
-            accomplished = objective["progress"] if objective else 0
+            accomplished = all_objectives.get(character_quest)
+            accomplished = accomplished if accomplished else 0
             if accomplished < item["number"]:
                 return False
 

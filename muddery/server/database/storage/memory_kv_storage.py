@@ -2,19 +2,17 @@
 Key value storage in relational database.
 """
 
-from muddery.server.database.storage.base_kv_cache import BaseKeyValueCache
-from muddery.server.database.storage.cache_transaction import CacheTransaction
+from muddery.server.database.storage.base_kv_storage import BaseKeyValueStorage
 from muddery.server.utils.exception import MudderyError, ERR
 
 
-class MemoryCache(BaseKeyValueCache):
+class MemoryKVStorage(BaseKeyValueStorage):
     """
     The storage of object attributes.
     """
     def __init__(self):
-        super(MemoryCache, self).__init__()
+        super(MemoryKVStorage, self).__init__()
         self.storage = {}
-        self.trans = CacheTransaction(self)
 
     async def add(self, category, key, value=None):
         """
@@ -31,7 +29,6 @@ class MemoryCache(BaseKeyValueCache):
         if key in self.storage[category]:
             raise MudderyError(ERR.duplicate_key, "Duplicate key %s." % key)
 
-        self.trans.set_dirty_category(category)
         self.storage[category][key] = value
 
     async def save(self, category, key, value=None):
@@ -46,7 +43,6 @@ class MemoryCache(BaseKeyValueCache):
         if category not in self.storage:
             self.storage[category] = {}
 
-        self.trans.set_dirty_category(category)
         if key in self.storage[category] and type(self.storage[category][key]) == dict:
             self.storage[category][key].update(value)
         else:
@@ -61,19 +57,6 @@ class MemoryCache(BaseKeyValueCache):
             key: (string) attribute's key.
         """
         return category in self.storage and key in self.storage[category]
-
-    async def set_all(self, all_data: dict) -> None:
-        """
-        Set all data.
-        """
-        self.storage = all_data
-
-    async def all(self) -> dict:
-        """
-        Get all data.
-        :return:
-        """
-        return self.storage.copy()
 
     async def load(self, category, key, *default, for_update=False):
         """
@@ -109,6 +92,25 @@ class MemoryCache(BaseKeyValueCache):
         except KeyError:
             pass
 
+    async def set_all(self, all_data: dict) -> None:
+        """
+        Set all data.
+        """
+        self.storage = all_data.copy()
+
+    async def load_all(self) -> dict:
+        """
+        Get all data.
+        :return:
+        """
+        return self.storage.copy()
+
+    async def set_category(self, category: str, data: dict) -> None:
+        """
+        Set a category of data to cache.
+        """
+        self.storage[category] = data.copy()
+
     async def load_category(self, category, *default):
         """
         Get all default field's values of a category.
@@ -124,12 +126,6 @@ class MemoryCache(BaseKeyValueCache):
             raise KeyError
 
         return self.storage[category].copy()
-
-    async def set_category(self, category: str, data: dict) -> None:
-        """
-        Set a category of data to cache.
-        """
-        self.storage[category] = data
 
     async def has_category(self, category: str) -> bool:
         """
@@ -148,7 +144,3 @@ class MemoryCache(BaseKeyValueCache):
             del self.storage[category]
         except KeyError:
             pass
-
-    def transaction(self) -> any:
-        return self.trans
-

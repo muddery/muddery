@@ -3,6 +3,7 @@ The base class of key value storage.
 """
 
 from asyncio import Lock
+from muddery.server.database.storage.transaction import Transaction
 
 
 class BaseKeyValueStorage(object):
@@ -44,13 +45,6 @@ class BaseKeyValueStorage(object):
         """
         pass
 
-    async def all(self) -> dict:
-        """
-        Get all data.
-        :return:
-        """
-        pass
-
     async def load(self, category: str, key: str, *default, for_update=False) -> any:
         """
         Get the value of an attribute.
@@ -63,6 +57,31 @@ class BaseKeyValueStorage(object):
         Raises:
             KeyError: If `raise_exception` is set and no matching Attribute
                 was found matching `key` and no default value set.
+        """
+        pass
+
+    async def set_all(self, all_data: dict) -> None:
+        """
+        Set all data to cache.
+        """
+        pass
+
+    async def load_all(self) -> dict:
+        """
+        Get all data.
+        :return:
+        """
+        pass
+
+    async def set_category(self, category: str, data: dict) -> None:
+        """
+        Set a category of data to cache.
+        """
+        pass
+
+    async def has_category(self, category: str) -> bool:
+        """
+        Check if the category is in cache.
         """
         pass
 
@@ -94,8 +113,17 @@ class BaseKeyValueStorage(object):
         """
         pass
 
-    def transaction(self) -> any:
+    def transaction(self) -> Transaction:
         """
         Guarantee the transaction execution of a given block.
         """
+        return Transaction(self)
+
+    def transaction_enter(self) -> None:
+        pass
+
+    def transaction_success(self, exc_type, exc_value, trace) -> None:
+        pass
+
+    def transaction_failed(self, exc_type, exc_value, trace) -> None:
         pass
