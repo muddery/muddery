@@ -78,20 +78,6 @@ class MudderyBaseNPC(ELEMENT("CHARACTER")):
                 logger.log_err("Can not create shop %s: (%s)%s" % (key, type(e).__name__, e))
                 continue
 
-    async def get_appearance(self, caller):
-        """
-        This is a convenient hook for a 'look'
-        command to call.
-        """
-        info = await super(MudderyBaseNPC, self).get_appearance(caller)
-
-        # quest mark
-        provide_quest, complete_quest = await self.have_quest(caller)
-        info["provide_quest"] = provide_quest
-        info["complete_quest"] = complete_quest
-
-        return info
-
     async def get_shop_info(self, shop_key, caller):
         """
         Show shop's information to the player.

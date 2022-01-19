@@ -55,13 +55,12 @@ class Skill(MudderySkill):
         """
         return self.const.mp
 
-    async def get_appearance(self, caller):
+    def get_appearance(self):
         """
         This is a convenient hook for a 'look'
         command to call.
         """
-        info = await super(Skill, self).get_appearance(caller)
-        
+        info = super(Skill, self).get_appearance()
         info["mp"] = self.const.mp
 
         return info

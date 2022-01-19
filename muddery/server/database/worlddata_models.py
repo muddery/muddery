@@ -280,9 +280,6 @@ class world_objects(BaseElement):
     # Action's name
     action = Column(String(KEY_LENGTH))
 
-    # the condition for showing the object
-    condition = Column(String(CONDITION_LENGTH))
-
     # object's icon resource
     icon = Column(String(KEY_LENGTH))
 
@@ -386,9 +383,6 @@ class world_npcs(BaseElement):
     # NPC's location, it must be a room.
     location = Column(String(KEY_LENGTH), index=True)
 
-    # the condition for showing the NPC
-    condition = Column(String(CONDITION_LENGTH))
-
 
 class player_characters(BaseElement):
     "Player's character."
@@ -421,9 +415,6 @@ class world_exits(BaseElement):
 
     # the action verb to enter the exit (optional)
     verb = Column(Unicode(NAME_LENGTH))
-
-    # the condition to show the exit
-    condition = Column(String(CONDITION_LENGTH))
 
 
 # ------------------------------------------------------------

@@ -42,13 +42,13 @@ class MudderyPocketObject(ELEMENT("COMMON_OBJECT")):
         """
         return self.const.icon
 
-    async def get_appearance(self, caller):
+    def get_appearance(self):
         """
         This is a convenient hook for a 'look'
         command to call.
         """
         # Get name, description and available commands.
-        info = await super(MudderyPocketObject, self).get_appearance(caller)
+        info = super(MudderyPocketObject, self).get_appearance()
         info["can_remove"] = self.const.can_remove
         info["can_discard"] = self.const.can_discard
 

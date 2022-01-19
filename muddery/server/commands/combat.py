@@ -21,7 +21,7 @@ class CmdCombatInfo(BaseCommand):
     key = "combat_info"
 
     @classmethod
-    async def func(cls, caller, args, context):
+    async def func(cls, caller, args):
         """
         Return the overall combat informations to the caller.
         """
@@ -51,7 +51,7 @@ class CmdLeaveCombat(BaseCommand):
     key = "leave_combat"
 
     @classmethod
-    async def func(cls, caller, args, context):
+    async def func(cls, caller, args):
         """
         Left the current combat.
         """
@@ -92,7 +92,7 @@ class CmdCastCombatSkill(BaseCommand):
     key = "cast_combat_skill"
 
     @classmethod
-    async def func(cls, caller, args, context):
+    async def func(cls, caller, args):
         "Cast a skill in a combat."
         if not await caller.is_alive():
             await caller.msg({"alert": _("You are died.")})

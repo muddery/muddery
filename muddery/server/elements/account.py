@@ -9,6 +9,7 @@ distribution systems.
 
 import traceback
 import datetime
+import asyncio
 from muddery.server.conf import settings
 from muddery.server.utils.password import hash_password, check_password, make_salt
 from muddery.server.database.gamedata.accounts import Accounts
@@ -153,22 +154,25 @@ class MudderyAccount(BaseElement):
         """
         Called at the end of the login process.
         """
-        await Accounts.inst().update_login_time(self.username)
-
         self.session = session
 
-        # Inform the client that we logged in first.
-        await session.msg({
-            "login": {
-                "name": self.username,
-                "id": self.get_id(),
-            },
-        })
+        await asyncio.wait([
+            Accounts.inst().update_login_time(self.username),
 
-        await session.msg({
-            "char_all": await self.get_all_nicknames(),
-            "max_char": settings.MAX_PLAYER_CHARACTERS
-        })
+            # Inform the client that we logged in first.
+            session.msg([
+                {
+                    "login": {
+                        "name": self.username,
+                        "id": self.get_id(),
+                    },
+                },
+                {
+                    "char_all": await self.get_all_nicknames(),
+                    "max_char": settings.MAX_PLAYER_CHARACTERS
+                },
+            ]),
+        ])
 
     async def at_pre_logout(self):
         """
@@ -190,7 +194,7 @@ class MudderyAccount(BaseElement):
         char_all = await self.get_all_characters()
         return [{"name": await CharacterInfo.inst().get_nickname(char_id), "id": char_id} for char_id in char_all]
 
-    async def msg(self, text, context=None):
+    async def msg(self, data, delay=True):
         """
         Element -> User
         This is the main route for sending data back to the user from the
@@ -208,11 +212,11 @@ class MudderyAccount(BaseElement):
 
         """
         # session relay
-        log_info = "Account %s send message: %s" % (self.get_id(), text)
+        log_info = "Account %s send message: %s" % (self.get_id(), data)
         print(log_info)
         logger.log_info(log_info)
         if self.session:
-            await self.session.msg(text=text, context=context)
+            await self.session.msg(data, delay)
 
     async def puppet_character(self, char_db_id):
         """
@@ -334,15 +338,17 @@ class MudderyAccount(BaseElement):
         await self.unpuppet_character()
 
         # delete all character data.
-        await AccountCharacters.inst().remove_character(self.id, char_db_id)
-        await CharacterInfo.inst().remove_character(char_db_id)
-        await CharacterLocation.inst().remove_character(char_db_id)
-        await CharacterInventory.inst().remove_character(char_db_id)
-        await CharacterEquipments.inst().remove_character(char_db_id)
-        await CharacterQuests.inst().remove_character(char_db_id)
-        await CharacterSkills.inst().remove_character(char_db_id)
-        await CharacterCombat.inst().remove_character(char_db_id)
-        await HonoursMapper.inst().remove_character(char_db_id)
+        await asyncio.wait([
+            AccountCharacters.inst().remove_character(self.id, char_db_id),
+            CharacterInfo.inst().remove_character(char_db_id),
+            CharacterLocation.inst().remove_character(char_db_id),
+            CharacterInventory.inst().remove_character(char_db_id),
+            CharacterEquipments.inst().remove_character(char_db_id),
+            CharacterQuests.inst().remove_character(char_db_id),
+            CharacterSkills.inst().remove_character(char_db_id),
+            CharacterCombat.inst().remove_character(char_db_id),
+            HonoursMapper.inst().remove_character(char_db_id),
+        ])
 
     async def delete_all_characters(self):
         """
@@ -351,21 +357,23 @@ class MudderyAccount(BaseElement):
         :param char_db_id:
         :return:
         """
-        # use the playable_characters list to search
-        all_characters = await self.get_all_characters()
-        for char_db_id in all_characters:
-            await self.unpuppet_character()
+        await self.unpuppet_character()
 
+        all_characters = await self.get_all_characters()
+        awaits = []
+        for char_db_id in all_characters:
             # delete all character data.
-            await AccountCharacters.inst().remove_character(self.id, char_db_id)
-            await CharacterInfo.inst().remove_character(char_db_id)
-            await CharacterLocation.inst().remove_character(char_db_id)
-            await CharacterInventory.inst().remove_character(char_db_id)
-            await CharacterEquipments.inst().remove_character(char_db_id)
-            await CharacterQuests.inst().remove_character(char_db_id)
-            await CharacterSkills.inst().remove_character(char_db_id)
-            await CharacterCombat.inst().remove_character(char_db_id)
-            await HonoursMapper.inst().remove_character(char_db_id)
+            awaits.append(AccountCharacters.inst().remove_character(self.id, char_db_id))
+            awaits.append(CharacterInfo.inst().remove_character(char_db_id))
+            awaits.append(CharacterLocation.inst().remove_character(char_db_id))
+            awaits.append(CharacterInventory.inst().remove_character(char_db_id))
+            awaits.append(CharacterEquipments.inst().remove_character(char_db_id))
+            awaits.append(CharacterQuests.inst().remove_character(char_db_id))
+            awaits.append(CharacterSkills.inst().remove_character(char_db_id))
+            awaits.append(CharacterCombat.inst().remove_character(char_db_id))
+            awaits.append(HonoursMapper.inst().remove_character(char_db_id))
+
+        await asyncio.wait(awaits)
 
     def at_cmdset_get(self):
         pass

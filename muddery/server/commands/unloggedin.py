@@ -83,7 +83,7 @@ class CmdConnectAccount(BaseCommand):
     key = "connect"
 
     @classmethod
-    async def func(cls, session, args, context):
+    async def func(cls, session, args):
         """
         Uses the Django admin api. Note that unlogged-in commands
         have a unique position in that their func() receives
@@ -157,7 +157,7 @@ class CmdCreateAccount(BaseCommand):
     key = "create"
 
     @classmethod
-    async def func(cls, session, args, context):
+    async def func(cls, session, args):
         "Do checks, create account and login."
         if not args:
             await session.msg({"alert": _("Syntax error!")})
@@ -219,7 +219,7 @@ class CmdQuitAccount(BaseCommand):
     key = "quit"
 
     @classmethod
-    async def func(cls, session, args, context):
+    async def func(cls, session, args):
         session.logout()
 
 
@@ -240,7 +240,7 @@ class CmdUnloginLook(BaseCommand):
     key = "unloggedin_look"
 
     @classmethod
-    async def func(cls, session, args, context):
+    async def func(cls, session, args):
         "Show the connect screen."
         game_name = GameSettings.inst().get("game_name")
         connection_screen = GameSettings.inst().get("connection_screen")

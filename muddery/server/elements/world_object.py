@@ -11,18 +11,6 @@ class MudderyWorldObject(ELEMENT("COMMON_OBJECT")):
     element_name = "World Object"
     model_name = "world_objects"
 
-    async def is_visible(self, caller):
-        """
-        If this object is visible to the caller.
-
-        Return:
-            boolean: visible
-        """
-        if not self.const.condition:
-            return True
-
-        return await STATEMENT_HANDLER.match_condition(self.const.condition, caller, self)
-
     async def get_available_commands(self, caller):
         """
         This returns a list of available commands.

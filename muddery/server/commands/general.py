@@ -28,7 +28,7 @@ class CmdLook(BaseCommand):
     key = "look"
 
     @classmethod
-    async def func(cls, caller, args, context):
+    async def func(cls, caller, args):
         """
         Handle the looking.
         """
@@ -76,7 +76,7 @@ class CmdInventory(BaseCommand):
     key = "inventory"
 
     @classmethod
-    async def func(cls, caller, args, context):
+    async def func(cls, caller, args):
         "check inventory"
         inv = caller.get_inventory_appearance()
         await caller.msg({"inventory":inv})
@@ -97,7 +97,7 @@ class CmdInventoryObject(BaseCommand):
     key = "inventory_obj"
 
     @classmethod
-    async def func(cls, caller, args, context):
+    async def func(cls, caller, args):
         """
         Handle the looking.
         """
@@ -107,7 +107,7 @@ class CmdInventoryObject(BaseCommand):
 
         appearance = await caller.get_inventory_object_appearance(args)
         if appearance:
-            await caller.msg({"inventory_obj": appearance}, context=context)
+            await caller.msg({"inventory_obj": appearance})
         else:
             await caller.msg({"alert": _("Can not find it in your inventory.")})
 
@@ -127,7 +127,7 @@ class CmdEquipmentsObject(BaseCommand):
     key = "equipments_obj"
 
     @classmethod
-    async def func(cls, caller, args, context):
+    async def func(cls, caller, args):
         """
         Handle the looking.
         """
@@ -137,7 +137,7 @@ class CmdEquipmentsObject(BaseCommand):
 
         appearance = await caller.return_equipments_object(args)
         if appearance:
-            await caller.msg({"equipments_obj": appearance}, context=context)
+            await caller.msg({"equipments_obj": appearance})
         else:
             await caller.msg({"alert": _("Can not find it in your equipments.")})
 
@@ -161,7 +161,7 @@ class CmdSay(BaseCommand):
     key = "say"
 
     @classmethod
-    async def func(cls, caller, args, context):
+    async def func(cls, caller, args):
         "Run the say command"
         if not args:
             return
@@ -196,7 +196,7 @@ class CmdLookRoomObj(BaseCommand):
     key = "look_room_obj"
 
     @classmethod
-    async def func(cls, caller, args, context):
+    async def func(cls, caller, args):
         if not await caller.is_alive():
             await caller.msg({"alert": _("You are died.")})
             return
@@ -231,7 +231,7 @@ class CmdLookRoomChar(BaseCommand):
     key = "look_room_char"
 
     @classmethod
-    async def func(cls, caller, args, context):
+    async def func(cls, caller, args):
         if not await caller.is_alive():
             await caller.msg({"alert": _("You are died.")})
             return
@@ -269,7 +269,7 @@ class CmdTraverse(BaseCommand):
     key = "traverse"
 
     @classmethod
-    async def func(cls, caller, args, context):
+    async def func(cls, caller, args):
         "Move caller to the exit."
         if not await caller.is_alive():
             await caller.msg({"alert": _("You are died.")})
@@ -306,7 +306,7 @@ class CmdTalk(BaseCommand):
     key = "talk"
 
     @classmethod
-    async def func(cls, caller, args, context):
+    async def func(cls, caller, args):
         "Talk to an NPC."
         if not args:
             await caller.msg({"alert":_("You should talk to someone.")})
@@ -345,7 +345,7 @@ class CmdDialogue(BaseCommand):
     key = "finish_dialogue"
 
     @classmethod
-    async def func(cls, caller, args, context):
+    async def func(cls, caller, args):
         "Continue a dialogue."
         if not args:
             await caller.msg({"alert":_("You should talk to someone.")})
@@ -386,7 +386,7 @@ class CmdLoot(BaseCommand):
     key = "loot"
 
     @classmethod
-    async def func(cls, caller, args, context):
+    async def func(cls, caller, args):
         "Loot objects."
         caller = caller
 
@@ -430,7 +430,7 @@ class CmdUse(BaseCommand):
     key = "use"
 
     @classmethod
-    async def func(cls, caller, args, context):
+    async def func(cls, caller, args):
         if not await caller.is_alive():
             await caller.msg({"alert": _("You are died.")})
             return
@@ -475,7 +475,7 @@ class CmdDiscard(BaseCommand):
     key = "discard"
 
     @classmethod
-    async def func(cls, caller, args, context):
+    async def func(cls, caller, args):
         "Use an object."
         caller = caller
 
@@ -516,7 +516,7 @@ class CmdEquip(BaseCommand):
     key = "equip"
 
     @classmethod
-    async def func(cls, caller, args, context):
+    async def func(cls, caller, args):
         "Put on an equipment."
         caller = caller
 
@@ -555,7 +555,7 @@ class CmdTakeOff(BaseCommand):
     key = "takeoff"
 
     @classmethod
-    async def func(cls, caller, args, context):
+    async def func(cls, caller, args):
         "Take off an equipment."
         if not args or "position" not in args:
             await caller.msg({"alert":_("You should take off something.")})
@@ -606,7 +606,7 @@ class CmdCastSkill(BaseCommand):
     key = "cast_skill"
 
     @classmethod
-    async def func(cls, caller, args, context):
+    async def func(cls, caller, args):
         "Cast a skill."
         if not await caller.is_alive():
             await caller.msg({"alert":_("You are died.")})
@@ -667,7 +667,7 @@ class CmdAttack(BaseCommand):
     key = "attack"
 
     @classmethod
-    async def func(cls, caller, args, context):
+    async def func(cls, caller, args):
         "Handle command"
         if not caller:
             return
@@ -749,7 +749,7 @@ class CmdQueueUpCombat(BaseCommand):
     key = "queue_up_combat"
 
     @classmethod
-    async def func(cls, caller, args, context):
+    async def func(cls, caller, args):
         "Handle command"
         if not caller:
             return
@@ -777,7 +777,7 @@ class CmdQuitCombatQueue(BaseCommand):
     key = "quit_combat_queue"
 
     @classmethod
-    async def func(cls, caller, args, context):
+    async def func(cls, caller, args):
         "Handle command"
         if not caller:
             return
@@ -800,7 +800,7 @@ class CmdConfirmCombat(BaseCommand):
     key = "confirm_combat"
 
     @classmethod
-    async def func(cls, caller, args, context):
+    async def func(cls, caller, args):
         "Handle command"
         if not caller:
             return
@@ -823,7 +823,7 @@ class CmdRejectCombat(BaseCommand):
     key = "reject_combat"
 
     @classmethod
-    async def func(cls, caller, args, context):
+    async def func(cls, caller, args):
         "Handle command"
 
         caller = caller
@@ -848,7 +848,7 @@ class CmdGetRankings(BaseCommand):
     key = "get_rankings"
 
     @classmethod
-    async def func(cls, caller, args, context):
+    async def func(cls, caller, args):
         """
         Get characters rankings.
 
@@ -876,7 +876,7 @@ class CmdGiveUpQuest(BaseCommand):
     key = "giveup_quest"
 
     @classmethod
-    async def func(cls, caller, args, context):
+    async def func(cls, caller, args):
         """
         Give up a quest.
 
@@ -924,7 +924,7 @@ class CmdUnlockExit(BaseCommand):
     key = "unlock_exit"
 
     @classmethod
-    async def func(cls, caller, args, context):
+    async def func(cls, caller, args):
         "Open a locked exit."
         if not args:
             await caller.msg({"alert": _("You should unlock something.")})
@@ -962,7 +962,7 @@ class CmdShopping(BaseCommand):
     key = "shopping"
 
     @classmethod
-    async def func(cls, caller, args, context):
+    async def func(cls, caller, args):
         "Do shopping."
         if not args or "npc" not in args or "shop" not in args:
             await caller.msg({"alert": _("You should shopping in someplace.")})
@@ -1001,7 +1001,7 @@ class CmdBuy(BaseCommand):
     key = "buy"
 
     @classmethod
-    async def func(cls, caller, args, context):
+    async def func(cls, caller, args):
         "Buy a goods."
         if not args or "npc" not in args or "shop" not in args or "goods" not in args:
             await caller.msg({"alert": _("You should buy something.")})
@@ -1044,7 +1044,7 @@ class CmdQueryQuest(BaseCommand):
     key = "query_quest"
 
     @classmethod
-    async def func(cls, caller, args, context):
+    async def func(cls, caller, args):
         """
         Handle the looking.
         """
@@ -1077,7 +1077,7 @@ class CmdQuerySkill(BaseCommand):
     key = "query_skill"
 
     @classmethod
-    async def func(cls, caller, args, context):
+    async def func(cls, caller, args):
         """
         Handle the looking.
         """
@@ -1106,7 +1106,7 @@ class CmdTest(BaseCommand):
     key = "test"
 
     @classmethod
-    async def func(cls, caller, args, context):
+    async def func(cls, caller, args):
         """
         Put your test here.
         """

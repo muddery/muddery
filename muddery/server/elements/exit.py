@@ -32,18 +32,6 @@ class MudderyExit(BaseElement):
 
         self.destination_obj = None
 
-    async def is_visible(self, caller):
-        """
-        If this object is visible to the caller.
-
-        Return:
-            boolean: visible
-        """
-        if not self.const.condition:
-            return True
-
-        return await STATEMENT_HANDLER.match_condition(self.const.condition, caller, self)
-
     async def traverse(self, character):
         """
         Traverse to the destination.
@@ -95,7 +83,7 @@ class MudderyExit(BaseElement):
         """
         return _("This is an exit")
 
-    async def get_appearance(self, caller):
+    def get_appearance(self):
         """
         Get the appearance of the exit.
         :param caller:
@@ -104,8 +92,7 @@ class MudderyExit(BaseElement):
         return {
             "key": self.get_element_key(),
             "name": self.get_name(),
-            "desc": await self.get_desc(caller),
-            "cmds": await self.get_available_commands(caller),
+            "desc": self.get_desc(),
         }
 
     async def get_available_commands(self, caller):

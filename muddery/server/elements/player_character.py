@@ -224,6 +224,8 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         """
         await super(MudderyPlayerCharacter, self).at_element_setup(first_time)
 
+        self.name = await CharacterInfo.inst().get_nickname(self.get_db_id())
+
         # initialize quests
         self.quest_handler = QuestHandler(self)
         await self.quest_handler.init()
@@ -254,7 +256,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         await super(MudderyPlayerCharacter, self).after_element_setup(first_time)
 
         # if it is dead, reborn at init.
-        if not await self.is_alive():
+        if not self.is_alive():
             if not self.is_temp and self.reborn_time > 0:
                 await self.reborn()
 
@@ -391,7 +393,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
 
         await super(MudderyPlayerCharacter, self).refresh_states(keep_states)
 
-    async def msg(self, text, context=None):
+    async def msg(self, data, delay=True):
         """
         Emits something to the account attached to the object.
 
@@ -406,7 +408,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
             return
 
         # relay to account
-        await self.account.msg(text, context)
+        await self.account.msg(data, delay)
 
     async def get_level(self):
         """
@@ -422,12 +424,11 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         self.name = nickname
         await CharacterInfo.inst().set_nickname(self.get_db_id(), nickname)
 
-    async def get_name(self):
+    def get_name(self):
         """
         Get player character's name.
         """
         # Use nick name instead of normal name.
-        self.name = await CharacterInfo.inst().get_nickname(self.get_db_id())
         return self.name
 
     async def get_available_commands(self, caller):
@@ -590,8 +591,8 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
             msg["reveal_map"] = {"rooms": rooms, "exits": exits}
 
         # get appearance
-        appearance = await self.location.get_appearance(self)
-        appearance.update(await self.location.get_surroundings(self))
+        appearance = self.location.get_appearance()
+        appearance.update(self.location.get_surroundings())
         msg["look_around"] = appearance
 
         await self.msg(msg)
@@ -1743,7 +1744,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         await self.show_status()
 
         if home:
-            await self.msg({"msg": _("You are reborn at {C%s{n.") % await home.get_name()})
+            await self.msg({"msg": _("You are reborn at {C%s{n.") % home.get_name()})
         else:
             await self.msg({"msg": _("You are reborn.")})
 
@@ -1878,7 +1879,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         await super(MudderyPlayerCharacter, self).level_up()
 
         # notify the player
-        await self.msg({"msg": _("{C%s upgraded to level %s.{n") % (await self.get_name(), await self.get_level())})
+        await self.msg({"msg": _("{C%s upgraded to level %s.{n") % (self.get_name(), await self.get_level())})
 
     async def get_message(self, caller, message):
         """
@@ -1889,9 +1890,9 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         """
         output = {
             "type": ConversationType.PRIVATE.value,
-            "channel": await self.get_name(),
+            "channel": self.get_name(),
             "from_obj": caller.get_id(),
-            "from_name": await caller.get_name(),
+            "from_name": caller.get_name(),
             "msg": message
         }
         await self.msg({"conversation": output})

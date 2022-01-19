@@ -31,34 +31,30 @@ class CommandHandler(object):
 
         command_key = data["cmd"]
         args = data["args"]
-        # context default is None
-        context = data.get("context")
 
         # Find the matching command in cmdset.
         # session commands
         command = self.session_cmdset.get(command_key)
+        caller = session
+
+        if not command:
+            account = session.account
+            if account:
+                command = self.account_cmdset.get(command_key)
+                caller = account
+
+                if not command:
+                    character = session.account.get_puppet_obj()
+                    if character:
+                        command = self.character_cmdset.get(command_key)
+                        caller = character
+
         if command:
             try:
-                await command.func(session, args, context)
+                await command.func(caller, args)
             except Exception as e:
                 traceback.print_exc()
                 logger.log_err("Run command error, %s: %s %s" % (session, raw_string, e))
             return
-
-        # account commands
-        account = session.account
-        if account:
-            command = self.account_cmdset.get(command_key)
-            if command:
-                await command.func(account, args, context)
-                return
-
-            # character commands
-            character = account.get_puppet_obj()
-            if character:
-                command = self.character_cmdset.get(command_key)
-                if command:
-                    await command.func(character, args, context)
-                    return
-
-        logger.log_err("Can not find command, %s: %s" % (session, raw_string))
+        else:
+            logger.log_err("Can not find command, %s: %s" % (session, raw_string))

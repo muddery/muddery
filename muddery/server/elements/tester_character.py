@@ -45,12 +45,3 @@ class MudderyTesterCharacter(ELEMENT("PLAYER_CHARACTER")):
         :return:
         """
         return True
-
-    def is_visible(self, caller):
-        """
-        If this object is not visible.
-
-        Return:
-            boolean: visible
-        """
-        return True

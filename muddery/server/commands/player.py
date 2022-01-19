@@ -36,7 +36,7 @@ class CmdDeleteAccount(BaseCommand):
     key = "delete_account"
 
     @classmethod
-    async def func(cls, account, args, context):
+    async def func(cls, account, args):
         "Do checks, create account and login."
         if not args:
             await account.msg({"alert": _("Syntax error!")})
@@ -79,7 +79,7 @@ class CmdQuit(BaseCommand):
     key = "quit"
 
     @classmethod
-    async def func(cls, account, args, context):
+    async def func(cls, account, args):
         # we are quitting the last available session
         await account.msg({
             "msg": "{RQuitting{n. Hope to see you again, soon.",
@@ -104,7 +104,7 @@ class CmdChangePassword(BaseCommand):
     key = "change_pw"
 
     @classmethod
-    async def func(cls, account, args, context):
+    async def func(cls, account, args):
         "hook function"
         current_password = args["current"]
         new_password = args["new"]
@@ -131,7 +131,7 @@ class CmdPuppet(BaseCommand):
     key = "puppet"
 
     @classmethod
-    async def func(cls, account, args, context):
+    async def func(cls, account, args):
         """
         Main puppet method
         """
@@ -172,7 +172,7 @@ class CmdPuppetName(BaseCommand):
     key = "puppet_name"
 
     @classmethod
-    async def func(cls, account, args, context):
+    async def func(cls, account, args):
         """
         Main puppet method
         """
@@ -216,7 +216,7 @@ class CmdUnpuppet(BaseCommand):
     key = "unpuppet"
 
     @classmethod
-    async def func(cls, account, args, context):
+    async def func(cls, account, args):
         # disconnect
         try:
             await account.unpuppet_character()
@@ -241,7 +241,7 @@ class CmdCharCreate(BaseCommand):
     key = "char_create"
 
     @classmethod
-    async def func(cls, account, args, context):
+    async def func(cls, account, args):
         "create the new character"
         if not args:
             await account.msg({"alert":_("You should give the character a name.")})
@@ -314,7 +314,7 @@ class CmdCharDelete(BaseCommand):
     key = "char_delete"
 
     @classmethod
-    async def func(cls, account, args, context):
+    async def func(cls, account, args):
         "delete the character"
         if not args:
             await account.msg({"alert":_("Please select a character")})
@@ -351,7 +351,7 @@ class CmdCharDeleteWithPW(BaseCommand):
     key = "char_delete"
 
     @classmethod
-    async def func(cls, account, args, context):
+    async def func(cls, account, args):
         "delete the character"
         if not args:
             await account.msg({"alert":_("Please select a character")})
@@ -392,6 +392,6 @@ class CmdCharAll(BaseCommand):
     key = "char_all"
 
     @classmethod
-    async def func(cls, account, args, context):
+    async def func(cls, account, args):
         "delete the character"
         await account.msg({"char_all": account.get_all_nicknames()})

@@ -85,7 +85,6 @@ class MudderyCharacter(BaseElement):
         # stop auto casting
         self.stop_auto_combat_skill()
 
-
     def set_id(self, char_id):
         """
         Set the character's id.
@@ -223,12 +222,12 @@ class MudderyCharacter(BaseElement):
         """
         self.name = name
 
-    async def get_name(self):
+    def get_name(self):
         """
         Get player character's name.
         """
         name = self.name
-        if not await self.is_alive():
+        if not self.is_alive():
             name += _(" [DEAD]")
 
         return name
@@ -267,27 +266,17 @@ class MudderyCharacter(BaseElement):
         """
         return self.icon
 
-    def is_visible(self, caller):
-        """
-        If this object is visible to the caller.
-
-        Return:
-            boolean: visible
-        """
-        return True
-
-    async def get_appearance(self, caller):
+    def get_appearance(self):
         """
         This is a convenient hook for a 'look'
         command to call.
         """
         info = {
             "id": self.get_id(),
-            "name": await self.get_name(),
+            "name": self.get_name(),
             "desc": self.get_desc(),
             "icon": self.get_icon(),
             "key": self.get_element_key(),
-            "cmds": await self.get_available_commands(caller),
         }
         return info
 
@@ -597,7 +586,7 @@ class MudderyCharacter(BaseElement):
         except Exception as e:
             traceback.print_exc()
             logger.log_err("Can not create combat: [%s] %s" % (type(e).__name__, e))
-            await self.msg({"alert": _("You can not attack %s.") % await target.get_name()})
+            await self.msg({"alert": _("You can not attack %s.") % target.get_name()})
 
         return True
 

@@ -7,5 +7,5 @@ class BaseCommand(object):
     key = ""
 
     @classmethod
-    async def func(cls, caller, args, context):
+    async def func(cls, caller, args):
         pass

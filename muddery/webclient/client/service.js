@@ -5,11 +5,10 @@ MudderyService = function() {
 MudderyService.prototype = {
 
     // commands
-    sendCommand : function(command, args, context) {
+    sendCommand : function(command, args) {
         var data = {
             "cmd" : command,
             "args" : args || "",
-            "context": context || "",
         };
         Connection.send(JSON.stringify(data));
     },
@@ -20,8 +19,8 @@ MudderyService.prototype = {
     
     // functions when user click a command link
     //
-    sendCommandLink: function(cmd, args, context) {
-       this.sendCommand(cmd, args, context);
+    sendCommandLink: function(cmd, args) {
+       this.sendCommand(cmd, args);
     },
 
     // query the unloggedin message
@@ -111,16 +110,16 @@ MudderyService.prototype = {
     },
     
     // look
-    look: function(odj_id, context) {
-        this.sendCommand("look", odj_id, context);
+    look: function(odj_id) {
+        this.sendCommand("look", odj_id);
     },
 
-    inventoryObject: function(position, context) {
-        this.sendCommand("inventory_obj", position, context);
+    inventoryObject: function(position) {
+        this.sendCommand("inventory_obj", position);
     },
 
-    equipmentsObject: function(obj_id, context) {
-        this.sendCommand("equipments_obj", obj_id, context);
+    equipmentsObject: function(obj_id) {
+        this.sendCommand("equipments_obj", obj_id);
     },
 
     // look at an object in the room

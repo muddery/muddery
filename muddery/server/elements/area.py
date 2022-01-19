@@ -5,6 +5,7 @@ Areas are compose the whole map. Rooms are belongs to areas.
 
 """
 
+import asyncio
 from muddery.server.utils.logger import logger
 from muddery.server.elements.base_element import BaseElement
 from muddery.server.mappings.element_set import ELEMENT
@@ -58,7 +59,7 @@ class MudderyArea(BaseElement):
         # load rooms in this area
         await self.load_rooms()
 
-    async def get_appearance(self, caller):
+    def get_appearance(self):
         """
         This is a convenient hook for a 'look'
         command to call.
@@ -137,9 +138,9 @@ class MudderyArea(BaseElement):
             table_data = table_data[0]
 
             new_obj = ELEMENT(table_data.element_type)()
-            await new_obj.setup_element(record.key)
+            self.all_rooms[record.key] = new_obj
 
-            self.all_rooms[new_obj.get_element_key()] = new_obj
+        await asyncio.wait([obj.setup_element(key) for key, obj in self.all_rooms.items()])
 
     def get_rooms_key(self):
         """

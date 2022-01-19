@@ -14,9 +14,7 @@ def run_server():
         await Server.inst().create_the_world()
         Server.inst().create_command_handler()
 
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(init_server())
-    loop.close()
+    asyncio.run(init_server())
 
     server_app = Sanic("muddery_server")
 

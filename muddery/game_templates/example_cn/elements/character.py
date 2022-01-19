@@ -44,21 +44,6 @@ class Character(MudderyCharacter):
         # Recover hp and mp.
         await self.recover()
 
-    async def get_appearance(self, caller):
-        """
-        This is a convenient hook for a 'look'
-        command to call.
-        """
-        # get name, description and available commands.
-        info = await super(Character, self).get_appearance(caller)
-
-        info["max_hp"] = self.const.max_hp
-        info["hp"] = await self.states.load("hp")
-        info["max_mp"] = self.const.max_mp
-        info["mp"] = await self.states.load("mp")
-
-        return info
-
     async def get_combat_status(self):
         """
         Get character status used in combats.

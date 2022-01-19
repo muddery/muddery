@@ -46,15 +46,6 @@ class MudderyStaffCharacter(ELEMENT("PLAYER_CHARACTER")):
         """
         return True
 
-    def is_visible(self, caller):
-        """
-        If this object is not visible.
-
-        Return:
-            boolean: visible
-        """
-        return False
-
     async def at_post_puppet(self):
         """
         Called just after puppeting has been completed and all
@@ -88,11 +79,11 @@ class MudderyStaffCharacter(ELEMENT("PLAYER_CHARACTER")):
 
         await self.show_location()
 
-    async def get_appearance(self, caller):
+    def get_appearance(self):
         """
         This is a convenient hook for a 'look'
         command to call.
         """
-        info = await super(MudderyStaffCharacter, self).get_appearance(caller)
+        info = super(MudderyStaffCharacter, self).get_appearance()
         info["is_staff"] = True
         return info

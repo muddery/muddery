@@ -189,7 +189,7 @@ class MudderySkill(BaseElement):
         """
         return self.const.icon
 
-    async def get_appearance(self, caller):
+    def get_appearance(self):
         """
         This is a convenient hook for a 'look'
         command to call.
@@ -198,7 +198,6 @@ class MudderySkill(BaseElement):
             "key": self.const.key,
             "name": self.get_name(),
             "desc": self.get_desc(),
-            "cmds": await self.get_available_commands(caller),
             "icon": self.get_icon(),
             "passive": self.is_passive(),
             "cd": self.get_cd(),

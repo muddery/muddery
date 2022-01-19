@@ -22,6 +22,9 @@ class SanicSession(object):
         self.account = None
         self.authed = False
 
+        self.msg_list = []
+        self.delay_msg = False
+
     def __str__(self):
         """
         Output self as a string
@@ -54,8 +57,12 @@ class SanicSession(object):
         :param bytes_data:
         :return:
         """
+        # Gather all messages send to the client and send them out together.
+        self.delay_msg = True
         # Pass messages to the muddery server.
         await Server.inst().handler_message(self, text_data)
+        await self.msg_all()
+        self.delay_msg = False
 
     async def login(self, account):
         """
@@ -82,18 +89,33 @@ class SanicSession(object):
         self.account = None
         self.authed = False
 
-    async def msg(self, text, context=None):
+    async def msg(self, data, delay=True):
         """
         Send data to the client.
 
         :param data_out: data to send {type: data}
         :param close: close connect after sends message.
         """
-        # create the output string
-        out_text = json.dumps({"data": text, "context": context}, ensure_ascii=False)
+        if self.delay_msg and delay:
+            # Delay sending out messages when self.delay_msg is set.
+            if type(data) == list:
+                self.msg_list.extend(data)
+            else:
+                self.msg_list.append(data)
+        else:
+            # Send out this message immediately.
+            # create the output string
+            out_text = json.dumps({"data": data}, ensure_ascii=False)
 
-        # send message
-        try:
-            await self.connection.send(out_text)
-        except Exception as e:
-            logger.log_err("Send message error: %s" % e)
+            # send message
+            try:
+                await self.connection.send(out_text)
+            except Exception as e:
+                logger.log_err("Send message error: %s" % e)
+
+    async def msg_all(self):
+        """
+        Send out all messages in the msg_list.
+        """
+        await self.msg(self.msg_list, delay=False)
+        self.msg_list = []
