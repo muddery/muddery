@@ -6,7 +6,7 @@ import re
 import time
 import hashlib
 from collections import defaultdict
-from muddery.server.conf import settings
+from muddery.server.settings import SETTINGS
 from muddery.server.mappings.element_set import ELEMENT
 from muddery.server.utils.logger import logger
 from muddery.server.commands.base_command import BaseCommand
@@ -111,7 +111,7 @@ class CmdConnectAccount(BaseCommand):
             return
 
         # Get the account.
-        element_type = settings.ACCOUNT_ELEMENT_TYPE
+        element_type = SETTINGS.ACCOUNT_ELEMENT_TYPE
         account = ELEMENT(element_type)()
 
         # Set the account with username and password.
@@ -181,7 +181,7 @@ class CmdCreateAccount(BaseCommand):
             connect = args["connect"]
 
         # Create an account.
-        element_type = settings.ACCOUNT_ELEMENT_TYPE
+        element_type = SETTINGS.ACCOUNT_ELEMENT_TYPE
         account = ELEMENT(element_type)()
 
         # Set the account with username and password.

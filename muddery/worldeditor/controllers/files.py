@@ -4,11 +4,11 @@ Battle commands. They only can be used when a character is in a combat.
 
 import os, tempfile, time
 from PIL import Image
-from django.conf import settings
 from muddery.server.utils.logger import logger
-from muddery.worldeditor.services import exporter, importer
-from muddery.worldeditor.utils.response import success_response, file_response
 from muddery.server.utils.exception import MudderyError, ERR
+from muddery.worldeditor.settings import SETTINGS
+from muddery.worldeditor.services import exporter, importer
+from muddery.worldeditor.utils.responses import success_response, file_response
 from muddery.worldeditor.utils import writers
 from muddery.worldeditor.controllers.base_request_processer import BaseRequestProcesser
 from muddery.worldeditor.dao.image_resources_mapper import ImageResourcesMapper
@@ -24,7 +24,7 @@ class upload_zip(BaseRequestProcesser):
     path = "upload_zip"
     name = ""
 
-    def func(self, args, request):
+    def func(self, args):
         file_obj = request.FILES.get("file", None)
 
         if not file_obj:
@@ -52,7 +52,7 @@ class upload_resources(BaseRequestProcesser):
     path = "upload_resources"
     name = ""
 
-    def func(self, args, request):
+    def func(self, args):
         file_obj = request.FILES.get("file", None)
 
         if not file_obj:
@@ -81,7 +81,7 @@ class upload_single_data(BaseRequestProcesser):
     path = "upload_single_data"
     name = ""
 
-    def func(self, args, request):
+    def func(self, args):
         file_obj = request.FILES.get("file", None)
 
         if not file_obj:
@@ -130,7 +130,7 @@ class download_zip(BaseRequestProcesser):
     path = "download_zip"
     name = ""
 
-    def func(self, args, request):
+    def func(self, args):
         file_type = args.get("type", "csv")
 
         # get data's zip
@@ -158,7 +158,7 @@ class download_resources(BaseRequestProcesser):
     path = "download_resources"
     name = ""
 
-    def func(self, args, request):
+    def func(self, args):
         # get data's zip
         fp = tempfile.TemporaryFile()
         try:
@@ -186,7 +186,7 @@ class download_single_data(BaseRequestProcesser):
     path = "download_single_data"
     name = ""
 
-    def func(self, args, request):
+    def func(self, args):
         if ('table' not in args):
             raise MudderyError(ERR.missing_args, 'Missing the table name.')
 
@@ -220,7 +220,7 @@ class query_data_file_types(BaseRequestProcesser):
     path = "query_data_file_types"
     name = ""
 
-    def func(self, args, request):
+    def func(self, args):
         writer_list = writers.get_writers()
         data = [{"type": item.type, "name": item.name} for item in writer_list]
         return success_response(data)
@@ -237,7 +237,7 @@ class upload_image(BaseRequestProcesser):
     path = "upload_image"
     name = ""
 
-    def func(self, args, request):
+    def func(self, args):
         file_obj = request.FILES.get("file", None)
 
         if not file_obj:
@@ -245,7 +245,7 @@ class upload_image(BaseRequestProcesser):
 
         file_type = args["type"]
         filename = file_obj.name
-        path = os.path.join(settings.MEDIA_ROOT, settings.IMAGE_PATH, file_type)
+        path = os.path.join(SETTINGS.MEDIA_ROOT, SETTINGS.IMAGE_PATH, file_type)
         filepath = os.path.join(path, filename)
         exist = False
 
@@ -287,7 +287,7 @@ class upload_image(BaseRequestProcesser):
 
             exist = True
 
-        icon_location = settings.IMAGE_PATH + "/" + file_type + "/" + filename
+        icon_location = SETTINGS.IMAGE_PATH + "/" + file_type + "/" + filename
         if not exist:
             try:
                 image = Image.open(filepath)

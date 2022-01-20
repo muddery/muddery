@@ -2,11 +2,8 @@
 Game settings file.
 """
 
-# Use the defaults from Muddery
-from muddery.server.default_settings import Settings as DefaultSettings
 
-
-class Settings(DefaultSettings):
+class ServerSettings(object):
 
     ######################################################################
     # Base server config
@@ -22,3 +19,6 @@ class Settings(DefaultSettings):
 
     # Server-side websocket port to open for the webclient.
     WEBSERVER_PORT = 8001
+
+    # The secret key of jwt.
+    WORLD_EDITOR_SECRET = "SET_YOUR_SECRET_KEY"

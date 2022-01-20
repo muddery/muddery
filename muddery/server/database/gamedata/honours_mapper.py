@@ -5,7 +5,7 @@ This model translates default strings into localized strings.
 import importlib
 import traceback
 
-from muddery.server.conf import settings
+from muddery.server.settings import SETTINGS
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 from sqlalchemy import select, update, delete
 from muddery.server.utils.utils import class_from_path
@@ -19,9 +19,9 @@ class HonoursMapper(Singleton):
     """
     def __init__(self):
         self.model_name = "honours"
-        module = importlib.import_module(settings.GAME_DATA_MODEL_FILE)
+        module = importlib.import_module(SETTINGS.GAME_DATA_MODEL_FILE)
         self.model = getattr(module, self.model_name)
-        self.session = DBManager.inst().get_session(settings.GAME_DATA_APP)
+        self.session = DBManager.inst().get_session(SETTINGS.GAME_DATA_APP)
 
         self.honours = {}
         self.rankings = []

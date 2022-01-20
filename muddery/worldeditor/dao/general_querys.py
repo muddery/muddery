@@ -4,8 +4,8 @@ Query and deal common tables.
 
 import importlib
 from sqlalchemy import select, delete, update, func
-from muddery.server.conf import settings
 from muddery.server.mappings.element_set import ELEMENT
+from muddery.worldeditor.settings import SETTINGS
 from muddery.worldeditor.database.db_manager import DBManager
 from muddery.worldeditor.dao.dict_record import DictRecord
 from muddery.server.utils.logger import logger
@@ -19,7 +19,7 @@ def get_field_names(table_name):
         table_name: (string) db table's name.
     """
     # get model
-    model = DBManager.inst().get_model(settings.WORLD_DATA_APP, table_name)
+    model = DBManager.inst().get_model(SETTINGS.WORLD_DATA_APP, table_name)
     return model.__table__.columns.keys()
 
 
@@ -27,7 +27,7 @@ def count(table_name, condition=None):
     """
     Count the number of records with conditions in kwargs.
     """
-    session_name = settings.WORLD_DATA_APP
+    session_name = SETTINGS.WORLD_DATA_APP
     session = DBManager.inst().get_session(session_name)
     model = DBManager.inst().get_model(session_name, table_name)
 
@@ -43,7 +43,7 @@ def get_query(table_name, condition=None):
     """
     Get a query of given condition.
     """
-    session_name = settings.WORLD_DATA_APP
+    session_name = SETTINGS.WORLD_DATA_APP
     session = DBManager.inst().get_session(session_name)
     model = DBManager.inst().get_model(session_name, table_name)
 
@@ -62,7 +62,7 @@ def get_one(table_name, condition=None):
     """
     Get a record of given condition. Compatible with the wtforms_alchemy's unique validator.
     """
-    session_name = settings.WORLD_DATA_APP
+    session_name = SETTINGS.WORLD_DATA_APP
     session = DBManager.inst().get_session(session_name)
     model = DBManager.inst().get_model(session_name, table_name)
 
@@ -146,7 +146,7 @@ def delete_records(table_name, condition=None):
     """
     Delete records with the given conditions.
     """
-    session_name = settings.WORLD_DATA_APP
+    session_name = SETTINGS.WORLD_DATA_APP
     session = DBManager.inst().get_session(session_name)
     model = DBManager.inst().get_model(session_name, table_name)
 
@@ -156,14 +156,7 @@ def delete_records(table_name, condition=None):
         where_condition = [(getattr(model, field)) == value for field, value in condition.items()]
         stmt = stmt.where(*where_condition)
 
-    try:
-        result = session.execute(stmt)
-        if result.rowcount > 0:
-            session.commit()
-    except Exception as e:
-        session.rollback()
-        raise
-
+    result = session.execute(stmt)
     return result.rowcount
 
 
@@ -204,9 +197,9 @@ def get_all_from_tables(tables, condition=None):
     if not tables:
         return
 
-    session_name = settings.WORLD_DATA_APP
+    session_name = SETTINGS.WORLD_DATA_APP
     session = DBManager.inst().get_session(session_name)
-    config = settings.AL_DATABASES[session_name]
+    config = SETTINGS.AL_DATABASES[session_name]
     module = importlib.import_module(config["MODELS"])
 
     if len(tables) == 1:
@@ -281,25 +274,21 @@ def delete_tables_record_by_key(tables, key):
     Return:
         a dict of values.
     """
-    session_name = settings.WORLD_DATA_APP
+    session_name = SETTINGS.WORLD_DATA_APP
     session = DBManager.inst().get_session(session_name)
 
-    for table_name in tables:
-        model = DBManager.inst().get_model(session_name, table_name)
+    with session.begin():
+        for table_name in tables:
+            model = DBManager.inst().get_model(session_name, table_name)
 
-        # set conditions
-        stmt = delete(model).where(model.key==key)
-        try:
-            result = session.execute(stmt)
-        except Exception as e:
-            session.rollback()
-            raise
+            # set conditions
+            stmt = delete(model).where(model.key==key)
+            session.execute(stmt)
 
-    session.commit()
     return
 
 
-def update_records(table_name, values, condition=None, commit=True):
+def update_records(table_name, values, condition=None):
     """
     Update records with given values.
 
@@ -307,9 +296,8 @@ def update_records(table_name, values, condition=None, commit=True):
         table_name: (string) the name of a table
         values: (dict) keys and values to update
         condition: (dict) update conditions
-        commit: (boolean) auto commit after update
     """
-    session_name = settings.WORLD_DATA_APP
+    session_name = SETTINGS.WORLD_DATA_APP
     session = DBManager.inst().get_session(session_name)
     model = DBManager.inst().get_model(session_name, table_name)
 
@@ -319,12 +307,5 @@ def update_records(table_name, values, condition=None, commit=True):
         where_condition = [(getattr(model, field)) == value for field, value in condition.items()]
         stmt = stmt.where(*where_condition)
 
-    try:
-        result = session.execute(stmt)
-        if result.rowcount > 0 and commit:
-            session.commit()
-    except Exception as e:
-        session.rollback()
-        raise
-
+    result = session.execute(stmt)
     return result.rowcount

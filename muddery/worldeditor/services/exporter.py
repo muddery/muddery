@@ -5,9 +5,9 @@ This module imports data from files to db.
 import os
 import tempfile
 import zipfile
-from muddery.server.conf import settings
 from muddery.launcher import configs
 from muddery.server.utils.exception import MudderyError, ERR
+from muddery.worldeditor.settings import SETTINGS
 from muddery.worldeditor.database.db_manager import DBManager
 from muddery.worldeditor.utils import writers
 from muddery.worldeditor.dao import general_querys
@@ -62,7 +62,7 @@ def export_zip_all(file_obj, file_type=None):
         archive = zipfile.ZipFile(file_obj, 'w', zipfile.ZIP_DEFLATED)
 
         # get model names
-        table_names = DBManager.inst().get_tables(settings.WORLD_DATA_APP)
+        table_names = DBManager.inst().get_tables(SETTINGS.WORLD_DATA_APP)
         for table_name in table_names:
             export_file(temp_filename, table_name, file_type)
             filename = table_name + "." + file_ext
@@ -82,7 +82,7 @@ def export_resources(file_obj):
     """
     Export all resource files to a zip file.
     """
-    dir_name = settings.MEDIA_ROOT
+    dir_name = SETTINGS.MEDIA_ROOT
     dir_length = len(dir_name)
 
     archive = zipfile.ZipFile(file_obj, 'w', zipfile.ZIP_DEFLATED)   

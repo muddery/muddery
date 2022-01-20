@@ -5,7 +5,7 @@ All available requests.
 import os, re
 import traceback
 from importlib import import_module
-from muddery.server.conf import settings
+from muddery.server.settings import SETTINGS
 from muddery.server.utils.logger import logger
 from muddery.server.utils.utils import class_from_path
 from muddery.server.utils.utils import get_module_path
@@ -175,5 +175,5 @@ class ElementSet(object):
 
 ELEMENT_SET = ElementSet()
 ELEMENT = ELEMENT_SET.get
-ELEMENT_SET.load_files(settings.PATH_ELEMENTS_BASE)
-ELEMENT_SET.load_files(settings.PATH_ELEMENTS_CUSTOM)
+ELEMENT_SET.load_files(SETTINGS.PATH_ELEMENTS_BASE)
+ELEMENT_SET.load_files(SETTINGS.PATH_ELEMENTS_CUSTOM)

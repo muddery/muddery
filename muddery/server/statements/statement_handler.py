@@ -3,7 +3,7 @@ This model handle statements.
 """
 
 import re, ast, traceback
-from muddery.server.conf import settings
+from muddery.server.settings import SETTINGS
 from muddery.server.utils.logger import logger
 from muddery.server.utils.utils import class_from_path
 
@@ -116,13 +116,13 @@ class StatementHandler(object):
         Creates a statement handler instance. Loads statements.
         """
         # load function sets
-        action_func_set_class = class_from_path(settings.ACTION_FUNC_SET)
+        action_func_set_class = class_from_path(SETTINGS.ACTION_FUNC_SET)
         self.action_func_set = action_func_set_class()
 
-        condition_func_set_class = class_from_path(settings.CONDITION_FUNC_SET)
+        condition_func_set_class = class_from_path(SETTINGS.CONDITION_FUNC_SET)
         self.condition_func_set = condition_func_set_class()
 
-        skill_func_set_class = class_from_path(settings.SKILL_FUNC_SET)
+        skill_func_set_class = class_from_path(SETTINGS.SKILL_FUNC_SET)
         self.skill_func_set = skill_func_set_class()
 
     async def do_action(self, action, caller, obj, **kwargs):

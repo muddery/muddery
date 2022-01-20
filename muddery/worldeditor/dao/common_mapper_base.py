@@ -2,9 +2,9 @@
 This model translates default strings into localized strings.
 """
 
-from muddery.server.conf import settings
 from sqlalchemy import select, update, delete
 from muddery.server.mappings.element_set import ELEMENT
+from muddery.worldeditor.settings import SETTINGS
 from muddery.worldeditor.dao import general_querys
 from muddery.worldeditor.database.db_manager import DBManager
 
@@ -16,7 +16,7 @@ class CommonMapper(object):
     def __init__(self, model_name):
         self.model_name = model_name
 
-        session_name = settings.WORLD_DATA_APP
+        session_name = SETTINGS.WORLD_DATA_APP
         self.session = DBManager.inst().get_session(session_name)
         self.model = DBManager.inst().get_model(session_name, model_name)
 
@@ -69,12 +69,7 @@ class CommonMapper(object):
         Update or insert a record.
         """
         record = self.model(**values)
-        try:
-            self.session.add(record)
-            self.session.commit()
-        except Exception as e:
-            self.session.rollback()
-            raise
+        self.session.add(record)
 
     def update_or_add(self, condition, values):
         """
@@ -84,36 +79,21 @@ class CommonMapper(object):
         for field, value in condition.items():
             stmt = stmt.where(getattr(self.model, field) == value)
 
-        try:
-            result = self.session.execute(stmt)
-            self.session.commit()
-        except Exception as e:
-            self.session.rollback()
-            raise
+        result = self.session.execute(stmt)
 
         if result.rowcount == 0:
             # Can not found the record to update, insert a new record.
             data = dict(condition, **values)
             record = self.model(**data)
-            try:
-                self.session.add(record)
-                self.session.commit()
-            except Exception as e:
-                self.session.rollback()
-                raise
+            self.session.add(record)
+
 
     def delete(self, condition):
         stmt = delete(self.model)
         for field, value in condition.items():
             stmt = stmt.where(getattr(self.model, field) == value)
 
-        try:
-            result = self.session.execute(stmt)
-            if result.rowcount > 0:
-                self.session.commit()
-        except Exception as e:
-            self.session.rollback()
-            raise
+        self.session.execute(stmt)
 
 
 class ElementsMapper(CommonMapper):

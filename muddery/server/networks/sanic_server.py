@@ -4,15 +4,13 @@ import asyncio
 from sanic import Sanic
 from asyncio import CancelledError
 from muddery.server.networks.sanic_session import SanicSession
-from muddery.server.conf import settings
+from muddery.server.settings import SETTINGS
 from muddery.server.server import Server
 
 
 def run_server():
     async def init_server():
-        await Server.inst().connect_db()
-        await Server.inst().create_the_world()
-        Server.inst().create_command_handler()
+        await Server.inst().init()
 
     asyncio.run(init_server())
 
@@ -34,4 +32,4 @@ def run_server():
 
         await ws.close()
 
-    server_app.run(port=settings.WEBSERVER_PORT)
+    server_app.run(port=SETTINGS.WEBSERVER_PORT)

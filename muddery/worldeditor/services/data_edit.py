@@ -2,10 +2,10 @@
 Battle commands. They only can be used when a character is in a combat.
 """
 
-from muddery.server.conf import settings
 from wtforms_alchemy.validators import Unique
 from muddery.server.utils.logger import logger
 from muddery.server.utils.exception import MudderyError, ERR
+from muddery.worldeditor.settings import SETTINGS
 from muddery.worldeditor.dao import general_querys
 from muddery.worldeditor.dao.system_data_mapper import SystemDataMapper
 from muddery.worldeditor.dao.element_properties_mapper import ElementPropertiesMapper
@@ -96,7 +96,7 @@ def save_form(values, table_name, record_id=None):
             pass
 
     if is_new:
-        model = DBManager.inst().get_model(settings.WORLD_DATA_APP, table_name)
+        model = DBManager.inst().get_model(SETTINGS.WORLD_DATA_APP, table_name)
         record = model(**values)
         form = form_class(formdata=form_data)
 
@@ -105,7 +105,7 @@ def save_form(values, table_name, record_id=None):
         raise MudderyError(ERR.invalid_form, "Invalid form.", data=form.errors)
 
     # Save data
-    session = DBManager.inst().get_session(settings.WORLD_DATA_APP)
+    session = DBManager.inst().get_session(SETTINGS.WORLD_DATA_APP)
     try:
         if is_new:
             session.add(record)
@@ -258,7 +258,7 @@ def save_element_form(tables, element_type, element_key):
                 pass
 
         if is_new:
-            model = DBManager.inst().get_model(settings.WORLD_DATA_APP, table_name)
+            model = DBManager.inst().get_model(SETTINGS.WORLD_DATA_APP, table_name)
             record = model(**values)
             form = form_class(formdata=form_data)
 
@@ -274,7 +274,7 @@ def save_element_form(tables, element_type, element_key):
         })
 
     # Save data.
-    session = DBManager.inst().get_session(settings.WORLD_DATA_APP)
+    session = DBManager.inst().get_session(SETTINGS.WORLD_DATA_APP)
     try:
         for item in forms_to_save:
             if item["is_new"]:
@@ -320,7 +320,7 @@ def save_map_positions(area, rooms):
             "key": room["key"],
         }, commit=False)
 
-    session = DBManager.inst().get_session(settings.WORLD_DATA_APP)
+    session = DBManager.inst().get_session(SETTINGS.WORLD_DATA_APP)
     try:
         session.commit()
     except Exception as e:

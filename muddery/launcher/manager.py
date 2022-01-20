@@ -65,9 +65,9 @@ def load_game_data():
 
     # Load settings.
     try:
-        from muddery.server.conf import settings
-        from server.settings import Settings
-        settings.update(Settings())
+        from muddery.server.settings import SETTINGS
+        from server.settings import ServerSettings
+        SETTINGS.update(ServerSettings())
     except Exception as e:
         traceback.print_exc()
         raise
@@ -135,37 +135,6 @@ def migrate_database():
         print("Migrate database error: %s" % e)
 
 
-def show_version(about=False):
-    """
-    Show system version.
-
-    :param about: show about info.
-    :return:
-    """
-    print(utils.show_version_info(about))
-
-
-def setup_server():
-    """
-    Setup the server.
-    """
-    from muddery.server.server import Server
-    Server.inst().create_the_world()
-    Server.inst().create_command_handler()
-
-
-def setup_editor():
-    """
-    Setup the server.
-    """
-    if not utils.check_database():
-        print("Migrating databases.")
-        utils.create_editor_database()
-
-    from muddery.worldeditor.server import Server
-    Server.inst()
-
-
 def collect_static():
     """
     Collect static web files.
@@ -174,10 +143,18 @@ def collect_static():
     gamedir = os.path.abspath(configs.CURRENT_DIR)
     utils.init_game_env(gamedir)
 
-    from muddery.server.conf import settings
-
-    # webpage files
-    for item in settings.WEBCLIENT_SOURCE_DIRS:
+    # game webpage files
+    from muddery.server.server import SETTINGS as SERVER_SETTINGS
+    for item in SERVER_SETTINGS.WEBCLIENT_SOURCE_DIRS:
         source = item[1]
         target = item[0]
         utils.copy_tree(source, target)
+
+    # world editor webpage files
+    from muddery.worldeditor.server import SETTINGS as EDITOR_SETTINGS
+    for item in EDITOR_SETTINGS.WEBCLIENT_SOURCE_DIRS:
+        source = item[1]
+        target = item[0]
+        utils.copy_tree(source, target)
+
+    print("Collect static files success.")

@@ -2,9 +2,9 @@
 """
 The base of all forms.
 """
-from muddery.server.conf import settings
 from wtforms import fields
 from wtforms_alchemy import ModelForm
+from muddery.worldeditor.settings import SETTINGS
 from muddery.worldeditor.database.db_manager import DBManager
 from muddery.server.utils.localized_strings_handler import _
 
@@ -38,7 +38,7 @@ class BaseForm(ModelForm):
     @classmethod
     def get_session(cls):
         # this method should return sqlalchemy session
-        return DBManager.inst().get_session(settings.WORLD_DATA_APP)
+        return DBManager.inst().get_session(SETTINGS.WORLD_DATA_APP)
 
     # add id field manually
     id = fields.HiddenField(id="id", name="id", description="id")

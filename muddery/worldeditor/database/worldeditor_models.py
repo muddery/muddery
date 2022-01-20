@@ -32,6 +32,9 @@ class accounts(Base):
     # account's password
     password = Column(String(128), nullable=False)
 
+    # password's salt
+    salt = Column(String(128), nullable=False)
+
     # account's type
     type = Column(String(KEY_LENGTH), index=True, nullable=False)
 
@@ -40,3 +43,6 @@ class accounts(Base):
 
     # account's last login time
     last_login = Column(DateTime, nullable=True)
+
+    # the last access token
+    token = Column(String(256))

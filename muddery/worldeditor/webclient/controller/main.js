@@ -92,6 +92,7 @@ controller = {
 
     loginSuccess: function(data) {
         this.login = true;
+        service.set_token(data.token);
 
         $("#username").val("");
         $("#password").val("");

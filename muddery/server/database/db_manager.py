@@ -4,7 +4,7 @@ import importlib
 import inspect
 from sqlalchemy.orm import Session
 from sqlalchemy import select, delete
-from muddery.server.conf import settings
+from muddery.server.settings import SETTINGS
 from muddery.server.database.engines import get_engine
 from muddery.server.utils.logger import logger
 from muddery.server.utils.singleton import Singleton
@@ -26,7 +26,7 @@ class DBManager(Singleton):
         if self.connected:
             return
 
-        for key, cfg in settings.AL_DATABASES.items():
+        for key, cfg in SETTINGS.AL_DATABASES.items():
             try:
                 engine = get_engine(cfg["ENGINE"], cfg)
                 self.engines[key] = engine
@@ -41,7 +41,7 @@ class DBManager(Singleton):
         """
         Create database tables if they are not exist.
         """
-        for key, cfg in settings.AL_DATABASES.items():
+        for key, cfg in SETTINGS.AL_DATABASES.items():
             try:
                 engine = self.engines[key]
                 module = importlib.import_module(cfg["MODELS"])
@@ -64,8 +64,8 @@ class DBManager(Singleton):
         Get all tables' names of a scheme.
         """
         tables = []
-        if scheme in settings.AL_DATABASES:
-            module = importlib.import_module(settings.AL_DATABASES[scheme]["MODELS"])
+        if scheme in SETTINGS.AL_DATABASES:
+            module = importlib.import_module(SETTINGS.AL_DATABASES[scheme]["MODELS"])
             tables = [cls.__tablename__ for cls in vars(module).values() if inspect.isclass(cls)]
 
         return tables
@@ -79,7 +79,7 @@ class DBManager(Singleton):
         if not session:
             return
 
-        config = settings.AL_DATABASES[scheme]
+        config = SETTINGS.AL_DATABASES[scheme]
         module = importlib.import_module(config["MODELS"])
         model = getattr(module, table_name)
         stmt = delete(model)
@@ -89,8 +89,8 @@ class DBManager(Singleton):
         """
         Get the table's ORM model.
         """
-        if scheme in settings.AL_DATABASES:
-            config = settings.AL_DATABASES[scheme]
+        if scheme in SETTINGS.AL_DATABASES:
+            config = SETTINGS.AL_DATABASES[scheme]
             module = importlib.import_module(config["MODELS"])
             model = getattr(module, table_name)
             return model

@@ -224,6 +224,7 @@ def create_game_directory(gamedir, template, port=None):
     if template_dir:
         copy_tree(template_dir, gamedir)
 
+    """
     # pre-build settings file in the new gamedir
     setting_py_dict = None
     if port:
@@ -242,19 +243,7 @@ def create_game_directory(gamedir, template, port=None):
             "WEBSOCKET_HOST": "'ws://' + window.location.hostname + ':%s'" % (port + 1),
         }
     create_webclient_settings(gamedir, setting_js_dict)
-
-
-def show_version_info(about=False):
     """
-    Display version info
-    """
-    import os, sys
-    import django
-
-    return configs.VERSION_INFO.format(version=muddery_version(),
-                                       about=configs.ABOUT_INFO if about else "",
-                                       os=os.name, python=sys.version.split()[0],
-                                       django=django.get_version())
 
 
 def check_gamedir(path):
@@ -280,22 +269,6 @@ def check_version():
         return False
 
     return True
-
-
-def check_database():
-    """
-    Check so the database exists.
-
-    Returns:
-        exists (bool): `True` if the database exists, otherwise `False`.
-    """
-    # Check so a database exists and is accessible
-    from django.db import connection
-
-    tables = connection.introspection.get_table_list(connection.cursor())
-    if not tables or not isinstance(tables[0], str):  # django 1.8+
-        tables = [tableinfo.name for tableinfo in tables]
-    return tables and "accounts_accountdb" in tables
 
 
 def create_config_file(game_dir, template):
@@ -364,36 +337,36 @@ def import_local_data(clear=False):
     """
     Import all local data files to models.
     """
-    from muddery.server.conf import settings
+    from muddery.server.settings import SETTINGS
     from muddery.worldeditor.services import importer
 
     # load custom data
     # data file's path
-    data_path = os.path.join(settings.GAME_DIR, settings.WORLD_DATA_FOLDER)
+    data_path = os.path.join(SETTINGS.GAME_DIR, SETTINGS.WORLD_DATA_FOLDER)
     importer.import_data_path(data_path, clear=clear, except_errors=True)
 
     # localized string file's path
-    localized_string_path = os.path.join(data_path, settings.LOCALIZED_STRINGS_FOLDER, settings.LANGUAGE_CODE)
-    importer.import_table_path(localized_string_path, settings.LOCALIZED_STRINGS_MODEL, clear=clear, except_errors=True)
+    localized_string_path = os.path.join(data_path, SETTINGS.LOCALIZED_STRINGS_FOLDER, SETTINGS.LANGUAGE_CODE)
+    importer.import_table_path(localized_string_path, SETTINGS.LOCALIZED_STRINGS_MODEL, clear=clear, except_errors=True)
 
 
 def import_system_data():
     """
     Import all local data files to models.
     """
-    from muddery.server.conf import settings
+    from muddery.server.settings import SETTINGS
     from muddery.worldeditor.services import importer
 
     # load system default data
     default_template = os.path.join(configs.GAME_TEMPLATES, configs.DEFAULT_TEMPLATE)
 
     # data file's path
-    data_path = os.path.join(default_template, settings.WORLD_DATA_FOLDER)
+    data_path = os.path.join(default_template, SETTINGS.WORLD_DATA_FOLDER)
     importer.import_data_path(data_path, clear=False, except_errors=True)
 
     # localized string file's path
-    localized_string_path = os.path.join(data_path, settings.LOCALIZED_STRINGS_FOLDER, settings.LANGUAGE_CODE)
-    importer.import_table_path(localized_string_path, settings.LOCALIZED_STRINGS_MODEL, clear=False, except_errors=True)
+    localized_string_path = os.path.join(data_path, SETTINGS.LOCALIZED_STRINGS_FOLDER, SETTINGS.LANGUAGE_CODE)
+    importer.import_table_path(localized_string_path, SETTINGS.LOCALIZED_STRINGS_MODEL, clear=False, except_errors=True)
 
 
 def init_game_env(gamedir):
@@ -406,94 +379,16 @@ def init_game_env(gamedir):
     sys.path.insert(0, gamedir)
 
 
-def create_superuser(username, password):
-    """
-    Create the superuser's account.
-    """
-    from evennia.accounts.models import AccountDB
-    AccountDB.objects.create_superuser(username, '', password)
-
-
-def create_database():
-    """
-    Create the game's database.
-    """
-    # make migrations
-    django_args = ["makemigrations"]
-    django_kwargs = {}
-    try:
-        django.core.management.call_command(*django_args, **django_kwargs)
-    except django.core.management.base.CommandError as exc:
-        raise(configs.ERROR_INPUT.format(traceback=exc, args=django_args, kwargs=django_kwargs))
-
-    django_args = ["makemigrations", "gamedata"]
-    django_kwargs = {}
-    try:
-        django.core.management.call_command(*django_args, **django_kwargs)
-    except django.core.management.base.CommandError as exc:
-        raise(configs.ERROR_INPUT.format(traceback=exc, args=django_args, kwargs=django_kwargs))
-
-    django_args = ["makemigrations", "worlddata"]
-    django_kwargs = {}
-    try:
-        django.core.management.call_command(*django_args, **django_kwargs)
-    except django.core.management.base.CommandError as exc:
-        raise(configs.ERROR_INPUT.format(traceback=exc, args=django_args, kwargs=django_kwargs))
-
-    # migrate the database
-    django_args = ["migrate"]
-    django_kwargs = {}
-    try:
-        django.core.management.call_command(*django_args, **django_kwargs)
-    except django.core.management.base.CommandError as exc:
-        raise(configs.ERROR_INPUT.format(traceback=exc, args=django_args, kwargs=django_kwargs))
-
-    django_args = ["migrate", "gamedata"]
-    django_kwargs = {"database": "gamedata"}
-    try:
-        django.core.management.call_command(*django_args, **django_kwargs)
-    except django.core.management.base.CommandError as exc:
-        raise(configs.ERROR_INPUT.format(traceback=exc, args=django_args, kwargs=django_kwargs))
-
-    django_args = ["migrate", "worlddata"]
-    django_kwargs = {"database": "worlddata"}
-    try:
-        django.core.management.call_command(*django_args, **django_kwargs)
-    except django.core.management.base.CommandError as exc:
-        raise(configs.ERROR_INPUT.format(traceback=exc, args=django_args, kwargs=django_kwargs))
-
-
-def create_editor_database():
-    """
-    Create the game's database.
-    """
-    # make migrations
-    django_args = ["makemigrations"]
-    django_kwargs = {}
-    try:
-        django.core.management.call_command(*django_args, **django_kwargs)
-    except django.core.management.base.CommandError as exc:
-        raise(configs.ERROR_INPUT.format(traceback=exc, args=django_args, kwargs=django_kwargs))
-
-    # migrate the database
-    django_args = ["migrate"]
-    django_kwargs = {}
-    try:
-        django.core.management.call_command(*django_args, **django_kwargs)
-    except django.core.management.base.CommandError as exc:
-        raise(configs.ERROR_INPUT.format(traceback=exc, args=django_args, kwargs=django_kwargs))
-
-
 def print_info():
     """
     Format info dicts from the Portal/Server for display
 
     """
-    from muddery.server.conf import settings
+    from muddery.server.settings import SETTINGS
 
     ind = " " * 8
     info = {
-        "servername": settings.GAME_SERVERNAME,
+        "servername": SETTINGS.GAME_SERVERNAME,
         "version": muddery_version(),
         "status": ""
     }

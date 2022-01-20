@@ -9,7 +9,7 @@ be of use when designing your own game.
 import os, re, inspect
 import importlib
 from pkgutil import iter_modules
-from muddery.server.conf import settings
+from muddery.server.settings import SETTINGS
 from muddery.launcher import configs
 from muddery.server.database.worlddata.localized_strings import LocalizedStrings
 
@@ -171,7 +171,7 @@ def all_unlocalized_js_strings(filter):
     # get filter
     if filter:
         local_string_filename = os.path.join(configs.MUDDERY_LIB, "web", "webclient", "webclient",
-                                             "lang", settings.LANGUAGE_CODE, "strings.js")
+                                             "lang", SETTINGS.LANGUAGE_CODE, "strings.js")
         with open(local_string_filename, "r") as file:
             re_dict = re.compile(r'".+?"\s*:\s*".+?"')
             re_string = re.compile(r'".*?"')

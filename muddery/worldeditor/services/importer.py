@@ -5,10 +5,10 @@ This module imports data from files to db.
 import os, glob, tempfile, zipfile, shutil
 import traceback
 
-from muddery.server.conf import settings
 from muddery.launcher.upgrader.upgrade_handler import UPGRADE_HANDLER
 from muddery.launcher import configs
 from muddery.launcher.utils import copy_tree
+from muddery.server.settings import SETTINGS
 from muddery.worldeditor.database.db_manager import DBManager
 from muddery.worldeditor.services.data_importer import import_file
 
@@ -39,25 +39,25 @@ def unzip_data_all(fp):
 
         # load system localized strings
         # system data file's path
-        system_data_path = os.path.join(settings.MUDDERY_DIR, settings.WORLD_DATA_FOLDER)
+        system_data_path = os.path.join(SETTINGS.MUDDERY_DIR, SETTINGS.WORLD_DATA_FOLDER)
 
         # localized string file's path
         system_localized_string_path = os.path.join(system_data_path,
-                                                    settings.LOCALIZED_STRINGS_FOLDER,
-                                                    settings.LANGUAGE_CODE)
+                                                    SETTINGS.LOCALIZED_STRINGS_FOLDER,
+                                                    SETTINGS.LANGUAGE_CODE)
 
         # load data
-        import_table_path(system_localized_string_path, settings.LOCALIZED_STRINGS_MODEL)
+        import_table_path(system_localized_string_path, SETTINGS.LOCALIZED_STRINGS_MODEL)
 
         # load custom localized strings
         # custom data file's path
-        custom_localized_string_path = os.path.join(source_path, settings.LOCALIZED_STRINGS_MODEL)
+        custom_localized_string_path = os.path.join(source_path, SETTINGS.LOCALIZED_STRINGS_MODEL)
 
         file_names = glob.glob(custom_localized_string_path + ".*")
         if file_names:
             print("Importing %s" % file_names[0])
             try:
-                import_file(file_names[0], table_name=settings.LOCALIZED_STRINGS_MODEL, clear=False)
+                import_file(file_names[0], table_name=SETTINGS.LOCALIZED_STRINGS_MODEL, clear=False)
             except Exception as e:
                 print("Import error: %s" % e)
 
@@ -69,7 +69,7 @@ def unzip_resources_all(fp):
     """
     Import all resource files from a zip file.
     """
-    media_dir = os.path.join(settings.MEDIA_ROOT, settings.IMAGE_PATH)
+    media_dir = os.path.join(SETTINGS.MEDIA_ROOT, SETTINGS.IMAGE_PATH)
     if not os.path.exists(media_dir):
         os.makedirs(media_dir)
 
@@ -103,7 +103,7 @@ def import_data_path(path, clear=True, except_errors=False):
         except_errors: (boolean) except error records and load other records.
     """
     # import tables one by one
-    tables = DBManager.inst().get_tables(settings.WORLD_DATA_APP)
+    tables = DBManager.inst().get_tables(SETTINGS.WORLD_DATA_APP)
     for table_name in tables:
         file_names = glob.glob(os.path.join(path, table_name) + ".*")
 
@@ -127,7 +127,7 @@ def import_table_path(path, table_name, clear=True, except_errors=False):
         except_errors: (boolean) except error records and load other records.
     """
     if clear:
-        DBManager.inst().clear_table(settings.WORLD_DATA_APP, table_name)
+        DBManager.inst().clear_table(SETTINGS.WORLD_DATA_APP, table_name)
 
     if not os.path.isdir(path):
         return

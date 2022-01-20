@@ -1,12 +1,11 @@
 
-from muddery.server.conf import settings
 from wtforms import validators, widgets
 from wtforms.fields import SelectField
-from muddery.server.utils.localiztion_handler import localize_form_fields
 from muddery.server.mappings.quest_objective_set import QUEST_OBJECTIVE_SET
 from muddery.server.mappings.quest_status_set import QUEST_STATUS_SET
 from muddery.server.mappings.event_action_set import EVENT_ACTION_SET
 from muddery.server.mappings.event_trigger_set import EVENT_TRIGGER_SET
+from muddery.worldeditor.settings import SETTINGS
 from muddery.worldeditor.database.db_manager import DBManager
 from muddery.worldeditor.dao import common_mappers as CM
 from muddery.worldeditor.dao.general_querys import get_element_base_data
@@ -19,7 +18,7 @@ def get_model(table_name):
     """
     Get a form of a table.
     """
-    session_name = settings.WORLD_DATA_APP
+    session_name = SETTINGS.WORLD_DATA_APP
     return DBManager.inst().get_model(session_name, table_name)
 
 

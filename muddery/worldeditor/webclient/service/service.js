@@ -47,15 +47,22 @@ service = {
 
     sendRequest: function(path, func_no, args, callback_success, callback_failed, context) {
 	    var url = CONFIG.api_url + path;
-	    params = {
+	    var params = {
             func: func_no,
             args: args,
         };
+
+        var headers = {};
+        var token = sessionStorage.getItem("token");
+        if (token) {
+            headers["Authorization"] = "Bearer " + token;
+        }
 
 	    $.ajax({
             url: url,
 		    type: "POST",
             contentType: "application/json",
+            headers: headers,
 		    cache: false,
             context: context,
 		    data: JSON.stringify(params),
@@ -106,6 +113,10 @@ service = {
             .appendTo(form);
 
         form.appendTo('body').submit().remove();
+    },
+
+    set_token: function(token) {
+        sessionStorage.setItem("token", token);
     },
 
     login: function(username, password, callback_success, callback_failed, context) {

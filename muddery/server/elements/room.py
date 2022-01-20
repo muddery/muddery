@@ -31,7 +31,7 @@ class MudderyRoom(BaseElement):
     properties and methods available on all Objects.
     """
     element_type = "ROOM"
-    element_name = _("Room")
+    element_name = "Room"
     model_name = "world_rooms"
 
     def __init__(self):
@@ -114,21 +114,22 @@ class MudderyRoom(BaseElement):
         models = ELEMENT("WORLD_NPC").get_models()
 
         self.all_characters = {}
-        awaits = []
-        for record in records:
-            tables_data = WorldData.get_tables_data(models, record.key)
-            tables_data = tables_data[0]
+        if records:
+            awaits = []
+            for record in records:
+                tables_data = WorldData.get_tables_data(models, record.key)
+                tables_data = tables_data[0]
 
-            new_obj = ELEMENT(tables_data.element_type)()
-            self.all_characters[new_obj.get_id()] = new_obj
+                new_obj = ELEMENT(tables_data.element_type)()
+                self.all_characters[new_obj.get_id()] = new_obj
 
-            awaits.append(new_obj.setup_element(tables_data.key, level=tables_data.level, first_time=True))
+                awaits.append(new_obj.setup_element(tables_data.key, level=tables_data.level, first_time=True))
 
-        await asyncio.wait(awaits)
+            await asyncio.wait(awaits)
 
-        # Set the character's location.
-        for obj in self.all_characters.values():
-            obj.set_location(self)
+            # Set the character's location.
+            for obj in self.all_characters.values():
+                obj.set_location(self)
 
     async def load_exits(self):
         """
@@ -140,22 +141,22 @@ class MudderyRoom(BaseElement):
         models = ELEMENT("EXIT").get_models()
 
         self.all_exits = {}
-        awaits = []
-        for record in records:
-            tables_data = WorldData.get_tables_data(models, record.key)
-            tables_data = tables_data[0]
+        if records:
+            awaits = []
+            for record in records:
+                tables_data = WorldData.get_tables_data(models, record.key)
+                tables_data = tables_data[0]
 
-            new_obj = ELEMENT(tables_data.element_type)()
-            self.all_exits[record.key] = {
-                "destination": tables_data.destination,
-                "verb": tables_data.verb,
-                "condition": tables_data.condition,
-                "obj": new_obj,
-            }
+                new_obj = ELEMENT(tables_data.element_type)()
+                self.all_exits[record.key] = {
+                    "destination": tables_data.destination,
+                    "verb": tables_data.verb,
+                    "obj": new_obj,
+                }
 
-            awaits.append(new_obj.setup_element(tables_data.key))
+                awaits.append(new_obj.setup_element(tables_data.key))
 
-        await asyncio.wait(awaits)
+            await asyncio.wait(awaits)
 
     async def load_objects(self):
         """
@@ -167,21 +168,22 @@ class MudderyRoom(BaseElement):
         models = ELEMENT("WORLD_OBJECT").get_models()
 
         self.all_objects = {}
-        awaits = []
-        for record in records:
-            tables_data = WorldData.get_tables_data(models, record.key)
-            tables_data = tables_data[0]
+        if records:
+            awaits = []
+            for record in records:
+                tables_data = WorldData.get_tables_data(models, record.key)
+                tables_data = tables_data[0]
 
-            new_obj = ELEMENT(tables_data.element_type)()
+                new_obj = ELEMENT(tables_data.element_type)()
 
-            self.all_objects[record.key] = {
-                "condition": tables_data.condition,
-                "obj": new_obj,
-            }
+                self.all_objects[record.key] = {
+                    "condition": tables_data.condition,
+                    "obj": new_obj,
+                }
 
-            awaits.append(new_obj.setup_element(record.key))
+                awaits.append(new_obj.setup_element(record.key))
 
-        await asyncio.wait(awaits)
+            await asyncio.wait(awaits)
 
     def get_character(self, char_id):
         """

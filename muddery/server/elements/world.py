@@ -2,7 +2,7 @@
 The World is the base controller of a server. It managers all areas, maps and characters on this server.
 """
 
-from muddery.server.conf import settings
+from muddery.server.settings import SETTINGS
 from muddery.server.elements.base_element import BaseElement
 from muddery.server.mappings.element_set import ELEMENT
 from muddery.server.database.gamedata.honours_mapper import HonoursMapper
@@ -101,13 +101,13 @@ class MudderyWorld(BaseElement):
         """
         Load all client commands.
         """
-        session_cmdset = class_from_path(settings.SESSION_CMDSET)
+        session_cmdset = class_from_path(SETTINGS.SESSION_CMDSET)
         session_cmdset.create()
 
-        account_cmdset = class_from_path(settings.ACCOUNT_CMDSET)
+        account_cmdset = class_from_path(SETTINGS.ACCOUNT_CMDSET)
         account_cmdset.create()
 
-        character_cmdset = class_from_path(settings.CHARACTER_CMDSET)
+        character_cmdset = class_from_path(SETTINGS.CHARACTER_CMDSET)
         character_cmdset.create()
 
     def get_room(self, room_key):

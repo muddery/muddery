@@ -10,7 +10,7 @@ distribution systems.
 import traceback
 import datetime
 import asyncio
-from muddery.server.conf import settings
+from muddery.server.settings import SETTINGS
 from muddery.server.utils.password import hash_password, check_password, make_salt
 from muddery.server.database.gamedata.accounts import Accounts
 from muddery.server.database.gamedata.server_bans import ServerBans
@@ -169,7 +169,7 @@ class MudderyAccount(BaseElement):
                 },
                 {
                     "char_all": await self.get_all_nicknames(),
-                    "max_char": settings.MAX_PLAYER_CHARACTERS
+                    "max_char": SETTINGS.MAX_PLAYER_CHARACTERS
                 },
             ]),
         ])
@@ -253,7 +253,7 @@ class MudderyAccount(BaseElement):
         # Find the character to puppet.
         try:
             if self.type == "STAFF":
-                char_type = settings.STAFF_CHARACTER_ELEMENT_TYPE
+                char_type = SETTINGS.STAFF_CHARACTER_ELEMENT_TYPE
                 char_key = await GameSettings.inst().get("default_staff_character_key")
             else:
                 char_info = await CharacterInfo.inst().get(char_db_id)

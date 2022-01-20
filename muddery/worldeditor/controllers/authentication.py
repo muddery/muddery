@@ -2,12 +2,12 @@
 Battle commands. They only can be used when a character is in a combat.
 """
 
-from django.contrib import auth
-from django.contrib.auth.hashers import check_password, is_password_usable, make_password
-from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
-from muddery.worldeditor.utils.response import error_response
+from sqlalchemy.orm.exc import NoResultFound
+from muddery.server.utils.password import hash_password, make_salt, check_password
 from muddery.server.utils.exception import MudderyError, ERR
-from muddery.worldeditor.utils.response import success_response
+from muddery.worldeditor.settings import SETTINGS
+from muddery.worldeditor.utils.auth import generate_token
+from muddery.worldeditor.utils.responses import success_response, error_response
 from muddery.worldeditor.controllers.base_request_processer import BaseRequestProcesser
 from muddery.worldeditor.dao.accounts import Accounts
 from muddery.server.utils.localized_strings_handler import _
@@ -27,20 +27,29 @@ class login(BaseRequestProcesser):
     login = False
     staff = False
 
-    def func(self, args, request):
+    def func(self, args):
         if not args or ('username' not in args) or ('password' not in args):
             raise MudderyError(ERR.missing_args, 'Missing arguments.')
 
         username = args['username']
-        password = args['password']
+        raw_password = args['password']
 
         # Match account name and check password
-        user = auth.authenticate(username=username, password=password)
-        if not user:
-            raise MudderyError(ERR.no_authentication, "Authentication fialed.")
+        try:
+            password, salt = Accounts.inst().get_password(username)
+        except NoResultFound:
+            # Wrong username.
+            raise MudderyError(ERR.no_authentication, "Authentication failed.")
 
-        auth.login(request, user)
-        return success_response("success")
+        if not check_password(raw_password, password, salt):
+            raise MudderyError(ERR.no_authentication, "Authentication failed.")
+
+        token = generate_token()
+        Accounts.inst().update_login(username, token)
+
+        return success_response({
+            "token": token,
+        })
 
 
 class logout(BaseRequestProcesser):
@@ -53,14 +62,14 @@ class logout(BaseRequestProcesser):
     path = "logout"
     name = ""
 
-    def func(self, args, request):
+    def func(self, args):
         """
         Logout the editor.
 
         Args:
             args: None
         """
-        auth.logout(request)
+        Accounts.inst().set_last_token("")
         return success_response("success")
 
 
@@ -74,7 +83,7 @@ class query_status(BaseRequestProcesser):
     path = "status"
     name = ""
 
-    def func(self, args, request):
+    def func(self, args):
         """
         Get the server's status.
 

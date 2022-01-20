@@ -18,6 +18,10 @@ import logging
 
 
 class Settings(object):
+    """
+    Game server's default settings.
+    """
+
     def update(self, settings):
         """
         Update configs with another Configs object.
@@ -90,7 +94,7 @@ class Settings(object):
             'PASSWORD': '',
             'HOST': '',
             'PORT': '',
-            'DEBUG': True,
+            'DEBUG': False,
         },
         'worlddata': {
             'ENGINE': 'sqlite3',
@@ -100,7 +104,7 @@ class Settings(object):
             'PASSWORD': '',
             'HOST': '',
             'PORT': '',
-            'DEBUG': True,
+            'DEBUG': False,
         },
     }
 
@@ -272,3 +276,6 @@ class Settings(object):
     # AI modules
     ###################################
     AI_CHOOSE_SKILL = "muddery.server.ai.choose_skill.ChooseSkill"
+
+
+SETTINGS = Settings()

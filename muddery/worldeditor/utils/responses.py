@@ -2,9 +2,7 @@
 Make HTTP response.
 """
 
-import json
-from django.http import HttpResponse, StreamingHttpResponse
-from muddery.server.utils.utils import file_iterator
+from sanic.response import empty, json, file_stream
 
 
 def cross_domain(func):
@@ -20,41 +18,43 @@ def cross_domain(func):
     return decorate
 
 
-@cross_domain
+def empty_response():
+    """
+    Empty response.
+    """
+    return empty()
+
+
 def success_response(data=None):
     """
-    Generate error response.
+    Generate a success response.
 
     Args:
         data: respond data.
     """
-    content = json.dumps({
+    return json({
         "code": 0,
         "msg": "success",
         "data": data,
     })
-    return HttpResponse(content, content_type="application/json")
 
 
-@cross_domain
-def error_response(code=-1, data=None, msg=None):
+def error_response(code=-1, data=None, msg=None, status=400):
     """
     Generate error response.
 
     Args:
         code: respond code.
-        msg: respond mseeage.
+        msg: respond message.
         data: respond data.
     """
-    content = json.dumps({
+    return json({
         "code": code,
         "msg": msg,
         "data": data,
-    })
-    return HttpResponse(content, content_type="application/json")
+    }, status=status)
 
 
-@cross_domain
 def file_response(file_obj, filename):
     """
     Respond a file.
@@ -63,8 +63,4 @@ def file_response(file_obj, filename):
         file_obj: (file object) file to send.
         filename: (string) filename.
     """
-    response = StreamingHttpResponse(file_iterator(file_obj))
-    response['Content-Type'] = 'application/octet-stream'
-    response['Content-Disposition'] = 'attachment;filename="%s"' % filename
-    return response
-
+    return file_stream(file_obj, filename=filename)

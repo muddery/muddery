@@ -7,7 +7,7 @@ from muddery.worldeditor.services import data_query, data_edit
 from muddery.server.server import Server
 from muddery.server.utils.exception import MudderyError, ERR
 from muddery.server.utils.logger import logger
-from muddery.worldeditor.utils.response import success_response
+from muddery.worldeditor.utils.responses import success_response
 from muddery.worldeditor.controllers.base_request_processer import BaseRequestProcesser
 from muddery.worldeditor.dao import general_querys
 from muddery.server.mappings.event_action_set import EVENT_ACTION_SET
@@ -24,7 +24,7 @@ class QueryAllElements(BaseRequestProcesser):
     path = "query_all_elements"
     name = ""
 
-    def func(self, args, request):
+    def func(self, args):
         data = data_query.query_all_elements()
         return success_response(data)
 
@@ -39,7 +39,7 @@ class QueryTable(BaseRequestProcesser):
     path = "query_table"
     name = ""
 
-    def func(self, args, request):
+    def func(self, args):
         if 'table' not in args:
             raise MudderyError(ERR.missing_args, 'Missing the argument: "table".')
 
@@ -59,7 +59,7 @@ class QueryElementTable(BaseRequestProcesser):
     path = "query_element_table"
     name = ""
 
-    def func(self, args, request):
+    def func(self, args):
         if 'element_type' not in args:
             raise MudderyError(ERR.missing_args, 'Missing the argument: "element_type".')
 
@@ -81,7 +81,7 @@ class QueryRecord(BaseRequestProcesser):
     path = "query_record"
     name = ""
 
-    def func(self, args, request):
+    def func(self, args):
         if ('table' not in args) or ('record' not in args):
             raise MudderyError(ERR.missing_args, 'Missing arguments.')
 
@@ -102,7 +102,7 @@ class QueryAreas(BaseRequestProcesser):
     path = "query_areas"
     name = ""
 
-    def func(self, args, request):
+    def func(self, args):
         data = data_query.query_areas()
         return success_response(data)
 
@@ -117,7 +117,7 @@ class QueryElementTypeProperties(BaseRequestProcesser):
     path = "query_element_type_properties"
     name = ""
 
-    def func(self, args, request):
+    def func(self, args):
         if 'element_type' not in args:
             raise MudderyError(ERR.missing_args, 'Missing the argument: "element_type".')
 
@@ -138,7 +138,7 @@ class QueryElementProperties(BaseRequestProcesser):
     path = "query_element_properties"
     name = ""
 
-    def func(self, args, request):
+    def func(self, args):
         if 'element_type' not in args:
             raise MudderyError(ERR.missing_args, 'Missing the argument: "element_type".')
 
@@ -163,7 +163,7 @@ class QueryElementLevelProperties(BaseRequestProcesser):
     path = "query_element_level_properties"
     name = ""
 
-    def func(self, args, request):
+    def func(self, args):
         if 'element_type' not in args:
             raise MudderyError(ERR.missing_args, 'Missing the argument: "element_type".')
 
@@ -195,7 +195,7 @@ class SaveElementLevelProperties(BaseRequestProcesser):
     path = "save_element_level_properties"
     name = ""
 
-    def func(self, args, request):
+    def func(self, args):
         if 'element_type' not in args:
             raise MudderyError(ERR.missing_args, 'Missing the argument: "element_type".')
 
@@ -231,7 +231,7 @@ class DeleteElementLevelProperties(BaseRequestProcesser):
     path = "delete_element_level_properties"
     name = ""
 
-    def func(self, args, request):
+    def func(self, args):
         if 'element_type' not in args:
             raise MudderyError(ERR.missing_args, 'Missing the argument: "element_type".')
 
@@ -262,7 +262,7 @@ class QueryElementEventTriggers(BaseRequestProcesser):
     path = "query_element_event_triggers"
     name = ""
 
-    def func(self, args, request):
+    def func(self, args):
         if 'element_type' not in args:
             raise MudderyError(ERR.missing_args, 'Missing the argument: "element_type".')
 
@@ -279,7 +279,7 @@ class QueryDialogueEventTriggers(BaseRequestProcesser):
     path = "query_dialogue_event_triggers"
     name = ""
 
-    def func(self, args, request):
+    def func(self, args):
         data = data_query.query_dialogue_event_triggers()
         return success_response(data)
 
@@ -294,7 +294,7 @@ class QueryElementEvents(BaseRequestProcesser):
     path = "query_element_events"
     name = ""
 
-    def func(self, args, request):
+    def func(self, args):
         if 'element_key' not in args:
             raise MudderyError(ERR.missing_args, 'Missing the argument: "element_key".')
 
@@ -315,7 +315,7 @@ class QueryEventActionForm(BaseRequestProcesser):
     path = "query_event_action_forms"
     name = ""
 
-    def func(self, args, request):
+    def func(self, args):
         if 'action' not in args or 'event' not in args:
             raise MudderyError(ERR.missing_args, 'Missing arguments.')
 
@@ -337,7 +337,7 @@ class QueryForm(BaseRequestProcesser):
     path = "query_form"
     name = ""
 
-    def func(self, args, request):
+    def func(self, args):
         if 'table' not in args:
             raise MudderyError(ERR.missing_args, 'Missing the argument: "table".')
 
@@ -358,7 +358,7 @@ class QueryFormFirstRecord(BaseRequestProcesser):
     path = "query_form_first_record"
     name = ""
 
-    def func(self, args, request):
+    def func(self, args):
         if 'table' not in args:
             raise MudderyError(ERR.missing_args, 'Missing the argument: "table".')
 
@@ -390,7 +390,7 @@ class SaveForm(BaseRequestProcesser):
     path = "save_form"
     name = ""
 
-    def func(self, args, request):
+    def func(self, args):
         if not args:
             raise MudderyError(ERR.missing_args, 'Missing arguments.')
 
@@ -421,7 +421,7 @@ class SaveEventActionForm(BaseRequestProcesser):
     path = "save_event_action_forms"
     name = ""
 
-    def func(self, args, request):
+    def func(self, args):
         if not args:
             raise MudderyError(ERR.missing_args, 'Missing arguments.')
 
@@ -467,7 +467,7 @@ class QueryObjectForm(BaseRequestProcesser):
     path = "query_element_form"
     name = ""
 
-    def func(self, args, request):
+    def func(self, args):
         if not args:
             raise MudderyError(ERR.missing_args, 'Missing arguments.')
 
@@ -492,7 +492,7 @@ class QueryMap(BaseRequestProcesser):
     path = "query_map"
     name = ""
 
-    def func(self, args, request):
+    def func(self, args):
         if not args:
             raise MudderyError(ERR.missing_args, 'Missing arguments.')
 
@@ -522,7 +522,7 @@ class SaveElementForm(BaseRequestProcesser):
     path = "save_element_form"
     name = ""
 
-    def func(self, args, request):
+    def func(self, args):
         if not args:
             raise MudderyError(ERR.missing_args, 'Missing arguments.')
 
@@ -562,7 +562,7 @@ class AddArea(BaseRequestProcesser):
     path = "add_area"
     name = ""
 
-    def func(self, args, request):
+    def func(self, args):
         if not args:
             raise MudderyError(ERR.missing_args, 'Missing arguments.')
 
@@ -606,7 +606,7 @@ class AddRoom(BaseRequestProcesser):
     path = "add_room"
     name = ""
 
-    def func(self, args, request):
+    def func(self, args):
         if not args:
             raise MudderyError(ERR.missing_args, 'Missing arguments.')
 
@@ -649,7 +649,7 @@ class DeleteElements(BaseRequestProcesser):
     path = "delete_elements"
     name = ""
 
-    def func(self, args, request):
+    def func(self, args):
         if not args:
             raise MudderyError(ERR.missing_args, 'Missing arguments.')
 
@@ -676,7 +676,7 @@ class AddExit(BaseRequestProcesser):
     path = "add_exit"
     name = ""
 
-    def func(self, args, request):
+    def func(self, args):
         if not args:
             raise MudderyError(ERR.missing_args, 'Missing arguments.')
 
@@ -731,7 +731,7 @@ class SaveMap(BaseRequestProcesser):
     path = "save_map_positions"
     name = ""
 
-    def func(self, args, request):
+    def func(self, args):
         if not args:
             raise MudderyError(ERR.missing_args, 'Missing arguments.')
 
@@ -759,7 +759,7 @@ class DeleteRecord(BaseRequestProcesser):
     path = "delete_record"
     name = ""
 
-    def func(self, args, request):
+    def func(self, args):
         if 'table' not in args:
             raise MudderyError(ERR.missing_args, 'Missing the argument: "table".')
 
@@ -786,7 +786,7 @@ class DeleteElement(BaseRequestProcesser):
     path = "delete_element"
     name = ""
 
-    def func(self, args, request):
+    def func(self, args):
         if 'element_key' not in args:
             raise MudderyError(ERR.missing_args, 'Missing the argument: "element_key".')
 
@@ -812,7 +812,7 @@ class QueryTables(BaseRequestProcesser):
     path = "query_tables"
     name = ""
 
-    def func(self, args, request):
+    def func(self, args):
         data = data_query.query_tables()
         return success_response(data)
 
@@ -827,7 +827,7 @@ class QueryDialoguesTable(BaseRequestProcesser):
     path = "query_dialogues_table"
     name = ""
 
-    def func(self, args, request):
+    def func(self, args):
         data = data_query.query_dialogues_table()
         return success_response(data)
 
@@ -842,7 +842,7 @@ class ApplyChanges(BaseRequestProcesser):
     path = "apply_changes"
     name = ""
 
-    def func(self, args, request):
+    def func(self, args):
         try:
             # reload system data
             # import_syetem_data()

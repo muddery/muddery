@@ -3,10 +3,10 @@ This model translates default strings into localized strings.
 """
 
 import importlib, inspect
-from muddery.server.conf import settings
 from wtforms_alchemy import ModelForm
-from muddery.server.utils.logger import logger
 from sqlalchemy.ext.declarative import declarative_base
+from muddery.server.utils.logger import logger
+from muddery.worldeditor.settings import SETTINGS
 Base = declarative_base()
 
 
@@ -24,7 +24,7 @@ class FormSet(object):
         """
         # load classes
         base_class = ModelForm
-        module = importlib.import_module(settings.PATH_DATA_FORMS_BASE)
+        module = importlib.import_module(SETTINGS.PATH_DATA_FORMS_BASE)
         for name, obj in vars(module).items():
             if inspect.isclass(obj) and issubclass(obj, base_class) and obj is not base_class:
                 form_class = obj

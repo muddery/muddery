@@ -5,7 +5,7 @@ import importlib
 import inspect
 import traceback
 
-from muddery.server.conf import settings
+from muddery.server.settings import SETTINGS
 from muddery.server.database.storage.memory_record import MemoryRecord
 from muddery.server.database.storage.memory_table import MemoryTable
 from muddery.server.utils.exception import MudderyError
@@ -31,12 +31,12 @@ class WorldData(object):
         """
         cls.clear()
 
-        module = importlib.import_module(settings.WORLD_DATA_MODEL_FILE)
+        module = importlib.import_module(SETTINGS.WORLD_DATA_MODEL_FILE)
         models = [cls for cls in vars(module).values() if inspect.isclass(cls)]
         for model in models:
-            config = settings.AL_DATABASES[settings.WORLD_DATA_APP]
+            config = SETTINGS.AL_DATABASES[SETTINGS.WORLD_DATA_APP]
             cls.tables[model.__name__] = MemoryTable(
-                settings.WORLD_DATA_APP,
+                SETTINGS.WORLD_DATA_APP,
                 config["MODELS"],
                 model.__name__)
 
@@ -46,9 +46,9 @@ class WorldData(object):
         Load a table to the local storage.
         """
         try:
-            config = settings.AL_DATABASES[settings.WORLD_DATA_APP]
+            config = SETTINGS.AL_DATABASES[SETTINGS.WORLD_DATA_APP]
             cls.tables[table_name] = MemoryTable(
-                settings.WORLD_DATA_APP,
+                SETTINGS.WORLD_DATA_APP,
                 config["MODELS"],
                 table_name)
         except Exception as e:

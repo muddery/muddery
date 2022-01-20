@@ -3,7 +3,7 @@ General account commands usually availabe to all players.
 """
 
 import re, traceback
-from muddery.server.conf import settings
+from muddery.server.settings import SETTINGS
 from muddery.server.utils.logger import logger
 from muddery.server.commands.base_command import BaseCommand
 from muddery.server.utils.localized_strings_handler import _
@@ -261,8 +261,8 @@ class CmdCharCreate(BaseCommand):
 
         # check total characters number
         char_all = await account.get_all_characters()
-        if len(char_all) >= settings.MAX_PLAYER_CHARACTERS:
-            await account.msg({"alert": _("You may only create a maximum of %i characters.") % settings.MAX_PLAYER_CHARACTERS})
+        if len(char_all) >= SETTINGS.MAX_PLAYER_CHARACTERS:
+            await account.msg({"alert": _("You may only create a maximum of %i characters.") % SETTINGS.MAX_PLAYER_CHARACTERS})
             return
 
         # strip excessive spaces in playername
@@ -277,12 +277,12 @@ class CmdCharCreate(BaseCommand):
             pass
 
         try:
-            if settings.TEST_MODE:
+            if SETTINGS.TEST_MODE:
                 await create_character(
                     account,
                     name,
-                    element_type=settings.PLAYER_CHARACTER_TYPE_TEST_MODE,
-                    character_key=settings.PLAYER_CHARACTER_KEY_TEST_MODE,
+                    element_type=SETTINGS.PLAYER_CHARACTER_TYPE_TEST_MODE,
+                    character_key=SETTINGS.PLAYER_CHARACTER_KEY_TEST_MODE,
                 )
             else:
                 await create_character(account, name)

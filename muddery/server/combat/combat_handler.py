@@ -1,5 +1,5 @@
 
-from muddery.server.server import settings
+from muddery.server.settings import SETTINGS
 from muddery.server.utils.utils import class_from_path
 from muddery.server.utils.defines import CombatType
 
@@ -32,9 +32,9 @@ class CombatHandler(object):
         self.combat_id += 1
 
         if combat_type == CombatType.HONOUR:
-            combat = class_from_path(settings.HONOUR_COMBAT_HANDLER)()
+            combat = class_from_path(SETTINGS.HONOUR_COMBAT_HANDLER)()
         else:
-            combat = class_from_path(settings.NORMAL_COMBAT_HANDLER)()
+            combat = class_from_path(SETTINGS.NORMAL_COMBAT_HANDLER)()
 
         await combat.set_combat(self, new_combat_id, combat_type, teams, desc, timeout)
         combat.start()

@@ -5,8 +5,8 @@ Store object's element key data in memory.
 
 import datetime
 from sqlalchemy import select, update, delete, func
-from muddery.server.conf import settings
 from muddery.server.utils.singleton import Singleton
+from muddery.worldeditor.settings import SETTINGS
 from muddery.worldeditor.database.db_manager import DBManager
 from muddery.worldeditor.database.worldeditor_models import accounts
 
@@ -17,34 +17,29 @@ class Accounts(Singleton):
     """
     # data storage
     def __init__(self):
-        self.session = DBManager.inst().get_session(settings.WORLD_EDITOR_APP)
+        self.session = DBManager.inst().get_session(SETTINGS.WORLD_EDITOR_APP)
 
-    def add(self, username, password, type):
+    def add(self, username, password, salt, account_type):
         """
         Add a new account.
 
         :param username: account's username
         :param password: account's password
-        :param account_id: account's id
+        :param account_type: account's type
         :return:
         """
         current_time = datetime.datetime.now()
         data = {
             "username": username,
             "password": password,
-            "type": type,
+            "salt": salt,
+            "type": account_type,
             "create_time": current_time,
             "last_login": current_time,
         }
 
         record = accounts(**data)
-
-        try:
-            self.session.add(record)
-            self.session.commit()
-        except Exception as e:
-            self.session.rollback()
-            raise
+        self.session.add(record)
 
     def remove(self, username):
         """
@@ -53,14 +48,7 @@ class Accounts(Singleton):
         :param username: account's username
         """
         stmt = delete(accounts).where(accounts.username == username)
-
-        try:
-            result = self.session.execute(stmt)
-            if result.rowcount > 0:
-                self.session.commit()
-        except Exception as e:
-            self.session.rollback()
-            raise
+        self.session.execute(stmt)
 
     def count(self):
         """
@@ -91,7 +79,8 @@ class Accounts(Singleton):
         """
         stmt = select(accounts).where(accounts.username == username)
         result = self.session.execute(stmt)
-        return result.scalars().one().password
+        record = result.scalars().one()
+        return record.password, record.salt
 
     def set_password(self, username, password):
         """
@@ -104,14 +93,9 @@ class Accounts(Singleton):
             password=password,
         )
 
-        try:
-            result = self.session.execute(stmt)
-            self.session.commit()
-        except Exception as e:
-            self.session.rollback()
-            raise
+        self.session.execute(stmt)
 
-    def get_info(self, username):
+    def get_type(self, username):
         """
         Get an account's information.
         :param username:
@@ -120,22 +104,40 @@ class Accounts(Singleton):
         stmt = select(accounts).where(accounts.username == username)
         result = self.session.execute(stmt)
         record = result.scalars().one()
-        return {
-            "type": record.type,
-        }
+        return record.type
 
-    def update_login_time(self, username):
+    def update_login(self, username, token):
         """
         Update the account's last login time.
         """
         current_time = datetime.datetime.now()
         stmt = update(accounts).where(accounts.username == username).values(
             last_login=current_time,
+            token=token
         )
 
-        try:
-            result = self.session.execute(stmt)
-            self.session.commit()
-        except Exception as e:
-            self.session.rollback()
-            raise
+        self.session.execute(stmt)
+
+    def get_last_token(self, username):
+        """
+        Get an account's information.
+        :param username:
+        :return:
+        """
+        stmt = select(accounts).where(accounts.username == username)
+        result = self.session.execute(stmt)
+        record = result.scalars().one()
+        return record.token
+
+    def set_last_token(self, username, token):
+        """
+        Set the token of the last login.
+        :param username:
+        :param token:
+        :return:
+        """
+        stmt = update(accounts).where(accounts.username == username).values(
+            token=token
+        )
+
+        self.session.execute(stmt)

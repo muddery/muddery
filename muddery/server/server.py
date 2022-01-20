@@ -1,7 +1,7 @@
 
 import threading
 import traceback
-from muddery.server.conf import settings
+from muddery.server.settings import SETTINGS
 from muddery.server.utils.utils import class_from_path
 from muddery.server.utils.singleton import Singleton
 from muddery.server.service.command_handler import CommandHandler
@@ -27,6 +27,11 @@ class Server(Singleton):
         self._command_handler = None
         self.db_connected = False
 
+    async def init(self):
+        await self.connect_db()
+        await self.create_the_world()
+        self.create_command_handler()
+
     async def connect_db(self):
         """
         Create the db connection.
@@ -43,7 +48,7 @@ class Server(Singleton):
             raise
 
         # load classes
-        for cls in classes_in_path(settings.PATH_GAMEDATA_DAO, BaseData):
+        for cls in classes_in_path(SETTINGS.PATH_GAMEDATA_DAO, BaseData):
             await cls.inst().init()
 
     async def create_the_world(self):
@@ -80,9 +85,9 @@ class Server(Singleton):
         if self._command_handler:
             return
 
-        session_cmdset = class_from_path(settings.SESSION_CMDSET)
-        account_cmdset = class_from_path(settings.ACCOUNT_CMDSET)
-        character_cmdset = class_from_path(settings.CHARACTER_CMDSET)
+        session_cmdset = class_from_path(SETTINGS.SESSION_CMDSET)
+        account_cmdset = class_from_path(SETTINGS.ACCOUNT_CMDSET)
+        character_cmdset = class_from_path(SETTINGS.CHARACTER_CMDSET)
         self._command_handler = CommandHandler(session_cmdset, account_cmdset, character_cmdset)
 
     async def handler_message(self, session, message):

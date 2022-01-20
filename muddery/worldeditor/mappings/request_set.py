@@ -2,10 +2,10 @@
 All available requests.
 """
 
-from muddery.server.conf import settings
 from muddery.server.utils.logger import logger
 from muddery.server.utils.exception import MudderyError
 from muddery.server.utils.utils import classes_in_path
+from muddery.worldeditor.settings import SETTINGS
 from muddery.worldeditor.controllers.base_request_processer import BaseRequestProcesser
 
 
@@ -22,7 +22,7 @@ class RequestSet(object):
         Add all forms from the form path.
         """
         # load classes
-        for cls in classes_in_path(settings.PATH_REQUEST_PROCESSERS_BASE, BaseRequestProcesser):
+        for cls in classes_in_path(SETTINGS.PATH_REQUEST_PROCESSERS_BASE, BaseRequestProcesser):
             path = cls.path
             name = cls.name
 

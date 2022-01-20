@@ -2,7 +2,7 @@
 All available event actions.
 """
 
-from muddery.server.conf import settings
+from muddery.server.settings import SETTINGS
 from muddery.server.utils.logger import logger
 from muddery.server.utils.utils import classes_in_path
 from muddery.server.events.base_event_action import BaseEventAction
@@ -20,7 +20,7 @@ class EventActionSet(object):
         Add all event actions from the path.
         """
         # load classes
-        for cls in classes_in_path(settings.PATH_EVENT_ACTION_BASE, BaseEventAction):
+        for cls in classes_in_path(SETTINGS.PATH_EVENT_ACTION_BASE, BaseEventAction):
             key = cls.key
             if key:
                 if key in self.dict:

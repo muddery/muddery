@@ -11,7 +11,7 @@ import os
 import threading
 import logging
 from logging.handlers import TimedRotatingFileHandler
-from muddery.server.conf import settings
+from muddery.server.settings import SETTINGS
 
 
 class Logger(object):
@@ -188,4 +188,4 @@ class Logger(object):
             self.logger.info("[SS] %s" % line)
 
 
-logger = Logger.instance(settings.LOG_DIR, settings.LOG_NAME, settings.LOG_LEVEL)
+logger = Logger.instance(SETTINGS.LOG_DIR, SETTINGS.LOG_NAME, SETTINGS.LOG_LEVEL)

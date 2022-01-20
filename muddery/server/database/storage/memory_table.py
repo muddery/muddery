@@ -14,12 +14,12 @@ class MemoryTable(object):
     Load and cache a table's data.
     """
 
-    def __init__(self, session, model_path, model_name):
+    def __init__(self, session_name, model_path, model_name):
         self.model_name = model_name
         module = importlib.import_module(model_path)
         self.model = getattr(module, model_name)
         self.columns = self.model.__table__.columns.keys()
-        self.session = DBManager.inst().get_session(session)
+        self.session = DBManager.inst().get_session(session_name)
 
         self.records = []
         self.table_fields = {}

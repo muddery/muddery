@@ -4,10 +4,10 @@ Import table data.
 
 import os, traceback
 from sqlalchemy import delete
-from muddery.server.conf import settings
 from muddery.server.utils.logger import logger
-from muddery.worldeditor.utils import readers
 from muddery.server.utils.exception import MudderyError, ERR
+from muddery.worldeditor.settings import SETTINGS
+from muddery.worldeditor.utils import readers
 from muddery.worldeditor.database.db_manager import DBManager
 
 
@@ -122,23 +122,23 @@ def import_file(fullname, file_type=None, table_name=None, clear=True, except_er
             line += 1
 
             # import values
-            for values in data_iterator:
-                # skip blank lines
-                blank_line = True
-                for value in values:
-                    if value:
-                        blank_line = False
-                        break
-                if blank_line:
+            with session.begin():
+                for values in data_iterator:
+                    # skip blank lines
+                    blank_line = True
+                    for value in values:
+                        if value:
+                            blank_line = False
+                            break
+                    if blank_line:
+                        line += 1
+                        continue
+
+                    data = parse_record(titles, field_types, values)
+                    record = model(**data)
+                    session.add(record)
                     line += 1
-                    continue
 
-                data = parse_record(titles, field_types, values)
-                record = model(**data)
-                session.add(record)
-                line += 1
-
-            session.commit()
         except StopIteration:
             # reach the end of file, pass this exception
             pass
@@ -188,8 +188,8 @@ def import_file(fullname, file_type=None, table_name=None, clear=True, except_er
             file_type = ext_name[1:].lower()
 
     # get model
-    session = DBManager.inst().get_session(settings.WORLD_DATA_APP)
-    model = DBManager.inst().get_model(settings.WORLD_DATA_APP, table_name)
+    session = DBManager.inst().get_session(SETTINGS.WORLD_DATA_APP)
+    model = DBManager.inst().get_model(SETTINGS.WORLD_DATA_APP, table_name)
 
     if clear:
         stmt = delete(model)

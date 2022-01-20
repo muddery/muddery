@@ -10,7 +10,7 @@ creation commands.
 
 import time, datetime, traceback, ast
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from muddery.server.conf import settings
+from muddery.server.settings import SETTINGS
 from muddery.server.utils.logger import logger
 from muddery.server.elements.base_element import BaseElement
 from muddery.server.combat.combat_handler import COMBAT_HANDLER
@@ -120,7 +120,7 @@ class MudderyCharacter(BaseElement):
         self.friendly = self.const.friendly if self.const.friendly else 0
 
         # skill's ai
-        ai_choose_skill_class = class_from_path(settings.AI_CHOOSE_SKILL)
+        ai_choose_skill_class = class_from_path(SETTINGS.AI_CHOOSE_SKILL)
         self.ai_choose_skill = ai_choose_skill_class()
 
         # skill's gcd
@@ -565,7 +565,7 @@ class MudderyCharacter(BaseElement):
             logger.log_err("Can not find the target.")
             return False
 
-        if not target.is_element(settings.CHARACTER_ELEMENT_TYPE):
+        if not target.is_element(SETTINGS.CHARACTER_ELEMENT_TYPE):
             # Target is not a character.
             logger.log_err("Can not attack the target %s." % target.get_id())
             return False

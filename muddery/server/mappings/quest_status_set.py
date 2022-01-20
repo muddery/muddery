@@ -2,7 +2,7 @@
 All available event actions.
 """
 
-from muddery.server.conf import settings
+from muddery.server.settings import SETTINGS
 from muddery.server.utils.logger import logger
 from muddery.server.utils.utils import classes_in_path
 from muddery.server.quests.base_quest_status import BaseQuestStatus
@@ -21,7 +21,7 @@ class QuestStatusSet(object):
         Add all quest status from the path.
         """
         # load classes
-        for cls in classes_in_path(settings.PATH_QUEST_STATUS_BASE, BaseQuestStatus):
+        for cls in classes_in_path(SETTINGS.PATH_QUEST_STATUS_BASE, BaseQuestStatus):
             key = cls.key
 
             if key in self.dict:

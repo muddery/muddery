@@ -3,7 +3,7 @@ This module handles importing data from csv files and creating the whole game wo
 """
 
 import traceback
-from muddery.server.conf import settings
+from muddery.server.settings import SETTINGS
 from muddery.server.utils.logger import logger
 from muddery.server.utils.game_settings import GameSettings
 from muddery.server.mappings.element_set import ELEMENT, ELEMENT_SET
@@ -22,7 +22,7 @@ async def create_character(account, nickname, character_key=None,
         character_key = GameSettings.inst().get("default_player_character_key")
 
     if not element_type:
-        element_type = settings.PLAYER_CHARACTER_ELEMENT_TYPE
+        element_type = SETTINGS.PLAYER_CHARACTER_ELEMENT_TYPE
 
     if not nickname:
         nickname = character_key
