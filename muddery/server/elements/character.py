@@ -7,7 +7,7 @@ is setup to be the "default" character type created by the default
 creation commands.
 
 """
-
+import asyncio
 import time, datetime, traceback, ast
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from muddery.server.settings import SETTINGS
@@ -32,7 +32,7 @@ from muddery.server.server import Server
 CHARACTER_LAST_ID = 0
 
 
-class MudderyCharacter(BaseElement):
+class MudderyCharacter(ELEMENT("MATTER")):
     """
     Characters can move in rooms.
     """
@@ -67,6 +67,8 @@ class MudderyCharacter(BaseElement):
         self.loot_handler = None
         self.location = None
         self.scheduler = None
+
+        self.is_alive = True
 
         # character's skills
         # self.skills = {
@@ -213,79 +215,24 @@ class MudderyCharacter(BaseElement):
 
         await self.refresh_states(True)
 
-    def set_name(self, name):
-        """
-        Set object's name.
-
-        Args:
-        name: (string) Name of the object.
-        """
-        self.name = name
-
     def get_name(self):
         """
         Get player character's name.
         """
         name = self.name
-        if not self.is_alive():
+        if not self.is_alive:
             name += _(" [DEAD]")
 
         return name
 
-    def set_desc(self, desc):
-        """
-        Set object's description.
-
-        Args:
-        desc: (string) Description.
-        """
-        self.desc = desc
-
-    def get_desc(self):
-        """
-        Get the element's description.
-        :return:
-        """
-        return self.desc
-
-    def set_icon(self, icon_key):
-        """
-        Set object's icon.
-        Args:
-            icon_key: (String)icon's resource key.
-
-        Returns:
-            None
-        """
-        self.icon = icon_key
-
-    def get_icon(self):
-        """
-        Get object's icon.
-        :return:
-        """
-        return self.icon
-
     def get_appearance(self):
         """
-        This is a convenient hook for a 'look'
-        command to call.
+        The common appearance for all players.
         """
-        info = {
-            "id": self.get_id(),
-            "name": self.get_name(),
-            "desc": self.get_desc(),
-            "icon": self.get_icon(),
-            "key": self.get_element_key(),
-        }
-        return info
+        info = super(MudderyCharacter, self).get_appearance()
+        info["id"] = self.get_id()
 
-    async def get_available_commands(self, caller):
-        """
-        This returns a list of available commands.
-        "args" must be a string without ' and ", usually it is self.id.
-        """
-        return []
+        return info
 
     @classmethod
     def get_event_trigger_types(cls):
@@ -473,7 +420,7 @@ class MudderyCharacter(BaseElement):
         """
         Cast a new skill automatically.
         """
-        if not await self.is_alive():
+        if not self.is_alive:
             return
 
         if not self.is_in_combat():
@@ -666,15 +613,6 @@ class MudderyCharacter(BaseElement):
         """
         self.combat_id = None
 
-    async def is_alive(self):
-        """
-        Check if the character is alive.
-
-        Returns:
-            (boolean) the character is alive or not
-        """
-        return True
-
     def is_player(self):
         """
         Check if this is a player character.
@@ -699,6 +637,14 @@ class MudderyCharacter(BaseElement):
         """
         return False
 
+    async def check_alive(self):
+        """
+        Check if the character is alive.
+        :return:
+        """
+        self.is_alive = True
+        return self.is_alive
+
     async def die(self, killers):
         """
         This character die.
@@ -709,6 +655,8 @@ class MudderyCharacter(BaseElement):
         Returns:
             None
         """
+        self.is_alive = False
+
         if not self.is_temp and self.reborn_time > 0:
             # Set reborn timer.
             reborn_time = datetime.datetime.fromtimestamp(time.time() + self.reborn_time)
@@ -721,6 +669,7 @@ class MudderyCharacter(BaseElement):
         """
         # Recover properties.
         await self.recover()
+        self.is_alive = True
 
         # Reborn at its default location.
         location_key = self.const.location
@@ -782,7 +731,7 @@ class MudderyCharacter(BaseElement):
         """
         pass
 
-    def show_status(self):
+    async def show_status(self):
         """
         Show character's status.
         """

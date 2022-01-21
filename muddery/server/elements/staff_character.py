@@ -57,7 +57,7 @@ class MudderyStaffCharacter(ELEMENT("PLAYER_CHARACTER")):
         # Send puppet info to the client first.
         output = {
             "id": self.get_id(),
-            "name": await self.get_name(),
+            "name": self.get_name(),
             "is_staff": self.is_staff(),
             "icon": getattr(self, "icon", None),
             "allow_commands": True,
@@ -81,8 +81,7 @@ class MudderyStaffCharacter(ELEMENT("PLAYER_CHARACTER")):
 
     def get_appearance(self):
         """
-        This is a convenient hook for a 'look'
-        command to call.
+        he common appearance for all players.
         """
         info = super(MudderyStaffCharacter, self).get_appearance()
         info["is_staff"] = True

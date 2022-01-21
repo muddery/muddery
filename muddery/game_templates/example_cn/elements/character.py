@@ -57,15 +57,15 @@ class Character(MudderyCharacter):
 
         return status
 
-    async def is_alive(self):
+    async def check_alive(self):
         """
         Check if the character is alive.
 
         Returns:
             (boolean) the character is alive or not
         """
-        hp = await self.states.load("hp")
-        return round(hp) > 0
+        self.is_alive = round(await self.states.load("hp")) > 0
+        return self.is_alive
 
     def provide_exp(self, killer):
         """

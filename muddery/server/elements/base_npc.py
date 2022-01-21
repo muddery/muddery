@@ -110,7 +110,7 @@ class MudderyBaseNPC(ELEMENT("CHARACTER")):
         This returns a list of available commands.
         """
         commands = []
-        if await self.is_alive():
+        if self.is_alive:
             if self.dialogues or self.default_dialogues:
                 # If the character have something to talk, add talk command.
                 commands.append({"name": _("Talk"), "cmd": "talk", "args": self.get_id()})

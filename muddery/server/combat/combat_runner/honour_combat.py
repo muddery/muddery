@@ -40,7 +40,7 @@ class HonourCombat(BaseCombat):
         """
         winner_team = None
         for char in self.characters.values():
-            if char["status"] == CStatus.ACTIVE and await char["char"].is_alive():
+            if char["status"] == CStatus.ACTIVE and char["char"].is_alive:
                 winner_team = char["team"]
                 break
 
@@ -77,7 +77,7 @@ class HonourCombat(BaseCombat):
 
         for char in self.characters.values():
             character = char["char"]
-            character.show_rankings()
-            character.show_status()
+            await character.show_rankings()
+            await character.show_status()
 
         return rewards

@@ -33,7 +33,7 @@ class FuncHit(StatementFunction):
         if not self.obj:
             return
 
-        target_name = await self.obj.get_name()
+        target_name = self.obj.get_name()
 
         # calculate the damage
         damage = float(self.caller.const.attack) / (self.caller.const.attack + self.obj.const.defence) * self.caller.const.attack
@@ -80,7 +80,7 @@ class FuncHeal(StatementFunction):
         changed = await self.obj.change_state("hp", heal)
 
         # send skill result
-        return _("Healed %s by %d points.") % (await self.obj.get_name(), changed)
+        return _("Healed %s by %d points.") % (self.obj.get_name(), changed)
 
 
 class FuncIncreaseMaxHP(StatementFunction):
@@ -120,4 +120,4 @@ class FuncIncreaseMaxHP(StatementFunction):
             await self.obj.change_state("hp", changed)
 
         # send skill result
-        return _("Raised %s's max HP by %d points.") % (await self.obj.get_name(), changed)
+        return _("Raised %s's max HP by %d points.") % (self.obj.get_name(), changed)

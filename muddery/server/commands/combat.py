@@ -31,7 +31,7 @@ class CmdCombatInfo(BaseCommand):
             return
 
         # Get combat's appearance and the character's available commands.
-        appearance = await caller.ndb.combat_handler.get_appearance()
+        appearance = caller.ndb.combat_handler.get_appearance()
         message = {"combat_info": appearance,
                    "combat_commands": caller.get_combat_commands()}
         await caller.msg(message)
@@ -94,7 +94,7 @@ class CmdCastCombatSkill(BaseCommand):
     @classmethod
     async def func(cls, caller, args):
         "Cast a skill in a combat."
-        if not await caller.is_alive():
+        if not caller.is_alive:
             await caller.msg({"alert": _("You are died.")})
             return
 

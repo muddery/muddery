@@ -17,6 +17,7 @@ The life of a combat:
 from enum import Enum
 import time
 import datetime
+import asyncio
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from muddery.server.utils.logger import logger
 from muddery.server.utils import defines
@@ -151,7 +152,7 @@ class BaseCombat(object):
         await character.msg({"joined_combat": True})
 
         # send messages in order
-        await character.msg({"combat_info": await self.get_appearance()})
+        await character.msg({"combat_info": self.get_appearance()})
 
     async def prepare_skill(self, skill_key, caller, target_id):
         """
@@ -187,11 +188,14 @@ class BaseCombat(object):
         if not len(self.characters):
             return False
 
+        await asyncio.wait([
+            char["char"].check_alive() for char in self.characters.values()if char["status"] == CStatus.ACTIVE
+        ])
+
         teams = set()
         for char in self.characters.values():
             if char["status"] == CStatus.ACTIVE:
-                character = char["char"]
-                if await character.is_alive():
+                if char["char"].is_alive:
                     teams.add(char["team"])
                     if len(teams) > 1:
                         # More than one team has alive characters.
@@ -285,7 +289,7 @@ class BaseCombat(object):
         """
         winner_team = None
         for char in self.characters.values():
-            if char["status"] == CStatus.ACTIVE and await char["char"].is_alive():
+            if char["status"] == CStatus.ACTIVE and char["char"].is_alive:
                 winner_team = char["team"]
                 break
 
@@ -369,7 +373,7 @@ class BaseCombat(object):
         for char_id, char in losers.items():
             await char.combat_result(self.combat_type, defines.COMBAT_LOSE, winners.values())
 
-    async def get_appearance(self):
+    def get_appearance(self):
         """
         Get the combat appearance.
         """
@@ -379,7 +383,7 @@ class BaseCombat(object):
         
         for char in self.characters.values():
             character = char["char"]
-            info = await character.get_appearance(self)
+            info = character.get_appearance()
             info["team"] = char["team"]
 
             appearance["characters"].append(info)

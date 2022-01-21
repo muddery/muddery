@@ -28,5 +28,5 @@ class MudderyWorldNPC(ELEMENT("BASE_NPC")):
 
         if not self.is_temp:
             # if it is dead, reborn at init.
-            if not await self.is_alive() and self.reborn_time > 0:
+            if not self.is_alive and self.reborn_time > 0:
                 self.reborn()

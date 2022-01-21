@@ -4,9 +4,9 @@ from muddery.server.server import Server
 from muddery.server.utils.logger import logger
 
 
-class SanicSession(object):
+class Channel(object):
     """
-    Websocket path.
+    Websocket channel.
     """
     def __init__(self, *args, **kwargs):
         """
@@ -17,7 +17,6 @@ class SanicSession(object):
         """
         super().__init__(*args, **kwargs)
 
-        self.connection = None
         self.address = None
         self.account = None
         self.authed = False
@@ -33,14 +32,6 @@ class SanicSession(object):
         if self.account:
             output += "-" + str(self.account)
         return output
-
-    def connect(self, request, connection):
-        """
-        Called on a client connecting in.
-        """
-        # To send message back to the client, accept first.
-        self.connection = connection
-        self.address = "%s:%s" % (request.ip, request.port)
 
     async def disconnect(self, close_code):
         """
@@ -59,6 +50,7 @@ class SanicSession(object):
         """
         # Gather all messages send to the client and send them out together.
         self.delay_msg = True
+
         # Pass messages to the muddery server.
         await Server.inst().handler_message(self, text_data)
         await self.msg_all()
@@ -89,12 +81,18 @@ class SanicSession(object):
         self.account = None
         self.authed = False
 
-    async def msg(self, data, delay=True):
+    async def send_out(self, data: dict or list) -> None:
+        """
+        Send out a message. To be implemented by a network channel.
+        """
+        pass
+
+    async def msg(self, data: dict or list, delay: bool = True) -> None:
         """
         Send data to the client.
 
-        :param data_out: data to send {type: data}
-        :param close: close connect after sends message.
+        :param data: data to send
+        :param delay: delay sending out messages when self.delay_msg is set.
         """
         if self.delay_msg and delay:
             # Delay sending out messages when self.delay_msg is set.
@@ -104,14 +102,15 @@ class SanicSession(object):
                 self.msg_list.append(data)
         else:
             # Send out this message immediately.
-            # create the output string
-            out_text = json.dumps({"data": data}, ensure_ascii=False)
+            log_info = "[Send message][%s]%s" % (self, data)
+            print(log_info)
+            logger.log_info(log_info)
 
             # send message
             try:
-                await self.connection.send(out_text)
+                await self.send_out(data)
             except Exception as e:
-                logger.log_err("Send message error: %s" % e)
+                logger.log_err("[Send message error][%s]%s" % e)
 
     async def msg_all(self):
         """

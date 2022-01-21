@@ -212,9 +212,6 @@ class MudderyAccount(BaseElement):
 
         """
         # session relay
-        log_info = "Account %s send message: %s" % (self.get_id(), data)
-        print(log_info)
-        logger.log_info(log_info)
         if self.session:
             await self.session.msg(data, delay)
 
@@ -275,7 +272,7 @@ class MudderyAccount(BaseElement):
         await self.msg({
             "puppet": {
                 "id": new_char.get_id(),
-                "name": await new_char.get_name(),
+                "name": new_char.get_name(),
                 "icon": getattr(new_char, "icon", None),
             }
         })
@@ -373,7 +370,8 @@ class MudderyAccount(BaseElement):
             awaits.append(CharacterCombat.inst().remove_character(char_db_id))
             awaits.append(HonoursMapper.inst().remove_character(char_db_id))
 
-        await asyncio.wait(awaits)
+        if awaits:
+            await asyncio.wait(awaits)
 
     def at_cmdset_get(self):
         pass

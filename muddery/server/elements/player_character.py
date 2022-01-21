@@ -256,7 +256,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         await super(MudderyPlayerCharacter, self).after_element_setup(first_time)
 
         # if it is dead, reborn at init.
-        if not self.is_alive():
+        if not self.is_alive:
             if not self.is_temp and self.reborn_time > 0:
                 await self.reborn()
 
@@ -334,7 +334,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         # send character's data to player
         message = {
             "status": await self.return_status(),
-            "equipments": await self.return_equipments(),
+            "equipments": self.return_equipments(),
             "inventory": self.get_inventory_appearance(),
             "skills": await self.return_skills(),
             "quests": await self.quest_handler.return_quests(),
@@ -424,19 +424,12 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         self.name = nickname
         await CharacterInfo.inst().set_nickname(self.get_db_id(), nickname)
 
-    def get_name(self):
-        """
-        Get player character's name.
-        """
-        # Use nick name instead of normal name.
-        return self.name
-
     async def get_available_commands(self, caller):
         """
         This returns a list of available commands.
         """
         commands = []
-        if await self.is_alive():
+        if self.is_alive:
             commands.append({"name": _("Attack"), "cmd": "attack", "args": self.get_id()})
         return commands
 
@@ -450,7 +443,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         all_channels = Server.world.get_all_channels()
         channels = {c.get_element_key(): {
             "type": "CHANNEL",
-            "name": await c.get_name()} for c in all_channels}
+            "name": c.get_name()} for c in all_channels}
 
         return channels
 
@@ -532,7 +525,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         msg = {
             "current_location": {
                 "key": location_key,
-                "area": await area.get_appearance(self),
+                "area": area.get_appearance(),
             }
         }
 
@@ -592,7 +585,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
 
         # get appearance
         appearance = self.location.get_appearance()
-        appearance.update(self.location.get_surroundings())
+        appearance.update(self.location.get_surroundings(self))
         msg["look_around"] = appearance
 
         await self.msg(msg)
@@ -1154,7 +1147,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
             item = self.inventory[position]
             item_obj = await self.get_inventory_obj_by_pos(position)
 
-            appearance = await item_obj.get_appearance(self)
+            appearance = await item_obj.get_detail_appearance(self)
             appearance["number"] = item["number"]
             appearance["position"] = position
 
@@ -1172,7 +1165,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         Get equipments data.
         """
         if position in self.equipments:
-            appearance = await self.equipments[position]["obj"].get_appearance(self)
+            appearance = await self.equipments[position]["obj"].get_detail_appearance(self)
 
             # add a take off command, remove equip command
             commands = [c for c in appearance["cmds"] if c["cmd"] != "equip"]
@@ -1265,23 +1258,17 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         Send equipments to player.
         """
         await self.msg({
-            "equipments": await self.return_equipments()
+            "equipments": self.return_equipments()
         })
 
-    async def return_equipments(self):
+    def return_equipments(self):
         """
         Get equipments' data.
         """
         info = {}
         for pos, item in self.equipments.items():
             # order by positions
-            obj = item["obj"]
-            info[pos] = {
-                "key": item["object_key"],
-                "name": obj.get_name(),
-                "desc": obj.get_desc(),
-                "icon": obj.get_icon(),
-            }
+            info[pos] = item["obj"].get_appearance()
 
         return info
 
@@ -1322,7 +1309,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
 
         message = {
             "status": await self.return_status(),
-            "equipments": await self.return_equipments(),
+            "equipments": self.return_equipments(),
             "inventory": self.get_inventory_appearance()
         }
         await self.msg(message)
@@ -1350,7 +1337,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         if not mute:
             message = {
                 "status": await self.return_status(),
-                "equipments": await self.return_equipments(),
+                "equipments": self.return_equipments(),
                 "inventory": self.get_inventory_appearance()
             }
             await self.msg(message)
@@ -1383,8 +1370,8 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
 
         # The exit may have different appearance after unlocking.
         # Send the lastest appearance to the caller.
-        appearance = await self.location.get_exit_appearance(self, exit_key)
-        await self.msg({"look_obj": appearance})
+        detail_appearance = await self.location.get_exit_appearance(self, exit_key)
+        await self.msg({"look_obj": detail_appearance})
 
         return True
 
@@ -1518,7 +1505,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         skills_list = []
 
         for skill in self.skills.values():
-            skills_list.append(await skill["obj"].get_appearance(self))
+            skills_list.append(skill["obj"].get_appearance())
 
         return skills_list
 
@@ -1741,6 +1728,8 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
 
         # Recover properties.
         await self.recover()
+        self.is_alive = True
+
         await self.show_status()
 
         if home:
@@ -1929,4 +1918,5 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         :param skill_key:
         :return:
         """
-        return await self.skills[skill_key]["obj"].get_appearance(self)
+        info = await self.skills[skill_key]["obj"].get_detail_appearance(self)
+        return info

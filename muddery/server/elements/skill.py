@@ -9,10 +9,10 @@ actions of a skill.
 import re, traceback
 from muddery.server.utils.localized_strings_handler import _
 from muddery.server.statements.statement_handler import STATEMENT_HANDLER
-from muddery.server.elements.base_element import BaseElement
+from muddery.server.mappings.element_set import ELEMENT
 
 
-class MudderySkill(BaseElement):
+class MudderySkill(ELEMENT("MATTER")):
     """
     A skill of the character.
     """
@@ -138,10 +138,10 @@ class MudderySkill(BaseElement):
         message = ""
 
         if caller:
-            caller_name = await caller.get_name()
+            caller_name = caller.get_name()
 
         if target:
-            target_name = await target.get_name()
+            target_name = target.get_name()
 
         if self.message_model:
             values = {"n": self.get_name(),
@@ -158,20 +158,6 @@ class MudderySkill(BaseElement):
         """
         return self.passive
 
-    def get_name(self):
-        """
-        Get skill's name.
-        :return:
-        """
-        return self.const.name
-
-    def get_desc(self):
-        """
-        Get skill's name.
-        :return:
-        """
-        return self.const.desc
-
     def get_cd(self):
         """
         Get this skill's CD
@@ -182,25 +168,12 @@ class MudderySkill(BaseElement):
 
         return self.cd
 
-    def get_icon(self):
-        """
-        Get this skill's icon.
-        :return:
-        """
-        return self.const.icon
-
     def get_appearance(self):
         """
-        This is a convenient hook for a 'look'
-        command to call.
+        The common appearance for all players.
         """
-        info = {
-            "key": self.const.key,
-            "name": self.get_name(),
-            "desc": self.get_desc(),
-            "icon": self.get_icon(),
-            "passive": self.is_passive(),
-            "cd": self.get_cd(),
-        }
+        info = super(MudderySkill, self).get_appearance()
+        info["passive"] = self.passive
+        info["cd"] = self.get_cd()
 
         return info

@@ -186,21 +186,37 @@ class world_channels(BaseElement):
     desc = Column(UnicodeText)
 
 
-class world_areas(BaseElement):
-    "The game map is composed by areas."
-    __tablename__ = "world_areas"
+class BaseMatter(BaseElement):
+    """
+    Base class for matter tables.
+    """
+    __abstract__ = True
 
-    # area's element type
-    element_type = Column(String(KEY_LENGTH), default="AREA", nullable=False)
+    __table_args__ = {
+        "extend_existing": True,
+    }
 
-    # area's name
+    # matter's element type
+    element_type = Column(String(KEY_LENGTH), nullable=False)
+
+    # matter's name
     name = Column(Unicode(NAME_LENGTH))
 
-    # area's description for display
+    # matter's description for display
     desc = Column(UnicodeText)
 
-    # area's icon resource
+    # matter's icon resource
     icon = Column(String(KEY_LENGTH))
+
+
+# ------------------------------------------------------------
+#
+# Areas
+#
+# ------------------------------------------------------------
+class world_areas(BaseMatter):
+    "The game map is composed by areas."
+    __tablename__ = "world_areas"
 
     # area's map background image resource
     background = Column(String(KEY_LENGTH))
@@ -212,21 +228,14 @@ class world_areas(BaseElement):
     height = Column(Integer, default=0)
 
 
-class world_rooms(BaseElement):
+# ------------------------------------------------------------
+#
+# Rooms
+#
+# ------------------------------------------------------------
+class world_rooms(BaseMatter):
     "Defines all unique rooms."
     __tablename__ = "world_rooms"
-
-    # room's element type
-    element_type = Column(String(KEY_LENGTH), default="ROOM", nullable=False)
-
-    # room's name
-    name = Column(Unicode(NAME_LENGTH))
-
-    # room's description for display
-    desc = Column(UnicodeText)
-
-    # room's icon resource
-    icon = Column(String(KEY_LENGTH))
 
     # The key of a world area.
     # The room's location, it must be a area.
@@ -242,11 +251,6 @@ class world_rooms(BaseElement):
     background = Column(String(KEY_LENGTH))
 
 
-# ------------------------------------------------------------
-#
-# rooms that can give profits to characters in the room.
-#
-# ------------------------------------------------------------
 class profit_rooms(BaseElement):
     """
     The action to trigger other actions at interval.
@@ -269,6 +273,16 @@ class profit_rooms(BaseElement):
     condition = Column(String(CONDITION_LENGTH))
 
 
+# ------------------------------------------------------------
+#
+# Objects
+#
+# ------------------------------------------------------------
+class common_objects(BaseMatter):
+    "Store all common objects."
+    __tablename__ = "common_objects"
+
+
 class world_objects(BaseElement):
     "Store all unique objects."
     __tablename__ = "world_objects"
@@ -279,23 +293,6 @@ class world_objects(BaseElement):
 
     # Action's name
     action = Column(String(KEY_LENGTH))
-
-    # object's icon resource
-    icon = Column(String(KEY_LENGTH))
-
-
-class common_objects(BaseElement):
-    "Store all common objects."
-    __tablename__ = "common_objects"
-
-    # object's element type
-    element_type = Column(String(KEY_LENGTH), default="COMMON_OBJECT", nullable=False)
-
-    # object's name
-    name = Column(Unicode(NAME_LENGTH))
-
-    # object's description for display
-    desc = Column(UnicodeText)
 
     # object's icon resource
     icon = Column(String(KEY_LENGTH))
@@ -347,21 +344,25 @@ class equipments(BaseElement):
     type = Column(String(KEY_LENGTH))
 
 
-class characters(BaseElement):
+class object_creators(BaseElement):
+    "Players can get new objects from an object_creator."
+    __tablename__ = "object_creators"
+
+    # loot's verb
+    loot_verb = Column(Unicode(NAME_LENGTH))
+
+    # loot's condition
+    loot_condition = Column(String(CONDITION_LENGTH))
+
+
+# ------------------------------------------------------------
+#
+# characters
+#
+# ------------------------------------------------------------
+class characters(BaseMatter):
     "Store common characters."
     __tablename__ = "characters"
-
-    # object's element type
-    element_type = Column(String(KEY_LENGTH), default="CHARACTER", nullable=False)
-
-    # object's name
-    name = Column(Unicode(NAME_LENGTH))
-
-    # object's description for display
-    desc = Column(UnicodeText)
-
-    # object's icon resource
-    icon = Column(String(KEY_LENGTH))
 
     # Character's level.
     level = Column(Integer, default=1)
@@ -394,15 +395,9 @@ class player_characters(BaseElement):
 # exits connecting between rooms.
 #
 # ------------------------------------------------------------
-class world_exits(BaseElement):
+class world_exits(BaseMatter):
     "Defines all unique exits."
     __tablename__ = "world_exits"
-
-    # object's element type
-    element_type = Column(String(KEY_LENGTH), default="EXIT", nullable=False)
-
-    # The exit's name.
-    name = Column(Unicode(NAME_LENGTH))
 
     # The key of a world room.
     # The exit's location, it must be a room.
@@ -417,11 +412,6 @@ class world_exits(BaseElement):
     verb = Column(Unicode(NAME_LENGTH))
 
 
-# ------------------------------------------------------------
-#
-# exit lock's additional data
-#
-# ------------------------------------------------------------
 class exit_locks(BaseElement):
     "Locked exit's additional data"
     __tablename__ = "exit_locks"
@@ -447,20 +437,9 @@ class exit_locks(BaseElement):
 
 # ------------------------------------------------------------
 #
-# object creator's additional data
+# Skills
 #
 # ------------------------------------------------------------
-class object_creators(BaseElement):
-    "Players can get new objects from an object_creator."
-    __tablename__ = "object_creators"
-
-    # loot's verb
-    loot_verb = Column(Unicode(NAME_LENGTH))
-
-    # loot's condition
-    loot_condition = Column(String(CONDITION_LENGTH))
-
-
 class skills(BaseElement):
     "Store all skills."
     __tablename__ = "skills"
@@ -470,6 +449,9 @@ class skills(BaseElement):
 
     # skill's description
     desc = Column(UnicodeText)
+
+    # skill's icon resource
+    icon = Column(String(KEY_LENGTH))
 
     # skill's message when casting
     message = Column(UnicodeText)
@@ -482,9 +464,6 @@ class skills(BaseElement):
 
     # skill function's name
     function = Column(String(KEY_LENGTH))
-
-    # skill's icon resource
-    icon = Column(String(KEY_LENGTH))
 
     # skill's main type, used in autocasting skills.
     main_type = Column(String(KEY_LENGTH))

@@ -58,8 +58,8 @@ class MudderyLockedExit(ELEMENT("EXIT")):
             return True
 
         # Show the object's appearance.
-        appearance = await self.get_appearance(character)
-        await character.msg({"look_obj": appearance})
+        detail_appearance = await self.get_detail_appearance(character)
+        await character.msg({"look_obj": detail_appearance})
         return False
 
     async def can_unlock(self, caller):
@@ -69,12 +69,12 @@ class MudderyLockedExit(ELEMENT("EXIT")):
         # Only can unlock exits which match there conditions.
         return await STATEMENT_HANDLER.match_condition(self.const.unlock_condition, caller, self)
 
-    async def get_desc(self, caller):
+    async def get_conditional_desc(self, caller):
         """
-        Get the exit's description.
-        :param caller:
-        :return:
+        The particular description for the caller.
         """
+        # Todo: add conditional descriptions
+
         # Get name and description.
         if await caller.is_exit_unlocked(self.get_element_key()):
             # If is unlocked, use common appearance.

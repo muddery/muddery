@@ -3,7 +3,7 @@ import traceback
 import asyncio
 from sanic import Sanic
 from asyncio import CancelledError
-from muddery.server.networks.sanic_session import SanicSession
+from muddery.server.networks.sanic_channel import SanicChannel
 from muddery.server.settings import SETTINGS
 from muddery.server.server import Server
 
@@ -18,17 +18,17 @@ def run_server():
 
     @server_app.websocket("/")
     async def handler(request, ws):
-        session = SanicSession()
+        channel = SanicChannel()
         try:
-            session.connect(request, ws)
+            channel.connect(request, ws)
             while True:
                 data = await ws.recv()
-                await session.receive(data)
+                await channel.receive(data)
         except CancelledError as e:
-            await session.disconnect(0)
+            await channel.disconnect(0)
         except Exception as e:
             traceback.print_exc()
-            await session.disconnect(-1)
+            await channel.disconnect(-1)
 
         await ws.close()
 

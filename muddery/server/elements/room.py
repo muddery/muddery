@@ -20,7 +20,7 @@ from muddery.server.database.worlddata.worlddata import WorldData
 from muddery.server.elements.base_element import BaseElement
 
 
-class MudderyRoom(BaseElement):
+class MudderyRoom(ELEMENT("MATTER")):
     """
     Rooms are like any Object, except their location is None
     (which is default). They also use basetype_setup() to
@@ -40,9 +40,6 @@ class MudderyRoom(BaseElement):
         """
         super(MudderyRoom, self).__init__()
 
-        self.name = None
-        self.desc = None
-        self.icon = None
         self.peaceful = False
         self.position = None
         self.background = None
@@ -60,10 +57,6 @@ class MudderyRoom(BaseElement):
         Set data_info to the object.
         """
         await super(MudderyRoom, self).at_element_setup(first_time)
-
-        self.set_name(self.const.name)
-        self.set_desc(self.const.desc)
-        self.set_icon(self.const.icon)
 
         self.all_exits = {}
         self.all_objects = {}
@@ -125,7 +118,8 @@ class MudderyRoom(BaseElement):
 
                 awaits.append(new_obj.setup_element(tables_data.key, level=tables_data.level, first_time=True))
 
-            await asyncio.wait(awaits)
+            if awaits:
+                await asyncio.wait(awaits)
 
             # Set the character's location.
             for obj in self.all_characters.values():
@@ -156,7 +150,8 @@ class MudderyRoom(BaseElement):
 
                 awaits.append(new_obj.setup_element(tables_data.key))
 
-            await asyncio.wait(awaits)
+            if awaits:
+                await asyncio.wait(awaits)
 
     async def load_objects(self):
         """
@@ -177,13 +172,13 @@ class MudderyRoom(BaseElement):
                 new_obj = ELEMENT(tables_data.element_type)()
 
                 self.all_objects[record.key] = {
-                    "condition": tables_data.condition,
                     "obj": new_obj,
                 }
 
                 awaits.append(new_obj.setup_element(record.key))
 
-            await asyncio.wait(awaits)
+            if awaits:
+                await asyncio.wait(awaits)
 
     def get_character(self, char_id):
         """
@@ -235,7 +230,7 @@ class MudderyRoom(BaseElement):
         :return:
         """
         exit_obj = self.all_exits[exit_key]["obj"]
-        return await exit_obj.get_appearance(caller)
+        return await exit_obj.get_detail_appearance(caller)
 
     async def msg_characters(self, msg, exclude=None):
         """
@@ -249,7 +244,8 @@ class MudderyRoom(BaseElement):
         else:
             chars = self.all_characters.values()
 
-        await asyncio.wait([char.msg(msg) for char in chars])
+        if chars:
+            await asyncio.wait([char.msg(msg) for char in chars])
 
     async def at_character_arrive(self, character):
         """
@@ -297,71 +293,16 @@ class MudderyRoom(BaseElement):
                 }
                 await self.msg_characters({"obj_moved_out": change}, {character.get_id()})
 
-    def set_name(self, name):
-        """
-        Set object's name.
-
-        Args:
-        name: (string) Name of the object.
-        """
-        self.name = name
-
-    def get_name(self):
-        """
-        Get player character's name.
-        """
-        return self.name
-
-    def set_desc(self, desc):
-        """
-        Set object's description.
-
-        Args:
-        desc: (string) Description.
-        """
-        self.desc = desc
-
-    def get_desc(self):
-        """
-        Get the element's description.
-        :return:
-        """
-        return self.desc
-
-    def set_icon(self, icon_key):
-        """
-        Set object's icon.
-        Args:
-            icon_key: (String)icon's resource key.
-
-        Returns:
-            None
-        """
-        self.icon = icon_key
-
-    def get_icon(self):
-        """
-        Get object's icon.
-        :return:
-        """
-        return self.icon
-
     def get_appearance(self):
         """
-        This is a convenient hook for a 'look'
-        command to call.
+        Get the common appearance of the room. It is the same to all players.
         """
-        info = {
-            "key": self.get_element_key(),
-            "name": self.get_name(),
-            "desc": self.get_desc(),
-            "icon": self.get_icon(),
-            "peaceful": self.peaceful,
-            "background": self.background,
-        }
+        info = super(MudderyRoom, self).get_appearance()
+        info["peaceful"] = self.peaceful
+        info["background"] = self.background
 
         return info
-        
+
     def get_exits(self):
         """
         Get this room's exits.

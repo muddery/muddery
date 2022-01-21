@@ -9,14 +9,16 @@ for allowing Characters to traverse the exit to its destination.
 
 import traceback
 import weakref
+import asyncio
 from muddery.server.utils.logger import logger
 from muddery.server.utils.localized_strings_handler import _
+from muddery.server.mappings.element_set import ELEMENT
 from muddery.server.elements.base_element import BaseElement
 from muddery.server.statements.statement_handler import STATEMENT_HANDLER
 from muddery.server.server import Server
 
 
-class MudderyExit(BaseElement):
+class MudderyExit(ELEMENT("MATTER")):
     """
     Exits are connectors between rooms.
     """
@@ -31,6 +33,16 @@ class MudderyExit(BaseElement):
         super(MudderyExit, self).__init__()
 
         self.destination_obj = None
+
+    async def at_element_setup(self, first_time):
+        """
+        Init the character.
+        """
+        await super(MudderyExit, self).at_element_setup(first_time)
+
+        if not self.desc:
+            self.set_desc(_("This is an exit"))
+        self.set_desc(self.const.desc)
 
     async def traverse(self, character):
         """
@@ -66,34 +78,19 @@ class MudderyExit(BaseElement):
         """
         Get exit's name.
         """
-        if self.const.name:
-            return self.const.name
-        elif self.const.destination:
+        if self.name:
+            return self.name
+
+        name = ""
+        if self.const.destination:
             if not self.destination_obj:
                 self.destination_obj = weakref.ref(Server.world.get_room(self.const.destination))
-            return self.destination_obj().get_name()
+            name = self.destination_obj().get_name()
         else:
-            return _("Exit")
+            name = _("Exit")
 
-    async def get_desc(self, caller):
-        """
-        Get the exit's description.
-        :param caller:
-        :return:
-        """
-        return _("This is an exit")
-
-    def get_appearance(self):
-        """
-        Get the appearance of the exit.
-        :param caller:
-        :return:
-        """
-        return {
-            "key": self.get_element_key(),
-            "name": self.get_name(),
-            "desc": self.get_desc(),
-        }
+        self.set_name(name)
+        return name
 
     async def get_available_commands(self, caller):
         """

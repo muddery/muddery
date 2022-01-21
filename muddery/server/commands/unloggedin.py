@@ -220,7 +220,7 @@ class CmdQuitAccount(BaseCommand):
 
     @classmethod
     async def func(cls, session, args):
-        session.logout()
+        await session.logout()
 
 
 class CmdUnloginLook(BaseCommand):

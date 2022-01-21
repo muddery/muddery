@@ -115,7 +115,7 @@ class DialogueHandler(Singleton):
         return {
             "target": {
                 "id": npc.get_id(),
-                "name": await npc.get_name(),
+                "name": npc.get_name(),
                 "icon": getattr(npc, "icon", None),
             },
             "dialogues": dialogues,
@@ -164,7 +164,7 @@ class DialogueHandler(Singleton):
         if npc:
             target = {
                 "id": npc.get_id(),
-                "name": await npc.get_name(),
+                "name": npc.get_name(),
                 "icon": getattr(npc, "icon", None),
             }
 
@@ -204,9 +204,9 @@ class DialogueHandler(Singleton):
         npc_name = ""
 
         if caller:
-            caller_name = await caller.get_name()
+            caller_name = caller.get_name()
         if npc:
-            npc_name = await npc.get_name()
+            npc_name = npc.get_name()
 
         values = {"p": caller_name,
                   "n": npc_name}

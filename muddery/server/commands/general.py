@@ -32,7 +32,7 @@ class CmdLook(BaseCommand):
         """
         Handle the looking.
         """
-        if not await caller.is_alive():
+        if not caller.is_alive:
             await caller.msg({"alert": _("You are died.")})
             return
 
@@ -54,7 +54,7 @@ class CmdLook(BaseCommand):
             await caller.msg({"joined_combat": True})
 
             # Send combat infos.
-            appearance = await combat.get_appearance()
+            appearance = combat.get_appearance()
             message = {
                 "combat_info": appearance,
                 "combat_commands": caller.get_combat_commands(),
@@ -197,7 +197,7 @@ class CmdLookRoomObj(BaseCommand):
 
     @classmethod
     async def func(cls, caller, args):
-        if not await caller.is_alive():
+        if not caller.is_alive:
             await caller.msg({"alert": _("You are died.")})
             return
 
@@ -212,8 +212,8 @@ class CmdLookRoomObj(BaseCommand):
             await caller.msg({"alert": _("Can not find the object.")})
             return
 
-        appearance = await obj.get_appearance(caller)
-        await caller.msg({"look_obj": appearance})
+        detail_appearance = await obj.get_detail_appearance(caller)
+        await caller.msg({"look_obj": detail_appearance})
 
 
 #------------------------------------------------------------
@@ -232,7 +232,7 @@ class CmdLookRoomChar(BaseCommand):
 
     @classmethod
     async def func(cls, caller, args):
-        if not await caller.is_alive():
+        if not caller.is_alive:
             await caller.msg({"alert": _("You are died.")})
             return
 
@@ -248,8 +248,8 @@ class CmdLookRoomChar(BaseCommand):
             await caller.msg({"alert": _("Can not find the object.")})
             return
 
-        appearance = await obj.get_appearance(caller)
-        await caller.msg({"look_obj": appearance})
+        detail_appearance = await obj.get_detail_appearance(caller)
+        await caller.msg({"look_obj": detail_appearance})
 
 
 #------------------------------------------------------------
@@ -271,7 +271,7 @@ class CmdTraverse(BaseCommand):
     @classmethod
     async def func(cls, caller, args):
         "Move caller to the exit."
-        if not await caller.is_alive():
+        if not caller.is_alive:
             await caller.msg({"alert": _("You are died.")})
             return
 
@@ -431,7 +431,7 @@ class CmdUse(BaseCommand):
 
     @classmethod
     async def func(cls, caller, args):
-        if not await caller.is_alive():
+        if not caller.is_alive:
             await caller.msg({"alert": _("You are died.")})
             return
 
@@ -479,7 +479,7 @@ class CmdDiscard(BaseCommand):
         "Use an object."
         caller = caller
 
-        if not await caller.is_alive():
+        if not caller.is_alive:
             await caller.msg({"alert":_("You are died.")})
             return
 
@@ -608,7 +608,7 @@ class CmdCastSkill(BaseCommand):
     @classmethod
     async def func(cls, caller, args):
         "Cast a skill."
-        if not await caller.is_alive():
+        if not caller.is_alive:
             await caller.msg({"alert":_("You are died.")})
             return
 
@@ -672,7 +672,7 @@ class CmdAttack(BaseCommand):
         if not caller:
             return
 
-        if not await caller.is_alive():
+        if not caller.is_alive:
             await caller.msg({"alert":_("You are died.")})
             return
 
@@ -692,12 +692,12 @@ class CmdAttack(BaseCommand):
             await caller.msg({"alert": _("You can not attack in this place.")})
             return
 
-        if not await target.is_alive():
-            await caller.msg({"alert": _("%s is died." % await target.get_name())})
+        if not target.is_alive:
+            await caller.msg({"alert": _("%s is died." % target.get_name())})
             return
 
         if caller.location != target.location:
-            await caller.msg({"alert": _("You can not attack %s.") % await target.get_name()})
+            await caller.msg({"alert": _("You can not attack %s.") % target.get_name()})
             return
 
         # Set caller's target.
@@ -727,11 +727,11 @@ class CmdAttack(BaseCommand):
         except Exception as e:
             traceback.print_exc()
             logger.log_err("Can not create combat: [%s] %s" % (type(e).__name__, e))
-            await caller.msg({"alert": _("You can not attack %s.") % await target.get_name()})
+            await caller.msg({"alert": _("You can not attack %s.") % target.get_name()})
             return
 
-        await caller.msg(_("You are attacking {R%s{n! You are in combat.") % await target.get_name())
-        await target.msg(_("{R%s{n is attacking you! You are in combat.") % await caller.get_name())
+        await caller.msg(_("You are attacking {R%s{n! You are in combat.") % target.get_name())
+        await target.msg(_("{R%s{n is attacking you! You are in combat.") % caller.get_name())
 
 
 # ------------------------------------------------------------
