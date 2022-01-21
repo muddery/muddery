@@ -8,10 +8,8 @@ Matters can be seen in a room or in an area.
 import asyncio
 from muddery.server.utils.logger import logger
 from muddery.server.elements.base_element import BaseElement
-from muddery.server.mappings.element_set import ELEMENT
-from muddery.server.database.worlddata.image_resource import ImageResource
-from muddery.server.database.worlddata.world_rooms import WorldRooms
-from muddery.server.database.worlddata.worlddata import WorldData
+from muddery.server.database.worlddata.conditional_desc import ConditionalDesc
+from muddery.server.statements.statement_handler import STATEMENT_HANDLER
 
 
 class MudderyMatter(BaseElement):
@@ -64,7 +62,10 @@ class MudderyMatter(BaseElement):
             self.get_conditional_desc(caller),
             self.get_available_commands(caller),
         )
-        info["desc"] = details[0]
+
+        if details[0]:
+            info["desc"] = details[0]
+
         info["cmds"] = details[1]
 
         return info
@@ -110,7 +111,15 @@ class MudderyMatter(BaseElement):
         """
         The particular description for the caller.
         """
-        return self.get_desc()
+        records = ConditionalDesc.get_data(self.element_type, self.element_key)
+        if records:
+            items = [(r.condition, r.desc) for r in records]
+            results = await asyncio.gather(*[
+                STATEMENT_HANDLER.match_condition(item[0], caller, self) for item in items
+            ])
+            for i, result in enumerate(results):
+                if result:
+                    return items[i][1]
 
     def set_icon(self, icon_key):
         """

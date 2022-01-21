@@ -73,14 +73,17 @@ class MudderyLockedExit(ELEMENT("EXIT")):
         """
         The particular description for the caller.
         """
-        # Todo: add conditional descriptions
+        desc = await super(MudderyLockedExit, self).get_conditional_desc(caller)
 
-        # Get name and description.
-        if await caller.is_exit_unlocked(self.get_element_key()):
-            # If is unlocked, use common appearance.
-            return self.const.unlocked_desc
-        else:
-            return self.const.locked_desc
+        if not desc:
+            # Get name and description.
+            if await caller.is_exit_unlocked(self.get_element_key()):
+                # If is unlocked, use common appearance.
+                desc = self.const.unlocked_desc
+            else:
+                desc = self.const.locked_desc
+
+        return desc
 
     async def get_available_commands(self, caller):
         """

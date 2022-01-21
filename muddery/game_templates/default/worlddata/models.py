@@ -277,6 +277,16 @@ class default_objects(BaseModels.default_objects):
 
 # ------------------------------------------------------------
 #
+# Condition desc
+#
+# ------------------------------------------------------------
+class conditional_desc(BaseModels.conditional_desc):
+    "Matter's conditional descriptions"
+    pass
+
+
+# ------------------------------------------------------------
+#
 # shops
 #
 # ------------------------------------------------------------

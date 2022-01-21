@@ -68,7 +68,7 @@ class MemoryTable(object):
         if hasattr(self.model, "__index_together__"):
             indexes.extend(self.model.__index_together__)
 
-        if type(self.model.__table_args__) == tuple:
+        if hasattr(self.model, "__table_args__") and type(self.model.__table_args__) == tuple:
             for table_args in self.model.__table_args__:
                 if type(table_args) == UniqueConstraint:
                     indexes.append(table_args.columns.keys())

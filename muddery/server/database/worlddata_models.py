@@ -25,10 +25,6 @@ class BaseModel(Base):
     """
     __abstract__ = True
 
-    __table_args__ = {
-        "extend_existing": True,
-    }
-
     id = Column(Integer, primary_key=True, autoincrement=True)
 
     def __eq__(self, other):
@@ -50,10 +46,6 @@ class system_data(BaseModel):
     """
     __tablename__ = "system_data"
 
-    __table_args__ = {
-        "extend_existing": True,
-    }
-
     # The last id of accounts.
     object_index = Column(Integer, default=0, nullable=False)
 
@@ -69,10 +61,6 @@ class game_settings(BaseModel):
     NOTE: Only uses the first record!
     """
     __tablename__ = "game_settings"
-
-    __table_args__ = {
-        "extend_existing": True,
-    }
 
     # The name of your game.
     game_name = Column(Unicode(NAME_LENGTH))
@@ -129,10 +117,6 @@ class honour_settings(BaseModel):
     """
     __tablename__ = "honour_settings"
 
-    __table_args__ = {
-        "extend_existing": True,
-    }
-
     # The minimum level that a player can attend a honour combat.
     min_honour_level = Column(Integer, default=1, nullable=False)
 
@@ -164,10 +148,6 @@ class BaseElement(BaseModel):
     """
     __abstract__ = True
 
-    __table_args__ = {
-        "extend_existing": True,
-    }
-
     # object's key
     key = Column(String(KEY_LENGTH), unique=True, nullable=False)
 
@@ -191,10 +171,6 @@ class BaseMatter(BaseElement):
     Base class for matter tables.
     """
     __abstract__ = True
-
-    __table_args__ = {
-        "extend_existing": True,
-    }
 
     # matter's element type
     element_type = Column(String(KEY_LENGTH), nullable=False)
@@ -437,6 +413,34 @@ class exit_locks(BaseElement):
 
 # ------------------------------------------------------------
 #
+# Condition desc
+#
+# ------------------------------------------------------------
+class conditional_desc(BaseElement):
+    "Matter's conditional descriptions"
+    __tablename__ = "conditional_desc"
+
+    __table_args__ = (
+        UniqueConstraint("element", "key", "condition"),
+    )
+
+    __index_together__ = [("element", "key")]
+
+    # The element's type.
+    element = Column(String(KEY_LENGTH), nullable=False)
+
+    # The key of an element.
+    key = Column(String(KEY_LENGTH), nullable=False)
+
+    # condition of the description
+    condition = Column(String(CONDITION_LENGTH))
+
+    # description
+    desc = Column(UnicodeText)
+
+
+# ------------------------------------------------------------
+#
 # Skills
 #
 # ------------------------------------------------------------
@@ -519,10 +523,6 @@ class shop_goods(BaseModel):
     "All goods that sold in shops."
     __tablename__ = "shop_goods"
 
-    __table_args__ = {
-        "extend_existing": True,
-    }
-
     # shop's key
     shop = Column(String(KEY_LENGTH), index=True, nullable=False)
 
@@ -556,9 +556,6 @@ class loot_list(BaseModel):
 
     __table_args__ = (
         UniqueConstraint("provider", "object"),
-        {
-            "extend_existing": True,
-        }
     )
 
     # the provider of the object
@@ -639,10 +636,6 @@ class equipment_types(BaseModel):
     "Store all equip types."
     __tablename__ = "equipment_types"
 
-    __table_args__ = {
-        "extend_existing": True,
-    }
-
     # equipment type's key
     key = Column(String(KEY_LENGTH), unique=True, nullable=False)
 
@@ -661,10 +654,6 @@ class equipment_types(BaseModel):
 class equipment_positions(BaseModel):
     "Store all equip types."
     __tablename__ = "equipment_positions"
-
-    __table_args__ = {
-        "extend_existing": True,
-    }
 
     # position's key
     key = Column(String(KEY_LENGTH), unique=True, nullable=False)
@@ -689,9 +678,6 @@ class properties_dict(BaseModel):
 
     __table_args__ = (
         UniqueConstraint("element_type", "property"),
-        {
-            "extend_existing": True,
-        }
     )
 
     # The key of a element type.
@@ -722,10 +708,6 @@ class character_states_dict(BaseModel):
     """
     __tablename__ = "character_states_dict"
 
-    __table_args__ = {
-        "extend_existing": True,
-    }
-
     # The key of the state.
     key = Column(String(KEY_LENGTH), unique=True, nullable=False)
 
@@ -751,9 +733,6 @@ class element_properties(BaseModel):
 
     __table_args__ = (
         UniqueConstraint("element", "key", "level", "property"),
-        {
-            "extend_existing": True,
-        }
     )
 
     __index_together__ = [("element", "key", "level")]
@@ -785,9 +764,6 @@ class default_objects(BaseModel):
 
     __table_args__ = (
         UniqueConstraint("character", "object"),
-        {
-            "extend_existing": True,
-        }
     )
 
     # Character's key.
@@ -815,9 +791,6 @@ class npc_shops(BaseModel):
 
     __table_args__ = (
         UniqueConstraint("npc", "shop"),
-        {
-            "extend_existing": True,
-        }
     )
 
     # The key of an NPC.
@@ -841,10 +814,6 @@ class skill_types(BaseModel):
     """
     __tablename__ = "skill_types"
 
-    __table_args__ = {
-        "extend_existing": True,
-    }
-
     # type's key
     key = Column(String(KEY_LENGTH), unique=True, nullable=False)
 
@@ -866,9 +835,6 @@ class default_skills(BaseModel):
 
     __table_args__ = (
         UniqueConstraint("character", "skill"),
-        {
-            "extend_existing": True,
-        }
     )
 
     # character's key
@@ -893,9 +859,6 @@ class quest_objectives(BaseModel):
 
     __table_args__ = (
         UniqueConstraint("quest", "type", "object"),
-        {
-            "extend_existing": True,
-        }
     )
 
     # The key of a quest.
@@ -927,9 +890,6 @@ class quest_dependencies(BaseModel):
 
     __table_args__ = (
         UniqueConstraint("quest", "dependency", "type"),
-        {
-            "extend_existing": True,
-        }
     )
 
     # The key of a quest.
@@ -953,10 +913,6 @@ class quest_dependencies(BaseModel):
 class event_data(BaseModel):
     "Store event data."
     __tablename__ = "event_data"
-
-    __table_args__ = {
-        "extend_existing": True,
-    }
 
     __index_together__ =  [("trigger_obj", "trigger_type")]
 
@@ -994,10 +950,6 @@ class dialogues(BaseModel):
     "Store all dialogues."
     __tablename__ = "dialogues"
 
-    __table_args__ = {
-        "extend_existing": True,
-    }
-
     # dialogue's key
     key = Column(String(KEY_LENGTH), unique=True, nullable=False)
 
@@ -1022,9 +974,6 @@ class dialogue_quest_dependencies(BaseModel):
 
     __table_args__ = (
         UniqueConstraint("dialogue", "dependency", "type"),
-        {
-            "extend_existing": True,
-        }
     )
 
     # The key of a dialogue.
@@ -1051,9 +1000,6 @@ class dialogue_relations(BaseModel):
 
     __table_args__ = (
         UniqueConstraint("dialogue", "next_dlg"),
-        {
-            "extend_existing": True,
-        }
     )
 
     # The key of a dialogue.
@@ -1076,9 +1022,6 @@ class npc_dialogues(BaseModel):
 
     __table_args__ = (
         UniqueConstraint("npc", "dialogue"),
-        {
-            "extend_existing": True,
-        }
     )
 
     # The key of an NPC.
@@ -1101,10 +1044,6 @@ class npc_dialogues(BaseModel):
 class BaseEventActionData(BaseModel):
     __abstract__ = True
 
-    __table_args__ = {
-        "extend_existing": True,
-    }
-
     # The key of an event.
     event_key = Column(String(KEY_LENGTH), index=True, nullable=False)
 
@@ -1120,9 +1059,6 @@ class action_attack(BaseEventActionData):
 
     __table_args__ = (
         UniqueConstraint("event_key", "mob", "level"),
-        {
-            "extend_existing": True,
-        }
     )
 
     # The key of a common character.
@@ -1151,9 +1087,6 @@ class action_dialogue(BaseEventActionData):
 
     __table_args__ = (
         UniqueConstraint("event_key", "dialogue", "npc"),
-        {
-            "extend_existing": True,
-        }
     )
 
     # The key of a dialogue.
@@ -1179,9 +1112,6 @@ class action_learn_skill(BaseEventActionData):
 
     __table_args__ = (
         UniqueConstraint("event_key", "skill"),
-        {
-            "extend_existing": True,
-        }
     )
 
     # The key of a skill.
@@ -1203,9 +1133,6 @@ class action_accept_quest(BaseEventActionData):
 
     __table_args__ = (
         UniqueConstraint("event_key", "quest"),
-        {
-            "extend_existing": True,
-        }
     )
 
     # The key of a quest.
@@ -1224,9 +1151,6 @@ class action_turn_in_quest(BaseEventActionData):
 
     __table_args__ = (
         UniqueConstraint("event_key", "quest"),
-        {
-            "extend_existing": True,
-        }
     )
 
     # The key of a quest.
@@ -1245,9 +1169,6 @@ class action_close_event(BaseEventActionData):
 
     __table_args__ = (
         UniqueConstraint("event_key", "event"),
-        {
-            "extend_existing": True,
-        }
     )
 
     # The key of an event to close.
@@ -1267,9 +1188,6 @@ class action_message(BaseEventActionData):
 
     __table_args__ = (
         UniqueConstraint("event_key", "message"),
-        {
-            "extend_existing": True,
-        }
     )
 
     # Messages.
@@ -1289,9 +1207,6 @@ class action_get_objects(BaseEventActionData):
 
     __table_args__ = (
         UniqueConstraint("event_key", "object"),
-        {
-            "extend_existing": True,
-        }
     )
 
     # The object's key.
@@ -1324,9 +1239,6 @@ class localized_strings(BaseModel):
 
     __table_args__ = (
         UniqueConstraint("category", "origin"),
-        {
-            "extend_existing": True,
-        }
     )
 
     # is system data or not
@@ -1350,10 +1262,6 @@ class localized_strings(BaseModel):
 class image_resources(BaseModel):
     "Store resource's information."
     __tablename__ = "image_resources"
-
-    __table_args__ = {
-        "extend_existing": True,
-    }
 
     # image's path
     resource = Column(String(KEY_LENGTH), unique=True, nullable=False)

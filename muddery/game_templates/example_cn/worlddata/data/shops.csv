@@ -1,2 +1,2 @@
 key,element_type,name,desc,verb,condition,icon
-shop_fruits,SHOP,买水果,我这里有一些水果。,买水果,,
+shop_fruits,SHOP,买水果,我这里有一些水果。,买水果,is_quest_finished("quest_find_survivor"),

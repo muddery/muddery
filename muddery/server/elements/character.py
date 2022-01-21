@@ -553,8 +553,11 @@ class MudderyCharacter(ELEMENT("MATTER")):
         # Create a target.
         base_model = ELEMENT("CHARACTER").get_base_model()
         table_data = WorldData.get_table_data(base_model, key=target_key)
-        table_data = table_data[0]
+        if not table_data:
+            logger.log_err("Can not create the target.")
+            return False
 
+        table_data = table_data[0]
         target = ELEMENT(table_data.element_type)()
         await target.setup_element(target_key, level=target_level, first_time=True, temp=True)
         if not target:
