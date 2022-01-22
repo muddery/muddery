@@ -4111,11 +4111,9 @@ MudderyCombat.prototype.setCombat = function(desc, timeout, characters, self_id)
 	var top = 10;
 	var line_height = 30;
 
-	var status = {};
 	for (var i in characters) {
 		var character = characters[i];
 		var obj_id = character["id"];
-		status[obj_id] = character;
 
 		var item = $("<div>")
             .attr("id", "combat-char-" + obj_id)
@@ -4169,7 +4167,6 @@ MudderyCombat.prototype.setCombat = function(desc, timeout, characters, self_id)
 	}
 
     this.character_hp_width = $(".character-hp").width();
-	this.updateStatus(status);
 }
 
 /*

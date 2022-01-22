@@ -51,17 +51,18 @@ class StorageWithCache(BaseKeyValueStorage):
             except KeyError:
                 await self.set_category_cache(category)
 
-    async def has(self, category: str, key: str) -> bool:
+    async def has(self, category: str, key: str, check_category: bool = False) -> bool:
         """
         Check if the key exists.
 
         Args:
             category: (string) the category of data.
             key: (string) attribute's key.
+            check_category: if check_category is True and does not has the category, it will raise a KeyError.
         """
         async with self.lock:
             try:
-                return await self.cache.has(category, key)
+                return await self.cache.has(category, key, check_category=True)
             except KeyError:
                 category_data = await self.set_category_cache(category)
                 return key in category_data

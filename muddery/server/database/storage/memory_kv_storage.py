@@ -48,15 +48,19 @@ class MemoryKVStorage(BaseKeyValueStorage):
         else:
             self.storage[category][key] = value
 
-    async def has(self, category, key):
+    async def has(self, category: str, key: str, check_category: bool = False) -> bool:
         """
         Check if the key exists.
 
         Args:
             category: (string) the category of data.
             key: (string) attribute's key.
+            check_category: if check_category is True and does not has the category, it will raise a KeyError.
         """
-        return category in self.storage and key in self.storage[category]
+        if check_category:
+            return key in self.storage[category]
+        else:
+            return category in self.storage and key in self.storage[category]
 
     async def load(self, category, key, *default, for_update=False):
         """

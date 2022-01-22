@@ -146,6 +146,8 @@ MudderyClient.prototype = {
                             info["timeout"],
                             info["characters"],
                             core.data_handler.character_id);
+                    } else if (key == "combat_status") {
+                        mud.combat_window.updateStatus(data[key]);
                     } else if (key == "combat_commands") {
                         mud.combat_window.setCommands(data[key]);
                     } else if (key == "skill_cd") {

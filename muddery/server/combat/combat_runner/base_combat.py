@@ -149,10 +149,17 @@ class BaseCombat(object):
             None
         """
         # Show combat information to the player.
-        await character.msg({"joined_combat": True})
-
-        # send messages in order
-        await character.msg({"combat_info": self.get_appearance()})
+        await character.msg([
+            {
+                "joined_combat": True
+            },
+            {
+                "combat_info": self.get_appearance()
+            },
+            {
+                "combat_status": await self.get_combat_status(),
+            },
+        ])
 
     async def prepare_skill(self, skill_key, caller, target_id):
         """
@@ -377,18 +384,28 @@ class BaseCombat(object):
         """
         Get the combat appearance.
         """
-        appearance = {"desc": self.desc,
-                      "timeout": self.timeout,
-                      "characters": []}
-        
+        characters = []
         for char in self.characters.values():
             character = char["char"]
             info = character.get_appearance()
             info["team"] = char["team"]
 
-            appearance["characters"].append(info)
+            characters.append(info)
 
-        return appearance
+        return {
+            "desc": self.desc,
+            "timeout": self.timeout,
+            "characters": characters
+        }
+
+    async def get_combat_status(self):
+        """
+        Get characters status.
+        :return:
+        """
+        chars = self.characters.keys()
+        status = await asyncio.gather(*[char["char"].get_combat_status() for char in self.characters.values()])
+        return dict(zip(chars, status))
 
     def get_combat_characters(self):
         """

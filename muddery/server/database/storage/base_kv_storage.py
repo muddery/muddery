@@ -35,13 +35,14 @@ class BaseKeyValueStorage(object):
         """
         pass
 
-    async def has(self, category: str, key: str) -> bool:
+    async def has(self, category: str, key: str, check_category: bool = False) -> bool:
         """
         Check if the attribute exists.
 
         Args:
-            category: (string, int) the category of data.
-            key: (string) attribute's key.
+            category: the category of data.
+            key: attribute's key.
+            check_category: if check_category is True and does not has the category, it will raise a KeyError.
         """
         pass
 

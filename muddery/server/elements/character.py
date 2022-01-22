@@ -248,7 +248,9 @@ class MudderyCharacter(ELEMENT("MATTER")):
         """
         Get character status used in combats.
         """
-        return {}
+        return {
+            "id": self.get_id()
+        }
 
     async def load_skills(self):
         """

@@ -118,13 +118,14 @@ class TableKVStorage(BaseKeyValueStorage):
             record = self.model(**data)
             self.session.add(record)
 
-    async def has(self, category, key):
+    async def has(self, category: str, key: str, check_category: bool = False) -> bool:
         """
         Check if the key exists.
 
         Args:
-            category: (string) the category of data.
-            key: (string) attribute's key.
+            category: the category of data.
+            key: attribute's key.
+            check_category: if check_category is True and does not has the category, it will raise a KeyError.
         """
         stmt = select(func.count()).select_from(self.model)
 
@@ -135,8 +136,25 @@ class TableKVStorage(BaseKeyValueStorage):
             stmt = stmt.where(getattr(self.model, self.key_field) == key)
 
         result = self.session.execute(stmt)
-        record = result.scalars().one()
-        return record > 0
+        count = result.scalars().one()
+        if count > 0:
+            return True
+
+        if not check_category:
+            return False
+
+        # Check if the category exists.
+        if not self.category_field:
+            return False
+
+        stmt = select(func.count()).select_from(self.model).where(getattr(self.model, self.category_field) == category)
+        result = self.session.execute(stmt)
+        count = result.scalars().one()
+        if count > 0:
+            return False
+        else:
+            raise KeyError
+
 
     async def load(self, category, key, *default, for_update=False):
         """
