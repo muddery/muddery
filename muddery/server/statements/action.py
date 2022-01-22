@@ -2,8 +2,10 @@
 Actions are used to do somethings.
 """
 
+import traceback
 from muddery.server.statements.statement_function import StatementFunction
 from muddery.server.server import Server
+from muddery.server.utils.logger import logger
 
 
 class FuncLearnSkill(StatementFunction):
@@ -197,3 +199,69 @@ class FuncFightTarget(StatementFunction):
             desc = self.args[0]
 
         return await self.caller.attack_temp_target(self.obj.get_element_key(), await self.obj.get_level(), desc)
+
+
+class FuncSetRelationship(StatementFunction):
+    """
+    Set the relationship between the player and the element.
+
+    Args:
+        args[0]: (string) element's type
+        args[1]: (string) element's key
+        args[2]: (number) number
+
+    Returns:
+        (boolean) value has set
+    """
+
+    key = "set_relation"
+    const = False
+
+    async def func(self):
+        """
+        Implement the function.
+        """
+        element_type = self.args[0]
+        element_key = self.args[1]
+        number = self.args[2]
+
+        try:
+            await self.caller.set_relationship(element_type, element_key, number)
+            return True
+        except:
+            traceback.print_exc()
+            logger.log_trace("Set relationship error.")
+            return False
+
+
+class FuncAddRelationship(StatementFunction):
+    """
+    Change the relationship between the player and the element.
+
+    Args:
+        args[0]: (string) element's type
+        args[1]: (string) element's key
+        args[2]: (number) number
+
+    Returns:
+        (boolean) value has set
+    """
+
+    key = "add_relation"
+    const = False
+
+    async def func(self):
+        """
+        Implement the function.
+        """
+        element_type = self.args[0]
+        element_key = self.args[1]
+        number = self.args[2]
+
+        try:
+            await self.caller.add_relationship(element_type, element_key, number)
+            return True
+        except:
+            traceback.print_exc()
+            logger.log_trace("Set relationship error.")
+            return False

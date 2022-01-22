@@ -346,8 +346,8 @@ class characters(BaseMatter):
     # Reborn time. The time of reborn after this character was killed. 0 means never reborn.
     reborn_time = Column(Integer, default=0)
 
-    # Friendly of this character.
-    friendly = Column(Integer, default=0)
+    # Default relationship between the character and the player.
+    relationship = Column(Integer, default=0)
 
     # Clone another character's custom properties if this character's data is empty.
     clone = Column(String(KEY_LENGTH))
@@ -1226,6 +1226,56 @@ class action_get_objects(BaseEventActionData):
 
     # This message will be sent to the character when get objects.
     message = Column(UnicodeText)
+
+
+# ------------------------------------------------------------
+#
+# action to set the relationship between a player and an element.
+#
+# ------------------------------------------------------------
+class action_set_relation(BaseEventActionData):
+    """
+    The Action to send a message to the character.
+    """
+    __tablename__ = "action_set_relation"
+
+    __table_args__ = (
+        UniqueConstraint("element_type", "element_key"),
+    )
+
+    # The type of a element type.
+    element_type = Column(String(KEY_LENGTH), index=True, nullable=False)
+
+    # The key of a element type.
+    element_key = Column(String(KEY_LENGTH), index=True, nullable=False)
+
+    # The relationship's value
+    value = Column(Integer)
+
+
+# ------------------------------------------------------------
+#
+# action to add the relationship between a player and an element.
+#
+# ------------------------------------------------------------
+class action_add_relation(BaseEventActionData):
+    """
+    The Action to send a message to the character.
+    """
+    __tablename__ = "action_add_relation"
+
+    __table_args__ = (
+        UniqueConstraint("element_type", "element_key"),
+    )
+
+    # The type of a element type.
+    element_type = Column(String(KEY_LENGTH), index=True, nullable=False)
+
+    # The key of a element type.
+    element_key = Column(String(KEY_LENGTH), index=True, nullable=False)
+
+    # The relationship's value
+    value = Column(Integer)
 
 
 # ------------------------------------------------------------

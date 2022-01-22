@@ -5,6 +5,7 @@ The DialogueHandler maintains a pool of dialogues.
 
 """
 
+import asyncio
 from muddery.server.mappings.element_set import ELEMENT
 from muddery.server.statements.statement_handler import STATEMENT_HANDLER
 from muddery.server.database.worlddata.shop_goods import ShopGoods
@@ -12,7 +13,7 @@ from muddery.server.database.worlddata.worlddata import WorldData
 from muddery.server.elements.base_element import BaseElement
 
 
-class MudderyShop(BaseElement):
+class MudderyShop(ELEMENT("MATTER")):
     """
     A shop.
     """
@@ -47,7 +48,7 @@ class MudderyShop(BaseElement):
         Load shop goods.
         :return:
         """
-        goods_data = ShopGoods.get_by_shop(self.element_key)
+        goods_data = ShopGoods.get_by_shop(self.get_element_key())
 
         self.goods = []
         for item in goods_data:
@@ -55,27 +56,21 @@ class MudderyShop(BaseElement):
             goods.set_data(item)
             self.goods.append(goods)
 
-    async def get_info(self, caller):
+    async def get_detail_appearance(self, caller):
         """
         Get shop information.
 
         Args:
             caller (obj): the custom
         """
-        info = {
-            "key": self.element_key,
-            "name": self.const.name,
-            "desc": self.const.desc,
-            "icon": self.const.icon,
-            "goods": [],
-        }
-
+        info = await super(MudderyShop, self).get_detail_appearance()
+        is_available = await asyncio.gather(*[item.is_available(caller) for item in self.goods])
+        available_goods = [index for index in range(len(self.goods)) if is_available[index]]
+        goods_list = await asyncio.gather(*[self.goods[index].get_info(caller) for index in available_goods])
         for index, item in enumerate(self.goods):
-            if await item.is_available(caller):
-                goods = item.get_info(caller)
-                goods["index"] = index
-                info["goods"].append(goods)
+            item["index"] = index
 
+        info["goods"] = goods_list
         return info
 
     def get_verb(self):

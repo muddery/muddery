@@ -62,13 +62,14 @@ class MudderyCharacter(ELEMENT("MATTER")):
         super(MudderyCharacter, self).__init__()
 
         self.set_id(self.generate_id())
-        self.states = ObjectStatesHandler(self.get_id(), MemoryObjectStorage)
+        self.states = None
 
         self.loot_handler = None
         self.location = None
         self.scheduler = None
 
         self.is_alive = True
+        self.default_relationship = 0
 
         # character's skills
         # self.skills = {
@@ -86,6 +87,13 @@ class MudderyCharacter(ELEMENT("MATTER")):
         """
         # stop auto casting
         self.stop_auto_combat_skill()
+
+    def create_status_handler(self):
+        """
+        Characters use memory to store status by default.
+        :return:
+        """
+        return ObjectStatesHandler(self.get_id(), MemoryObjectStorage)
 
     def set_id(self, char_id):
         """
@@ -118,8 +126,10 @@ class MudderyCharacter(ELEMENT("MATTER")):
         self.set_desc(self.const.desc)
         self.set_icon(self.const.icon)
 
-        # friendly
-        self.friendly = self.const.friendly if self.const.friendly else 0
+        self.states = self.create_status_handler()
+
+        # default_relationship
+        self.default_relationship = self.const.relationship if self.const.relationship else 0
 
         # skill's ai
         ai_choose_skill_class = class_from_path(SETTINGS.AI_CHOOSE_SKILL)
@@ -211,7 +221,7 @@ class MudderyCharacter(ELEMENT("MATTER")):
         :return:
         """
         self.level = level
-        await self.load_custom_level_data(self.element_type, self.element_key, level)
+        await self.load_custom_level_data(self.element_type, self.get_element_key(), level)
 
         await self.refresh_states(True)
 

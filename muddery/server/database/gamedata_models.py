@@ -9,17 +9,31 @@ NAME_LENGTH = 80
 VALUE_LENGTH = 80
 
 
-class system_data(Base):
+# ------------------------------------------------------------
+#
+# The base of all data models
+#
+# ------------------------------------------------------------
+class BaseModel(Base):
+    """
+    The game world system's data.
+    """
+    __abstract__ = True
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+
+    def __eq__(self, other):
+        """
+        Define the equal operator. Two records are equal if they have the same id.
+        """
+        return int(self.id) == int(other.id)
+
+
+class system_data(BaseModel):
     """
     Store system data. Only use the first record.
     """
     __tablename__ = "system_data"
-
-    __table_args__ = {
-        "extend_existing": True,
-    }
-
-    id = Column(Integer, primary_key=True, autoincrement=True)
 
     # The last id of accounts.
     last_account_id = Column(Integer, default=0, nullable=False)
@@ -33,20 +47,15 @@ class system_data(Base):
 # The base of runtime attributes.
 #
 # ------------------------------------------------------------
-class object_states(Base):
+class BaseObjectStates(BaseModel):
     """
     Object's runtime attributes.
     """
-    __tablename__ = "object_states"
+    __abstract__ = True
 
     __table_args__ = (
         UniqueConstraint("obj_id", "key"),
-        {
-            "extend_existing": True,
-        }
     )
-
-    id = Column(Integer, primary_key=True, autoincrement=True)
 
     # object's id
     obj_id = Column(Integer, index=True, nullable=False)
@@ -58,12 +67,19 @@ class object_states(Base):
     value = Column(String(VALUE_LENGTH))
 
 
+class character_status(BaseObjectStates):
+    """
+    Player character's runtime attributes.
+    """
+    __tablename__ = "character_status"
+
+
 # ------------------------------------------------------------
 #
 # server bans
 #
 # ------------------------------------------------------------
-class server_bans(Base):
+class server_bans(BaseModel):
     """
     Banned players.
     """
@@ -71,12 +87,7 @@ class server_bans(Base):
 
     __table_args__ = (
         UniqueConstraint("type", "target"),
-        {
-            "extend_existing": True,
-        }
     )
-
-    id = Column(Integer, primary_key=True, autoincrement=True)
 
     # ban's type, should be "IP" or "USERNAME"
     type = Column(String(KEY_LENGTH), index=True, nullable=False)
@@ -96,17 +107,11 @@ class server_bans(Base):
 # player's accounts
 #
 # ------------------------------------------------------------
-class accounts(Base):
+class accounts(BaseModel):
     """
     User accounts.
     """
     __tablename__ = "accounts"
-
-    __table_args__ = {
-        "extend_existing": True,
-    }
-
-    id = Column(Integer, primary_key=True, autoincrement=True)
 
     # account's username
     username = Column(String(KEY_LENGTH), unique=True, nullable=False)
@@ -135,16 +140,10 @@ class accounts(Base):
 # player account's characters
 #
 # ------------------------------------------------------------
-class account_characters(Base):
+class account_characters(BaseModel):
     "Account's player characters."
 
     __tablename__ = "account_characters"
-
-    __table_args__ = {
-        "extend_existing": True,
-    }
-
-    id = Column(Integer, primary_key=True, autoincrement=True)
 
     # player's account id
     account_id = Column(Integer, index=True, nullable=False)
@@ -157,16 +156,10 @@ class account_characters(Base):
 # player character's basic information
 #
 # ------------------------------------------------------------
-class character_info(Base):
+class character_info(BaseModel):
     "player character's basic information"
 
     __tablename__ = "character_info"
-
-    __table_args__ = {
-        "extend_existing": True,
-    }
-
-    id = Column(Integer, primary_key=True, autoincrement=True)
 
     # playable character's id
     char_id = Column(Integer, unique=True, nullable=False)
@@ -189,16 +182,10 @@ class character_info(Base):
 # player character's info
 #
 # ------------------------------------------------------------
-class character_location(Base):
+class character_location(BaseModel):
     "player character's location"
 
     __tablename__ = "character_location"
-
-    __table_args__ = {
-        "extend_existing": True,
-    }
-
-    id = Column(Integer, primary_key=True, autoincrement=True)
 
     # player character's id
     char_id = Column(Integer, unique=True, nullable=False)
@@ -212,19 +199,14 @@ class character_location(Base):
 # player character's inventory
 #
 # ------------------------------------------------------------
-class character_inventory(Base):
+class character_inventory(BaseModel):
     "Player character's inventory."
 
     __tablename__ = "character_inventory"
 
     __table_args__ = (
         UniqueConstraint("character_id", "position"),
-        {
-            "extend_existing": True,
-        }
     )
-
-    id = Column(Integer, primary_key=True, autoincrement=True)
 
     # character's id
     character_id = Column(Integer, index=True, nullable=False)
@@ -247,19 +229,14 @@ class character_inventory(Base):
 # player character's equipments
 #
 # ------------------------------------------------------------
-class character_equipments(Base):
+class character_equipments(BaseModel):
     "Player character's equipments."
 
     __tablename__ = "character_equipments"
 
     __table_args__ = (
         UniqueConstraint("character_id", "position"),
-        {
-            "extend_existing": True,
-        }
     )
-
-    id = Column(Integer, primary_key=True, autoincrement=True)
 
     # character's id
     character_id = Column(Integer, index=True, nullable=False)
@@ -279,19 +256,14 @@ class character_equipments(Base):
 # player character's skills
 #
 # ------------------------------------------------------------
-class character_skills(Base):
+class character_skills(BaseModel):
     "Player character's skills."
 
     __tablename__ = "character_skills"
 
     __table_args__ = (
         UniqueConstraint("character_id", "skill"),
-        {
-            "extend_existing": True,
-        }
     )
-
-    id = Column(Integer, primary_key=True, autoincrement=True)
 
     # character's id
     character_id = Column(Integer, index=True, nullable=False)
@@ -314,16 +286,10 @@ class character_skills(Base):
 # player character's combat information
 #
 # ------------------------------------------------------------
-class character_combat(Base):
+class character_combat(BaseModel):
     "Player character's combat."
 
     __tablename__ = "character_combat"
-
-    __table_args__ = {
-        "extend_existing": True,
-    }
-
-    id = Column(Integer, primary_key=True, autoincrement=True)
 
     # character's id
     character_id = Column(Integer, unique=True, nullable=False)
@@ -337,19 +303,14 @@ class character_combat(Base):
 # player character's quests
 #
 # ------------------------------------------------------------
-class character_quests(Base):
+class character_quests(BaseModel):
     "Player character's quests."
 
     __tablename__ = "character_quests"
 
     __table_args__ = (
         UniqueConstraint("character_id", "quest"),
-        {
-            "extend_existing": True,
-        }
     )
-
-    id = Column(Integer, primary_key=True, autoincrement=True)
 
     # character's id
     character_id = Column(Integer, index=True, nullable=False)
@@ -366,25 +327,20 @@ class character_quests(Base):
 # Player character's quest objectives.
 #
 # ------------------------------------------------------------
-class character_quest_objectives(Base):
+class character_quest_objectives(BaseModel):
     "Quests' objectives."
 
     __tablename__ = "character_quest_objectives"
 
     __table_args__ = (
         UniqueConstraint("character_quest", "objective"),
-        {
-            "extend_existing": True,
-        }
     )
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
-
-    # character's id and quest's key, separated by colon
+    # character's id and quest's key, separated by colon. (id:key)
     character_quest = Column(String(KEY_LENGTH + KEY_LENGTH), index=True, nullable=False)
 
     # Quest's objective.
-    # objective's type and relative object's key, separated by colon
+    # objective's type and relative object's key, separated by colon. (type:key)
     objective = Column(String(KEY_LENGTH + KEY_LENGTH), nullable=False)
 
     # objective's progress
@@ -393,19 +349,38 @@ class character_quest_objectives(Base):
 
 # ------------------------------------------------------------
 #
+# Player character's relationship with other elements.
+#
+# ------------------------------------------------------------
+class character_relationships(BaseModel):
+    "Player character's relationship with other elements."
+
+    __tablename__ = "character_relationships"
+
+    __table_args__ = (
+        UniqueConstraint("character_id", "element"),
+    )
+
+    # character's db id
+    character_id = Column(Integer, index=True, nullable=False)
+
+    # element
+    # element's type and element object's key, separated by colon. (type:key)
+    element = Column(String(KEY_LENGTH), nullable=False)
+
+    # relationship's value
+    relationship = Column(Integer, default=0)
+
+
+# ------------------------------------------------------------
+#
 # character's honour
 #
 # ------------------------------------------------------------
-class honours(Base):
+class honours(BaseModel):
     "All character's honours."
 
     __tablename__ = "honours"
-
-    __table_args__ = {
-        "extend_existing": True,
-    }
-
-    id = Column(Integer, primary_key=True, autoincrement=True)
 
     # character's database id
     character = Column(Integer, unique=0, nullable=False)

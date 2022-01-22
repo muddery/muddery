@@ -251,7 +251,7 @@ class BaseElement(object):
         :return:
         """
         self.level = level
-        await self.load_custom_level_data(self.element_type, self.element_key, level)
+        await self.load_custom_level_data(self.element_type, self.get_element_key(), level)
 
     async def get_level(self):
         """

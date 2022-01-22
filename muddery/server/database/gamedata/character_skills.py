@@ -41,7 +41,7 @@ class CharacterSkills(BaseData, Singleton):
         """
         return await self.storage.has(character_id, skill_key)
 
-    async def load(self, character_id, skill_key, **default):
+    async def load(self, character_id, skill_key, *default):
         """
         Get the value of a skill.
 
@@ -54,7 +54,7 @@ class CharacterSkills(BaseData, Singleton):
             KeyError: If `raise_exception` is set and no matching Attribute
                 was found matching `key` and no default value set.
         """
-        return await self.storage.load(character_id, skill_key, **default)
+        return await self.storage.load(character_id, skill_key, *default)
 
     async def load_character(self, character_id):
         """

@@ -152,18 +152,18 @@ class BaseObjectStorage(BaseData, Singleton):
         await self.storage.delete_category(obj_id)
 
 
-class DBObjectStorage(BaseObjectStorage):
+class CharacterObjectStorage(BaseObjectStorage):
     """
     The storage of object attributes.
     """
-    __table_name = "object_states"
+    __table_name = "character_states"
     __category_name = "obj_id"
     __key_field = "key"
     __default_value_field = "value"
 
     def __init__(self):
         # data storage
-        super(DBObjectStorage, self).__init__()
+        super(CharacterObjectStorage, self).__init__()
         self.storage = self.create_storage(self.__table_name, self.__category_name, self.__key_field, self.__default_value_field)
 
 

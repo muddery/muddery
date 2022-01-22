@@ -467,3 +467,102 @@ class FuncAttributeLessThan(StatementFunction):
             return
 
         return value < number
+
+
+class FuncRelationshipEqualTo(StatementFunction):
+    """
+    Check if the caller and the element's relationship equals to the number.
+
+    Args:
+        args[0]: (string) element's type
+        args[1]: (string) element's key
+        args[2]: (number) number
+
+    Returns:
+        boolean result
+    """
+
+    key = "relation_equal_to"
+    const = True
+
+    async def func(self):
+        """
+        Implement the function.
+        """
+        if not self.args:
+            return False
+
+        element_type = self.args[0]
+        element_key = self.args[1]
+        number = self.args[2]
+
+        relationship = await self.caller.get_relationship(element_type, element_key)
+        if relationship is None:
+            return False
+        return relationship == number
+
+
+class FuncRelationshipMoreThan(StatementFunction):
+    """
+    Check if the caller and the element's relationship is more than the number.
+
+    Args:
+        args[0]: (string) element's type
+        args[1]: (string) element's key
+        args[2]: (number) number
+
+    Returns:
+        boolean result
+    """
+
+    key = "relation_more_than"
+    const = True
+
+    async def func(self):
+        """
+        Implement the function.
+        """
+        if not self.args:
+            return False
+
+        element_type = self.args[0]
+        element_key = self.args[1]
+        number = self.args[2]
+
+        relationship = await self.caller.get_relationship(element_type, element_key)
+        if relationship is None:
+            return False
+        return relationship > number
+
+
+class FuncRelationshipLessThan(StatementFunction):
+    """
+    Check if the caller and the element's relationship is less than the number.
+
+    Args:
+        args[0]: (string) element's type
+        args[1]: (string) element's key
+        args[2]: (number) number
+
+    Returns:
+        boolean result
+    """
+
+    key = "relation_less_than"
+    const = True
+
+    async def func(self):
+        """
+        Implement the function.
+        """
+        if not self.args:
+            return False
+
+        element_type = self.args[0]
+        element_key = self.args[1]
+        number = self.args[2]
+
+        relationship = await self.caller.get_relationship(element_type, element_key)
+        if relationship is None:
+            return False
+        return relationship < number

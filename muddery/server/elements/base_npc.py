@@ -88,7 +88,7 @@ class MudderyBaseNPC(ELEMENT("CHARACTER")):
         if shop_key not in self.shops:
             return None
 
-        shop_info = await self.shops[shop_key].get_info(caller)
+        shop_info = await self.shops[shop_key].get_detail_appearance(caller)
         shop_info["npc"] = self.get_id()
         return shop_info
 
@@ -111,27 +111,32 @@ class MudderyBaseNPC(ELEMENT("CHARACTER")):
         """
         commands = []
         if self.is_alive:
-            if self.dialogues or self.default_dialogues:
-                # If the character have something to talk, add talk command.
-                commands.append({"name": _("Talk"), "cmd": "talk", "args": self.get_id()})
+            relationship = await caller.get_relationship(self.element_type, self.get_element_key())
+            if relationship is None:
+                # Use the default relationship.
+                relationship = self.default_relationship
 
-            # Add shops.
-            for key, obj in self.shops.items():
-                if not await obj.is_available(caller):
-                    continue
-
-                verb = obj.get_verb()
-                commands.append({
-                    "name": verb,
-                    "cmd": "shopping",
-                    "args": {
-                        "npc": self.get_id(),
-                        "shop": obj.get_element_key(),
-                    }
-                })
-
-            if self.friendly <= 0:
+            if relationship <= 0:
                 commands.append({"name": _("Attack"), "cmd": "attack", "args": self.get_id()})
+            else:
+                if self.dialogues or self.default_dialogues:
+                    # If the character have something to talk, add talk command.
+                    commands.append({"name": _("Talk"), "cmd": "talk", "args": self.get_id()})
+
+                # Add shops.
+                for key, obj in self.shops.items():
+                    if not await obj.is_available(caller):
+                        continue
+
+                    verb = obj.get_verb()
+                    commands.append({
+                        "name": verb,
+                        "cmd": "shopping",
+                        "args": {
+                            "npc": self.get_id(),
+                            "shop": obj.get_element_key(),
+                        }
+                    })
 
         return commands
 

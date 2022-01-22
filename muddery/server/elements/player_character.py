@@ -10,6 +10,7 @@ creation commands.
 
 import ast, traceback
 import weakref
+from muddery.server.settings import SETTINGS
 from muddery.server.utils.logger import logger
 from muddery.server.server import Server
 from muddery.server.utils.quest_handler import QuestHandler
@@ -27,6 +28,7 @@ from muddery.server.database.worlddata.default_objects import DefaultObjects
 from muddery.server.database.worlddata.element_properties import ElementProperties
 from muddery.server.database.worlddata.equipment_positions import EquipmentPositions
 from muddery.server.database.worlddata.character_states_dict import CharacterStatesDict
+from muddery.server.database.gamedata.character_relationships import CharacterRelationships
 from muddery.server.database.gamedata.character_info import CharacterInfo
 from muddery.server.mappings.element_set import ELEMENT
 from muddery.server.utils import defines
@@ -41,7 +43,7 @@ from muddery.server.database.gamedata.character_combat import CharacterCombat
 from muddery.server.database.gamedata.character_location import CharacterLocation
 from muddery.server.combat.match_pvp import MatchPVPHandler
 from muddery.server.utils.object_states_handler import ObjectStatesHandler
-from muddery.server.database.gamedata.object_storage import DBObjectStorage
+from muddery.server.database.gamedata.object_storage import CharacterObjectStorage
 from muddery.server.events.event_trigger import EventTrigger
 
 
@@ -152,6 +154,13 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         raise Exception("Cannot delete the body object!")
     body = property(__body_get, __body_set, __body_del)
 
+    def create_status_handler(self):
+        """
+        Characters use memory to store status by default.
+        :return:
+        """
+        return ObjectStatesHandler(self.get_db_id(), CharacterObjectStorage)
+
     def set_db_id(self, db_id):
         """
         Set the id of the character's data in db.
@@ -200,20 +209,6 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
             level = await CharacterInfo.inst().get_level(self.get_db_id())
 
         await super(MudderyPlayerCharacter, self).setup_element(key, level, first_time)
-
-    async def load_data(self, element_key, level=None):
-        """
-        Load the object's data.
-
-        :arg
-            element_key: (string) the key of the data.
-            level: (int) element's level.
-
-        :return:
-        """
-        # create states handler
-        self.states = ObjectStatesHandler(self.get_db_id(), DBObjectStorage)
-        await super(MudderyPlayerCharacter, self).load_data(element_key, level)
 
     async def at_element_setup(self, first_time):
         """
@@ -1920,3 +1915,30 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         """
         info = await self.skills[skill_key]["obj"].get_detail_appearance(self)
         return info
+
+    async def get_relationship(self, element_type, element_key):
+        """
+        Get the relationship value between the player and the element.
+        :param element_type:
+        :param element_key:
+        :return:
+        """
+        return await CharacterRelationships.inst().load(self.get_db_id(), element_type, element_key, None)
+
+    async def set_relationship(self, element_type, element_key, relationship):
+        """
+        Get the relationship value between the player and the element.
+        :param element_type:
+        :param element_key:
+        :return:
+        """
+        await CharacterRelationships.inst().save(self.get_db_id(), element_type, element_key, relationship)
+
+    async def add_relationship(self, element_type, element_key, value):
+        """
+        Add the relationship value between the player and the element with the given number.
+        :param element_type:
+        :param element_key:
+        :return:
+        """
+        await CharacterRelationships.inst().add(self.get_db_id(), element_type, element_key, value)

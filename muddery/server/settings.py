@@ -248,7 +248,6 @@ class Settings(object):
     LOCALIZED_STRINGS_MODEL = "localized_strings"
 
 
-
     ###################################
     # permissions
     ###################################

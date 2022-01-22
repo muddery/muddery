@@ -75,7 +75,7 @@ class MudderyShopGoods(BaseElement):
 
         return await STATEMENT_HANDLER.match_condition(self.condition, caller, None)
 
-    def get_info(self, caller):
+    async def get_info(self, caller):
         """
         Get the goods' info.
 

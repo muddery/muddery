@@ -27,6 +27,8 @@ class ActionFuncSet(BaseStatementFuncSet):
         self.add(action.FuncTeleportTo)
         self.add(action.FuncFightMob)
         self.add(action.FuncFightTarget)
+        self.add(action.FuncSetRelationship)
+        self.add(action.FuncAddRelationship)
 
 
 class ConditionFuncSet(BaseStatementFuncSet):
@@ -56,6 +58,10 @@ class ConditionFuncSet(BaseStatementFuncSet):
         self.add(condition.FuncAttributeEqualTo)
         self.add(condition.FuncAttributeMoreThan)
         self.add(condition.FuncAttributeLessThan)
+
+        self.add(condition.FuncRelationshipEqualTo)
+        self.add(condition.FuncRelationshipMoreThan)
+        self.add(condition.FuncRelationshipLessThan)
 
         self.add(attribute.FuncGetAttr)
         self.add(attribute.FuncHasAttr)

@@ -520,6 +520,26 @@ class action_get_objects(BaseModels.action_get_objects):
 
 # ------------------------------------------------------------
 #
+# action to set the relationship between a player and an element.
+#
+# ------------------------------------------------------------
+class action_set_relation(BaseModels.action_set_relation):
+    "The Action to send a message to the character."
+    pass
+
+
+# ------------------------------------------------------------
+#
+# action to add the relationship between a player and an element.
+#
+# ------------------------------------------------------------
+class action_add_relation(BaseModels.action_add_relation):
+    "The Action to send a message to the character."
+    pass
+
+
+# ------------------------------------------------------------
+#
 # localized strings
 #
 # ------------------------------------------------------------

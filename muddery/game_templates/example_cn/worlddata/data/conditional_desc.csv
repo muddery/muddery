@@ -1,2 +1,2 @@
 element,key,condition,desc
-WORLD_NPC,npc_wu,"not is_quest_finished(""quest_find_survivor"")","这个人身材高大，体格强健，双手紧握着拳头，眼睛紧紧地盯着你，时刻会向你扑过来。"
+WORLD_NPC,npc_wu,"relation_less_than(""WORLD_NPC"",""npc_wu"",0)","这个人身材高大，体格强健，双手紧握着拳头，眼睛紧紧地盯着你，时刻会向你扑过来。"

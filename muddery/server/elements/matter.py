@@ -111,7 +111,7 @@ class MudderyMatter(BaseElement):
         """
         The particular description for the caller.
         """
-        records = ConditionalDesc.get_data(self.element_type, self.element_key)
+        records = ConditionalDesc.get_data(self.element_type, self.get_element_key())
         if records:
             items = [(r.condition, r.desc) for r in records]
             results = await asyncio.gather(*[

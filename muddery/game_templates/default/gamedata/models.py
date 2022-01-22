@@ -11,7 +11,7 @@ class system_data(BaseModels.system_data):
 # Game object's runtime attributes.
 #
 # ------------------------------------------------------------
-class object_states(BaseModels.object_states):
+class character_states(BaseModels.character_status):
     pass
 
 
@@ -138,6 +138,16 @@ class character_quest_objectives(BaseModels.character_quest_objectives):
     """
     Quests' objectives.
     """
+    pass
+
+
+# ------------------------------------------------------------
+#
+# Player character's relationship with other elements.
+#
+# ------------------------------------------------------------
+class character_relationships(BaseModels.character_relationships):
+    "Player character's relationship with other elements."
     pass
 
 

@@ -52,11 +52,8 @@ class MudderyQuest(BaseElement):
         self.character_id = character_id
         self.objectives = {}
 
-        if not self.element_key:
-            return
-
         # Get objectives.
-        records = QuestObjectives.get(self.element_key)
+        records = QuestObjectives.get(self.get_element_key())
 
         for record in records:
             self.objectives[(record.type, record.object)] = {
@@ -105,7 +102,7 @@ class MudderyQuest(BaseElement):
         output = []
         all_objectives = await CharacterQuestObjectives.inst().get_character_quest(
             self.character_id,
-            self.element_key
+            self.get_element_key()
         )
 
         for item in self.objectives.values():
@@ -225,7 +222,7 @@ class MudderyQuest(BaseElement):
         """
         all_objectives = await CharacterQuestObjectives.inst().get_character_quest(
             self.character_id,
-            self.element_key
+            self.get_element_key()
         )
 
         for item in self.objectives.values():
@@ -296,7 +293,7 @@ class MudderyQuest(BaseElement):
 
         accomplished = await CharacterQuestObjectives.inst().get_progress(
             self.character_id,
-            self.element_key,
+            self.get_element_key(),
             item["type"],
             item["object"],
             0
@@ -312,7 +309,7 @@ class MudderyQuest(BaseElement):
 
         await CharacterQuestObjectives.inst().save_progress(
             self.character_id,
-            self.element_key,
+            self.get_element_key(),
             objective_type,
             object_key,
             accomplished
