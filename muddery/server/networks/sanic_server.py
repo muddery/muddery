@@ -19,6 +19,7 @@ def run_server():
     @server_app.websocket("/")
     async def handler(request, ws):
         channel = SanicChannel()
+        print("[Connection created] %s:%s" % (request.ip, request.port))
         try:
             channel.connect(request, ws)
             while True:
@@ -30,6 +31,7 @@ def run_server():
             traceback.print_exc()
             await channel.disconnect(-1)
 
+        print("[Connection closed] %s:%s" % (request.ip, request.port))
         await ws.close()
 
     server_app.run(port=SETTINGS.WEBSERVER_PORT)

@@ -157,10 +157,10 @@ class MudderyAccount(BaseElement):
         self.session = session
 
         await asyncio.wait([
-            Accounts.inst().update_login_time(self.username),
+            asyncio.create_task(Accounts.inst().update_login_time(self.username)),
 
             # Inform the client that we logged in first.
-            session.msg([
+            asyncio.create_task(session.msg([
                 {
                     "login": {
                         "name": self.username,
@@ -171,7 +171,7 @@ class MudderyAccount(BaseElement):
                     "char_all": await self.get_all_nicknames(),
                     "max_char": SETTINGS.MAX_PLAYER_CHARACTERS
                 },
-            ]),
+            ])),
         ])
 
     async def at_pre_logout(self):
@@ -336,15 +336,15 @@ class MudderyAccount(BaseElement):
 
         # delete all character data.
         await asyncio.wait([
-            AccountCharacters.inst().remove_character(self.id, char_db_id),
-            CharacterInfo.inst().remove_character(char_db_id),
-            CharacterLocation.inst().remove_character(char_db_id),
-            CharacterInventory.inst().remove_character(char_db_id),
-            CharacterEquipments.inst().remove_character(char_db_id),
-            CharacterQuests.inst().remove_character(char_db_id),
-            CharacterSkills.inst().remove_character(char_db_id),
-            CharacterCombat.inst().remove_character(char_db_id),
-            HonoursMapper.inst().remove_character(char_db_id),
+            asyncio.create_task(AccountCharacters.inst().remove_character(self.id, char_db_id)),
+            asyncio.create_task(CharacterInfo.inst().remove_character(char_db_id)),
+            asyncio.create_task(CharacterLocation.inst().remove_character(char_db_id)),
+            asyncio.create_task(CharacterInventory.inst().remove_character(char_db_id)),
+            asyncio.create_task(CharacterEquipments.inst().remove_character(char_db_id)),
+            asyncio.create_task(CharacterQuests.inst().remove_character(char_db_id)),
+            asyncio.create_task(CharacterSkills.inst().remove_character(char_db_id)),
+            asyncio.create_task(CharacterCombat.inst().remove_character(char_db_id)),
+            asyncio.create_task(HonoursMapper.inst().remove_character(char_db_id)),
         ])
 
     async def delete_all_characters(self):
@@ -360,15 +360,15 @@ class MudderyAccount(BaseElement):
         awaits = []
         for char_db_id in all_characters:
             # delete all character data.
-            awaits.append(AccountCharacters.inst().remove_character(self.id, char_db_id))
-            awaits.append(CharacterInfo.inst().remove_character(char_db_id))
-            awaits.append(CharacterLocation.inst().remove_character(char_db_id))
-            awaits.append(CharacterInventory.inst().remove_character(char_db_id))
-            awaits.append(CharacterEquipments.inst().remove_character(char_db_id))
-            awaits.append(CharacterQuests.inst().remove_character(char_db_id))
-            awaits.append(CharacterSkills.inst().remove_character(char_db_id))
-            awaits.append(CharacterCombat.inst().remove_character(char_db_id))
-            awaits.append(HonoursMapper.inst().remove_character(char_db_id))
+            awaits.append(asyncio.create_task(AccountCharacters.inst().remove_character(self.id, char_db_id)))
+            awaits.append(asyncio.create_task(CharacterInfo.inst().remove_character(char_db_id)))
+            awaits.append(asyncio.create_task(CharacterLocation.inst().remove_character(char_db_id)))
+            awaits.append(asyncio.create_task(CharacterInventory.inst().remove_character(char_db_id)))
+            awaits.append(asyncio.create_task(CharacterEquipments.inst().remove_character(char_db_id)))
+            awaits.append(asyncio.create_task(CharacterQuests.inst().remove_character(char_db_id)))
+            awaits.append(asyncio.create_task(CharacterSkills.inst().remove_character(char_db_id)))
+            awaits.append(asyncio.create_task(CharacterCombat.inst().remove_character(char_db_id)))
+            awaits.append(asyncio.create_task(HonoursMapper.inst().remove_character(char_db_id)))
 
         if awaits:
             await asyncio.wait(awaits)

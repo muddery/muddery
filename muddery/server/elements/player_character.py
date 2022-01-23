@@ -753,33 +753,42 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
                 # common number
                 if object_record.unique:
                     # unique object
-                    if len(inventory_obj_list) > 0:
-                        item = self.inventory[inventory_obj_list[0]]
-                        # add object number
-                        current_number = item["number"]
-                        add = number
-                        if add > object_record.max_stack - current_number:
-                            add = object_record.max_stack - current_number
+                    # Check equipments.
+                    in_equipments = False
+                    for item in self.equipments.values():
+                        if item["object_key"] == object_key:
+                            in_equipments = True
+                            reject = _("Can not get more %s.") % object_record.name
+                            break
 
-                        if add > 0:
-                            # increase stack number
-                            item["number"] = current_number + add
-                            await CharacterInventory.inst().set_dict(self.get_db_id(), item["position"], {"number": current_number + add})
+                    if not in_equipments:
+                        if len(inventory_obj_list) > 0:
+                            item = self.inventory[inventory_obj_list[0]]
+                            # add object number
+                            current_number = item["number"]
+                            add = number
+                            if add > object_record.max_stack - current_number:
+                                add = object_record.max_stack - current_number
+
+                            if add > 0:
+                                # increase stack number
+                                item["number"] = current_number + add
+                                await CharacterInventory.inst().set_dict(self.get_db_id(), item["position"], {"number": current_number + add})
+                                number -= add
+                                accepted += add
+                            else:
+                                reject = _("Can not get more %s.") % object_record.name
+                        else:
+                            # Get the number that actually added.
+                            add = number
+                            if add > object_record.max_stack:
+                                add = object_record.max_stack
+
+                            # add a new object to the inventory
+                            await add_new_object(object_key, level, add, object_record.element_type, object_record.can_remove)
+
                             number -= add
                             accepted += add
-                        else:
-                            reject = _("Can not get more %s.") % object_record.name
-                    else:
-                        # Get the number that actually added.
-                        add = number
-                        if add > object_record.max_stack:
-                            add = object_record.max_stack
-
-                        # add a new object to the inventory
-                        await add_new_object(object_key, level, add, object_record.element_type, object_record.can_remove)
-
-                        number -= add
-                        accepted += add
                 else:
                     # not unique object
                     # if already has this kind of object

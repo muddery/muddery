@@ -196,7 +196,8 @@ class BaseCombat(object):
             return False
 
         await asyncio.wait([
-            char["char"].check_alive() for char in self.characters.values()if char["status"] == CStatus.ACTIVE
+            asyncio.create_task(char["char"].check_alive())
+            for char in self.characters.values() if char["status"] == CStatus.ACTIVE
         ])
 
         teams = set()

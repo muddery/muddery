@@ -92,9 +92,9 @@ class MudderyRoom(ELEMENT("MATTER")):
 
         # Load exits, objects and NPCs.
         await asyncio.wait([
-            self.load_exits(),
-            self.load_objects(),
-            self.load_npcs(),
+            asyncio.create_task(self.load_exits()),
+            asyncio.create_task(self.load_objects()),
+            asyncio.create_task(self.load_npcs()),
         ])
 
     async def load_npcs(self):
@@ -116,7 +116,9 @@ class MudderyRoom(ELEMENT("MATTER")):
                 new_obj = ELEMENT(tables_data.element_type)()
                 self.all_characters[new_obj.get_id()] = new_obj
 
-                awaits.append(new_obj.setup_element(tables_data.key, level=tables_data.level, first_time=True))
+                awaits.append(asyncio.create_task(new_obj.setup_element(tables_data.key,
+                                                                        level=tables_data.level,
+                                                                        first_time=True)))
 
             if awaits:
                 await asyncio.wait(awaits)
@@ -148,7 +150,7 @@ class MudderyRoom(ELEMENT("MATTER")):
                     "obj": new_obj,
                 }
 
-                awaits.append(new_obj.setup_element(tables_data.key))
+                awaits.append(asyncio.create_task(new_obj.setup_element(tables_data.key)))
 
             if awaits:
                 await asyncio.wait(awaits)
@@ -175,7 +177,7 @@ class MudderyRoom(ELEMENT("MATTER")):
                     "obj": new_obj,
                 }
 
-                awaits.append(new_obj.setup_element(record.key))
+                awaits.append(asyncio.create_task(new_obj.setup_element(record.key)))
 
             if awaits:
                 await asyncio.wait(awaits)
@@ -245,7 +247,7 @@ class MudderyRoom(ELEMENT("MATTER")):
             chars = self.all_characters.values()
 
         if chars:
-            await asyncio.wait([char.msg(msg) for char in chars])
+            await asyncio.wait([asyncio.create_task(char.msg(msg)) for char in chars])
 
     async def at_character_arrive(self, character):
         """

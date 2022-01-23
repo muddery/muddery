@@ -78,7 +78,7 @@ class MudderyArea(ELEMENT("MATTER")):
             self.all_rooms[record.key] = new_obj
 
         if self.all_rooms:
-            await asyncio.wait([obj.setup_element(key) for key, obj in self.all_rooms.items()])
+            await asyncio.wait([asyncio.create_task(obj.setup_element(key)) for key, obj in self.all_rooms.items()])
 
     def get_rooms_key(self):
         """
