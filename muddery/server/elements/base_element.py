@@ -159,9 +159,7 @@ class BaseElement(object):
         self.is_temp = temp
 
         await self.load_data(element_key, level)
-
         await self.at_element_setup(first_time)
-
         await self.after_element_setup(first_time)
 
     async def load_data(self, element_key, level=None):

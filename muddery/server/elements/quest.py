@@ -18,6 +18,7 @@ from muddery.server.database.worlddata.loot_list import QuestRewardList
 from muddery.server.database.worlddata.quest_objectives import QuestObjectives
 from muddery.server.mappings.element_set import ELEMENT
 from muddery.server.elements.base_element import BaseElement
+from muddery.server.utils.utils import async_gather, async_wait
 
 
 class MudderyQuest(BaseElement):
@@ -75,13 +76,17 @@ class MudderyQuest(BaseElement):
         Get return messages for the client.
         """
         # Get name, description and available commands.
+        cmds, objectives = await async_gather([
+            self.get_available_commands(),
+            self.return_objectives(),
+        ])
         info = {
             "key": self.const.key,
             "name": self.const.name,
             "desc": self.const.desc,
-            "cmds": await self.get_available_commands(),
+            "cmds": cmds,
             "icon": getattr(self, "icon", None),
-            "objectives": await self.return_objectives(),
+            "objectives": objectives,
         }
         return info
 
@@ -242,31 +247,36 @@ class MudderyQuest(BaseElement):
             return
 
         # get rewards
-        obj_list = await self.loot_handler.get_obj_list(caller)
-        if obj_list:
+        receive_list = await self.loot_handler.get_obj_list(caller)
+
+        awaits = []
+        if receive_list:
             # give objects to winner
-            await caller.receive_objects(obj_list)
+            awaits.append(caller.receive_objects(receive_list))
 
         # get exp
         exp = self.const.exp
         if exp:
-            await caller.add_exp(exp)
+            awaits.append(caller.add_exp(exp))
 
         # do quest's action
         action = self.const.action
         if action:
-            await STATEMENT_HANDLER.do_action(action, caller, None)
+            awaits.append(STATEMENT_HANDLER.do_action(action, caller, None))
 
         # remove objective objects
-        obj_list = []
+        remove_list = []
         for item in self.objectives.values():
             if item["type"] == defines.OBJECTIVE_OBJECT:
-                obj_list.append({
+                remove_list.append({
                     "object_key": item["object"],
                     "number": item["number"]
                 })
-        if obj_list:
-            await caller.remove_objects_by_list(obj_list)
+        if remove_list:
+            await caller.remove_objects_by_list(remove_list)
+
+        if awaits:
+            await async_wait(awaits)
 
         # remove quest objectives records
         await CharacterQuestObjectives.inst().remove(

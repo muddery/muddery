@@ -17,8 +17,8 @@ The life of a combat:
 from enum import Enum
 import time
 import datetime
-import asyncio
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from muddery.server.utils.utils import async_wait, async_gather
 from muddery.server.utils.logger import logger
 from muddery.server.utils import defines
 from muddery.server.database.worlddata.worlddata import WorldData
@@ -109,14 +109,12 @@ class BaseCombat(object):
                 }
 
         # Set combat to characters.
-        for char in self.characters.values():
-            character = char["char"]
+        if self.characters:
+            await async_wait([c["char"].join_combat(combat_id) for c in self.characters.values()])
 
-            # add the combat handler
-            await character.join_combat(combat_id)
-
-            if character.is_player():
-                await self.show_combat(character)
+            awaits = [self.show_combat(c["char"]) for c in self.characters.values() if c["char"].is_player()]
+            if awaits:
+                await async_wait(awaits)
 
     def start(self):
         """
@@ -195,10 +193,9 @@ class BaseCombat(object):
         if not len(self.characters):
             return False
 
-        await asyncio.wait([
-            asyncio.create_task(char["char"].check_alive())
-            for char in self.characters.values() if char["status"] == CStatus.ACTIVE
-        ])
+        awaits = [c["char"].check_alive() for c in self.characters.values() if c["status"] == CStatus.ACTIVE]
+        if awaits:
+            await async_wait(awaits)
 
         teams = set()
         for char in self.characters.values():
@@ -266,30 +263,34 @@ class BaseCombat(object):
 
         if all_player_left:
             # There is no player character in combat.
+            awaits = []
             for char in self.characters.values():
                 if char["status"] != CStatus.LEFT:
                     char["status"] = CStatus.LEFT
-                    try:
-                        await char["char"].remove_from_combat()
-                    except Exception as e:
-                        logger.log_err("Leave combat error: %s" % e)
+                    awaits.append(char["char"].remove_from_combat())
+
+            if awaits:
+                try:
+                    await async_wait(awaits)
+                except Exception as e:
+                    logger.log_err("Leave combat error: %s" % e)
 
             self.stop()
 
-    async def msg_all(self, message):
+    async def msg_all(self, message: str) -> None:
         "Send message to all combatants"
-        for char in self.characters.values():
-            await char["char"].msg(message)
+        if self.characters:
+            await async_wait([c["char"].msg(message) for c in self.characters.values()])
 
-    async def set_combat_draw(self):
+    async def set_combat_draw(self) -> None:
         """
         Called when the combat ended in a draw.
 
         Returns:
             None.
         """
-        for char in self.characters.values():
-            await char["char"].combat_result(self.combat_type, defines.COMBAT_DRAW)
+        if self.characters:
+            await async_wait([c["char"].combat_result(self.combat_type, defines.COMBAT_DRAW) for c in self.characters.values()])
 
     async def calc_winners(self):
         """
@@ -320,21 +321,29 @@ class BaseCombat(object):
             (dict) reward dict
         """
         rewards = {}
+        if not winners or not losers:
+            return rewards
+
+        exp_list = []
+        loot_list = []
         for winner_id, winner_char in winners.items():
-            exp = 0
-            loots = []
-            for loser in losers:
-                loser_char = self.characters[loser]["char"]
-                exp += loser_char.provide_exp(self)
-                obj_list = await loser_char.loot_handler.get_obj_list(winner_char)
-                if obj_list:
-                    loots.extend(obj_list)
+            # Get exps from every losers.
+            exps = [self.characters[loser]["char"].provide_exp(self) for loser in losers]
+            exp_list.append(exps)
 
+            # Get loot tasks from every losers.
+            loot_awaits = [self.characters[loser]["char"].loot_handler.get_obj_list(winner_char) for loser in losers]
+            loot_list.append(loot_awaits)
+
+        # Calculate all loots.
+        loot_results = await async_gather([async_gather(char_loot) for char_loot in loot_list])
+
+        common_models = ELEMENT("COMMON_OBJECT").get_models()
+
+        for index, winner_id in enumerate(winners.keys()):
             obj_list = []
-            if loots:
-                common_models = ELEMENT("COMMON_OBJECT").get_models()
-
-                for obj_info in loots:
+            for loot_list in loot_results[index]:
+                for obj_info in loot_list:
                     try:
                         table_data = WorldData.get_tables_data(common_models, key=obj_info["object_key"])
                         table_data = table_data[0]
@@ -352,7 +361,7 @@ class BaseCombat(object):
                         pass
 
             rewards[winner_id] = {
-                "exp": exp,
+                "exp": sum(exp_list[index]),
                 "loots": obj_list,
             }
 
@@ -375,11 +384,13 @@ class BaseCombat(object):
         Returns:
             None
         """
-        for char_id, char in winners.items():
-            await char.combat_result(self.combat_type, defines.COMBAT_WIN, losers.values(), self.get_combat_rewards(char_id))
+        winner_awaits = [char.combat_result(self.combat_type, defines.COMBAT_WIN, losers.values(), self.get_combat_rewards(char_id))
+                         for char_id, char in winners.items()]
+        loser_awaits = [char.combat_result(self.combat_type, defines.COMBAT_LOSE, winners.values())
+                        for char_id, char in losers.items()]
 
-        for char_id, char in losers.items():
-            await char.combat_result(self.combat_type, defines.COMBAT_LOSE, winners.values())
+        if winner_awaits or loser_awaits:
+            await async_wait(winner_awaits + loser_awaits)
 
     def get_appearance(self):
         """
@@ -404,9 +415,12 @@ class BaseCombat(object):
         Get characters status.
         :return:
         """
-        chars = self.characters.keys()
-        status = await asyncio.gather(*[char["char"].get_combat_status() for char in self.characters.values()])
-        return dict(zip(chars, status))
+        if self.characters:
+            chars = self.characters.keys()
+            status = await async_gather([char["char"].get_combat_status() for char in self.characters.values()])
+            return dict(zip(chars, status))
+        else:
+            return {}
 
     def get_combat_characters(self):
         """

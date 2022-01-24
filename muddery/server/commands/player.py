@@ -150,6 +150,7 @@ class CmdPuppet(BaseCommand):
         except Exception as e:
             traceback.print_exc()
             await account.msg({"alert": _("That is not a valid character choice.")})
+            return
 
 
 class CmdPuppetName(BaseCommand):
@@ -197,6 +198,7 @@ class CmdPuppetName(BaseCommand):
         except Exception as e:
             traceback.print_exc()
             await account.msg({"alert": _("That is not a valid character choice.")})
+            return
 
 
 class CmdUnpuppet(BaseCommand):
@@ -223,8 +225,10 @@ class CmdUnpuppet(BaseCommand):
             await account.msg({"unpuppet": True})
         except RuntimeError as e:
             await account.msg({"alert":_("Could not unpuppet: %s" % e)})
+            return
         except Exception as e:
             logger.log_err("Could not unpuppet: %s" % e)
+            return
 
 
 class CmdCharCreate(BaseCommand):

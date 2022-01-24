@@ -27,19 +27,8 @@ MudderyMapData.prototype = {
 
     setData: function(data) {
         // set map data
-        this._map_rooms = data.rooms;
-        this._map_exits = data.exits;
-
-        for (var exit in data.exits) {
-            var location = data.exits[exit]["from"];
-            var destination = data.exits[exit]["to"];
-            if (location in this._map_paths) {
-                this._map_paths[location].push(destination);
-            }
-            else {
-                this._map_paths[location] = [destination];
-            }
-        }
+        this.clearData();
+        this.revealMap(data);
     },
 
     setCurrentLocation: function(location) {
@@ -48,25 +37,28 @@ MudderyMapData.prototype = {
 
     revealMap: function(data) {
         // add data to map
-        if (!data) {
-            return;
-        }
+        for (var area in data) {
+            var rooms = data[area];
 
-        if ("rooms" in data) {
-            // add rooms
-            for (var room in data.rooms) {
-                this._map_rooms[room] = data.rooms[room];
+            // Add room.
+            for (var room_key in rooms) {
+                rooms[room_key]["area"] = area;
             }
-        }
+            this._map_rooms = Object.assign(this._map_rooms, rooms);
 
-        if ("exits" in data) {
-            for (var exit in data.exits) {
-                // add exits
-                this._map_exits[exit] = data.exits[exit];
+            // Add exits.
+            var new_exits = {};
+            for (var room_key in rooms) {
+                var exits = rooms[room_key]["exits"];
+                for (var exit_key in exits) {
+                    this._map_exits[exit_key] = exits[exit_key];
+                    new_exits[exit_key] = exits[exit_key];
+                }
+            }
 
-                // add paths
-                var location = data.exits[exit]["from"];
-                var destination = data.exits[exit]["to"];
+            for (var exit_key in new_exits) {
+                var location = new_exits[exit_key]["from"];
+                var destination = new_exits[exit_key]["to"];
                 if (location in this._map_paths) {
                     this._map_paths[location].push(destination);
                 }

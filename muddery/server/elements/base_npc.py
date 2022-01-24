@@ -17,6 +17,7 @@ from muddery.server.database.worlddata.npc_shops import NPCShops
 from muddery.server.database.worlddata.worlddata import WorldData
 from muddery.server.utils import defines
 from muddery.server.utils.localized_strings_handler import _
+from muddery.server.utils.utils import async_gather
 
 
 class MudderyBaseNPC(ELEMENT("CHARACTER")):
@@ -29,6 +30,11 @@ class MudderyBaseNPC(ELEMENT("CHARACTER")):
     element_type = "BASE_NPC"
     element_name = "Base None Player Character"
     model_name = ""
+
+    def __init__(self, *agrs, **wargs):
+        super(MudderyBaseNPC, self).__init__(*agrs, **wargs)
+
+        self.shops = {}
 
     async def at_element_setup(self, first_time):
         """
@@ -64,19 +70,26 @@ class MudderyBaseNPC(ELEMENT("CHARACTER")):
         base_model = ELEMENT("SHOP").get_base_model()
 
         # NPC's shop
-        self.shops = {}
-        for key in shop_keys:
-            try:
-                table_data = WorldData.get_table_data(base_model, key=key)
-                table_data = table_data[0]
+        if shop_keys:
+            shops = await async_gather([self.create_shop(base_model, key) for key in shop_keys])
+            self.shops = dict(zip(shop_keys, shops))
 
-                shop = ELEMENT(table_data.element_type)()
-                await shop.setup_element(key)
-                shop.set_owner(self)
-                self.shops[key] = shop
-            except Exception as e:
-                logger.log_err("Can not create shop %s: (%s)%s" % (key, type(e).__name__, e))
-                continue
+    async def create_shop(self, base_model, shop_key):
+        """
+        Create a shop.
+        """
+        try:
+            table_data = WorldData.get_table_data(base_model, key=shop_key)
+            table_data = table_data[0]
+
+            shop = ELEMENT(table_data.element_type)()
+            await shop.setup_element(shop_key)
+            shop.set_owner(self)
+        except Exception as e:
+            logger.log_err("Can not create shop %s: (%s)%s" % (shop_key, type(e).__name__, e))
+            return
+
+        return shop
 
     async def get_shop_info(self, shop_key, caller):
         """
@@ -124,19 +137,22 @@ class MudderyBaseNPC(ELEMENT("CHARACTER")):
                     commands.append({"name": _("Talk"), "cmd": "talk", "args": self.get_id()})
 
                 # Add shops.
-                for key, obj in self.shops.items():
-                    if not await obj.is_available(caller):
-                        continue
+                if self.shops:
+                    available_shops = await async_gather([obj.is_available(caller) for obj in self.shops.values()])
+                    for index, key in enumerate(self.shops.keys()):
+                        if not available_shops[index]:
+                            continue
 
-                    verb = obj.get_verb()
-                    commands.append({
-                        "name": verb,
-                        "cmd": "shopping",
-                        "args": {
-                            "npc": self.get_id(),
-                            "shop": obj.get_element_key(),
-                        }
-                    })
+                        obj = self.shops[key]
+                        verb = obj.get_verb()
+                        commands.append({
+                            "name": verb,
+                            "cmd": "shopping",
+                            "args": {
+                                "npc": self.get_id(),
+                                "shop": obj.get_element_key(),
+                            }
+                        })
 
         return commands
 

@@ -108,11 +108,6 @@ MudderyService.prototype = {
     unpuppetCharacter: function() {
         this.sendCommand("unpuppet");
     },
-    
-    // look
-    look: function(odj_id) {
-        this.sendCommand("look", odj_id);
-    },
 
     inventoryObject: function(position) {
         this.sendCommand("inventory_obj", position);

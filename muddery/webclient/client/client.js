@@ -181,9 +181,9 @@ MudderyClient.prototype = {
                         mud.conversation_window.getMessage(data[key]);
                     } else if (key == "current_location") {
                         core.map_data.setCurrentLocation(data[key]);
-                    } else if (key == "reveal_map") {
-                        core.map_data.revealMap(data[key]);
-                    } else if (key == "revealed_map") {
+                    } else if (key == "area_map") {
+                        core.map_data.revealArea(data[key]);
+                    } else if (key == "revealed_areas") {
                         core.map_data.setData(data[key]);
                     } else if (key == "shop") {
                         mud.game_window.showShop(data[key]);

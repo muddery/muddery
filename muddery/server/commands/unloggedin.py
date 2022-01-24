@@ -193,7 +193,6 @@ class CmdCreateAccount(BaseCommand):
                 await session.msg({"alert": str(e)})
             else:
                 await session.msg({"alert": _("There was an error creating the Player: %s" % e)})
-
             return None
 
         if connect:

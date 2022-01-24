@@ -4,6 +4,7 @@ Combat handler.
 
 from muddery.server.combat.combat_runner.base_combat import BaseCombat, CStatus
 from muddery.server.utils.honours_handler import HONOURS_HANDLER
+from muddery.server.utils.utils import async_wait
 
 
 class HonourCombat(BaseCombat):
@@ -75,9 +76,9 @@ class HonourCombat(BaseCombat):
                 rewards[char_id] = {}
             rewards[char_id]["honour"] = honour_changes[char_id] if char_id in honour_changes else 0
 
-        for char in self.characters.values():
-            character = char["char"]
-            await character.show_rankings()
-            await character.show_status()
+        if self.characters:
+            rankings_awaits = [c["char"].show_rankings() for c in self.characters.values()]
+            status_awaits = [c["char"].show_status() for c in self.characters.values()]
+            await async_wait(rankings_awaits + status_awaits)
 
         return rewards

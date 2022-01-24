@@ -7,7 +7,7 @@ is setup to be the "default" character type created by the default
 creation commands.
 
 """
-import asyncio
+
 import time, datetime, traceback, ast
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from muddery.server.settings import SETTINGS
@@ -27,6 +27,7 @@ from muddery.server.utils.object_states_handler import ObjectStatesHandler
 from muddery.server.utils.utils import class_from_path
 from muddery.server.database.gamedata.object_storage import MemoryObjectStorage
 from muddery.server.server import Server
+from muddery.server.utils.utils import async_gather
 
 
 CHARACTER_LAST_ID = 0
@@ -177,8 +178,14 @@ class MudderyCharacter(ELEMENT("MATTER")):
         # set states
         to_save = {}
         records = CharacterStatesDict.all()
-        for record in records:
-            if keep_states and await self.states.has(record.key):
+
+        if keep_states and records:
+            has_status = await async_gather([self.states.has(record.key) for record in records])
+        else:
+            has_status = []
+
+        for index, record in enumerate(records):
+            if keep_states and has_status[index]:
                 # Do not change existent states.
                 continue
 
@@ -270,22 +277,31 @@ class MudderyCharacter(ELEMENT("MATTER")):
 
         # default skills
         default_skills = DefaultSkills.get(self.get_element_key())
-
-        for item in default_skills:
-            key = item.skill
-            try:
-                # Create skill object.
-                skill_obj = ELEMENT("SKILL")()
-                await skill_obj.setup_element(key, item.level)
-            except Exception as e:
-                logger.log_err("Can not load skill %s: (%s) %s" % (key, type(e).__name__, e))
-                continue
-
+        for index, item in enumerate(default_skills):
             # Store new skill.
-            self.skills[key] = {
-                "obj": skill_obj,
+            self.skills[item.skill] = {
+                "level": item.level,
                 "cd_finish": 0,
             }
+
+        if self.skills:
+            skills = await async_gather([self.create_skill(key, item["level"]) for key, item in self.skills.items()])
+            for index, item in enumerate(self.skills.values()):
+                item["obj"] = skills[index]
+
+    async def create_skill(self, skill_key, level):
+        """
+        Create a skill object.
+        """
+        try:
+            # Create skill object.
+            skill_obj = ELEMENT("SKILL")()
+            await skill_obj.setup_element(skill_key, level)
+        except Exception as e:
+            logger.log_err("Can not load skill %s: (%s) %s" % (skill_key, type(e).__name__, e))
+            return
+
+        return skill_obj
 
     def set_location(self, location):
         """
@@ -347,8 +363,11 @@ class MudderyCharacter(ELEMENT("MATTER")):
         if time_now < self.gcd_finish_time:
             return
 
-        skills = [skill["obj"] for skill in self.skills.values() if time_now >= skill["cd_finish"] and
-                  await skill["obj"].is_available(self, passive=False)]
+        skills = []
+        if self.skills:
+            available = await async_gather([s["obj"].is_available(self, passive=False) for s in self.skills.values()])
+            skills = [s["obj"] for i, s in enumerate(self.skills.values()) if time_now >= s["cd_finish"] and available[i]]
+
         return skills
 
     def get_skill(self, key):
@@ -854,13 +873,20 @@ class MudderyCharacter(ELEMENT("MATTER")):
         """
         changes = {}
 
+        new_values = {}
         for key, increment in increments.items():
             changes[key] = 0
 
             if self.const_data_handler.has(key):
                 current_value = self.const_data_handler.get(key)
-                new_value = await self.validate_property(key, current_value + increment)
-                changes[key] = new_value - current_value
+                new_values[key] = current_value + increment
+
+        # Get validated values
+        if new_values:
+            validated_values = await async_gather([self.validate_property(key, value) for key, value in new_values.items()])
+            for index, key in enumerate(new_values):
+                new_value = validated_values[index]
+                changes[key] = new_value
                 self.const_data_handler.add(key, new_value)
 
         return changes

@@ -46,39 +46,6 @@ class MudderyStaffCharacter(ELEMENT("PLAYER_CHARACTER")):
         """
         return True
 
-    async def at_post_puppet(self):
-        """
-        Called just after puppeting has been completed and all
-        Player<->Object links have been established.
-
-        """
-        self.available_channels = await self.get_available_channels()
-
-        # Send puppet info to the client first.
-        output = {
-            "id": self.get_id(),
-            "name": self.get_name(),
-            "is_staff": self.is_staff(),
-            "icon": getattr(self, "icon", None),
-            "allow_commands": True,
-        }
-
-        await self.msg({"puppet": output})
-
-        # send character's data to player
-        message = {
-            "status": await self.return_status(),
-            "equipments": await self.return_equipments(),
-            "inventory": self.get_inventory_appearance(),
-            "skills": await self.return_skills(),
-            "quests": await self.quest_handler.return_quests(),
-            "revealed_map": await self.get_revealed_map(),
-            "channels": self.available_channels
-        }
-        await self.msg(message)
-
-        await self.show_location()
-
     def get_appearance(self):
         """
         he common appearance for all players.

@@ -27,7 +27,6 @@ class CharacterCmdSet(CommandSet):
         # any commands you add below will overload the default ones.
         #
 
-        cls.add(general.CmdLook())
         cls.add(general.CmdInventoryObject())
         cls.add(general.CmdEquipmentsObject())
         cls.add(general.CmdLookRoomObj())

@@ -5,12 +5,12 @@ The DialogueHandler maintains a pool of dialogues.
 
 """
 
-import asyncio
 from muddery.server.mappings.element_set import ELEMENT
 from muddery.server.statements.statement_handler import STATEMENT_HANDLER
 from muddery.server.database.worlddata.shop_goods import ShopGoods
 from muddery.server.database.worlddata.worlddata import WorldData
 from muddery.server.elements.base_element import BaseElement
+from muddery.server.utils.utils import async_gather
 
 
 class MudderyShop(ELEMENT("MATTER")):
@@ -64,11 +64,16 @@ class MudderyShop(ELEMENT("MATTER")):
             caller (obj): the custom
         """
         info = await super(MudderyShop, self).get_detail_appearance()
-        is_available = await asyncio.gather(*[item.is_available(caller) for item in self.goods])
-        available_goods = [index for index in range(len(self.goods)) if is_available[index]]
-        goods_list = await asyncio.gather(*[self.goods[index].get_info(caller) for index in available_goods])
-        for index, item in enumerate(self.goods):
-            item["index"] = index
+
+        goods_list = []
+        if self.goods:
+            is_available = await async_gather([item.is_available(caller) for item in self.goods])
+            available_goods = [index for index in range(len(self.goods)) if is_available[index]]
+
+            if available_goods:
+                goods_list = await async_gather([self.goods[index].get_info(caller) for index in available_goods])
+                for index, item in enumerate(self.goods):
+                    item["index"] = index
 
         info["goods"] = goods_list
         return info

@@ -1,9 +1,10 @@
 """
 General Character commands usually availabe to all characters
 """
-import traceback
 
+import traceback
 from muddery.server.utils.logger import logger
+from muddery.server.utils.utils import async_wait
 from muddery.server.commands.base_command import BaseCommand
 from muddery.server.utils.localized_strings_handler import _
 from muddery.server.utils.exception import MudderyError
@@ -12,54 +13,6 @@ from muddery.server.combat.combat_handler import COMBAT_HANDLER
 from muddery.server.combat.match_pvp import MatchPVPHandler
 from muddery.server.database.worlddata.honour_settings import HonourSettings
 from muddery.server.server import Server
-
-
-class CmdLook(BaseCommand):
-    """
-    look around
-
-    Usage:
-        {
-            "cmd":"look",
-        }
-
-    Observes your location or objects in your vicinity.
-    """
-    key = "look"
-
-    @classmethod
-    async def func(cls, caller, args):
-        """
-        Handle the looking.
-        """
-        if not caller.is_alive:
-            await caller.msg({"alert": _("You are died.")})
-            return
-
-        # Observes the caller's location
-        looking_at_obj = caller.location
-        if not looking_at_obj:
-            await caller.msg({"msg": _("You have nothing to look at!")})
-            return
-
-        # Clear caller's target.
-        await caller.show_location()
-
-        combat = await caller.get_combat()
-        if combat:
-            # If the caller is in combat, add combat info.
-            # This happens when a player is in combat and he logout and login again.
-
-            # Send "joined_combat" message first. It will set the player to combat status.
-            await caller.msg({"joined_combat": True})
-
-            # Send combat infos.
-            appearance = combat.get_appearance()
-            message = {
-                "combat_info": appearance,
-                "combat_commands": caller.get_combat_commands(),
-            }
-            await caller.msg(message)
 
 
 class CmdInventory(BaseCommand):
@@ -407,8 +360,7 @@ class CmdLoot(BaseCommand):
         except Exception as e:
             ostring = "Can not loot %s: %s" % (obj.get_element_key(), e)
             logger.log_trace(ostring)
-            
-        await caller.show_location()
+            return
 
 
 #------------------------------------------------------------
@@ -444,7 +396,6 @@ class CmdUse(BaseCommand):
         try:
             # Use the object and get the result.
             result = await caller.use_object(int(position))
-            await caller.show_location()
         except Exception as e:
             ostring = "Can not use %s: %s" % (args, e)
             logger.log_trace(ostring)
@@ -491,7 +442,6 @@ class CmdDiscard(BaseCommand):
         # remove object
         try:
             await caller.remove_all_objects_by_position(int(position))
-            await caller.show_location()
         except Exception as e:
             # If the caller does not have this object.
             await caller.msg({"alert": _("Can not discard this object.")})
@@ -730,8 +680,10 @@ class CmdAttack(BaseCommand):
             await caller.msg({"alert": _("You can not attack %s.") % target.get_name()})
             return
 
-        await caller.msg(_("You are attacking {R%s{n! You are in combat.") % target.get_name())
-        await target.msg(_("{R%s{n is attacking you! You are in combat.") % caller.get_name())
+        await async_wait([
+            caller.msg(_("You are attacking {R%s{n! You are in combat.") % target.get_name()),
+            target.msg(_("{R%s{n is attacking you! You are in combat.") % caller.get_name()),
+        ])
 
 
 # ------------------------------------------------------------
@@ -1058,6 +1010,7 @@ class CmdQueryQuest(BaseCommand):
             await caller.msg({"quest_info": await caller.get_quest_info(quest_key)})
         except Exception as e:
             logger.log_err("Can not get %s's quest %s." % (caller.id, quest_key))
+            return
 
 
 class CmdQuerySkill(BaseCommand):
@@ -1091,6 +1044,7 @@ class CmdQuerySkill(BaseCommand):
             await caller.msg({"skill_info": await caller.get_skill_info(skill_key)})
         except Exception as e:
             logger.log_err("Can not get %s's skill %s." % (caller.id, skill_key))
+            return
 
 
 #------------------------------------------------------------

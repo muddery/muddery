@@ -18,6 +18,7 @@ from muddery.server.utils.defines import ConversationType, EventType
 from muddery.server.utils.localized_strings_handler import _
 from muddery.server.database.worlddata.worlddata import WorldData
 from muddery.server.elements.base_element import BaseElement
+from muddery.server.utils.utils import async_wait
 
 
 class MudderyRoom(ELEMENT("MATTER")):
@@ -91,10 +92,10 @@ class MudderyRoom(ELEMENT("MATTER")):
                 logger.log_trace("Load background %s error: %s" % (resource, e))
 
         # Load exits, objects and NPCs.
-        await asyncio.wait([
-            asyncio.create_task(self.load_exits()),
-            asyncio.create_task(self.load_objects()),
-            asyncio.create_task(self.load_npcs()),
+        await async_wait([
+            self.load_exits(),
+            self.load_objects(),
+            self.load_npcs(),
         ])
 
     async def load_npcs(self):
@@ -107,25 +108,22 @@ class MudderyRoom(ELEMENT("MATTER")):
         models = ELEMENT("WORLD_NPC").get_models()
 
         self.all_characters = {}
-        if records:
-            awaits = []
-            for record in records:
-                tables_data = WorldData.get_tables_data(models, record.key)
-                tables_data = tables_data[0]
+        awaits = []
+        for record in records:
+            tables_data = WorldData.get_tables_data(models, record.key)
+            tables_data = tables_data[0]
 
-                new_obj = ELEMENT(tables_data.element_type)()
-                self.all_characters[new_obj.get_id()] = new_obj
+            new_obj = ELEMENT(tables_data.element_type)()
+            self.all_characters[new_obj.get_id()] = new_obj
 
-                awaits.append(asyncio.create_task(new_obj.setup_element(tables_data.key,
-                                                                        level=tables_data.level,
-                                                                        first_time=True)))
+            awaits.append(new_obj.setup_element(tables_data.key, level=tables_data.level, first_time=True))
 
-            if awaits:
-                await asyncio.wait(awaits)
+        if awaits:
+            await async_wait(awaits)
 
-            # Set the character's location.
-            for obj in self.all_characters.values():
-                obj.set_location(self)
+        # Set the character's location.
+        for obj in self.all_characters.values():
+            obj.set_location(self)
 
     async def load_exits(self):
         """
@@ -137,23 +135,19 @@ class MudderyRoom(ELEMENT("MATTER")):
         models = ELEMENT("EXIT").get_models()
 
         self.all_exits = {}
-        if records:
-            awaits = []
-            for record in records:
-                tables_data = WorldData.get_tables_data(models, record.key)
-                tables_data = tables_data[0]
+        for record in records:
+            tables_data = WorldData.get_tables_data(models, record.key)
+            tables_data = tables_data[0]
 
-                new_obj = ELEMENT(tables_data.element_type)()
-                self.all_exits[record.key] = {
-                    "destination": tables_data.destination,
-                    "verb": tables_data.verb,
-                    "obj": new_obj,
-                }
+            new_obj = ELEMENT(tables_data.element_type)()
+            self.all_exits[record.key] = {
+                "destination": tables_data.destination,
+                "verb": tables_data.verb,
+                "obj": new_obj,
+            }
 
-                awaits.append(asyncio.create_task(new_obj.setup_element(tables_data.key)))
-
-            if awaits:
-                await asyncio.wait(awaits)
+        if self.all_exits:
+            await async_wait([char["obj"].setup_element(key) for key, char in self.all_exits.items()])
 
     async def load_objects(self):
         """
@@ -165,22 +159,18 @@ class MudderyRoom(ELEMENT("MATTER")):
         models = ELEMENT("WORLD_OBJECT").get_models()
 
         self.all_objects = {}
-        if records:
-            awaits = []
-            for record in records:
-                tables_data = WorldData.get_tables_data(models, record.key)
-                tables_data = tables_data[0]
+        for record in records:
+            tables_data = WorldData.get_tables_data(models, record.key)
+            tables_data = tables_data[0]
 
-                new_obj = ELEMENT(tables_data.element_type)()
+            new_obj = ELEMENT(tables_data.element_type)()
 
-                self.all_objects[record.key] = {
-                    "obj": new_obj,
-                }
+            self.all_objects[record.key] = {
+                "obj": new_obj,
+            }
 
-                awaits.append(asyncio.create_task(new_obj.setup_element(record.key)))
-
-            if awaits:
-                await asyncio.wait(awaits)
+        if self.all_objects:
+            await async_wait([obj["obj"].setup_element(key) for key, obj in self.all_objects.items()])
 
     def get_character(self, char_id):
         """

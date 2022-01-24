@@ -7,6 +7,7 @@ be of use when designing your own game.
 """
 
 import os, re, inspect
+import asyncio
 import importlib
 from pkgutil import iter_modules
 from muddery.server.settings import SETTINGS
@@ -260,3 +261,11 @@ def get_module_path(path):
         return root + "." + name
     else:
         return name
+
+
+async def async_wait(coros: list):
+    return await asyncio.wait([asyncio.create_task(c) for c in coros])
+
+
+async def async_gather(coros: list):
+    return await asyncio.gather(*coros)

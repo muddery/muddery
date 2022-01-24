@@ -12,6 +12,7 @@ from muddery.server.database.worlddata.dialogue_relations import DialogueRelatio
 from muddery.server.database.worlddata.dialogue_quests import DialogueQuests
 from muddery.server.elements.base_element import BaseElement
 from muddery.server.mappings.quest_status_set import QUEST_STATUS_SET
+from muddery.server.utils.utils import async_gather
 
 
 class MudderyDialogue(BaseElement):
@@ -81,12 +82,16 @@ class MudderyDialogue(BaseElement):
         :param npc:
         :return:
         """
-        for dep in self.dependencies:
-            status = QUEST_STATUS_SET.get(dep["type"])
-            if not await status.match(caller, dep["quest"]):
-                return False
+        statuses = [QUEST_STATUS_SET.get(dep["type"]) for dep in self.dependencies]
+        quests = [dep["quest"] for dep in self.dependencies]
+        awaits = [status.match(caller, quest) for status, quest in zip(statuses, quests)]
+        if awaits:
+            matches = await async_gather(awaits)
 
-        return True
+            # If there is a False in matches, it will return False, else return True.
+            return min(matches)
+        else:
+            return True
 
     async def can_finish_quest(self, caller):
         """
@@ -95,11 +100,13 @@ class MudderyDialogue(BaseElement):
         :param caller: the dialogue's caller
         :return:
         """
-        for quest_key in self.finish_quest:
-            if await caller.quest_handler.is_accomplished(quest_key):
-                return True
+        if self.finish_quest:
+            can_finish = await async_gather([caller.quest_handler.is_accomplished(key) for key in self.finish_quest])
 
-        return False
+            # If there is a True in can_finish, it will return True, else return False.
+            return max(can_finish)
+        else:
+            return False
 
     async def can_provide_quest(self, caller):
         """
@@ -108,11 +115,13 @@ class MudderyDialogue(BaseElement):
         :param caller: the dialogue's caller
         :return:
         """
-        for quest_key in self.provide_quest:
-            if await caller.quest_handler.can_provide(quest_key):
-                return True
+        if self.provide_quest:
+            can_provide = await async_gather([caller.quest_handler.can_provide(key) for key in self.provide_quest])
 
-        return False
+            # If there is a True in can_finish, it will return True, else return False.
+            return max(can_provide)
+        else:
+            return False
 
     def get_next_dialogues(self):
         """

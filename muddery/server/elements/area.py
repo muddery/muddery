@@ -5,7 +5,7 @@ Areas are compose the whole map. Rooms are belongs to areas.
 
 """
 
-import asyncio
+from muddery.server.utils.utils import async_wait
 from muddery.server.utils.logger import logger
 from muddery.server.mappings.element_set import ELEMENT
 from muddery.server.database.worlddata.image_resource import ImageResource
@@ -78,7 +78,7 @@ class MudderyArea(ELEMENT("MATTER")):
             self.all_rooms[record.key] = new_obj
 
         if self.all_rooms:
-            await asyncio.wait([asyncio.create_task(obj.setup_element(key)) for key, obj in self.all_rooms.items()])
+            await async_wait([obj.setup_element(key) for key, obj in self.all_rooms.items()])
 
     def get_rooms_key(self):
         """
@@ -94,3 +94,33 @@ class MudderyArea(ELEMENT("MATTER")):
         :return:
         """
         return self.all_rooms[room_key]
+
+    def get_map(self):
+        """
+        Get all rooms and exits' positions in this area.
+
+        {
+            room's key: {
+                "name": name,
+                "icon": icon,
+                "pos": position,
+                "exits": {
+                    {
+                        exit's key:
+                            {
+                                "from": room's key,
+                                "to": room's key,
+                            },
+                    }
+            },
+        }
+        """
+
+        all_rooms = {key: {
+            "name": room.get_name(),
+            "icon": room.get_icon(),
+            "pos": room.position,
+            "exits": room.get_exits()
+        } for key, room in self.all_rooms.items()}
+
+        return all_rooms

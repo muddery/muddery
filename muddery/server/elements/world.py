@@ -11,6 +11,7 @@ from muddery.server.database.worlddata.world_channels import WorldChannels
 from muddery.server.database.worlddata.worlddata import WorldData
 from muddery.server.utils.defines import ConversationType
 from muddery.server.utils.utils import class_from_path
+from muddery.server.utils.utils import async_wait
 
 
 class MudderyWorld(BaseElement):
@@ -50,9 +51,11 @@ class MudderyWorld(BaseElement):
         :return:
         """
         # Load data.
-        await HonoursMapper.inst().init()
-        await self.load_channels()
-        await self.load_areas()
+        await async_wait([
+            HonoursMapper.inst().init(),
+            self.load_channels(),
+            self.load_areas(),
+        ])
         self.load_commands()
 
     async def load_channels(self):
@@ -61,16 +64,17 @@ class MudderyWorld(BaseElement):
         """
         records = WorldChannels.all()
         base_model = ELEMENT("CHANNEL").get_base_model()
-        self.all_channels = {}
 
+        self.all_channels = {}
         for record in records:
             table_data = WorldData.get_table_data(base_model, key=record.key)
             table_data = table_data[0]
 
             new_channel = ELEMENT(table_data.element_type)()
-            await new_channel.setup_element(record.key)
+            self.all_channels[record.key] = new_channel
 
-            self.all_channels[new_channel.get_element_key()] = new_channel
+        if self.all_characters:
+            await async_wait([channel.setup_element(key) for key, channel in self.all_characters])
 
     async def load_areas(self):
         """
@@ -89,13 +93,14 @@ class MudderyWorld(BaseElement):
             table_data = table_data[0]
 
             new_area = ELEMENT(table_data.element_type)()
-            await new_area.setup_element(record.key)
+            self.all_areas[record.key] = new_area
 
-            self.all_areas[new_area.get_element_key()] = new_area
+        if self.all_areas:
+            await async_wait([area.setup_element(key) for key, area in self.all_areas.items()])
 
-            rooms_key = new_area.get_rooms_key()
-            for key in rooms_key:
-                self.room_dict[key] = record.key
+        self.room_dict = {
+            room_key: area_key for area_key, area in self.all_areas.items() for room_key in area.get_rooms_key()
+        }
 
     def load_commands(self):
         """
@@ -109,6 +114,14 @@ class MudderyWorld(BaseElement):
 
         character_cmdset = class_from_path(SETTINGS.CHARACTER_CMDSET)
         character_cmdset.create()
+
+    def get_area(self, area_key):
+        """
+        Get a room by its key.
+        :param area_key:
+        :return:
+        """
+        return self.all_areas[area_key]
 
     def get_room(self, room_key):
         """
