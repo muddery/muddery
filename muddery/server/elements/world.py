@@ -132,6 +132,14 @@ class MudderyWorld(BaseElement):
         area_key = self.room_dict[room_key]
         return self.all_areas[area_key].get_room(room_key)
 
+    def get_area_key_by_room(self, room_key):
+        """
+        Get the room's area's key.
+        :param room_key:
+        :return:
+        """
+        return self.room_dict.get(room_key)
+
     def get_area_by_room(self, room_key):
         """
         Get the room's area.

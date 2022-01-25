@@ -33,9 +33,9 @@ class CharacterRelationships(BaseData, Singleton):
         element = "%s:%s" % (element_type, element_key)
         await self.storage.save(character_id, element, relationship)
 
-    async def add(self, character_id: int, element_type: str, element_key: str, value: int) -> None:
+    async def increase(self, character_id: int, element_type: str, element_key: str, value: int) -> None:
         """
-        Get the value of a relationship.
+        Increase the value of a relationship.
 
         Args:
             character_id: (int) character's id.

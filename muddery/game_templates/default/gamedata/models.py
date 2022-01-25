@@ -153,6 +153,15 @@ class character_relationships(BaseModels.character_relationships):
 
 # ------------------------------------------------------------
 #
+# closed events
+#
+# ------------------------------------------------------------
+class character_closed_events(BaseModels.character_closed_events):
+    pass
+
+
+# ------------------------------------------------------------
+#
 # The game's runtime data.
 #
 # ------------------------------------------------------------

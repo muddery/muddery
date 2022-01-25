@@ -3,6 +3,7 @@ Quest status.
 """
 
 from muddery.server.quests.base_quest_status import BaseQuestStatus
+from muddery.server.utils.utils import async_gather
 
 
 class NotAccepted(BaseQuestStatus):
@@ -19,6 +20,9 @@ class NotAccepted(BaseQuestStatus):
         if not caller:
             return False
 
-        return not await caller.quest_handler.is_finished(quest_key) and \
-               not await caller.quest_handler.is_in_progress(quest_key)
+        results = await async_gather([
+            caller.quest_handler.is_finished(quest_key),
+            caller.quest_handler.is_in_progress(quest_key),
+        ])
 
+        return not results[0] and not results[1]

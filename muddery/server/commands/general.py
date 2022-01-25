@@ -990,8 +990,6 @@ class CmdQueryQuest(BaseCommand):
                 "key": <quest's key>
             }
         }
-
-    Observes your location or objects in your vicinity.
     """
     key = "query_quest"
 
@@ -1024,8 +1022,6 @@ class CmdQuerySkill(BaseCommand):
                 "key": <skill's key>
             }
         }
-
-    Observes your location or objects in your vicinity.
     """
     key = "query_skill"
 
@@ -1045,6 +1041,33 @@ class CmdQuerySkill(BaseCommand):
         except Exception as e:
             logger.log_err("Can not get %s's skill %s." % (caller.id, skill_key))
             return
+
+
+class CmdQueryMaps(BaseCommand):
+    """
+    Query an area's map by a room's key
+
+    Usage:
+        {
+            "cmd": "query_maps",
+            "args": {
+                "rooms": (list) a list of room keys
+            }
+        }
+    """
+    key = "query_maps"
+
+    @classmethod
+    async def func(cls, caller, args):
+        """
+        Handle the looking.
+        """
+        if not args or "rooms" not in args:
+            await caller.msg({"alert": _("Can not find it.")})
+            return
+
+        room_list = args["rooms"]
+        await caller.msg({"reveal_maps": caller.get_maps(room_list)})
 
 
 #------------------------------------------------------------

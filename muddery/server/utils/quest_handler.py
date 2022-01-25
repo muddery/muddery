@@ -13,6 +13,7 @@ from muddery.server.database.worlddata.quest_dependencies import QuestDependenci
 from muddery.server.mappings.quest_status_set import QUEST_STATUS_SET
 from muddery.server.mappings.element_set import ELEMENT
 from muddery.server.database.gamedata.character_quests import CharacterQuests
+from muddery.server.utils.utils import async_wait, async_gather
 
 
 class QuestHandler(object):
@@ -39,9 +40,8 @@ class QuestHandler(object):
         :return:
         """
         self.quests = await CharacterQuests.inst().get_character(self.owner.get_db_id())
-        for key in self.quests:
-            if not self.quests[key]["finished"]:
-                await self.create_quest(key)
+        if self.quests:
+            await async_wait([self.create_quest(key) for key in self.quests if not self.quests[key]["finished"]])
 
     async def accept(self, quest_key):
         """
@@ -227,11 +227,15 @@ class QuestHandler(object):
         Returns:
             (boolean) result
         """
-        for dep in QuestDependencies.get(quest_key):
-            status = QUEST_STATUS_SET.get(dep.type)
-            if not await status.match(self.owner, dep.dependency):
-                return False
-        return True
+        dependencies = QuestDependencies.get(quest_key)
+        if dependencies:
+            results = await async_gather([
+                QUEST_STATUS_SET.get(dep.type).match(self.owner, dep.dependency) for dep in dependencies
+            ])
+        else:
+            return True
+
+        return min(results)
 
     async def match_condition(self, quest_key):
         """
@@ -266,15 +270,13 @@ class QuestHandler(object):
         """
         Get quests' data.
         """
-        quests_info = []
-
         all_quests = await CharacterQuests.inst().get_character(self.owner.get_db_id())
-        for quest_key, info in all_quests.items():
-            if info["finished"]:
-                continue
-
-            quest = await self.get_quest(quest_key)
-            quests_info.append(await quest.return_info())
+        not_finished = [key for key, info in all_quests.items() if not info["finished"]]
+        if not_finished:
+            quest_objects = await async_gather([self.get_quest(key) for key in not_finished])
+            quests_info = await async_gather([quest.return_info() for quest in quest_objects])
+        else:
+            quests_info = []
 
         return quests_info
 
@@ -292,17 +294,28 @@ class QuestHandler(object):
             None
         """
         status_changed = False
+
+        # Get unfinished quests.
         all_quests = await CharacterQuests.inst().get_character(self.owner.get_db_id())
-        for quest_key, info in all_quests.items():
-            if info["finished"]:
-                continue
+        not_finished = [key for key, info in all_quests.items() if not info["finished"]]
+        if not_finished:
+            # Check objectives.
+            quest_objects = await async_gather([self.get_quest(key) for key in not_finished])
+            results = await async_gather([quest.at_objective(object_type, object_key, number) for quest in quest_objects])
+            objective_changed = [quest for index, quest in enumerate(quest_objects) if results[index]]
 
-            quest = await self.get_quest(quest_key)
-
-            if await quest.at_objective(object_type, object_key, number):
+            if objective_changed:
                 status_changed = True
-                if await quest.is_accomplished():
-                    await self.owner.msg({"msg": _("Quest {C%s{n's goals are accomplished.") % quest.get_name()})
+
+                # Check if quest is accomplished.
+                accomplished = await async_gather([quest.is_accomplished() for quest in objective_changed])
+                quest_names = [quest.get_name() for index, quest in enumerate(quest_objects) if accomplished[index]]
+                
+                if quest_names:
+                    # Notify the player.
+                    await self.owner.msg([
+                        {"msg": _("Quest {C%s{n's goals are accomplished.") % n} for n in quest_names
+                    ])
 
         if status_changed:
             await self.show_quests()

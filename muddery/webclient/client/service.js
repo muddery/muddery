@@ -228,6 +228,11 @@ MudderyService.prototype = {
         this.sendCommand("query_skill", {key: key});
     },
 
+    // query area maps by a list of room keys
+    queryMaps: function (room_list) {
+        this.sendCommand("query_maps", {rooms: room_list});
+    },
+
     // do test
     doTest: function() {
         // test codes

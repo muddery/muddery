@@ -22,6 +22,7 @@ from muddery.server.database.gamedata.character_equipments import CharacterEquip
 from muddery.server.database.gamedata.character_quests import CharacterQuests
 from muddery.server.database.gamedata.character_skills import CharacterSkills
 from muddery.server.database.gamedata.character_combat import CharacterCombat
+from muddery.server.database.gamedata.character_closed_events import CharacterClosedEvents
 from muddery.server.database.gamedata.honours_mapper import HonoursMapper
 from muddery.server.elements.base_element import BaseElement
 from muddery.server.mappings.element_set import ELEMENT
@@ -289,14 +290,17 @@ class MudderyAccount(BaseElement):
             "puppet": puppet_msg
         })
 
-        # Get map
-        await self.msg({
-            "revealed_areas": await new_char.get_revealed_areas(),
-        })
-
         # Set location
         try:
             location_key = await CharacterLocation.inst().load(char_db_id)
+
+            # Set map
+            maps = new_char.get_maps([location_key])
+            maps.update(new_char.get_neighbour_maps(location_key))
+            await self.msg({
+                "reveal_maps": maps,
+            })
+
             location = Server.world.get_room(location_key)
             await new_char.move_to(location)
         except KeyError:
@@ -361,6 +365,7 @@ class MudderyAccount(BaseElement):
             CharacterQuests.inst().remove_character(char_db_id),
             CharacterSkills.inst().remove_character(char_db_id),
             CharacterCombat.inst().remove_character(char_db_id),
+            CharacterClosedEvents.inst().remove_character(char_db_id),
             HonoursMapper.inst().remove_character(char_db_id),
         ])
 
@@ -386,6 +391,7 @@ class MudderyAccount(BaseElement):
                 CharacterQuests.inst().remove_character(char_db_id),
                 CharacterSkills.inst().remove_character(char_db_id),
                 CharacterCombat.inst().remove_character(char_db_id),
+                CharacterClosedEvents.inst().remove_character(char_db_id),
                 HonoursMapper.inst().remove_character(char_db_id),
             ])
 

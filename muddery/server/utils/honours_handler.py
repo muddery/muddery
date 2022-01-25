@@ -2,7 +2,7 @@
 This model translates default strings into localized strings.
 """
 
-from muddery.server.database.gamedata.honours_mapper import HONOURS_MAPPER
+from muddery.server.database.gamedata.honours_mapper import HonoursMapper
 
 
 class HonoursHandler(object):
@@ -24,21 +24,21 @@ class HonoursHandler(object):
         average_losers = 0
         if losers:
             for char in losers:
-                total_losers += HONOURS_MAPPER.get_honour(char, 0)
+                total_losers += HonoursMapper.inst().get_honour(char, 0)
             average_losers = total_losers / len(losers)
         
         total_winners = 0
         average_winners = 0
         if winners:
             for char in winners:
-                total_winners += HONOURS_MAPPER.get_honour(char, 0)
+                total_winners += HonoursMapper.inst().get_honour(char, 0)
             average_winners = total_winners / len(winners)
 
         honour_changes = {}
         total_honours = {}
         for char in winners:
             # Calculate the change of the honour.
-            self_honour = HONOURS_MAPPER.get_honour(char, 0)
+            self_honour = HonoursMapper.inst().get_honour(char, 0)
 
             diff = average_losers - self_honour
             if diff > 200:
@@ -60,7 +60,7 @@ class HonoursHandler(object):
 
         for char in losers:
             # Calculate the change of the honour.
-            self_honour = HONOURS_MAPPER.get_honour(char, 0)
+            self_honour = HonoursMapper.inst().get_honour(char, 0)
 
             diff = average_winners - self_honour
             if diff > 200:
@@ -82,7 +82,7 @@ class HonoursHandler(object):
 
         # Set new honours.
         print("total_honours: %s" % total_honours)
-        await HONOURS_MAPPER.set_honours(total_honours)
+        await HonoursMapper.inst().set_honours(total_honours)
 
         return honour_changes
 

@@ -247,7 +247,7 @@ class FuncAddRelationship(StatementFunction):
         (boolean) value has set
     """
 
-    key = "add_relation"
+    key = "inc_relation"
     const = False
 
     async def func(self):
@@ -259,7 +259,7 @@ class FuncAddRelationship(StatementFunction):
         number = self.args[2]
 
         try:
-            await self.caller.add_relationship(element_type, element_key, number)
+            await self.caller.increase_relationship(element_type, element_key, number)
             return True
         except:
             traceback.print_exc()

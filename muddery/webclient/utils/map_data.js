@@ -25,24 +25,20 @@ MudderyMapData.prototype = {
    	 	_current_location: null;
     },
 
-    setData: function(data) {
-        // set map data
-        this.clearData();
-        this.revealMap(data);
-    },
-
     setCurrentLocation: function(location) {
         this._current_location = location;
     },
 
-    revealMap: function(data) {
+    revealMaps: function(data) {
         // add data to map
+        var new_map = false;
         for (var area in data) {
             var rooms = data[area];
 
             // Add room.
             for (var room_key in rooms) {
                 rooms[room_key]["area"] = area;
+                new_map = true;
             }
             this._map_rooms = Object.assign(this._map_rooms, rooms);
 
@@ -66,6 +62,39 @@ MudderyMapData.prototype = {
                     this._map_paths[location] = [destination];
                 }
             }
+        }
+
+        if (new_map && this._current_location) {
+            this.checkNeighbourRooms(this._current_location["key"]);
+        }
+    },
+
+    checkNeighbourRooms: function (room_key) {
+        // Check if has the room's map, else query the map.
+        if (!(room_key in this._map_rooms)) {
+            core.service.queryMaps([room_key]);
+            return;
+        }
+
+        var room_list = [];
+        for (var exit_key in this._map_rooms[room_key].exits) {
+            var dest = this._map_rooms[room_key].exits[exit_key]["to"];
+            if (!(dest in this._map_rooms)) {
+                room_list.push(dest);
+            }
+            else {
+                // Check neighbour's neighbour
+                for (var dest_exit_key in this._map_rooms[dest].exits) {
+                    var dest2 = this._map_rooms[dest].exits[dest_exit_key]["to"];
+                    if (!(dest2 in this._map_rooms)) {
+                        room_list.push(dest2);
+                    }
+                }
+            }
+        }
+
+        if (room_list.length > 0) {
+            core.service.queryMaps(room_list);
         }
     },
 

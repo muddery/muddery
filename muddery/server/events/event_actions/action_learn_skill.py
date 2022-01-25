@@ -6,6 +6,7 @@ import traceback
 from muddery.server.utils.logger import logger
 from muddery.server.events.base_event_action import BaseEventAction
 from muddery.server.database.worlddata.worlddata import WorldData
+from muddery.server.utils.utils import async_wait
 
 
 class ActionLearnSkill(BaseEventAction):
@@ -30,10 +31,5 @@ class ActionLearnSkill(BaseEventAction):
         records = WorldData.get_table_data(self.model_name, event_key=event_key)
 
         # Learn skills.
-        for record in records:
-            try:
-                await character.learn_skill(record.skill, record.level, False)
-            except Exception as e:
-                traceback.print_exc()
-                logger.log_err("Can not learn skill %s %s" % (type(e).__name__, e))
-                pass
+        if records:
+            await async_wait([character.learn_skill(r.skill, r.level, False) for r in records])

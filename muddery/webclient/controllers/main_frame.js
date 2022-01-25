@@ -2257,6 +2257,9 @@ MudderyScene.prototype.setScene = function(scene) {
     else {
         backview.css("background", "");
     }
+
+    // check neighbour rooms
+	core.map_data.checkNeighbourRooms(scene["key"]);
 }
 
 /*

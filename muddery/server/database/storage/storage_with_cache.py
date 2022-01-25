@@ -93,7 +93,7 @@ class StorageWithCache(BaseKeyValueStorage):
         """
         async with self.lock:
             try:
-                return await self.cache.load(category, key, *default)
+                return await self.cache.load(category, key)
             except KeyError:
                 category_data = await self.set_category_cache(category)
                 try:
@@ -117,7 +117,7 @@ class StorageWithCache(BaseKeyValueStorage):
         """
         async with self.lock:
             try:
-                return await self.cache.load_category(category, *default)
+                return await self.cache.load_category(category)
             except KeyError:
                 category_data = await self.set_category_cache(category)
                 if category_data is not None:

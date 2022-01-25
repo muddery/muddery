@@ -9,6 +9,7 @@ from muddery.server.utils import defines
 from muddery.server.utils.game_settings import GameSettings
 from muddery.server.mappings.element_set import ELEMENT
 from muddery.server.utils.singleton import Singleton
+from muddery.server.utils.utils import async_gather, async_wait
 
 
 class DialogueHandler(Singleton):
@@ -82,36 +83,24 @@ class DialogueHandler(Singleton):
         dialogues = []
 
         # Get npc's dialogues.
-        for dlg_key in npc.dialogues:
-            # Get all dialogues.
-            npc_dlg = await self.get_dialogue(dlg_key)
-            if not npc_dlg:
-                continue
+        if npc.dialogues:
+            dialogues = await async_gather([self.get_dialogue(dlg_key) for dlg_key in npc.dialogues])
+            dialogues = [d for d in dialogues if d]
+            if dialogues:
+                matches = await async_gather([d.match_condition(caller, npc) for d in dialogues])
+                dialogues = [d for index, d in enumerate(dialogues) if matches[index]]
+                if dialogues:
+                    matches = await async_gather([d.match_dependencies(caller) for d in dialogues])
+                    dialogues = [d for index, d in enumerate(dialogues) if matches[index]]
 
-            # Match conditions.
-            if not await npc_dlg.match_condition(caller, npc):
-                continue
-
-            # Match dependencies.
-            if not await npc_dlg.match_dependencies(caller):
-                continue
-
-            dialogues.append({
-                "key": dlg_key,
-                "content": npc_dlg.get_content(),
-            })
-
-        if not dialogues:
+        if not dialogues and npc.default_dialogues:
             # Use default sentences.
             # Default sentences should not have condition and dependencies.
-            for dlg_key in npc.default_dialogues:
-                npc_dlg = await self.get_dialogue(dlg_key)
-                if npc_dlg:
-                    dialogues.append({
-                        "key": dlg_key,
-                        "content": npc_dlg.get_content(),
-                    })
-            
+            dialogues = await async_gather([self.get_dialogue(dlg_key) for dlg_key in npc.default_dialogues])
+            dialogues = [d for d in dialogues if d]
+
+        dialogues = [{"key": d.get_element_key(), "content": d.get_content()} for d in dialogues]
+
         return {
             "target": {
                 "id": npc.get_id(),
@@ -169,24 +158,18 @@ class DialogueHandler(Singleton):
             }
 
         dialogues = []
-        for next_dlg_key in dlg.get_next_dialogues():
-            # Get next dialogue.
-            next_dlg = await self.get_dialogue(next_dlg_key)
-            if not next_dlg:
-                continue
+        dialogues_keys = dlg.get_next_dialogues()
+        if dialogues_keys:
+            dialogues = await async_gather([self.get_dialogue(dlg_key) for dlg_key in dialogues_keys])
+            dialogues = [d for d in dialogues if d]
+            if dialogues:
+                matches = await async_gather([d.match_condition(caller, npc) for d in dialogues])
+                dialogues = [d for index, d in enumerate(dialogues) if matches[index]]
+                if dialogues:
+                    matches = await async_gather([d.match_dependencies(caller) for d in dialogues if d])
+                    dialogues = [d for index, d in enumerate(dialogues) if matches[index]]
 
-            # Match conditions.
-            if not await next_dlg.match_condition(caller, npc):
-                continue
-
-            # Match dependencies.
-            if not await next_dlg.match_dependencies(caller):
-                continue
-
-            dialogues.append({
-                "key": next_dlg_key,
-                "content": next_dlg.get_content(),
-            })
+        dialogues = [{"key": d.get_element_key(), "content": d.get_content()} for d in dialogues]
 
         return {
             "target": target,
@@ -252,7 +235,6 @@ class DialogueHandler(Singleton):
 
         # do dialogue's event
         await caller.event.at_dialogue(dlg_key)
-
         await caller.quest_handler.at_objective(defines.OBJECTIVE_TALK, dlg_key)
 
     def clear(self):

@@ -29,6 +29,7 @@ from muddery.server.database.worlddata.element_properties import ElementProperti
 from muddery.server.database.worlddata.equipment_positions import EquipmentPositions
 from muddery.server.database.worlddata.character_states_dict import CharacterStatesDict
 from muddery.server.database.gamedata.character_relationships import CharacterRelationships
+from muddery.server.database.gamedata.character_closed_events import CharacterClosedEvents
 from muddery.server.database.gamedata.character_info import CharacterInfo
 from muddery.server.mappings.element_set import ELEMENT
 from muddery.server.utils import defines
@@ -348,8 +349,6 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         }
         await self.msg(message)
 
-        await self.show_location()
-
         await self.resume_last_dialogue()
 
         await self.resume_combat()
@@ -447,18 +446,22 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
 
         return channels
 
-    async def get_revealed_areas(self):
+    def get_maps(self, room_list):
         """
-        Get the areas that the character has revealed.
+        Get the map of the room's area.
         """
-        areas = {}
-        revealed_areas = await self.states.load("revealed_areas", set())
-        for area_key in revealed_areas:
-            # get area's information
-            area = Server.world.get_area(area_key)
-            areas[area_key] = area.get_map()
+        areas = set([Server.world.get_area_key_by_room(room_key) for room_key in room_list])
+        maps = {area_key: Server.world.get_area(area_key).get_map() for area_key in areas if area_key}
+        return maps
 
-        return areas
+    def get_neighbour_maps(self, room_key):
+        """
+        Get the map of the room's neighbour.
+        """
+        room = Server.world.get_room(room_key)
+        exits = room.get_exits()
+        neighbours = [exit["to"] for exit in exits.values()]
+        return self.get_maps(neighbours)
 
     async def wear_equipments(self):
         """
@@ -470,39 +473,28 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
 
     async def show_location(self):
         """
-        Show character's location. Reveal the map by areas.
+        Show character's location.
         """
         if not self.location:
             return
 
         room_key = self.location.get_element_key()
         area = Server.world.get_area_by_room(room_key)
-        area_key = area.get_element_key()
-
-        msg = []
-        revealed_areas = await self.states.load("revealed_areas", set())
-        if area_key not in revealed_areas:
-            # reveal map
-            revealed_areas.add(area_key)
-            await self.states.save("revealed_areas", revealed_areas)
-            msg.append({
-                "area_map": area.get_map(),
-            })
-
-        msg.append({
-            "current_location": {
-                "key": room_key,
-                "area": area.get_appearance(),
-            }
-        })
-
         # get appearance
         appearance = self.location.get_appearance()
         appearance.update(self.location.get_surroundings(self))
-        msg.append({
-            "look_around": appearance,
-        })
 
+        msg = [
+            {
+                "current_location": {
+                    "key": room_key,
+                    "area": area.get_appearance(),
+                }
+            },
+            {
+                "look_around": appearance,
+            },
+        ]
         await self.msg(msg)
 
     ################################################
@@ -1480,9 +1472,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
             event_key: (string) event's key
         """
         # set closed events
-        closed_events = await self.states.load("closed_events", set())
-        closed_events.add(event_key)
-        await self.states.save("closed_events", closed_events)
+        await CharacterClosedEvents.inst().add(self.get_db_id(), event_key)
 
     async def is_event_closed(self, event_key):
         """
@@ -1491,8 +1481,13 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         Args:
             event_key: (string) event's key
         """
-        closed_events = await self.states.load("closed_events", set())
-        return event_key in closed_events
+        return await CharacterClosedEvents.inst().has(self.get_db_id(), event_key)
+
+    async def all_closed_events(self):
+        """
+        Get all closed events.
+        """
+        return await CharacterClosedEvents.inst().get_character(self.get_db_id())
 
     async def join_combat(self, combat_id):
         """
@@ -1876,11 +1871,11 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         """
         await CharacterRelationships.inst().save(self.get_db_id(), element_type, element_key, relationship)
 
-    async def add_relationship(self, element_type, element_key, value):
+    async def increase_relationship(self, element_type, element_key, value):
         """
         Add the relationship value between the player and the element with the given number.
         :param element_type:
         :param element_key:
         :return:
         """
-        await CharacterRelationships.inst().add(self.get_db_id(), element_type, element_key, value)
+        await CharacterRelationships.inst().increase(self.get_db_id(), element_type, element_key, value)

@@ -4,6 +4,7 @@ Event action.
 
 from muddery.server.events.base_interval_action import BaseIntervalAction
 from muddery.server.database.worlddata.worlddata import WorldData
+from muddery.server.utils.utils import async_wait
 
 
 class ActionMessage(BaseIntervalAction):
@@ -28,5 +29,5 @@ class ActionMessage(BaseIntervalAction):
         records = WorldData.get_table_data(self.model_name, event_key=event_key)
 
         # send messages
-        for record in records:
-            await character.msg(record.message)
+        if records:
+            await async_wait([character.msg(r.message) for r in records])

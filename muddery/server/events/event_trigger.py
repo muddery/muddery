@@ -9,6 +9,7 @@ from muddery.server.statements.statement_handler import STATEMENT_HANDLER
 from muddery.server.database.worlddata.event_data import EventData
 from muddery.server.mappings.event_action_set import EVENT_ACTION_SET
 from muddery.server.utils.defines import EventType
+from muddery.server.utils.utils import async_gather
 
 
 class EventTrigger(object):
@@ -87,8 +88,19 @@ class EventTrigger(object):
             return False
 
         # Get available events.
-        candidates = [e for e in events if not await self.owner.is_event_closed(e.key) and
-                      await STATEMENT_HANDLER.match_condition(e.condition, self.owner, obj)]
+        closed_events = await self.owner.all_closed_events()
+        active_events = [e for e in events if e not in closed_events]
+        if not active_events:
+            return False
+
+        if active_events:
+            matches = await async_gather([STATEMENT_HANDLER.match_condition(e.condition, self.owner, obj) for e in active_events])
+            candidates = [e for index, e in enumerate(active_events) if matches[index]]
+        else:
+            candidates = []
+
+        if not candidates:
+            return False
 
         triggered = False
         rand = random.random()

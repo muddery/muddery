@@ -41,7 +41,7 @@ class MudderyShop(ELEMENT("MATTER")):
         """
         if owner:
             if not self.const.icon:
-                self.const_data_handler.add("icon", owner.get_icon())
+                self.set_icon(owner.get_icon())
 
     def load_goods(self):
         """
@@ -63,7 +63,7 @@ class MudderyShop(ELEMENT("MATTER")):
         Args:
             caller (obj): the custom
         """
-        info = await super(MudderyShop, self).get_detail_appearance()
+        info = await super(MudderyShop, self).get_detail_appearance(caller)
 
         goods_list = []
         if self.goods:
@@ -72,8 +72,8 @@ class MudderyShop(ELEMENT("MATTER")):
 
             if available_goods:
                 goods_list = await async_gather([self.goods[index].get_info(caller) for index in available_goods])
-                for index, item in enumerate(self.goods):
-                    item["index"] = index
+                for index, item in enumerate(goods_list):
+                    item["index"] = available_goods[index]
 
         info["goods"] = goods_list
         return info

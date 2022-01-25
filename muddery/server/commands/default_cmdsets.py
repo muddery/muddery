@@ -54,6 +54,7 @@ class CharacterCmdSet(CommandSet):
         cls.add(general.CmdGetRankings())
         cls.add(general.CmdQueryQuest())
         cls.add(general.CmdQuerySkill())
+        cls.add(general.CmdQueryMaps())
 
         cls.add(combat.CmdCastCombatSkill())
         cls.add(combat.CmdCombatInfo())

@@ -3,6 +3,7 @@ Condition statements return a boolean value. They can be used in conditional sta
 """
 
 from muddery.server.statements.statement_function import StatementFunction
+from muddery.server.utils.utils import async_gather
 
 
 class FuncIsQuestAccepted(StatementFunction):
@@ -27,7 +28,11 @@ class FuncIsQuestAccepted(StatementFunction):
             return False
 
         quest_key = self.args[0]
-        return await self.caller.quest_handler.is_finished(quest_key) or self.caller.quest_handler.is_in_progress(quest_key)
+        results = await async_gather([
+            self.caller.quest_handler.is_finished(quest_key),
+            self.caller.quest_handler.is_in_progress(quest_key),
+        ])
+        return results[0] or results[1]
 
 
 class FuncIsQuestAccomplished(StatementFunction):

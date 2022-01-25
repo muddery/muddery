@@ -300,6 +300,27 @@ class character_combat(BaseModel):
 
 # ------------------------------------------------------------
 #
+# closed events
+#
+# ------------------------------------------------------------
+class character_closed_events(BaseModel):
+    "Player character's closed events."
+
+    __tablename__ = "character_closed_events"
+
+    __table_args__ = (
+        UniqueConstraint("character_id", "event"),
+    )
+
+    # character's id
+    character_id = Column(Integer, index=True, nullable=False)
+
+    # event's key
+    event = Column(String(KEY_LENGTH), index=True, nullable=False)
+
+
+# ------------------------------------------------------------
+#
 # player character's quests
 #
 # ------------------------------------------------------------
