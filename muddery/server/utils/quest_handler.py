@@ -13,6 +13,7 @@ from muddery.server.database.worlddata.quest_dependencies import QuestDependenci
 from muddery.server.mappings.quest_status_set import QUEST_STATUS_SET
 from muddery.server.mappings.element_set import ELEMENT
 from muddery.server.database.gamedata.character_quests import CharacterQuests
+from muddery.server.database.gamedata.character_finished_quests import CharacterFinishedQuests
 from muddery.server.utils.utils import async_wait, async_gather
 
 
@@ -27,6 +28,9 @@ class QuestHandler(object):
         """
         self.owner = weakref.proxy(owner)
         self.quests = {}
+        self.finished_quests = set()
+
+        self.objectives = {}
 
     async def init(self):
         """
@@ -39,9 +43,14 @@ class QuestHandler(object):
         Load character's quests.
         :return:
         """
-        self.quests = await CharacterQuests.inst().get_character(self.owner.get_db_id())
-        if self.quests:
-            await async_wait([self.create_quest(key) for key in self.quests if not self.quests[key]["finished"]])
+        quest_keys = await CharacterQuests.inst().get_character(self.owner.get_db_id())
+        if quest_keys:
+            await async_wait([self.create_quest(key) for key in quest_keys])
+
+        finished_quests = await CharacterFinishedQuests.inst().get_character(self.owner.get_db_id())
+        self.finished_quests = set(finished_quests.keys())
+
+        self.calculate_objectives()
 
     async def accept(self, quest_key):
         """
@@ -53,13 +62,13 @@ class QuestHandler(object):
         Returns:
             None
         """
-        all_quests = await CharacterQuests.inst().get_character(self.owner.get_db_id())
-        if quest_key in all_quests:
+        if quest_key in self.quests or quest_key in self.finished_quests:
             return
 
         # Create quest object.
         quest = await self.create_quest(quest_key)
         await CharacterQuests.inst().add(self.owner.get_db_id(), quest_key)
+        self.add_objectives(quest)
 
         await self.owner.msg({"msg": _("Accepted quest {C%s{n.") % quest.get_name()})
         await self.show_quests()
@@ -72,7 +81,12 @@ class QuestHandler(object):
         It will be called when quests' owner will be deleted.
         """
         self.quests = {}
-        await CharacterQuests.inst().remove_character(self.owner.get_db_id())
+        self.finished_quests = set()
+        self.objectives = {}
+        await async_wait([
+            CharacterQuests.inst().remove_character(self.owner.get_db_id()),
+            CharacterFinishedQuests.inst().remove_character(self.owner.get_db_id()),
+        ])
 
     async def give_up(self, quest_key):
         """
@@ -88,13 +102,12 @@ class QuestHandler(object):
             logger.log_trace("Can not give up quests.")
             raise MudderyError(_("Can not give up this quest."))
 
-        quest = await CharacterQuests.inst().get_quest(self.owner.get_db_id(), quest_key)
-        if not quest or quest["finished"]:
+        if quest_key not in self.quests:
             raise MudderyError("Can not find this quest.")
 
         await CharacterQuests.inst().remove_quest(self.owner.get_db_id(), quest_key)
-        if quest_key in self.quests:
-            del self.quests[quest_key]
+        del self.quests[quest_key]
+        self.calculate_objectives()
 
         await self.show_quests()
 
@@ -108,20 +121,23 @@ class QuestHandler(object):
         Returns:
             None
         """
-        quest_info = await CharacterQuests.inst().get_quest(self.owner.get_db_id(), quest_key)
-        if not quest_info or quest_info["finished"]:
+        if quest_key not in self.quests:
             raise MudderyError("Can not find this quest.")
 
-        quest = await self.get_quest(quest_key)
+        quest = self.get_quest(quest_key)
         if not await quest.is_accomplished():
             raise MudderyError(_("Can not turn in this quest."))
 
-        # Call turn in function in the quest.
-        await quest.turn_in(self.owner)
-        await CharacterQuests.inst().set(self.owner.get_db_id(), quest_key, {"finished": True})
-
         # Get quest's name.
         name = quest.get_name()
+
+        # Call turn in function in the quest.
+        await quest.turn_in(self.owner)
+        await CharacterFinishedQuests.inst().add(self.owner.get_db_id(), quest_key)
+        await CharacterQuests.inst().remove(self.owner.get_db_id(), quest_key)
+        self.finished_quests.add(quest_key)
+        del self.quests[quest_key]
+        self.calculate_objectives()
 
         await self.owner.msg({"msg": _("Turned in quest {C%s{n.") % name})
         await self.show_quests()
@@ -138,7 +154,7 @@ class QuestHandler(object):
         Returns:
             None
         """
-        if not await self.is_in_progress(quest_key):
+        if not self.is_in_progress(quest_key):
             return False
 
         return await self.quests[quest_key]["obj"].is_accomplished()
@@ -153,12 +169,12 @@ class QuestHandler(object):
         Returns:
             None
         """
-        if not await self.is_in_progress(quest_key):
+        if not self.is_in_progress(quest_key):
             return False
 
         return not await self.quests[quest_key]["obj"].is_accomplished()
 
-    async def is_finished(self, quest_key):
+    def is_finished(self, quest_key):
         """
         Whether the character finished this quest or not.
 
@@ -168,13 +184,9 @@ class QuestHandler(object):
         Returns:
             None
         """
-        all_quests = await CharacterQuests.inst().get_character(self.owner.get_db_id())
-        if quest_key not in all_quests:
-            return False
+        return quest_key in self.finished_quests
 
-        return all_quests[quest_key]["finished"]
-
-    async def is_in_progress(self, quest_key):
+    def is_in_progress(self, quest_key):
         """
         If the character is doing this quest.
 
@@ -184,14 +196,7 @@ class QuestHandler(object):
         Returns:
             None
         """
-        all_quests = await CharacterQuests.inst().get_character(self.owner.get_db_id())
-        if quest_key not in all_quests:
-            return False
-
-        if all_quests[quest_key]["finished"]:
-            return False
-
-        return True
+        return quest_key in self.quests
 
     async def can_provide(self, quest_key):
         """
@@ -203,10 +208,10 @@ class QuestHandler(object):
         Returns:
             None
         """
-        if await self.is_finished(quest_key):
+        if self.is_finished(quest_key):
             return False
 
-        if await self.is_in_progress(quest_key):
+        if self.is_in_progress(quest_key):
             return False
 
         if not await self.match_dependencies(quest_key):
@@ -263,22 +268,40 @@ class QuestHandler(object):
         """
         Send quests to player.
         """
-        quests = await self.return_quests()
+        quests = await self.get_quests_info()
         await self.owner.msg({"quests": quests})
 
-    async def return_quests(self):
+    async def get_quests_info(self):
         """
         Get quests' data.
         """
-        all_quests = await CharacterQuests.inst().get_character(self.owner.get_db_id())
-        not_finished = [key for key, info in all_quests.items() if not info["finished"]]
-        if not_finished:
-            quest_objects = await async_gather([self.get_quest(key) for key in not_finished])
-            quests_info = await async_gather([quest.return_info() for quest in quest_objects])
+        if self.quests:
+            quests_info = await async_gather([quest["obj"].return_info() for quest in self.quests.values()])
         else:
             quests_info = []
 
         return quests_info
+
+    def add_objectives(self, quest):
+        key = quest.get_element_key()
+        objective_types = quest.get_objective_types()
+        for objective_type in objective_types:
+            if objective_type not in self.objectives:
+                self.objectives[objective_type] = [key]
+            else:
+                self.objectives[objective_type].append(key)
+
+    def calculate_objectives(self):
+        objectives = {}
+        for key, quest in self.quests.items():
+            objective_types = quest["obj"].get_objective_types()
+            for objective_type in objective_types:
+                if objective_type not in objectives:
+                    objectives[objective_type] = [key]
+                else:
+                    objectives[objective_type].append(key)
+
+        self.objectives = objectives
 
     async def at_objective(self, object_type, object_key, number=1):
         """
@@ -293,23 +316,24 @@ class QuestHandler(object):
         Returns:
             None
         """
+        if (object_type, object_key) not in self.objectives:
+            return
+
         status_changed = False
 
-        # Get unfinished quests.
-        all_quests = await CharacterQuests.inst().get_character(self.owner.get_db_id())
-        not_finished = [key for key, info in all_quests.items() if not info["finished"]]
-        if not_finished:
+        quest_keys = self.objectives[(object_type, object_key)]
+        if quest_keys:
             # Check objectives.
-            quest_objects = await async_gather([self.get_quest(key) for key in not_finished])
-            results = await async_gather([quest.at_objective(object_type, object_key, number) for quest in quest_objects])
-            objective_changed = [quest for index, quest in enumerate(quest_objects) if results[index]]
+            quests = [self.get_quest(key) for key in quest_keys]
+            results = await async_gather([quest.at_objective(object_type, object_key, number) for quest in quests])
+            quests = [quest["obj"] for index, quest in enumerate(self.quests.values()) if results[index]]
 
-            if objective_changed:
+            if quests:
                 status_changed = True
 
                 # Check if quest is accomplished.
-                accomplished = await async_gather([quest.is_accomplished() for quest in objective_changed])
-                quest_names = [quest.get_name() for index, quest in enumerate(quest_objects) if accomplished[index]]
+                accomplished = await async_gather([quest.is_accomplished() for quest in quests])
+                quest_names = [quest.get_name() for index, quest in enumerate(quests) if accomplished[index]]
                 
                 if quest_names:
                     # Notify the player.
@@ -335,18 +359,13 @@ class QuestHandler(object):
 
         return quest
 
-    async def get_quest(self, quest_key):
+    def get_quest(self, quest_key):
         """
         Get a quest object by its key.
         :param quest_key:
         :return:
         """
-        if quest_key in self.quests:
-            quest = self.quests[quest_key]["obj"]
-        else:
-            quest = await self.create_quest(quest_key)
-
-        return quest
+        return self.quests[quest_key]["obj"]
 
     async def get_quest_info(self, quest_key):
         """
@@ -354,10 +373,5 @@ class QuestHandler(object):
         :param quest_key:
         :return:
         """
-        all_quests = await CharacterQuests.inst().get_character(self.owner.get_db_id())
-        if all_quests[quest_key]["finished"]:
-            logger.log_err("%s's quest %s is finished." % (self.owner.get_db_id(), quest_key))
-            return
-
-        quest = await self.get_quest(quest_key)
+        quest = self.get_quest(quest_key)
         return await quest.return_info()

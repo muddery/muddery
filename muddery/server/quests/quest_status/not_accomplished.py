@@ -20,10 +20,9 @@ class NotAccomplished(BaseQuestStatus):
         if not caller:
             return False
 
-        results = await async_gather([
-            caller.quest_handler.is_in_progress(quest_key),
-            caller.quest_handler.is_accomplished(quest_key),
-        ])
+        results = []
+        results.append(caller.quest_handler.is_in_progress(quest_key))
+        results.append(await caller.quest_handler.is_accomplished(quest_key))
 
         return results[0] and not results[1]
 

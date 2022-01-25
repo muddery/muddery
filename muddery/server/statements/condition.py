@@ -28,10 +28,10 @@ class FuncIsQuestAccepted(StatementFunction):
             return False
 
         quest_key = self.args[0]
-        results = await async_gather([
+        results = [
             self.caller.quest_handler.is_finished(quest_key),
             self.caller.quest_handler.is_in_progress(quest_key),
-        ])
+        ]
         return results[0] or results[1]
 
 
@@ -82,7 +82,7 @@ class FuncIsQuestInProgress(StatementFunction):
             return False
 
         quest_key = self.args[0]
-        return await self.caller.quest_handler.is_in_progress(quest_key)
+        return self.caller.quest_handler.is_in_progress(quest_key)
 
 
 class FuncCanProvideQuest(StatementFunction):
@@ -132,7 +132,7 @@ class FuncIsQuestFinished(StatementFunction):
             return False
 
         quest_key = self.args[0]
-        return await self.caller.quest_handler.is_finished(quest_key)
+        return self.caller.quest_handler.is_finished(quest_key)
 
 
 class FuncHasObject(StatementFunction):

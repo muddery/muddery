@@ -19,4 +19,4 @@ class NotFinished(BaseQuestStatus):
         if not caller:
             return False
 
-        return not await caller.quest_handler.is_finished(quest_key)
+        return not caller.quest_handler.is_finished(quest_key)

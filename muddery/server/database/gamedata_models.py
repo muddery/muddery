@@ -321,7 +321,7 @@ class character_closed_events(BaseModel):
 
 # ------------------------------------------------------------
 #
-# player character's quests
+# player character's quests that are doing.
 #
 # ------------------------------------------------------------
 class character_quests(BaseModel):
@@ -339,8 +339,26 @@ class character_quests(BaseModel):
     # quest's key
     quest = Column(String(KEY_LENGTH), index=True, nullable=False)
 
-    # quest is finished
-    finished = Column(Boolean, default=False, index=True, nullable=False)
+
+# ------------------------------------------------------------
+#
+# player character's quests that are finished
+#
+# ------------------------------------------------------------
+class character_finished_quests(BaseModel):
+    "Player character's quests."
+
+    __tablename__ = "character_finished_quests"
+
+    __table_args__ = (
+        UniqueConstraint("character_id", "quest"),
+    )
+
+    # character's id
+    character_id = Column(Integer, index=True, nullable=False)
+
+    # quest's key
+    quest = Column(String(KEY_LENGTH), index=True, nullable=False)
 
 
 # ------------------------------------------------------------

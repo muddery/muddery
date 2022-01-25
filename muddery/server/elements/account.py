@@ -20,6 +20,7 @@ from muddery.server.database.gamedata.character_location import CharacterLocatio
 from muddery.server.database.gamedata.character_inventory import CharacterInventory
 from muddery.server.database.gamedata.character_equipments import CharacterEquipments
 from muddery.server.database.gamedata.character_quests import CharacterQuests
+from muddery.server.database.gamedata.character_finished_quests import CharacterFinishedQuests
 from muddery.server.database.gamedata.character_skills import CharacterSkills
 from muddery.server.database.gamedata.character_combat import CharacterCombat
 from muddery.server.database.gamedata.character_closed_events import CharacterClosedEvents
@@ -363,6 +364,7 @@ class MudderyAccount(BaseElement):
             CharacterInventory.inst().remove_character(char_db_id),
             CharacterEquipments.inst().remove_character(char_db_id),
             CharacterQuests.inst().remove_character(char_db_id),
+            CharacterFinishedQuests.inst().remove_character(char_db_id),
             CharacterSkills.inst().remove_character(char_db_id),
             CharacterCombat.inst().remove_character(char_db_id),
             CharacterClosedEvents.inst().remove_character(char_db_id),
@@ -389,6 +391,7 @@ class MudderyAccount(BaseElement):
                 CharacterInventory.inst().remove_character(char_db_id),
                 CharacterEquipments.inst().remove_character(char_db_id),
                 CharacterQuests.inst().remove_character(char_db_id),
+                CharacterFinishedQuests.inst().remove_character(char_db_id),
                 CharacterSkills.inst().remove_character(char_db_id),
                 CharacterCombat.inst().remove_character(char_db_id),
                 CharacterClosedEvents.inst().remove_character(char_db_id),

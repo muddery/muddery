@@ -20,9 +20,9 @@ class Accepted(BaseQuestStatus):
         if not caller:
             return False
 
-        results = await async_gather([
+        results = [
             caller.quest_handler.is_finished(quest_key),
             caller.quest_handler.is_in_progress(quest_key),
-        ])
+        ]
 
         return results[0] or results[1]

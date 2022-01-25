@@ -334,7 +334,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
             self.get_available_channels(),
             self.return_status(),
             self.return_skills(),
-            self.quest_handler.return_quests(),
+            self.quest_handler.get_quests_info(),
         ])
         self.available_channels = channels
 

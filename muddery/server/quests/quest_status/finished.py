@@ -19,5 +19,4 @@ class Finished(BaseQuestStatus):
         if not caller:
             return False
 
-        return await caller.quest_handler.is_finished(quest_key)
-    
+        return caller.quest_handler.is_finished(quest_key)

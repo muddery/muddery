@@ -119,13 +119,22 @@ class character_combat(BaseModels.character_combat):
 
 # ------------------------------------------------------------
 #
-# player character's quests
+# player character's quests that are doing.
 #
 # ------------------------------------------------------------
 class character_quests(BaseModels.character_quests):
     """
     Character's quests.
     """
+    pass
+
+
+# ------------------------------------------------------------
+#
+# player character's quests that are finished
+#
+# ------------------------------------------------------------
+class character_finished_quests(BaseModels.character_finished_quests):
     pass
 
 

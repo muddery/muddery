@@ -19,5 +19,5 @@ class InProgress(BaseQuestStatus):
         if not caller:
             return False
 
-        return await caller.quest_handler.is_in_progress(quest_key)
+        return caller.quest_handler.is_in_progress(quest_key)
     

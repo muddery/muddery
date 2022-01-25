@@ -99,6 +99,13 @@ class MudderyQuest(BaseElement):
             commands.append({"name": _("Give Up"), "cmd": "giveup_quest", "args": self.const.key})
         return commands
 
+    def get_objective_types(self):
+        """
+        Get objective's type and objective's key.
+        :return:
+        """
+        return self.objectives.keys()
+
     async def return_objectives(self):
         """
         Get the information of all objectives.
