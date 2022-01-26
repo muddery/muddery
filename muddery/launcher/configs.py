@@ -9,7 +9,6 @@ import os
 MUDDERY_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 MUDDERY_LIB = os.path.join(MUDDERY_ROOT, "muddery")
-EVENNIA_LIB = os.path.join(MUDDERY_LIB, "libs", "evennia")
 GAME_TEMPLATES = os.path.join(MUDDERY_LIB, "game_templates")
 
 # Game directory structure
@@ -20,6 +19,7 @@ SETTINGS_PATH = os.path.join(CONF_DIR, SETTING_FILE)
 SETTINGS_DOTPATH = "server.conf.settings"
 CURRENT_DIR = os.getcwd()
 GAME_DIR = CURRENT_DIR
+LOG_FILE = os.path.join(GAME_DIR, "server", "logs", "launcher.log")
 
 DEFAULT_TEMPLATE = "default"
 

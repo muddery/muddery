@@ -135,9 +135,9 @@ def migrate_database():
         print("Migrate database error: %s" % e)
 
 
-def collect_static():
+def collect_webclient_static():
     """
-    Collect static web files.
+    Collect webclient's static web files.
     :return:
     """
     gamedir = os.path.abspath(configs.CURRENT_DIR)
@@ -150,6 +150,17 @@ def collect_static():
         target = item[0]
         utils.copy_tree(source, target)
 
+    print("Webclient's static files collected.")
+
+
+def collect_worldeditor_static():
+    """
+    Collect worldeditor's static web files.
+    :return:
+    """
+    gamedir = os.path.abspath(configs.CURRENT_DIR)
+    utils.init_game_env(gamedir)
+
     # world editor webpage files
     from muddery.worldeditor.server import SETTINGS as EDITOR_SETTINGS
     for item in EDITOR_SETTINGS.WEBCLIENT_SOURCE_DIRS:
@@ -157,4 +168,98 @@ def collect_static():
         target = item[0]
         utils.copy_tree(source, target)
 
-    print("Collect static files success.")
+    print("Worldeditor's static files collected.")
+
+
+def run(server: bool = True, webclient: bool = True, editor: bool = True):
+    """
+    Run servers.
+
+    Args:
+        server: run the game server.
+        webclient: run the web client.
+        editor: run the world editor.
+    """
+    import subprocess
+
+    gamedir = os.path.abspath(configs.CURRENT_DIR)
+    utils.init_game_env(gamedir)
+
+    print("Starting ...")
+
+    if os.name == "nt":
+        template = "python %s"
+    else:
+        template = "python %s &"
+
+    options = {
+        "shell": True,
+    }
+
+    if server:
+        # Run game servers.
+        command = template % "run_server.py"
+        subprocess.Popen(command, **options)
+
+    if webclient:
+        # Run web client.
+        command = template % "run_webclient.py"
+        subprocess.Popen(command, **options)
+
+    if editor:
+        # Run world editor.
+        command = template % "run_worldeditor.py"
+        subprocess.Popen(command, **options)
+
+
+def kill(server: bool = True, webclient: bool = True, editor: bool = True):
+    """
+    kill servers.
+
+    Args:
+        server: kill the game server.
+        webclient: kill the web client.
+        editor: kill the world editor.
+    """
+    import subprocess
+
+    gamedir = os.path.abspath(configs.CURRENT_DIR)
+    utils.init_game_env(gamedir)
+
+    print("Stopping ...")
+
+    if os.name == "nt":
+        template = "python %s"
+    else:
+        template = "python %s &"
+
+    options = {
+        "shell": True,
+    }
+
+    server_process = None
+    if server:
+        # Run game servers.
+        command = template % "run_server.py stop"
+        server_process = subprocess.Popen(command, **options)
+
+    webclient_process = None
+    if webclient:
+        # Run web client.
+        command = template % "run_webclient.py stop"
+        webclient_process = subprocess.Popen(command, **options)
+
+    worldeditor_process = None
+    if editor:
+        # Run world editor.
+        command = template % "run_worldeditor.py stop"
+        worldeditor_process = subprocess.Popen(command, **options)
+
+    if server_process:
+        server_process.wait()
+
+    if webclient_process:
+        webclient_process.wait()
+
+    if worldeditor_process:
+        worldeditor_process.wait()

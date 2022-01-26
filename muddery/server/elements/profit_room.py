@@ -6,6 +6,7 @@ Rooms are simple containers that has no location of their own.
 """
 
 import time
+import pytz
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from muddery.server.utils.loot_handler import LootHandler
 from muddery.server.database.worlddata.loot_list import RoomProfitList
@@ -28,7 +29,7 @@ class MudderyProfitRoom(ELEMENT("ROOM")):
         """
         super(MudderyProfitRoom, self).__init__()
 
-        self.scheduler = AsyncIOScheduler()
+        self.scheduler = AsyncIOScheduler(timezone=pytz.utc)
         self.last_trigger_time = {}
         self.loot_handler = None
 

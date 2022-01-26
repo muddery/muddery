@@ -40,6 +40,9 @@ class Settings(object):
     MUDDERY_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     GAME_DIR = os.getcwd()
 
+    # Worldedotir's pid file
+    WORLD_EDITOR_PID = os.path.join(GAME_DIR, "worldeditor.pid")
+
     # Place to put log files
     LOG_DIR = os.path.join(GAME_DIR, "worldeditor", "logs")
     LOG_NAME = 'server.log'

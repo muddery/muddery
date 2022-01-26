@@ -264,8 +264,37 @@ def get_module_path(path):
 
 
 async def async_wait(coros: list):
+    """
+    Wrap the system asyncio.wait function.
+    """
     return await asyncio.wait([asyncio.create_task(c) for c in coros])
 
 
 async def async_gather(coros: list):
+    """
+    Wrap the system asyncio.gather function.
+    """
     return await asyncio.gather(*coros)
+
+
+def write_pid_file(filename, pid):
+    """
+    Write a pid to a file.
+    """
+    with open(filename, "w") as fp:
+        fp.write(str(pid))
+
+
+def read_pid_file(filename):
+    """
+    Read a pid from a file.
+    """
+    pid = None
+    try:
+        with open(filename, "r") as fp:
+            pid = fp.readline()
+            pid = int(pid)
+    except FileNotFoundError:
+        pass
+
+    return pid

@@ -1,22 +1,47 @@
 # The sanic server.
+
 import traceback
 import asyncio
+import os
+import signal
 from sanic import Sanic
 from asyncio import CancelledError
 from muddery.server.networks.sanic_channel import SanicChannel
 from muddery.server.settings import SETTINGS
 from muddery.server.server import Server
+from muddery.server.utils.utils import write_pid_file, read_pid_file
 
 
-def run_server():
-    async def init_server():
+def run():
+    pid = read_pid_file(SETTINGS.SERVER_PID)
+    if pid:
+        print('\nThe game server has already started.\nYou can run "muddery stop" to stop it and start it again.')
+        return
+
+    app = Sanic("muddery_server")
+
+    @app.before_server_start
+    async def before_server_start(app, loop):
+        # init the game server
         await Server.inst().init()
 
-    asyncio.run(init_server())
+    @app.after_server_start
+    async def after_server_start(app, loop):
+        # save pid
+        write_pid_file(SETTINGS.SERVER_PID, os.getpid())
+        print("\nGame server server started.\n")
 
-    server_app = Sanic("muddery_server")
+    @app.after_server_stop
+    async def after_server_stop(app, loop):
+        # server stopped
+        try:
+            os.remove(SETTINGS.SERVER_PID)
+        except:
+            pass
+        print("Game server stopped.")
 
-    @server_app.websocket("/")
+    # set websocket interface
+    @app.websocket("/")
     async def handler(request, ws):
         channel = SanicChannel()
         print("[Connection created] %s:%s" % (request.ip, request.port))
@@ -34,4 +59,26 @@ def run_server():
         print("[Connection closed] %s:%s" % (request.ip, request.port))
         await ws.close()
 
-    server_app.run(port=SETTINGS.WEBSERVER_PORT)
+    # run the server
+    app.run(port=SETTINGS.WEBSERVER_PORT)
+
+
+def stop():
+    # Send a terminate signal to the server.
+    pid = read_pid_file(SETTINGS.SERVER_PID)
+    if not pid:
+        print("Can not get the game server's pid.")
+        return
+
+    try:
+        os.kill(pid, signal.SIGTERM)
+    except:
+        print("Can not stop the game server.")
+        return
+
+    try:
+        os.remove(SETTINGS.SERVER_PID)
+    except:
+        pass
+
+    print("Game server stopped.")

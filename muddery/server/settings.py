@@ -44,6 +44,12 @@ class Settings(object):
     MUDDERY_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     GAME_DIR = os.getcwd()
 
+    # Server's pid file
+    SERVER_PID = os.path.join(GAME_DIR, "server.pid")
+
+    # Webclient's pid file
+    WEBCLIENT_PID = os.path.join(GAME_DIR, "webclient.pid")
+
     # Place to put log files
     LOG_DIR = os.path.join(GAME_DIR, "server", "logs")
     LOG_NAME = 'server.log'

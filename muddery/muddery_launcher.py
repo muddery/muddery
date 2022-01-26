@@ -61,6 +61,15 @@ def main():
         metavar="<N>",
         help="Set game's network ports when init the game, recommend to use ports above 10000.")
     parser.add_argument(
+        '--server', '-s', action='store_true', dest='run_server', default=False,
+        help="Run the game server only.")
+    parser.add_argument(
+        '--webclient', '-w', action='store_true', dest='run_webclient', default=False,
+        help="Run the web client only.")
+    parser.add_argument(
+        '--editor', '-e', action='store_true', dest='run_editor', default=False,
+        help="Run the world editor only.")
+    parser.add_argument(
         "operation", nargs='?', default="noop",
         help=configs.ARG_OPTIONS)
     parser.epilog = (
@@ -70,7 +79,7 @@ def main():
     args, unknown_args = parser.parse_known_args()
 
     # handle arguments
-    option = args.operation
+    operation = args.operation
 
     # make sure we have everything
     from muddery.launcher import manager
@@ -108,7 +117,8 @@ def main():
         try:
             manager.migrate_database()
             manager.load_game_data()
-            manager.collect_static()
+            manager.collect_webclient_static()
+            manager.collect_worldeditor_static()
         except Exception as e:
             traceback.print_exc()
             sys.exit(-1)
@@ -152,7 +162,8 @@ def main():
 
     elif args.collect_static:
         try:
-            manager.collect_static()
+            manager.collect_webclient_static()
+            manager.collect_worldeditor_static()
         except Exception as e:
             print(e)
             sys.exit(-1)
@@ -160,12 +171,34 @@ def main():
 
     if args.show_version:
         # show the version info
-        manager.show_version(option == "help")
+        manager.show_version(operation == "help")
         sys.exit()
 
-    if option != "noop":
+    if operation == "start":
         try:
-            manager.run_evennia(option)
+            if not args.run_server and not args.run_webclient and not args.run_editor:
+                manager.run()
+            else:
+                manager.run(
+                    server=args.run_server,
+                    webclient=args.run_webclient,
+                    editor=args.run_editor
+                )
+        except Exception as e:
+            traceback.print_exc()
+            print(e)
+            sys.exit(-1)
+        sys.exit()
+    elif operation == "stop":
+        try:
+            if not args.run_server and not args.run_webclient and not args.run_editor:
+                manager.kill()
+            else:
+                manager.kill(
+                    server=args.run_server,
+                    webclient=args.run_webclient,
+                    editor=args.run_editor
+                )
         except Exception as e:
             traceback.print_exc()
             print(e)
