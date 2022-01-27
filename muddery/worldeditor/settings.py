@@ -48,6 +48,10 @@ class Settings(object):
     LOG_NAME = 'server.log'
     LOG_LEVEL = logging.INFO
 
+    ROOT_LOG = "root.log"
+    ACCESS_LOG = "access.log"
+    ERROR_LOG = "error.log"
+
     # Administrator's name and password.
     ADMIN_NAME = "admin"
 
@@ -56,7 +60,7 @@ class Settings(object):
     # World data API's url path.
     WORLD_EDITOR_API_PATH = "/api"
 
-    # Server-side http port to open for the worldeditor.
+    # http port to open for the worldeditor.
     WORLD_EDITOR_PORT = 8002
 
     # The secret key of jwt.

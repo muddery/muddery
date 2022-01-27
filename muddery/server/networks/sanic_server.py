@@ -1,7 +1,7 @@
 # The sanic server.
 
 import traceback
-import asyncio
+import logging
 import os
 import signal
 from sanic import Sanic
@@ -10,6 +10,7 @@ from muddery.server.networks.sanic_channel import SanicChannel
 from muddery.server.settings import SETTINGS
 from muddery.server.server import Server
 from muddery.server.utils.utils import write_pid_file, read_pid_file
+from muddery.worldeditor.utils import responses
 
 
 def run():
@@ -39,6 +40,11 @@ def run():
         except:
             pass
         print("Game server stopped.")
+
+    # check the server's status
+    @app.get("/status")
+    async def get_status(request):
+        return responses.success_response()
 
     # set websocket interface
     @app.websocket("/")
@@ -72,13 +78,11 @@ def stop():
 
     try:
         os.kill(pid, signal.SIGTERM)
+        print("Game server stopped.")
     except:
-        print("Can not stop the game server.")
-        return
+        print("Can not stop the game server correctly.")
 
     try:
         os.remove(SETTINGS.SERVER_PID)
     except:
         pass
-
-    print("Game server stopped.")

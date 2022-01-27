@@ -10,6 +10,7 @@ from muddery.worldeditor.server import Server as EditorServer
 from muddery.worldeditor.settings import SETTINGS
 from muddery.server.utils.logger import logger
 from muddery.server.utils.utils import write_pid_file, read_pid_file
+from muddery.worldeditor.utils import responses
 from muddery.launcher.manager import collect_worldeditor_static
 
 
@@ -52,6 +53,11 @@ def run():
     app.static('/editor', SETTINGS.WORLD_EDITOR_WEBROOT)
     app.static('/media', SETTINGS.MEDIA_ROOT)
 
+    # check the server's status
+    @app.get("/status")
+    async def get_status(request):
+        return responses.success_response()
+
     # api
     @app.post(SETTINGS.WORLD_EDITOR_API_PATH + "/<func>")
     async def handler(request, func):
@@ -87,13 +93,11 @@ def stop():
 
     try:
         os.kill(pid, signal.SIGTERM)
+        print("Worldeditor server stopped.")
     except:
-        print("Can not stop the worldeditor server.")
-        return
+        print("Can not stop the worldeditor server correctly.")
 
     try:
         os.remove(SETTINGS.WORLD_EDITOR_PID)
     except:
         pass
-
-    print("Worldeditor server stopped.")

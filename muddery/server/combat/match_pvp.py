@@ -5,6 +5,7 @@ from collections import deque
 import time
 import datetime
 import math
+import pytz
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from muddery.server.database.gamedata.honours_mapper import HonoursMapper
 from muddery.server.utils.localized_strings_handler import _
@@ -42,7 +43,7 @@ class MatchPVPHandler(Singleton):
         #   }
         self.preparing = {}
 
-        self.scheduler = AsyncIOScheduler()
+        self.scheduler = AsyncIOScheduler(timezone=pytz.utc)
         self.loop = None
         self.key = "MATCH_PVP_HANDLER"
 

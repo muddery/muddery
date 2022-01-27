@@ -6,6 +6,7 @@ from sanic import Sanic
 from muddery.server.settings import SETTINGS
 from muddery.server.utils.utils import write_pid_file, read_pid_file
 from muddery.launcher.manager import collect_webclient_static
+from muddery.worldeditor.utils import responses
 
 
 def run():
@@ -17,9 +18,6 @@ def run():
     app = Sanic("muddery_webclient")
     app.static('/webclient', SETTINGS.WEBCLIENT_ROOT)
     app.static('/media', SETTINGS.MEDIA_ROOT)
-
-    # save pid
-    write_pid_file(SETTINGS.WEBCLIENT_PID, os.getpid())
 
     @app.before_server_start
     async def before_server_start(app, loop):
@@ -41,6 +39,11 @@ def run():
             pass
         print("Webclient stopped.")
 
+    # check the server's status
+    @app.get("/status")
+    async def get_status(request):
+        return responses.success_response()
+
     app.run(port=SETTINGS.WEBCLIENT_PORT)
 
 
@@ -53,13 +56,11 @@ def stop():
 
     try:
         os.kill(pid, signal.SIGTERM)
+        print("Webclient server stopped.")
     except:
-        print("Can not stop the webclient server.")
-        return
+        print("Can not stop the webclient server correctly.")
 
     try:
         os.remove(SETTINGS.WEBCLIENT_PID)
     except:
         pass
-
-    print("Webclient stopped.")

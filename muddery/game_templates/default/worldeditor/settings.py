@@ -14,8 +14,5 @@ class ServerSettings(object):
     # sure to change this to your actual host addresses/IPs.
     ALLOWED_HOSTS = "['*']"
 
-    # The webserver sits behind a Portal proxy.
-    WEBCLIENT_PORT = 8000
-
-    # Server-side websocket port to open for the webclient.
-    WEBSERVER_PORT = 8001
+    # http port to open for the worldeditor.
+    WORLD_EDITOR_PORT = 8002

@@ -1,6 +1,9 @@
 
 import os
 import traceback
+import asyncio
+import subprocess
+from urllib import request, error
 from muddery.launcher import configs, utils
 
 
@@ -144,8 +147,15 @@ def collect_webclient_static():
     utils.init_game_env(gamedir)
 
     # game webpage files
-    from muddery.server.server import SETTINGS as SERVER_SETTINGS
-    for item in SERVER_SETTINGS.WEBCLIENT_SOURCE_DIRS:
+    try:
+        from muddery.server.settings import SETTINGS
+        from server.settings import ServerSettings
+        SETTINGS.update(ServerSettings())
+    except Exception as e:
+        traceback.print_exc()
+        raise
+
+    for item in SETTINGS.WEBCLIENT_SOURCE_DIRS:
         source = item[1]
         target = item[0]
         utils.copy_tree(source, target)
@@ -162,13 +172,127 @@ def collect_worldeditor_static():
     utils.init_game_env(gamedir)
 
     # world editor webpage files
-    from muddery.worldeditor.server import SETTINGS as EDITOR_SETTINGS
-    for item in EDITOR_SETTINGS.WEBCLIENT_SOURCE_DIRS:
+    try:
+        from muddery.worldeditor.settings import SETTINGS
+        from worldeditor.settings import ServerSettings
+        SETTINGS.update(ServerSettings())
+    except Exception as e:
+        traceback.print_exc()
+        raise
+
+    for item in SETTINGS.WEBCLIENT_SOURCE_DIRS:
         source = item[1]
         target = item[0]
         utils.copy_tree(source, target)
 
     print("Worldeditor's static files collected.")
+
+
+async def wait_server_status(server_process, webclient_process, worldeditor_process, timeout):
+    """
+    Check server's status.
+
+    :param server_starting:
+    :param webclient_starting:
+    :param worldeditor_starting:
+    :param timeout:
+    :return:
+    """
+    async def async_reqeust(url, timeout):
+        try:
+            req = request.urlopen(url, timeout=timeout)
+            code = req.getcode()
+        except error.HTTPError as e:
+            code = e.code
+        except error.URLError as e:
+            code = -1
+        return code
+
+    async def get_server_status(server_process, webclient_process, worldeditor_process):
+        # get status url
+        server_status_url = None
+        webclient_status_url = None
+        worldeditor_status_url = None
+
+        if server_process or webclient_process:
+            try:
+                from muddery.server.settings import SETTINGS as SERVER_SETTINGS
+                from server.settings import ServerSettings
+                SERVER_SETTINGS.update(ServerSettings())
+                server_status_url = "http://localhost:%s/status" % SERVER_SETTINGS.WEBSERVER_PORT
+                webclient_status_url = "http://localhost:%s/status" % SERVER_SETTINGS.WEBCLIENT_PORT
+            except Exception as e:
+                traceback.print_exc()
+                if server_process:
+                    server_process = None
+                    print("Can not start the game server.")
+                if webclient_process:
+                    webclient_process = None
+                    print("Can not start the webclient server.")
+
+        if worldeditor_process:
+            try:
+                from muddery.worldeditor.settings import SETTINGS as WORLDEDITOR_SETTINGS
+                from worldeditor.settings import ServerSettings
+                WORLDEDITOR_SETTINGS.update(ServerSettings())
+                worldeditor_status_url = "http://localhost:%s/status" % WORLDEDITOR_SETTINGS.WORLD_EDITOR_PORT
+            except Exception as e:
+                traceback.print_exc()
+                worldeditor_process = None
+                print("Can not start the worldeditor server.")
+
+        while server_process or webclient_process or worldeditor_process:
+            awaits = []
+            if server_process:
+                if server_process.poll() is not None:
+                    # process stopped
+                    server_process = None
+                    print("Can not start the game server.")
+                else:
+                    awaits.append(asyncio.create_task(async_reqeust(server_status_url, timeout=5)))
+
+            if webclient_process:
+                if webclient_process.poll() is not None:
+                    # process stopped
+                    webclient_process = None
+                    print("Can not start the webclient server.")
+                else:
+                    awaits.append(asyncio.create_task(async_reqeust(webclient_status_url, timeout=5)))
+
+            if worldeditor_process:
+                if worldeditor_process.poll() is not None:
+                    # process stopped
+                    worldeditor_process = None
+                    print("Can not start the worldeditor server.")
+                else:
+                    awaits.append(asyncio.create_task(async_reqeust(worldeditor_status_url, timeout=5)))
+
+            results = await asyncio.gather(*awaits)
+
+            if server_process:
+                if results[0] == 200:
+                    server_process = None
+                    print("Game server is running.")
+                results = results[1:]
+
+            if webclient_process:
+                if results[0] == 200:
+                    webclient_process = None
+                    print("Webclient is running.")
+                results = results[1:]
+
+            if worldeditor_process:
+                if results[0] == 200:
+                    worldeditor_process = None
+                    print("Worldeditor is running.")
+
+            await asyncio.sleep(1)
+
+    try:
+        await asyncio.wait_for(get_server_status(server_process, webclient_process, worldeditor_process), timeout)
+        print("All servers are running.")
+    except asyncio.TimeoutError:
+        print("Can not start all servers.")
 
 
 def run(server: bool = True, webclient: bool = True, editor: bool = True):
@@ -180,8 +304,6 @@ def run(server: bool = True, webclient: bool = True, editor: bool = True):
         webclient: run the web client.
         editor: run the world editor.
     """
-    import subprocess
-
     gamedir = os.path.abspath(configs.CURRENT_DIR)
     utils.init_game_env(gamedir)
 
@@ -196,20 +318,29 @@ def run(server: bool = True, webclient: bool = True, editor: bool = True):
         "shell": True,
     }
 
+    server_starting = False
+    webclient_starting = False
+    worldeditor_starting = False
+
+    server_process = None
     if server:
         # Run game servers.
         command = template % "run_server.py"
-        subprocess.Popen(command, **options)
+        server_process = subprocess.Popen(command, **options)
 
+    webclient_process = None
     if webclient:
         # Run web client.
         command = template % "run_webclient.py"
-        subprocess.Popen(command, **options)
+        webclient_process = subprocess.Popen(command, **options)
 
+    worldeditor_process = None
     if editor:
         # Run world editor.
         command = template % "run_worldeditor.py"
-        subprocess.Popen(command, **options)
+        worldeditor_process = subprocess.Popen(command, **options)
+
+    asyncio.run(wait_server_status(server_process, webclient_process, worldeditor_process, 30))
 
 
 def kill(server: bool = True, webclient: bool = True, editor: bool = True):

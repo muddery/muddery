@@ -9,6 +9,7 @@ creation commands.
 """
 
 import time, datetime, traceback, ast
+import pytz
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from muddery.server.settings import SETTINGS
 from muddery.server.utils.logger import logger
@@ -112,7 +113,7 @@ class MudderyCharacter(ELEMENT("MATTER")):
     def get_scheduler(self):
         # get the apscheduler
         if not self.scheduler:
-            self.scheduler = AsyncIOScheduler()
+            self.scheduler = AsyncIOScheduler(timezone=pytz.utc)
             self.scheduler.start()
         return self.scheduler
 

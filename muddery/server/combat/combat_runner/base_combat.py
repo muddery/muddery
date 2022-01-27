@@ -17,6 +17,7 @@ The life of a combat:
 from enum import Enum
 import time
 import datetime
+import pytz
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from muddery.server.utils.utils import async_wait, async_gather
 from muddery.server.utils.logger import logger
@@ -123,7 +124,7 @@ class BaseCombat(object):
         if self.timeout:
             # Set finish time.
             finish_time = datetime.datetime.fromtimestamp(time.time() + self.timeout)
-            self.scheduler = AsyncIOScheduler()
+            self.scheduler = AsyncIOScheduler(timezone=pytz.utc)
             self.scheduler.add_job(self.at_timeout, "date", run_date=finish_time)
             self.scheduler.start()
 
