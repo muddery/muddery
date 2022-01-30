@@ -131,7 +131,7 @@ class CmdSay(BaseCommand):
         target = args["target"]
         message = args["message"]
 
-        Server.world.send_message(caller, target_type, target, message)
+        await Server.world.send_message(caller, target_type, target, message)
 
 
 #------------------------------------------------------------
@@ -782,7 +782,7 @@ class CmdRejectCombat(BaseCommand):
         if not caller:
             return
 
-        MatchPVPHandler.inst().reject(caller)
+        await MatchPVPHandler.inst().reject(caller)
 
 
 # ------------------------------------------------------------

@@ -1830,10 +1830,12 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         rankings = top_rankings
         rankings.extend([char_id for char_id in nearest_rankings if char_id not in top_rankings])
 
-        data = [{"name": CharacterInfo.inst().get_nickname(char_id),
+        nicknames = await async_gather([CharacterInfo.inst().get_nickname(char_id) for char_id in rankings])
+
+        data = [{"name": nicknames[index],
                  "id": char_id,
                  "ranking": HonoursMapper.inst().get_ranking(char_id),
-                 "honour": HonoursMapper.inst().get_honour(char_id)} for char_id in rankings]
+                 "honour": HonoursMapper.inst().get_honour(char_id)} for index, char_id in enumerate(rankings)]
         await self.msg({"rankings": data})
 
     async def get_quest_info(self, quest_key):

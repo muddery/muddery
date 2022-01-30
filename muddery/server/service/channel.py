@@ -110,7 +110,7 @@ class Channel(object):
             try:
                 await self.send_out(data)
             except Exception as e:
-                logger.log_err("[Send message error][%s]%s" % e)
+                logger.log_err("[Send message error][%s]%s" % (self, e))
 
     async def msg_all(self):
         """

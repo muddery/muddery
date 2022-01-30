@@ -1,6 +1,7 @@
 """
 This model translates default strings into localized strings.
 """
+import traceback
 from collections import deque
 import time
 import datetime
@@ -171,7 +172,7 @@ class MatchPVPHandler(Singleton):
                         pass
 
                     try:
-                        character_B = Server.world.get_character(char_id_A)
+                        character_B = Server.world.get_character(char_id_B)
                         awaits.append(character_B.msg({"prepare_match": self.preparing_time}))
                     except KeyError:
                         pass
@@ -179,19 +180,20 @@ class MatchPVPHandler(Singleton):
                     if awaits:
                         await async_wait(awaits)
 
-                    job_time = datetime.datetime.now() + datetime.timedelta(seconds=self.preparing_time)
+                    job_time = datetime.datetime.now(tz=pytz.utc) + datetime.timedelta(seconds=self.preparing_time)
                     job = self.scheduler.add_job(self.fight, 'date', run_date=job_time, args=(char_id_A, char_id_B))
+
                     self.preparing[char_id_A] = {
                         "time": time.time(),
                         "opponent": char_id_B,
                         "confirmed": False,
-                        "job_id": job.id(),
+                        "job_id": job.id,
                     }
                     self.preparing[char_id_B] = {
                         "time": time.time(),
                         "opponent": char_id_A,
                         "confirmed": False,
-                        "job_id": job.id(),
+                        "job_id": job.id,
                     }
 
     def confirm(self, character):
@@ -240,7 +242,7 @@ class MatchPVPHandler(Singleton):
             await async_wait(awaits)
         await self.remove(character)
 
-    async def fight(self, opponents_id):
+    async def fight(self, char_id_A, char_id_B):
         """
         Create a combat.
         """
@@ -258,28 +260,28 @@ class MatchPVPHandler(Singleton):
             except KeyError:
                 pass
 
-        confirmed0 = opponents_id[0] in self.preparing and self.preparing[opponents_id[0]]["confirmed"]
-        confirmed1 = opponents_id[1] in self.preparing and self.preparing[opponents_id[1]]["confirmed"]
+        confirmed_A = char_id_A in self.preparing and self.preparing[char_id_A]["confirmed"]
+        confirmed_B = char_id_B in self.preparing and self.preparing[char_id_B]["confirmed"]
 
-        if not confirmed0 and not confirmed1:
+        if not confirmed_A and not confirmed_B:
             # Neither characters is confirmed.
-            remove_by_id(opponents_id[0])
-            remove_by_id(opponents_id[1])
+            remove_by_id(char_id_A)
+            remove_by_id(char_id_B)
 
             awaits = []
             try:
-                character0 = Server.world.get_character(opponents_id[0])
+                character0 = Server.world.get_character(char_id_A)
                 awaits.append(character0.msg({
-                    "match_rejected": opponents_id[0],
+                    "match_rejected": char_id_A,
                     "left_combat_queue": "",
                 }))
             except KeyError:
                 pass
 
             try:
-                character1 = Server.world.get_character(opponents_id[1])
+                character1 = Server.world.get_character(char_id_B)
                 awaits.append(character1.msg({
-                    "match_rejected": opponents_id[1],
+                    "match_rejected": char_id_B,
                     "left_combat_queue": "",
                 }))
             except KeyError:
@@ -288,17 +290,17 @@ class MatchPVPHandler(Singleton):
             if awaits:
                 await async_wait(awaits)
 
-        elif not confirmed0:
+        elif not confirmed_A:
             # Opponents 0 not confirmed.
 
             # Remove opponent 0.
-            remove_by_id(opponents_id[0])
+            remove_by_id(char_id_A)
 
             awaits = []
             try:
-                character0 = Server.world.get_character(opponents_id[0])
+                character0 = Server.world.get_character(char_id_A)
                 awaits.append(character0.msg({
-                    "match_rejected": opponents_id[0],
+                    "match_rejected": char_id_A,
                     "left_combat_queue": "",
                 }))
             except KeyError:
@@ -306,14 +308,14 @@ class MatchPVPHandler(Singleton):
 
             # Put opponent 1 back to the waiting queue.
             try:
-                del self.preparing[opponents_id[1]]
+                del self.preparing[char_id_B]
             except KeyError:
                 pass
 
             try:
-                character1 = Server.world.get_character(opponents_id[1])
+                character1 = Server.world.get_character(char_id_B)
                 awaits.append(character1.msg({
-                    "match_rejected": opponents_id[0],
+                    "match_rejected": char_id_A,
                 }))
             except KeyError:
                 pass
@@ -321,17 +323,17 @@ class MatchPVPHandler(Singleton):
             if awaits:
                 await async_wait(awaits)
 
-        elif not confirmed1:
+        elif not confirmed_B:
             # opponents 1 not confirmed
 
             # Remove opponent 1.
-            remove_by_id(opponents_id[1])
+            remove_by_id(char_id_B)
 
             awaits = []
             try:
-                character0 = Server.world.get_character(opponents_id[1])
+                character0 = Server.world.get_character(char_id_B)
                 awaits.append(character0.msg({
-                    "match_rejected": opponents_id[1],
+                    "match_rejected": char_id_B,
                     "left_combat_queue": "",
                 }))
             except KeyError:
@@ -339,24 +341,24 @@ class MatchPVPHandler(Singleton):
 
             # Put opponent 0 back to the waiting queue.
             try:
-                del self.preparing[opponents_id[0]]
+                del self.preparing[char_id_A]
             except KeyError:
                 pass
 
             try:
-                character1 = Server.world.get_character(opponents_id[0])
+                character1 = Server.world.get_character(char_id_A)
                 awaits.append(character1.msg({
-                    "match_rejected": opponents_id[1],
+                    "match_rejected": char_id_B,
                 }))
             except KeyError:
                 pass
 
-        elif confirmed0 and confirmed1:
+        elif confirmed_A and confirmed_B:
             # all confirmed
 
             # create a combat
-            opponent0 = Server.world.get_character(opponents_id[0])
-            opponent1 = Server.world.get_character(opponents_id[1])
+            opponent0 = Server.world.get_character(char_id_A)
+            opponent1 = Server.world.get_character(char_id_B)
 
             # create a new combat
             await COMBAT_HANDLER.create_combat(
@@ -366,8 +368,8 @@ class MatchPVPHandler(Singleton):
                 timeout=0
             )
 
-            remove_by_id(opponents_id[0])
-            remove_by_id(opponents_id[1])
+            remove_by_id(char_id_A)
+            remove_by_id(char_id_B)
 
             await async_wait([
                 opponent0.msg({"left_combat_queue": ""}),
