@@ -199,7 +199,7 @@ def get_all_from_tables(tables, condition=None):
 
     session_name = SETTINGS.WORLD_DATA_APP
     session = DBManager.inst().get_session(session_name)
-    config = SETTINGS.AL_DATABASES[session_name]
+    config = SETTINGS.DATABASES[session_name]
     module = importlib.import_module(config["MODELS"])
 
     if len(tables) == 1:

@@ -1,4 +1,8 @@
+
 from muddery.server.database import worlddata_models as BaseModels
+
+
+Base = BaseModels.Base
 
 
 # ------------------------------------------------------------

@@ -45,7 +45,7 @@ class Upgrader(BaseUpgrader):
 
         # load system localized strings
         from django.conf import settings
-        from muddery.worldeditor.services import importer
+        from muddery.server.utils import importer
 
         # system data file's path
         system_data_path = os.path.join(settings.MUDDERY_DIR, settings.WORLD_DATA_FOLDER)

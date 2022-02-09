@@ -4,7 +4,7 @@ Event action's base class.
 
 from muddery.server.settings import SETTINGS
 from muddery.server.database.worlddata.worlddata import WorldData
-from muddery.worldeditor.database.db_manager import DBManager
+from muddery.server.database.db_manager import DBManager
 
 
 class BaseEventAction(object):

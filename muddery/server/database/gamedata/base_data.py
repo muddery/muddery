@@ -32,7 +32,7 @@ class BaseData(object):
         Create the storage object.
         """
         session = SETTINGS.GAME_DATA_APP
-        config = SETTINGS.AL_DATABASES[session]
+        config = SETTINGS.DATABASES[session]
 
         storage_class = utils.class_from_path(SETTINGS.DATABASE_STORAGE_OBJECT)
         storage = storage_class(
@@ -54,7 +54,7 @@ class BaseData(object):
         Create the storage object.
         """
         session = SETTINGS.GAME_DATA_APP
-        config = SETTINGS.AL_DATABASES[session]
+        config = SETTINGS.DATABASES[session]
 
         storage_class = utils.class_from_path(SETTINGS.DATABASE_STORAGE_OBJECT)
         return storage_class(

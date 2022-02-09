@@ -49,6 +49,8 @@ class system_data(BaseModel):
     # The last id of accounts.
     object_index = Column(Integer, default=0, nullable=False)
 
+    test = Column(Integer, default=0, nullable=False)
+
 
 # ------------------------------------------------------------
 #

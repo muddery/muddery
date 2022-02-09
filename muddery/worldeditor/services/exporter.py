@@ -9,7 +9,7 @@ from muddery.launcher import configs
 from muddery.server.utils.exception import MudderyError, ERR
 from muddery.worldeditor.settings import SETTINGS
 from muddery.worldeditor.database.db_manager import DBManager
-from muddery.worldeditor.utils import writers
+from muddery.common.utils import writers
 from muddery.worldeditor.dao import general_querys
 
 

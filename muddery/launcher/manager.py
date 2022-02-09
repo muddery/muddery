@@ -56,6 +56,64 @@ def upgrade_game(template=None):
     UPGRADE_HANDLER.upgrade_game(gamedir, template, configs.MUDDERY_LIB)
 
 
+def create_server_tables():
+    """
+    Create database tables.
+    :return:
+    """
+    print("Creating the game server's tables.")
+
+    gamedir = os.path.abspath(configs.CURRENT_DIR)
+
+    # Load settings.
+    try:
+        from muddery.server.settings import SETTINGS
+        from server.settings import ServerSettings
+        SETTINGS.update(ServerSettings())
+        utils.init_game_env(gamedir)
+    except Exception as e:
+        traceback.print_exc()
+        raise
+
+    # Create tables
+    try:
+        from muddery.server.database.db_manager import DBManager
+        DBManager.inst().connect()
+        DBManager.inst().create_tables()
+    except Exception as e:
+        traceback.print_exc()
+        raise
+
+
+def create_worldeditor_tables():
+    """
+    Create database tables.
+    :return:
+    """
+    print("Creating the worldeditor's tables.")
+
+    gamedir = os.path.abspath(configs.CURRENT_DIR)
+
+    # Load settings.
+    try:
+        from muddery.worldeditor.settings import SETTINGS
+        from worldeditor.settings import ServerSettings
+        SETTINGS.update(ServerSettings())
+        utils.init_game_env(gamedir)
+    except Exception as e:
+        traceback.print_exc()
+        raise
+
+    # Create tables
+    try:
+        from muddery.worldeditor.database.db_manager import DBManager
+        DBManager.inst().connect()
+        DBManager.inst().create_tables()
+    except Exception as e:
+        traceback.print_exc()
+        raise
+
+
 def load_game_data():
     """
     Reload the game's default data.
@@ -81,11 +139,10 @@ def load_game_data():
         traceback.print_exc()
         raise
 
-    # create tables first
+    # connect the db
     try:
         from muddery.server.database.db_manager import DBManager
         DBManager.inst().connect()
-        DBManager.inst().create_tables()
     except Exception as e:
         traceback.print_exc()
         raise
@@ -119,23 +176,23 @@ def load_system_data():
         raise
 
 
-def migrate_database():
+def migrate_database(database_name):
     """
     Migrate databases to the latest Muddery version.
 
     :return:
     """
-    print("Migrating databases.")
+    print("Migrating %s." % database_name)
 
     gamedir = os.path.abspath(configs.CURRENT_DIR)
     utils.init_game_env(gamedir)
 
     try:
-        from muddery.server.server import Server
-        Server.inst()
+        subprocess.Popen("alembic -n %s revision --autogenerate" % database_name).wait()
+        subprocess.Popen("alembic -n %s upgrade head" % database_name).wait()
     except Exception as e:
         traceback.print_exc()
-        print("Migrate database error: %s" % e)
+        print("Migrate %s error: %s" % (database_name, e))
 
 
 def collect_webclient_static():
@@ -192,9 +249,9 @@ async def wait_server_status(server_process, webclient_process, worldeditor_proc
     """
     Check server's status.
 
-    :param server_starting:
-    :param webclient_starting:
-    :param worldeditor_starting:
+    :param server_process:
+    :param webclient_process:
+    :param worldeditor_process:
     :param timeout:
     :return:
     """
@@ -317,10 +374,6 @@ def run(server: bool = True, webclient: bool = True, editor: bool = True):
     options = {
         "shell": True,
     }
-
-    server_starting = False
-    webclient_starting = False
-    worldeditor_starting = False
 
     server_process = None
     if server:

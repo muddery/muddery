@@ -2,6 +2,9 @@
 from muddery.server.database import gamedata_models as BaseModels
 
 
+Base = BaseModels.Base
+
+
 class system_data(BaseModels.system_data):
     pass
 

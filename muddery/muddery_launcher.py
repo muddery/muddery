@@ -115,7 +115,8 @@ def main():
     elif args.setup:
         # Create databases and load default data.
         try:
-            manager.migrate_database()
+            manager.create_server_tables()
+            manager.create_worldeditor_tables()
             manager.load_game_data()
             manager.collect_webclient_static()
             manager.collect_worldeditor_static()
@@ -154,7 +155,9 @@ def main():
 
     elif args.migrate:
         try:
-            manager.migrate_database()
+            manager.migrate_database("gamedata")
+            manager.migrate_database("worlddata")
+            manager.migrate_database("worldeditor")
         except Exception as e:
             print(e)
             sys.exit(-1)

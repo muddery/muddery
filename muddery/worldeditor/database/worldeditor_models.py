@@ -2,6 +2,7 @@
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String, DateTime, Boolean
 from sqlalchemy import UniqueConstraint
+
 Base = declarative_base()
 
 KEY_LENGTH = 80

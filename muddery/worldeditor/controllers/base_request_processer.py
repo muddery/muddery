@@ -2,7 +2,7 @@
 Battle commands. They only can be used when a character is in a combat.
 """
 
-from muddery.worldeditor.utils import responses
+from muddery.common.networks import responses
 
 
 class BaseRequestProcesser(object):

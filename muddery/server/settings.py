@@ -78,23 +78,19 @@ class Settings(object):
 
     ######################################################################
     # Database config
-    ######################################################################
-
-    # Database config syntax:
-    # ENGINE - path to the the database backend. Possible choices are:
-    #            'django.db.backends.sqlite3', (default)
-    #            'django.db.backends.mysql',
-    #            'django.db.backends.postgresql_psycopg2' (see Issue 241),
-    #            'django.db.backends.oracle' (untested).
+    # ENGINE: Database's engine. Possible choices are:
+    #         'sqlite3'
+    #         'mysql'
     # NAME - database name, or path to the db file for sqlite3
     # USER - db admin (unused in sqlite3)
     # PASSWORD - db admin password (unused in sqlite3)
     # HOST - empty string is localhost (unused in sqlite3)
     # PORT - empty string defaults to localhost (unused in sqlite3)
-    AL_DATABASES = {
+    ######################################################################
+    DATABASES = {
         'gamedata': {
-            'ENGINE': 'sqlite3',
             'MODELS': 'gamedata.models',
+            'ENGINE': 'sqlite3',
             'NAME': os.path.join(GAME_DIR, "server", "gamedata.db3"),
             'USER': '',
             'PASSWORD': '',
@@ -103,8 +99,8 @@ class Settings(object):
             'DEBUG': False,
         },
         'worlddata': {
-            'ENGINE': 'sqlite3',
             'MODELS': 'worlddata.models',
+            'ENGINE': 'sqlite3',
             'NAME': os.path.join(GAME_DIR, "server", "worlddata.db3"),
             'USER': '',
             'PASSWORD': '',

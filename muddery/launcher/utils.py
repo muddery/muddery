@@ -7,7 +7,6 @@ import os
 import sys
 import shutil
 import configparser
-import traceback
 from pathlib import Path
 from subprocess import check_output, CalledProcessError, STDOUT
 from muddery.launcher import configs
@@ -338,7 +337,7 @@ def import_local_data(clear=False):
     Import all local data files to models.
     """
     from muddery.server.settings import SETTINGS
-    from muddery.worldeditor.services import importer
+    from muddery.server.utils import importer
 
     # load custom data
     # data file's path
@@ -355,7 +354,7 @@ def import_system_data():
     Import all local data files to models.
     """
     from muddery.server.settings import SETTINGS
-    from muddery.worldeditor.services import importer
+    from muddery.server.utils import importer
 
     # load system default data
     default_template = os.path.join(configs.GAME_TEMPLATES, configs.DEFAULT_TEMPLATE)
@@ -376,7 +375,8 @@ def init_game_env(gamedir):
     os.chdir(gamedir)
 
     # Add gamedir to python path
-    sys.path.insert(0, gamedir)
+    if len(sys.path) == 0 or sys.path[0] != gamedir:
+        sys.path.insert(0, gamedir)
 
 
 def print_info():

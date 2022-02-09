@@ -4,11 +4,10 @@ Decorators of web service controllers.
 This decorator can add controllers to the controller dict for future usage.
 """
 
-import json
 from muddery.server.utils.logger import logger
 from muddery.server.utils.exception import MudderyError, ERR
 from muddery.worldeditor.mappings.request_set import RequestSet
-from muddery.worldeditor.utils import responses
+from muddery.common.networks import responses
 from muddery.worldeditor.utils.auth import check_token
 
 

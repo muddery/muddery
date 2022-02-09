@@ -3,14 +3,12 @@ Battle commands. They only can be used when a character is in a combat.
 """
 
 from sqlalchemy.orm.exc import NoResultFound
-from muddery.server.utils.password import hash_password, make_salt, check_password
+from muddery.server.utils.password import check_password
 from muddery.server.utils.exception import MudderyError, ERR
-from muddery.worldeditor.settings import SETTINGS
 from muddery.worldeditor.utils.auth import generate_token
-from muddery.worldeditor.utils.responses import success_response, error_response
+from muddery.common.networks.responses import success_response
 from muddery.worldeditor.controllers.base_request_processer import BaseRequestProcesser
 from muddery.worldeditor.dao.accounts import Accounts
-from muddery.server.utils.localized_strings_handler import _
 
 
 class login(BaseRequestProcesser):

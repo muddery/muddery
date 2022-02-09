@@ -34,7 +34,7 @@ class WorldData(object):
         module = importlib.import_module(SETTINGS.WORLD_DATA_MODEL_FILE)
         models = [cls for cls in vars(module).values() if inspect.isclass(cls)]
         for model in models:
-            config = SETTINGS.AL_DATABASES[SETTINGS.WORLD_DATA_APP]
+            config = SETTINGS.DATABASES[SETTINGS.WORLD_DATA_APP]
             cls.tables[model.__name__] = MemoryTable(
                 SETTINGS.WORLD_DATA_APP,
                 config["MODELS"],
@@ -46,7 +46,7 @@ class WorldData(object):
         Load a table to the local storage.
         """
         try:
-            config = SETTINGS.AL_DATABASES[SETTINGS.WORLD_DATA_APP]
+            config = SETTINGS.DATABASES[SETTINGS.WORLD_DATA_APP]
             cls.tables[table_name] = MemoryTable(
                 SETTINGS.WORLD_DATA_APP,
                 config["MODELS"],

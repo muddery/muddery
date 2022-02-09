@@ -32,7 +32,6 @@ class Server(Singleton):
 
         try:
             DBManager.inst().connect()
-            DBManager.inst().create_tables()
             self.db_connected = True
         except Exception as e:
             traceback.print_exc()
