@@ -14,6 +14,7 @@ from muddery.worldeditor.utils import responses
 
 
 def run():
+    # Check if a server is running.
     pid = read_pid_file(SETTINGS.SERVER_PID)
     if pid:
         print('\nThe game server has already started.\nYou can run "muddery stop" to stop it and start it again.')

@@ -284,6 +284,24 @@ controller = {
         controller.pushPage(name, url, null);
     },
 
+    editMatter: function(element_type, element_key, no_delete) {
+        var url = "matter_editor.html?element_type=" + element_type;
+
+        var name = "";
+        if (element_key) {
+            name = "Edit " + element_type;
+            url += "&element_key=" + element_key;
+            if (no_delete) {
+                url += "&no_delete=1";
+            }
+        }
+        else {
+            name = "Add " + element_type;
+        }
+
+        controller.pushPage(name, url, null);
+    },
+
     createObject: function(element_type, field_values) {
         var url = "element_editor.html?element_type=" + element_type;
         var name = "Add " + element_type;
@@ -330,6 +348,21 @@ controller = {
         }
         else {
             name = "添加元素属性";
+        }
+
+        controller.pushPage(name, url, null);
+    },
+
+    editConditionalDesc: function(element_type, element_key, record_id) {
+        var url = "conditional_desc_editor.html?element_type=" + element_type + "&element_key=" + element_key;
+
+        var name = "";
+        if (record_id) {
+            name = "编辑描述信息";
+            url += "&record=" + record_id;
+        }
+        else {
+            name = "添加描述信息";
         }
 
         controller.pushPage(name, url, null);

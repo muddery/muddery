@@ -111,8 +111,6 @@ def save_form(values, table_name, record_id=None):
             session.add(record)
         else:
             session.merge(record)
-
-        session.commit()
     except Exception as e:
         session.rollback()
         logger.log_trace("Can not save form %s" % e)
@@ -281,8 +279,6 @@ def save_element_form(tables, element_type, element_key):
                 session.add(record)
             else:
                 session.merge(record)
-
-        session.commit()
     except Exception as e:
         session.rollback()
         logger.log_trace("Can not save form %s" % e)
@@ -299,34 +295,29 @@ def save_map_positions(area, rooms):
         area: (dict) area's data.
         rooms: (dict) rooms' data.
     """
-    # area data
-    general_querys.update_records("world_areas", {
-        "background": area["background"],
-        "width": area["width"],
-        "height": area["height"],
-    }, condition={
-        "key": area["key"]
-    }, commit=False)
-
-    # rooms
-    for room in rooms:
-        position = ""
-        if len(room["position"]) > 1:
-            position = "(%s,%s)" % (room["position"][0], room["position"][1])
-
-        general_querys.update_records("world_rooms", {
-            "position": position,
-        }, condition={
-            "key": room["key"],
-        }, commit=False)
-
     session = DBManager.inst().get_session(SETTINGS.WORLD_DATA_APP)
-    try:
-        session.commit()
-    except Exception as e:
-        session.rollback()
-        logger.log_trace("Can not save map %s" % e)
-        raise
+
+    with session.begin():
+        # area data
+        general_querys.update_records("world_areas", {
+            "background": area["background"],
+            "width": area["width"],
+            "height": area["height"],
+        }, condition={
+            "key": area["key"]
+        })
+
+        # rooms
+        for room in rooms:
+            position = ""
+            if len(room["position"]) > 1:
+                position = "(%s,%s)" % (room["position"][0], room["position"][1])
+
+            general_querys.update_records("world_rooms", {
+                "position": position,
+            }, condition={
+                "key": room["key"],
+            })
 
 
 def delete_element(element_key, base_element_type=None):

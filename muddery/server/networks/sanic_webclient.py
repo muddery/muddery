@@ -10,6 +10,7 @@ from muddery.worldeditor.utils import responses
 
 
 def run():
+    # Check if a server is running.
     pid = read_pid_file(SETTINGS.WEBCLIENT_PID)
     if pid:
         print('\nThe webclient server has already started.\nYou can run "muddery stop" to stop it and start it again.')

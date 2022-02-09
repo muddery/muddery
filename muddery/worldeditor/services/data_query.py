@@ -251,6 +251,33 @@ def query_element_level_properties(element_type, element_key, level):
     return fields
 
 
+def query_conditional_desc(element_type, element_key):
+    """
+    Query all properties of the given element.
+
+    Args:
+        element_type: (string) the object's element type.
+        element_key: (string) object's element key.
+    """
+    # Get fields.
+    table_fields = query_fields_info("conditional_desc")
+    fields = [field for field in table_fields if field["name"] != "element" and field["name"] != "key"]
+    records = general_querys.filter_records("conditional_desc", {
+        "element": element_type,
+        "key": element_key,
+    })
+    rows = []
+    for record in records:
+        line = [getattr(record, field["name"]) for field in fields]
+        rows.append(line)
+
+    table = {
+        "fields": fields,
+        "records": rows,
+    }
+    return table
+
+
 def query_element_event_triggers(element_type):
     """
     Query all event triggers of the given element type.

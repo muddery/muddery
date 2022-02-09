@@ -326,6 +326,31 @@ class QueryEventActionForm(BaseRequestProcesser):
         return success_response(data)
 
 
+class QueryConditionalDesc(BaseRequestProcesser):
+    """
+    Query an object's conditional descriptions.
+
+    Args:
+        element_type: (string) element's type
+        element_key: (string) element's key.
+    """
+    path = "query_conditional_desc"
+    name = ""
+
+    def func(self, args):
+        if 'element_type' not in args:
+            raise MudderyError(ERR.missing_args, 'Missing the argument: "element_type".')
+
+        if 'element_key' not in args:
+            raise MudderyError(ERR.missing_args, 'Missing the argument: "element_key".')
+
+        element_type = args["element_type"]
+        element_key = args["element_key"]
+
+        data = data_query.query_conditional_desc(element_type, element_key)
+        return success_response(data)
+
+
 class QueryForm(BaseRequestProcesser):
     """
     Query a form of a record of a table.

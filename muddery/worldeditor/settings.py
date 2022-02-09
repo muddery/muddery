@@ -118,7 +118,7 @@ class Settings(object):
     ######################################################################
 
     # Path of base world data forms.
-    PATH_DATA_FORMS_BASE = "muddery.worldeditor.forms.default_forms_al"
+    PATH_DATA_FORMS_BASE = "muddery.worldeditor.forms.default_forms"
 
     # Path of base request processers.
     PATH_REQUEST_PROCESSERS_BASE = "muddery.worldeditor.controllers"

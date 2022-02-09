@@ -15,6 +15,7 @@ from muddery.launcher.manager import collect_worldeditor_static
 
 
 def run():
+    # Check if a server is running.
     pid = read_pid_file(SETTINGS.WORLD_EDITOR_PID)
     if pid:
         print('\nThe worldeditor server has already started.\nYou can run "muddery stop" to stop it and start it again.')
