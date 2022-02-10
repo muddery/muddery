@@ -14,11 +14,10 @@ from muddery.server.database.worlddata.world_npcs import WorldNPCs
 from muddery.server.database.worlddata.world_exits import WorldExits
 from muddery.server.database.worlddata.world_objects import WorldObjects
 from muddery.server.mappings.element_set import ELEMENT
-from muddery.server.utils.defines import ConversationType, EventType
+from muddery.common.utils.defines import ConversationType, EventType
 from muddery.server.utils.localized_strings_handler import _
 from muddery.server.database.worlddata.worlddata import WorldData
-from muddery.server.elements.base_element import BaseElement
-from muddery.server.utils.utils import async_wait
+from muddery.common.utils.utils import async_wait
 
 
 class MudderyRoom(ELEMENT("MATTER")):

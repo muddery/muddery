@@ -8,7 +8,7 @@ from asyncio import CancelledError
 from muddery.server.networks.sanic_channel import SanicChannel
 from muddery.server.settings import SETTINGS
 from muddery.server.server import Server
-from muddery.server.utils.utils import write_pid_file, read_pid_file
+from muddery.common.utils.utils import write_pid_file, read_pid_file
 from muddery.common.networks import responses
 
 

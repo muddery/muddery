@@ -1,9 +1,10 @@
 
 import traceback
-from muddery.server.utils.singleton import Singleton
-from muddery.server.utils.password import hash_password, make_salt
+from muddery.common.utils.singleton import Singleton
+from muddery.common.utils.password import hash_password, make_salt
 from muddery.worldeditor.settings import SETTINGS
-from muddery.worldeditor.database.db_manager import DBManager
+from muddery.server.database.worlddata_db import WorldDataDB
+from muddery.worldeditor.database.worldeditor_db import WorldEditorDB
 from muddery.worldeditor.dao.accounts import Accounts
 from muddery.worldeditor.processer import Processor
 
@@ -31,11 +32,14 @@ class Server(Singleton):
             return
 
         try:
-            DBManager.inst().connect()
-            self.db_connected = True
+            # init world data
+            WorldDataDB.inst().connect()
+            WorldEditorDB.inst().connect()
         except Exception as e:
             traceback.print_exc()
             raise
+
+        self.db_connected = True
 
     def check_admin(self):
         """
@@ -47,5 +51,5 @@ class Server(Singleton):
             password = hash_password(SETTINGS.ADMIN_PASSWORD, salt)
             Accounts.inst().add(SETTINGS.ADMIN_NAME, password, salt, "ADMIN")
 
-    def handle_request(self, method, path, data, token=None):
-        return self.processor.process(method, path, data, token)
+    async def handle_request(self, method, path, data, token=None):
+        return await self.processor.process(method, path, data, token)

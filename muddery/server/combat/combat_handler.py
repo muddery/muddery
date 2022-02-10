@@ -1,7 +1,7 @@
 
 from muddery.server.settings import SETTINGS
-from muddery.server.utils.utils import class_from_path
-from muddery.server.utils.defines import CombatType
+from muddery.common.utils.utils import class_from_path
+from muddery.common.utils.defines import CombatType
 
 
 class CombatHandler(object):

@@ -2,12 +2,16 @@
 
 import sys
 from muddery.worldeditor.networks.sanic_server import run, stop
-from muddery.worldeditor.settings import SETTINGS
-from worldeditor.settings import ServerSettings
+from muddery.server.settings import SETTINGS as GAME_SERVER_SETTINGS
+from server.settings import ServerSettings as GameServerSettings
+from muddery.worldeditor.settings import SETTINGS as WORLDEDITOR_SETTINGS
+from worldeditor.settings import ServerSettings as WorldeditorSettings
 
 
 def main(argv):
-    SETTINGS.update(ServerSettings())
+    GAME_SERVER_SETTINGS.update(GameServerSettings())
+    WORLDEDITOR_SETTINGS.update(WorldeditorSettings())
+
     if len(argv) == 1:
         # start the server
         run()

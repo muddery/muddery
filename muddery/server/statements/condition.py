@@ -3,7 +3,6 @@ Condition statements return a boolean value. They can be used in conditional sta
 """
 
 from muddery.server.statements.statement_function import StatementFunction
-from muddery.server.utils.utils import async_gather
 
 
 class FuncIsQuestAccepted(StatementFunction):

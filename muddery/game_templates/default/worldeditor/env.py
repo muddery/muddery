@@ -14,10 +14,9 @@ from muddery.worldeditor.settings import SETTINGS
 from worldeditor.settings import ServerSettings
 SETTINGS.update(ServerSettings())
 
-from muddery.worldeditor.database.db_manager import DBManager
-DBManager.inst().connect()
+from muddery.worldeditor.database.worldeditor_db import WorldEditorDB
+WorldEditorDB.inst().connect()
 
-DATABASE_NAME = "worldeditor"
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -52,7 +51,7 @@ def run_migrations_offline():
     script output.
 
     """
-    url = DBManager.inst().get_db_link(DATABASE_NAME)
+    url = WorldEditorDB.inst().get_db_link()
     context.configure(
         url=url,
         target_metadata=target_metadata,
@@ -71,7 +70,7 @@ def run_migrations_online():
     and associate a connection with the context.
 
     """
-    connectable = DBManager.inst().get_engine(DATABASE_NAME)
+    connectable = WorldEditorDB.inst().get_engine()
     with connectable.connect() as connection:
         context.configure(
             connection=connection, target_metadata=target_metadata

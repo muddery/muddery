@@ -5,9 +5,8 @@ Store object's element key data in memory.
 
 import datetime
 from sqlalchemy import select, update, delete, func
-from muddery.server.utils.singleton import Singleton
-from muddery.worldeditor.settings import SETTINGS
-from muddery.worldeditor.database.db_manager import DBManager
+from muddery.common.utils.singleton import Singleton
+from muddery.worldeditor.database.worldeditor_db import WorldEditorDB
 from muddery.worldeditor.database.worldeditor_models import accounts
 
 
@@ -17,7 +16,7 @@ class Accounts(Singleton):
     """
     # data storage
     def __init__(self):
-        self.session = DBManager.inst().get_session(SETTINGS.WORLD_EDITOR_APP)
+        self.session = WorldEditorDB.inst().get_session()
 
     def add(self, username, password, salt, account_type):
         """

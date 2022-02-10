@@ -3,7 +3,7 @@ Query and deal common tables.
 """
 
 from sqlalchemy import select, or_
-from muddery.server.utils.singleton import Singleton
+from muddery.common.utils.singleton import Singleton
 from muddery.worldeditor.dao.common_mapper_base import CommonMapper
 from muddery.server.mappings.element_set import ELEMENT
 

@@ -2,13 +2,8 @@
 Upgrade custom's game dir to the latest version.
 """
 
-import traceback
-import os
-import shutil
 from muddery.launcher.upgrader.base_upgrader import BaseUpgrader
-from muddery.launcher.upgrader.utils import file_append
-from muddery.launcher.utils import import_system_data, init_game_env
-from muddery.server.utils.exception import MudderyError, ERR
+from muddery.common.utils.exception import MudderyError, ERR
 
 
 class Upgrader(BaseUpgrader):

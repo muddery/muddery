@@ -5,7 +5,7 @@ This model translates default strings into localized strings.
 import importlib, inspect
 from wtforms_alchemy import ModelForm
 from sqlalchemy.ext.declarative import declarative_base
-from muddery.server.utils.logger import logger
+from muddery.worldeditor.utils.logger import logger
 from muddery.worldeditor.settings import SETTINGS
 Base = declarative_base()
 

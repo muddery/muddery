@@ -10,7 +10,7 @@ distribution systems.
 import traceback
 import datetime
 from muddery.server.settings import SETTINGS
-from muddery.server.utils.password import hash_password, check_password, make_salt
+from muddery.common.utils.password import hash_password, check_password, make_salt
 from muddery.server.database.gamedata.accounts import Accounts
 from muddery.server.database.gamedata.server_bans import ServerBans
 from muddery.server.database.gamedata.system_data import SystemData
@@ -29,10 +29,9 @@ from muddery.server.elements.base_element import BaseElement
 from muddery.server.mappings.element_set import ELEMENT
 from muddery.server.server import Server
 from muddery.server.utils.game_settings import GameSettings
-from muddery.server.utils.exception import MudderyError, ERR
+from muddery.common.utils.exception import MudderyError, ERR
 from muddery.server.utils.localized_strings_handler import _
-from muddery.server.utils.logger import logger
-from muddery.server.utils.utils import async_wait, async_gather
+from muddery.common.utils.utils import async_wait, async_gather
 
 
 _SESSIONS = None

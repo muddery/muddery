@@ -4,7 +4,7 @@ Combat handler.
 
 from muddery.server.combat.combat_runner.base_combat import BaseCombat, CStatus
 from muddery.server.utils.honours_handler import HONOURS_HANDLER
-from muddery.server.utils.utils import async_wait
+from muddery.common.utils.utils import async_wait
 
 
 class HonourCombat(BaseCombat):

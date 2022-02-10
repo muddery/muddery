@@ -5,8 +5,8 @@ This model handle statements.
 import re, ast, traceback
 from muddery.server.settings import SETTINGS
 from muddery.server.utils.logger import logger
-from muddery.server.utils.utils import class_from_path
-from muddery.server.utils.utils import async_gather, async_wait
+from muddery.common.utils.utils import class_from_path
+from muddery.common.utils.utils import async_gather, async_wait
 
 
 re_function = re.compile(r'[a-zA-Z_][a-zA-Z0-9_\.]*\(.*?\)')

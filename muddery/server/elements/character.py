@@ -13,7 +13,6 @@ import pytz
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from muddery.server.settings import SETTINGS
 from muddery.server.utils.logger import logger
-from muddery.server.elements.base_element import BaseElement
 from muddery.server.combat.combat_handler import COMBAT_HANDLER
 from muddery.server.mappings.element_set import ELEMENT
 from muddery.server.database.worlddata.loot_list import CharacterLootList
@@ -23,12 +22,12 @@ from muddery.server.database.worlddata.character_states_dict import CharacterSta
 from muddery.server.utils.loot_handler import LootHandler
 from muddery.server.utils.game_settings import GameSettings
 from muddery.server.utils.localized_strings_handler import _
-from muddery.server.utils.defines import CombatType, EventType
+from muddery.common.utils.defines import CombatType, EventType
 from muddery.server.utils.object_states_handler import ObjectStatesHandler
-from muddery.server.utils.utils import class_from_path
+from muddery.common.utils.utils import class_from_path
 from muddery.server.database.gamedata.object_storage import MemoryObjectStorage
 from muddery.server.server import Server
-from muddery.server.utils.utils import async_gather
+from muddery.common.utils.utils import async_gather
 
 
 CHARACTER_LAST_ID = 0

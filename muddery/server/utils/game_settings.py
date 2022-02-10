@@ -3,7 +3,7 @@ Set the game's configuration.
 """
 
 from muddery.server.database.worlddata.game_settings import GameSettings as GameSettingsData
-from muddery.server.utils.singleton import Singleton
+from muddery.common.utils.singleton import Singleton
 
 
 class GameSettings(Singleton):

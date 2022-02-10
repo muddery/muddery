@@ -75,7 +75,6 @@ class Settings(object):
     # http://www.w3.org/TR/REC-html40/struct/dirlang.html#langcodes
     LANGUAGE_CODE = "en-US"
 
-
     ######################################################################
     # Database config
     # ENGINE: Database's engine. Possible choices are:
@@ -87,27 +86,26 @@ class Settings(object):
     # HOST - empty string is localhost (unused in sqlite3)
     # PORT - empty string defaults to localhost (unused in sqlite3)
     ######################################################################
-    DATABASES = {
-        'gamedata': {
-            'MODELS': 'gamedata.models',
-            'ENGINE': 'sqlite3',
-            'NAME': os.path.join(GAME_DIR, "server", "gamedata.db3"),
-            'USER': '',
-            'PASSWORD': '',
-            'HOST': '',
-            'PORT': '',
-            'DEBUG': False,
-        },
-        'worlddata': {
-            'MODELS': 'worlddata.models',
-            'ENGINE': 'sqlite3',
-            'NAME': os.path.join(GAME_DIR, "server", "worlddata.db3"),
-            'USER': '',
-            'PASSWORD': '',
-            'HOST': '',
-            'PORT': '',
-            'DEBUG': False,
-        },
+    GAMEDATA_DB = {
+        'MODELS': 'gamedata.models',
+        'ENGINE': 'sqlite3',
+        'NAME': os.path.join(GAME_DIR, "server", "gamedata.db3"),
+        'USER': '',
+        'PASSWORD': '',
+        'HOST': '',
+        'PORT': '',
+        'DEBUG': False,
+    }
+
+    WORLDDATA_DB = {
+        'MODELS': 'worlddata.models',
+        'ENGINE': 'sqlite3',
+        'NAME': os.path.join(GAME_DIR, "server", "worlddata.db3"),
+        'USER': '',
+        'PASSWORD': '',
+        'HOST': '',
+        'PORT': '',
+        'DEBUG': False,
     }
 
     # Database Access Object
@@ -213,19 +211,6 @@ class Settings(object):
     ######################################################################
     # Muddery additional data features
     ######################################################################
-
-    # data app name
-    GAME_DATA_APP = "gamedata"
-
-    # game data model's filename
-    GAME_DATA_MODEL_FILE = "gamedata.models"
-
-    # data app name
-    WORLD_DATA_APP = "worlddata"
-
-    # world data model's filename
-    WORLD_DATA_MODEL_FILE = "worlddata.models"
-
     # wsgi setting
     WSGI_APPLICATION = 'muddery.server.service.router.wsgi_application'
 

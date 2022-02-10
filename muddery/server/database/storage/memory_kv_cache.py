@@ -3,7 +3,6 @@ Key value storage in relational database.
 """
 
 from muddery.server.database.storage.memory_kv_storage import MemoryKVStorage
-from muddery.server.utils.exception import MudderyError, ERR
 
 
 class MemoryKVCache(MemoryKVStorage):

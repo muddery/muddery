@@ -6,7 +6,7 @@ import weakref
 from muddery.server.utils.logger import logger
 from muddery.server.statements.statement_handler import STATEMENT_HANDLER
 from muddery.server.utils.localized_strings_handler import _
-from muddery.server.utils.exception import MudderyError
+from muddery.common.utils.exception import MudderyError
 from muddery.server.utils.game_settings import GameSettings
 from muddery.server.database.worlddata.worlddata import WorldData
 from muddery.server.database.worlddata.quest_dependencies import QuestDependencies
@@ -14,7 +14,7 @@ from muddery.server.mappings.quest_status_set import QUEST_STATUS_SET
 from muddery.server.mappings.element_set import ELEMENT
 from muddery.server.database.gamedata.character_quests import CharacterQuests
 from muddery.server.database.gamedata.character_finished_quests import CharacterFinishedQuests
-from muddery.server.utils.utils import async_wait, async_gather
+from muddery.common.utils.utils import async_wait, async_gather
 
 
 class QuestHandler(object):

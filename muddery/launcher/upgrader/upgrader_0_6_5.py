@@ -2,7 +2,6 @@
 Upgrade custom's game dir to the latest version.
 """
 
-import traceback
 import os
 import shutil
 from django.conf import settings
@@ -10,9 +9,8 @@ from django.db import connections
 from django.db.utils import OperationalError
 import django.core.management
 from muddery.launcher.upgrader.base_upgrader import BaseUpgrader
-from muddery.launcher.upgrader.utils import file_append
-from muddery.launcher.utils import import_system_data, init_game_env
-from muddery.server.utils.exception import MudderyError, ERR
+from muddery.launcher.utils import init_game_env
+from muddery.common.utils.exception import MudderyError, ERR
 
 
 class Upgrader(BaseUpgrader):

@@ -4,8 +4,9 @@ Query and deal game data.
 """
 
 from muddery.server.settings import SETTINGS
-from muddery.server.utils import utils
+from muddery.common.utils import utils
 from muddery.server.database.storage.storage_with_cache import StorageWithCache
+from muddery.server.database.gamedata_db import GameDataDB
 
 
 class BaseData(object):
@@ -31,13 +32,10 @@ class BaseData(object):
         """
         Create the storage object.
         """
-        session = SETTINGS.GAME_DATA_APP
-        config = SETTINGS.DATABASES[session]
-
         storage_class = utils.class_from_path(SETTINGS.DATABASE_STORAGE_OBJECT)
         storage = storage_class(
-            session,
-            config["MODELS"],
+            GameDataDB.inst().get_session(),
+            SETTINGS.GAMEDATA_DB["MODELS"],
             table_name,
             category_name,
             key_field,
@@ -53,13 +51,10 @@ class BaseData(object):
         """
         Create the storage object.
         """
-        session = SETTINGS.GAME_DATA_APP
-        config = SETTINGS.DATABASES[session]
-
         storage_class = utils.class_from_path(SETTINGS.DATABASE_STORAGE_OBJECT)
         return storage_class(
-            session,
-            config["MODELS"],
+            GameDataDB.inst().get_session(),
+            SETTINGS.GAMEDATA_DB["MODELS"],
             table_name,
             category_name,
             key_field,

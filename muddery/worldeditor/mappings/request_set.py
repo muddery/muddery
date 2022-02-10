@@ -2,9 +2,8 @@
 All available requests.
 """
 
-from muddery.server.utils.logger import logger
-from muddery.server.utils.exception import MudderyError
-from muddery.server.utils.utils import classes_in_path
+from muddery.common.utils.utils import classes_in_path
+from muddery.worldeditor.utils.logger import logger
 from muddery.worldeditor.settings import SETTINGS
 from muddery.worldeditor.controllers.base_request_processer import BaseRequestProcesser
 

@@ -7,7 +7,7 @@ in the character. It controls quest's objectives.
 """
 
 from muddery.server.utils.logger import logger
-from muddery.server.utils import defines
+from muddery.common.utils import defines
 from muddery.server.database.gamedata.character_quest_objectives import CharacterQuestObjectives
 from muddery.server.statements.statement_handler import STATEMENT_HANDLER
 from muddery.server.utils.loot_handler import LootHandler
@@ -18,7 +18,7 @@ from muddery.server.database.worlddata.loot_list import QuestRewardList
 from muddery.server.database.worlddata.quest_objectives import QuestObjectives
 from muddery.server.mappings.element_set import ELEMENT
 from muddery.server.elements.base_element import BaseElement
-from muddery.server.utils.utils import async_gather, async_wait
+from muddery.common.utils.utils import async_gather, async_wait
 
 
 class MudderyQuest(BaseElement):

@@ -9,9 +9,9 @@ from muddery.launcher.upgrader.upgrade_handler import UPGRADE_HANDLER
 from muddery.launcher import configs
 from muddery.launcher.utils import copy_tree
 from muddery.server.settings import SETTINGS
-from muddery.server.database.db_manager import DBManager
+from muddery.server.database.worlddata_db import WorldDataDB
 from muddery.server.utils.logger import logger
-from muddery.server.utils.exception import MudderyError, ERR
+from muddery.common.utils.exception import MudderyError, ERR
 from muddery.common.utils import readers
 
 
@@ -192,8 +192,8 @@ def import_file(fullname, file_type=None, table_name=None, clear=True, except_er
             file_type = ext_name[1:].lower()
 
     # get model
-    session = DBManager.inst().get_session(SETTINGS.WORLD_DATA_APP)
-    model = DBManager.inst().get_model(SETTINGS.WORLD_DATA_APP, table_name)
+    session = WorldDataDB.inst().get_session()
+    model = WorldDataDB.inst().get_model(table_name)
 
     if clear:
         stmt = delete(model)
@@ -303,7 +303,7 @@ def import_data_path(path, clear=True, except_errors=False):
         except_errors: (boolean) except error records and load other records.
     """
     # import tables one by one
-    tables = DBManager.inst().get_tables(SETTINGS.WORLD_DATA_APP)
+    tables = WorldDataDB.inst().get_tables()
     for table_name in tables:
         file_names = glob.glob(os.path.join(path, table_name) + ".*")
 
@@ -327,7 +327,7 @@ def import_table_path(path, table_name, clear=True, except_errors=False):
         except_errors: (boolean) except error records and load other records.
     """
     if clear:
-        DBManager.inst().clear_table(SETTINGS.WORLD_DATA_APP, table_name)
+        WorldDataDB.inst().clear_table(table_name)
 
     if not os.path.isdir(path):
         return

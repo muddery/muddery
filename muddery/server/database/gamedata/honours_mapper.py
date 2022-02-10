@@ -6,11 +6,9 @@ import importlib
 import traceback
 
 from muddery.server.settings import SETTINGS
-from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 from sqlalchemy import select, update, delete
-from muddery.server.utils.utils import class_from_path
-from muddery.server.database.db_manager import DBManager
-from muddery.server.utils.singleton import Singleton
+from muddery.server.database.gamedata_db import GameDataDB
+from muddery.common.utils.singleton import Singleton
 
 
 class HonoursMapper(Singleton):
@@ -19,9 +17,9 @@ class HonoursMapper(Singleton):
     """
     def __init__(self):
         self.model_name = "honours"
-        module = importlib.import_module(SETTINGS.GAME_DATA_MODEL_FILE)
+        module = importlib.import_module(SETTINGS.GAMEDATA_DB["MODELS"])
         self.model = getattr(module, self.model_name)
-        self.session = DBManager.inst().get_session(SETTINGS.GAME_DATA_APP)
+        self.session = GameDataDB.inst().get_session()
 
         self.honours = {}
         self.rankings = []

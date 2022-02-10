@@ -5,11 +5,11 @@ The DialogueHandler maintains a pool of dialogues.
 
 """
 
-from muddery.server.utils import defines
+from muddery.common.utils import defines
 from muddery.server.utils.game_settings import GameSettings
 from muddery.server.mappings.element_set import ELEMENT
-from muddery.server.utils.singleton import Singleton
-from muddery.server.utils.utils import async_gather, async_wait
+from muddery.common.utils.singleton import Singleton
+from muddery.common.utils.utils import async_gather
 
 
 class DialogueHandler(Singleton):

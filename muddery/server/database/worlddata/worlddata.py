@@ -4,11 +4,11 @@ Load and cache all worlddata.
 import importlib
 import inspect
 import traceback
-
+from muddery.common.utils.exception import MudderyError
 from muddery.server.settings import SETTINGS
 from muddery.server.database.storage.memory_record import MemoryRecord
 from muddery.server.database.storage.memory_table import MemoryTable
-from muddery.server.utils.exception import MudderyError
+from muddery.server.database.worlddata_db import WorldDataDB
 
 
 class WorldData(object):
@@ -46,9 +46,9 @@ class WorldData(object):
         Load a table to the local storage.
         """
         try:
-            config = SETTINGS.DATABASES[SETTINGS.WORLD_DATA_APP]
+            config = SETTINGS.WORLDDATA_DB
             cls.tables[table_name] = MemoryTable(
-                SETTINGS.WORLD_DATA_APP,
+                WorldDataDB.inst().get_session(),
                 config["MODELS"],
                 table_name)
         except Exception as e:

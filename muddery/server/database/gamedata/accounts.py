@@ -5,7 +5,7 @@ Store object's element key data in memory.
 
 import datetime
 from muddery.server.database.gamedata.base_data import BaseData
-from muddery.server.utils.singleton import Singleton
+from muddery.common.utils.singleton import Singleton
 
 
 class Accounts(BaseData, Singleton):

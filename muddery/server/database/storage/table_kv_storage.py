@@ -2,15 +2,11 @@
 Key value storage in relational database.
 """
 
-import traceback
 import importlib
-from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
+from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy import select, update, delete
 from sqlalchemy import func
 from muddery.server.database.storage.base_kv_storage import BaseKeyValueStorage
-from muddery.server.utils.exception import MudderyError, ERR
-from muddery.server.utils.utils import class_from_path
-from muddery.server.database.db_manager import DBManager
 
 
 class TableKVStorage(BaseKeyValueStorage):
@@ -18,14 +14,13 @@ class TableKVStorage(BaseKeyValueStorage):
     The storage of object attributes.
     """
     def __init__(self,
-                 session_name: str,
+                 session: any,
                  model_path: str,
                  model_name: str,
                  category_field: str,
                  key_field: str,
                  default_value_field: str = None):
         """
-
         :param model_name: table's model
         :param category_field: category's field name in the table
         :param key_field: key's field name in the table
@@ -36,11 +31,11 @@ class TableKVStorage(BaseKeyValueStorage):
         super(TableKVStorage, self).__init__()
 
         # db model
+        self.session = session
         self.model_name = model_name
         module = importlib.import_module(model_path)
         self.model = getattr(module, model_name)
         self.columns = self.model.__table__.columns.keys()
-        self.session = DBManager.inst().get_session(session_name)
 
         self.trans = None
 

@@ -2,14 +2,14 @@
 
 import os
 import signal
+import json
 from sanic import Sanic
-from muddery.server.server import Server as GameServer
-from muddery.worldeditor.server import Server as EditorServer
-from muddery.worldeditor.settings import SETTINGS
-from muddery.server.utils.logger import logger
-from muddery.server.utils.utils import write_pid_file, read_pid_file
+from muddery.common.utils.utils import write_pid_file, read_pid_file
 from muddery.common.networks import responses
 from muddery.launcher.manager import collect_worldeditor_static
+from muddery.worldeditor.server import Server
+from muddery.worldeditor.settings import SETTINGS
+from muddery.worldeditor.utils.logger import logger
 
 
 def run():
@@ -24,11 +24,8 @@ def run():
 
     @app.before_server_start
     async def before_server_start(app, loop):
-        # init the game database
-        await GameServer.inst().connect_db()
-
         # init the worldeditor server
-        EditorServer.inst().init()
+        Server.inst().init()
 
         # collect static files
         collect_worldeditor_static()
@@ -66,8 +63,22 @@ def run():
             if token.find(token_prefix) == 0:
                 token = token[len(token_prefix):]
 
-        data = request.json if request.method == "POST" else None
-        response = EditorServer.inst().handle_request(request.method, request.path, data, token)
+        if request.content_type == "application/json":
+            data = request.json
+        elif request.content_type == "application/x-www-form-urlencoded":
+            data = {}
+            if "func_no" in request.form and len(request.form["func_no"]) > 0:
+                data["func_no"] = json.loads(request.form["func_no"][0])
+            if "args" in request.form and len(request.form["args"]) > 0:
+                data["args"] = json.loads(request.form["args"][0])
+            if "token" in request.form and len(request.form["token"]) > 0:
+                token = request.form["token"][0]
+        elif request.content_type.index("multipart/form-data;") == 0:
+            data = request.form
+        else:
+            data = None
+
+        response = await Server.inst().handle_request(request.method, request.path, data, token)
 
         if hasattr(response, "body"):
             print("[RESPOND] '%s' '%s'" % (response.status, response.body))

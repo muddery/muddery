@@ -4,10 +4,10 @@ Decorators of web service controllers.
 This decorator can add controllers to the controller dict for future usage.
 """
 
-from muddery.server.utils.logger import logger
-from muddery.server.utils.exception import MudderyError, ERR
-from muddery.worldeditor.mappings.request_set import RequestSet
 from muddery.common.networks import responses
+from muddery.common.utils.exception import MudderyError, ERR
+from muddery.worldeditor.mappings.request_set import RequestSet
+from muddery.worldeditor.utils.logger import logger
 from muddery.worldeditor.utils.auth import check_token
 
 
@@ -23,7 +23,7 @@ class Processor(object):
         self.path_prefix = path_prefix
         self.request_set = RequestSet()
 
-    def process(self, method, path, data, token=None):
+    async def process(self, method, path, data, token=None):
         """
         Process a request by the func key.
         
@@ -59,7 +59,7 @@ class Processor(object):
 
         # call function
         try:
-            response = processor.func(args)
+            response = await processor.func(args)
         except MudderyError as e:
             logger.log_err("Error: %s, %s" % (e.code, e))
             response = responses.error_response(e.code, msg=str(e), data=e.data, status=200)

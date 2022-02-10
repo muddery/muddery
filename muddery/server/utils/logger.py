@@ -27,14 +27,14 @@ class Logger(object):
         self.logger = self.setup_log(log_path, log_name, log_level)
 
     @classmethod
-    def instance(cls, *args, **kwargs):
+    def instance(cls):
         """
         Singleton object.
         """
         if not hasattr(Logger, "_instance"):
             with Logger._instance_lock:
                 if not hasattr(Logger, "_instance"):
-                    Logger._instance = Logger(*args, **kwargs)
+                    Logger._instance = Logger(SETTINGS.LOG_DIR, SETTINGS.LOG_NAME, SETTINGS.LOG_LEVEL)
         return Logger._instance
 
     def setup_log(self, log_path, log_name, log_level):
@@ -188,4 +188,4 @@ class Logger(object):
             self.logger.info("[SS] %s" % line)
 
 
-logger = Logger.instance(SETTINGS.LOG_DIR, SETTINGS.LOG_NAME, SETTINGS.LOG_LEVEL)
+logger = Logger.instance()

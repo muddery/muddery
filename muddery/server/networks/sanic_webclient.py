@@ -4,7 +4,7 @@ import os
 import signal
 from sanic import Sanic
 from muddery.server.settings import SETTINGS
-from muddery.server.utils.utils import write_pid_file, read_pid_file
+from muddery.common.utils.utils import write_pid_file, read_pid_file
 from muddery.launcher.manager import collect_webclient_static
 from muddery.common.networks import responses
 

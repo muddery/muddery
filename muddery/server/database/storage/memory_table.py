@@ -4,8 +4,7 @@ Load and cache all worlddata.
 
 import importlib
 from sqlalchemy import UniqueConstraint, select
-from muddery.server.database.db_manager import DBManager
-from muddery.server.utils.exception import MudderyError
+from muddery.common.utils.exception import MudderyError
 from muddery.server.database.storage.memory_record import MemoryRecord
 
 
@@ -13,13 +12,12 @@ class MemoryTable(object):
     """
     Load and cache a table's data.
     """
-
-    def __init__(self, session_name, model_path, model_name):
+    def __init__(self, session, model_path, model_name):
         self.model_name = model_name
         module = importlib.import_module(model_path)
+        self.session = session
         self.model = getattr(module, model_name)
         self.columns = self.model.__table__.columns.keys()
-        self.session = DBManager.inst().get_session(session_name)
 
         self.records = []
         self.table_fields = {}

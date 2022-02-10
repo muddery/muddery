@@ -12,7 +12,7 @@ from muddery.server.database.worlddata.dialogue_relations import DialogueRelatio
 from muddery.server.database.worlddata.dialogue_quests import DialogueQuests
 from muddery.server.elements.base_element import BaseElement
 from muddery.server.mappings.quest_status_set import QUEST_STATUS_SET
-from muddery.server.utils.utils import async_gather
+from muddery.common.utils.utils import async_gather
 
 
 class MudderyDialogue(BaseElement):

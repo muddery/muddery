@@ -4,7 +4,7 @@ The storage of all character's quests that are finished.
 """
 
 from muddery.server.database.gamedata.base_data import BaseData
-from muddery.server.utils.singleton import Singleton
+from muddery.common.utils.singleton import Singleton
 
 
 class CharacterFinishedQuests(BaseData, Singleton):

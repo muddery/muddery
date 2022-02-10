@@ -14,5 +14,5 @@ class BaseRequestProcesser(object):
     login = True
     staff = True
 
-    def func(self, args):
+    async def func(self, args):
         return responses.empty_response()

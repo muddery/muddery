@@ -3,7 +3,6 @@ Quest status.
 """
 
 from muddery.server.quests.base_quest_status import BaseQuestStatus
-from muddery.server.utils.utils import async_gather
 
 
 class NotAccepted(BaseQuestStatus):

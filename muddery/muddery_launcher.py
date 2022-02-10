@@ -180,7 +180,7 @@ def main():
     if operation == "start":
         try:
             if not args.run_server and not args.run_webclient and not args.run_editor:
-                manager.run()
+                manager.run(server=True, webclient=True, editor=True)
             else:
                 manager.run(
                     server=args.run_server,

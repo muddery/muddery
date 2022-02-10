@@ -1,12 +1,11 @@
-
-import threading
 import traceback
 from muddery.server.settings import SETTINGS
-from muddery.server.utils.utils import class_from_path
-from muddery.server.utils.singleton import Singleton
+from muddery.common.utils.utils import class_from_path
+from muddery.common.utils.singleton import Singleton
 from muddery.server.service.command_handler import CommandHandler
-from muddery.server.database.db_manager import DBManager
-from muddery.server.utils.utils import classes_in_path
+from muddery.server.database.gamedata_db import GameDataDB
+from muddery.server.database.worlddata_db import WorldDataDB
+from muddery.common.utils.utils import classes_in_path
 from muddery.server.database.gamedata.base_data import BaseData
 
 
@@ -40,8 +39,8 @@ class Server(Singleton):
             return
 
         try:
-            DBManager.inst().connect()
-            self.db_connected = True
+            WorldDataDB.inst().connect()
+            GameDataDB.inst().connect()
         except Exception as e:
             traceback.print_exc()
             raise
@@ -49,6 +48,8 @@ class Server(Singleton):
         # load classes
         for cls in classes_in_path(SETTINGS.PATH_GAMEDATA_DAO, BaseData):
             await cls.inst().init()
+
+        self.db_connected = True
 
     async def create_the_world(self):
         """

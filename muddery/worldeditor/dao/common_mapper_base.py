@@ -4,9 +4,9 @@ This model translates default strings into localized strings.
 
 from sqlalchemy import select, update, delete
 from muddery.server.mappings.element_set import ELEMENT
+from muddery.server.database.worlddata_db import WorldDataDB
 from muddery.worldeditor.settings import SETTINGS
 from muddery.worldeditor.dao import general_querys
-from muddery.worldeditor.database.db_manager import DBManager
 
 
 class CommonMapper(object):
@@ -15,10 +15,8 @@ class CommonMapper(object):
     """
     def __init__(self, model_name):
         self.model_name = model_name
-
-        session_name = SETTINGS.WORLD_DATA_APP
-        self.session = DBManager.inst().get_session(session_name)
-        self.model = DBManager.inst().get_model(session_name, model_name)
+        self.session = WorldDataDB.inst().get_session()
+        self.model = WorldDataDB.inst().get_model(model_name)
 
     def all(self):
         stmt = select(self.model)

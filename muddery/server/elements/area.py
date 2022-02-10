@@ -5,7 +5,7 @@ Areas are compose the whole map. Rooms are belongs to areas.
 
 """
 
-from muddery.server.utils.utils import async_wait
+from muddery.common.utils.utils import async_wait
 from muddery.server.utils.logger import logger
 from muddery.server.mappings.element_set import ELEMENT
 from muddery.server.database.worlddata.image_resource import ImageResource

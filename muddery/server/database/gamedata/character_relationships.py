@@ -3,7 +3,7 @@ The relationship between players and elements
 """
 
 from muddery.server.database.gamedata.base_data import BaseData
-from muddery.server.utils.singleton import Singleton
+from muddery.common.utils.singleton import Singleton
 
 
 class CharacterRelationships(BaseData, Singleton):

@@ -7,7 +7,7 @@ import muddery
 from muddery.launcher.upgrader import utils
 from muddery.launcher.upgrader import upgrader_0_7_0
 from muddery.launcher import utils as launcher_utils
-from muddery.server.utils.exception import MudderyError, ERR
+from muddery.common.utils.exception import MudderyError, ERR
 
 
 class UpgradeHandler(object):

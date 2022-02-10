@@ -64,22 +64,26 @@ def create_server_tables():
     print("Creating the game server's tables.")
 
     gamedir = os.path.abspath(configs.CURRENT_DIR)
+    utils.init_game_env(gamedir)
 
     # Load settings.
     try:
         from muddery.server.settings import SETTINGS
         from server.settings import ServerSettings
         SETTINGS.update(ServerSettings())
-        utils.init_game_env(gamedir)
     except Exception as e:
         traceback.print_exc()
         raise
 
     # Create tables
     try:
-        from muddery.server.database.db_manager import DBManager
-        DBManager.inst().connect()
-        DBManager.inst().create_tables()
+        from muddery.server.database.gamedata_db import GameDataDB
+        GameDataDB.inst().connect()
+        GameDataDB.inst().create_tables()
+
+        from muddery.server.database.worlddata_db import WorldDataDB
+        WorldDataDB.inst().connect()
+        WorldDataDB.inst().create_tables()
     except Exception as e:
         traceback.print_exc()
         raise
@@ -93,22 +97,22 @@ def create_worldeditor_tables():
     print("Creating the worldeditor's tables.")
 
     gamedir = os.path.abspath(configs.CURRENT_DIR)
+    utils.init_game_env(gamedir)
 
     # Load settings.
     try:
         from muddery.worldeditor.settings import SETTINGS
         from worldeditor.settings import ServerSettings
         SETTINGS.update(ServerSettings())
-        utils.init_game_env(gamedir)
     except Exception as e:
         traceback.print_exc()
         raise
 
     # Create tables
     try:
-        from muddery.worldeditor.database.db_manager import DBManager
-        DBManager.inst().connect()
-        DBManager.inst().create_tables()
+        from muddery.worldeditor.database.worldeditor_db import WorldEditorDB
+        WorldEditorDB.inst().connect()
+        WorldEditorDB.inst().create_tables()
     except Exception as e:
         traceback.print_exc()
         raise
@@ -123,6 +127,7 @@ def load_game_data():
     print("Importing local data.")
 
     gamedir = os.path.abspath(configs.CURRENT_DIR)
+    utils.init_game_env(gamedir)
 
     # Load settings.
     try:
@@ -133,16 +138,10 @@ def load_game_data():
         traceback.print_exc()
         raise
 
-    try:
-        utils.init_game_env(gamedir)
-    except Exception as e:
-        traceback.print_exc()
-        raise
-
     # connect the db
     try:
-        from muddery.server.database.db_manager import DBManager
-        DBManager.inst().connect()
+        from muddery.server.database.worlddata_db import WorldDataDB
+        WorldDataDB.inst().connect()
     except Exception as e:
         traceback.print_exc()
         raise
@@ -352,7 +351,7 @@ async def wait_server_status(server_process, webclient_process, worldeditor_proc
         print("Can not start all servers.")
 
 
-def run(server: bool = True, webclient: bool = True, editor: bool = True):
+def run(server: bool = False, webclient: bool = False, editor: bool = False, restart: bool = False):
     """
     Run servers.
 
@@ -360,16 +359,20 @@ def run(server: bool = True, webclient: bool = True, editor: bool = True):
         server: run the game server.
         webclient: run the web client.
         editor: run the world editor.
+        restart: restart the server
     """
     gamedir = os.path.abspath(configs.CURRENT_DIR)
     utils.init_game_env(gamedir)
 
     print("Starting ...")
 
-    if os.name == "nt":
-        template = "python %s"
-    else:
-        template = "python %s &"
+    template = "python %s"
+
+    if restart:
+        template += " restart"
+
+    if os.name != "nt":
+        template += " &"
 
     options = {
         "shell": True,

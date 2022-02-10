@@ -2,7 +2,7 @@
 Query and deal common tables.
 """
 
-from muddery.server.utils.singleton import Singleton
+from muddery.common.utils.singleton import Singleton
 from muddery.worldeditor.dao.common_mapper_base import CommonMapper
 
 

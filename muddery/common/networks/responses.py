@@ -2,7 +2,8 @@
 Make HTTP response.
 """
 
-from sanic.response import empty, json, file_stream
+from sanic.response import empty, json, ResponseStream
+from mimetypes import guess_type
 
 
 def cross_domain(func):
@@ -55,7 +56,7 @@ def error_response(code=-1, data=None, msg=None, status=400):
     }, status=status)
 
 
-def file_response(file_obj, filename):
+async def file_response(file_obj, filename):
     """
     Respond a file.
 
@@ -63,4 +64,19 @@ def file_response(file_obj, filename):
         file_obj: (file object) file to send.
         filename: (string) filename.
     """
-    return file_stream(file_obj, filename=filename)
+    async def streaming_fn(response):
+        while True:
+            content = file_obj.read(4096)
+            if len(content) < 1:
+                break
+            await response.write(content)
+
+    headers = {"Content-Disposition": f'attachment; filename="{filename}"'}
+    mime_type = guess_type(filename)[0] or "text/plain"
+
+    return ResponseStream(
+        streaming_fn=streaming_fn,
+        status=200,
+        headers=headers,
+        content_type=mime_type,
+    )

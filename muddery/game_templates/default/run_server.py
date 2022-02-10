@@ -8,6 +8,7 @@ from server.settings import ServerSettings
 
 def main(argv):
     SETTINGS.update(ServerSettings())
+
     if len(argv) == 1:
         # start the server
         run()

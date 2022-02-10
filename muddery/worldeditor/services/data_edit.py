@@ -2,18 +2,17 @@
 Battle commands. They only can be used when a character is in a combat.
 """
 
-from wtforms_alchemy.validators import Unique
-from muddery.server.utils.logger import logger
-from muddery.server.utils.exception import MudderyError, ERR
+from muddery.common.utils.exception import MudderyError, ERR
+from muddery.server.mappings.element_set import ELEMENT, ELEMENT_SET
+from muddery.server.mappings.event_action_set import EVENT_ACTION_SET
+from muddery.server.database.worlddata_db import WorldDataDB
+from muddery.worldeditor.utils.logger import logger
 from muddery.worldeditor.settings import SETTINGS
 from muddery.worldeditor.dao import general_querys
 from muddery.worldeditor.dao.system_data_mapper import SystemDataMapper
 from muddery.worldeditor.dao.element_properties_mapper import ElementPropertiesMapper
 from muddery.worldeditor.mappings.form_set import FORM_SET
-from muddery.server.mappings.element_set import ELEMENT, ELEMENT_SET
-from muddery.server.mappings.event_action_set import EVENT_ACTION_SET
-from muddery.server.utils.localized_strings_handler import _
-from muddery.worldeditor.database.db_manager import DBManager
+from muddery.worldeditor.utils.localized_strings import LocalizedStrings
 from muddery.worldeditor.forms.base_form import FormData
 
 
@@ -96,7 +95,7 @@ def save_form(values, table_name, record_id=None):
             pass
 
     if is_new:
-        model = DBManager.inst().get_model(SETTINGS.WORLD_DATA_APP, table_name)
+        model = WorldDataDB.inst().get_model(table_name)
         record = model(**values)
         form = form_class(formdata=form_data)
 
@@ -105,7 +104,7 @@ def save_form(values, table_name, record_id=None):
         raise MudderyError(ERR.invalid_form, "Invalid form.", data=form.errors)
 
     # Save data
-    session = DBManager.inst().get_session(SETTINGS.WORLD_DATA_APP)
+    session = WorldDataDB.inst().get_session()
     try:
         if is_new:
             session.add(record)
@@ -171,8 +170,8 @@ def query_element_form(base_element_type, obj_element_type, element_key):
                 # set the element type to the new value
                 field["value"] = obj_element_type
                 field["type"] = "Select"
-                field["choices"] = [(key, _(element.element_name, "elements") + " (" + key + ")")
-                                    for key, element in candidate_element_types.items()]
+                field["choices"] = [(key, LocalizedStrings.inst().trans(element.element_name, "elements") +
+                                     " (" + key + ")") for key, element in candidate_element_types.items()]
                 break
 
     return forms
@@ -256,7 +255,7 @@ def save_element_form(tables, element_type, element_key):
                 pass
 
         if is_new:
-            model = DBManager.inst().get_model(SETTINGS.WORLD_DATA_APP, table_name)
+            model = WorldDataDB.inst().get_model(table_name)
             record = model(**values)
             form = form_class(formdata=form_data)
 
@@ -272,7 +271,7 @@ def save_element_form(tables, element_type, element_key):
         })
 
     # Save data.
-    session = DBManager.inst().get_session(SETTINGS.WORLD_DATA_APP)
+    session = WorldDataDB.inst().get_session()
     try:
         for item in forms_to_save:
             if item["is_new"]:
@@ -295,7 +294,7 @@ def save_map_positions(area, rooms):
         area: (dict) area's data.
         rooms: (dict) rooms' data.
     """
-    session = DBManager.inst().get_session(SETTINGS.WORLD_DATA_APP)
+    session = WorldDataDB.inst().get_session()
 
     with session.begin():
         # area data

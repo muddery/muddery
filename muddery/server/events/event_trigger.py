@@ -4,12 +4,11 @@ EventHandler handles all events. The handler sets on every object.
 
 import random
 import weakref
-from muddery.server.utils import defines
 from muddery.server.statements.statement_handler import STATEMENT_HANDLER
 from muddery.server.database.worlddata.event_data import EventData
 from muddery.server.mappings.event_action_set import EVENT_ACTION_SET
-from muddery.server.utils.defines import EventType
-from muddery.server.utils.utils import async_gather
+from muddery.common.utils.defines import EventType
+from muddery.common.utils.utils import async_gather
 
 
 class EventTrigger(object):

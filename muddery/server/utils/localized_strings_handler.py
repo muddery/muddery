@@ -3,7 +3,7 @@ This model translates default strings into localized strings.
 """
 
 from muddery.server.database.worlddata.localized_strings import LocalizedStrings
-from muddery.server.utils.singleton import Singleton
+from muddery.common.utils.singleton import Singleton
 
 
 class LocalizedStringsHandler(Singleton):

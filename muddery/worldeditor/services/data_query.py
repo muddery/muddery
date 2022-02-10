@@ -4,19 +4,18 @@ Battle commands. They only can be used when a character is in a combat.
 
 import ast
 from sqlalchemy.sql import text
-from muddery.server.utils.logger import logger
+from muddery.common.utils.exception import MudderyError, ERR
+from muddery.common.utils.defines import EventType
 from muddery.server.mappings.element_set import ELEMENT_SET, ELEMENT
-from muddery.server.utils.defines import EventType
-from muddery.server.utils.exception import MudderyError, ERR
-from muddery.server.utils.localized_strings_handler import _
-from muddery.worldeditor.settings import SETTINGS
+from muddery.server.database.worlddata_db import WorldDataDB
+from muddery.worldeditor.utils.localized_strings import LocalizedStrings
+from muddery.worldeditor.utils.logger import logger
 from muddery.worldeditor.dao.common_mappers import WORLD_AREAS
 from muddery.worldeditor.dao.world_rooms_mapper import WorldRoomsMapper
 from muddery.worldeditor.dao.world_exits_mapper import WorldExitsMapper
 from muddery.worldeditor.dao.element_properties_mapper import ElementPropertiesMapper
 from muddery.worldeditor.dao.events_mapper import EventsMapper
 from muddery.worldeditor.dao import general_querys
-from muddery.worldeditor.database.db_manager import DBManager
 from muddery.worldeditor.mappings.form_set import FORM_SET
 
 
@@ -75,10 +74,10 @@ def query_tables():
     """
     Query all tables' names.
     """
-    tables = DBManager.inst().get_tables(SETTINGS.WORLD_DATA_APP)
+    tables = WorldDataDB.inst().get_tables()
     models_info = [{
         "key": table,
-        "name": _(table, category="models") + "(" + table + ")"
+        "name": LocalizedStrings.inst().trans(table, category="models") + "(" + table + ")"
     } for table in tables]
     return models_info
 
@@ -152,8 +151,8 @@ def query_element_properties(element_type, element_key):
     fields = []
     fields.append({
         "name": "level",
-        "label": _("Level"),
-        "help_text": _("Properties's level.")
+        "label": LocalizedStrings.inst().trans("Level"),
+        "help_text": LocalizedStrings.inst().trans("Properties's level.")
     })
 
     properties_info = ELEMENT(element_type).get_properties_info()
@@ -210,7 +209,7 @@ def query_element_level_properties(element_type, element_key, level):
     # Object's key.
     fields.append({
         "name": "key",
-        "label": _("Key"),
+        "label": LocalizedStrings.inst().trans("Key"),
         "disabled": True,
         "help_text": "",
         "type": "TextInput",
@@ -220,7 +219,7 @@ def query_element_level_properties(element_type, element_key, level):
     # Object's level.
     fields.append({
         "name": "level",
-        "label": _("Level"),
+        "label": LocalizedStrings.inst().trans("Level"),
         "disabled": False,
         "help_text": "",
         "type": "NumberInput",
@@ -427,8 +426,7 @@ def query_dialogues_table():
     """
     Query dialogues.
     """
-    session_name = SETTINGS.WORLD_DATA_APP
-    session = DBManager.inst().get_session(session_name)
+    session = WorldDataDB.inst().get_session()
     stmt = text("SELECT T1.*, T2.event event, T5.name npc_name, T5.npc npc_key " \
                 "FROM (dialogues T1 LEFT JOIN " \
                     "(SELECT MIN(T6.key) event, T6.trigger_obj FROM event_data T6 " \
@@ -445,8 +443,8 @@ def query_dialogues_table():
     fields.append({
         "default": "",
         "disabled": True,
-        "help_text": _("Has event.", "help_text"),
-        "label": _("event", "field"),
+        "help_text": LocalizedStrings.inst().trans("Has event.", "help_text"),
+        "label": LocalizedStrings.inst().trans("event", "field"),
         "name": "event",
         "type": "BooleanField",
     })
@@ -454,8 +452,8 @@ def query_dialogues_table():
     fields.append({
         "default": "",
         "disabled": True,
-        "help_text": _("Dialogue's NPC.", "help_text"),
-        "label": _("NPC", "field"),
+        "help_text": LocalizedStrings.inst().trans("Dialogue's NPC.", "help_text"),
+        "label": LocalizedStrings.inst().trans("NPC", "field"),
         "name": "npc",
         "type": "CharField",
     })

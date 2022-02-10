@@ -5,10 +5,10 @@ Object's attributes cache.
 import json
 import traceback
 from collections import OrderedDict
-from muddery.server.utils.exception import MudderyError, ERR
+from muddery.common.utils.exception import MudderyError, ERR
 from muddery.server.database.storage.memory_kv_storage import MemoryKVStorage
 from muddery.server.database.gamedata.base_data import BaseData
-from muddery.server.utils.singleton import Singleton
+from muddery.common.utils.singleton import Singleton
 
 
 def to_string(value):

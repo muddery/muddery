@@ -7,8 +7,8 @@ import traceback
 from importlib import import_module
 from muddery.server.settings import SETTINGS
 from muddery.server.utils.logger import logger
-from muddery.server.utils.utils import class_from_path
-from muddery.server.utils.utils import get_module_path
+from muddery.common.utils.utils import class_from_path
+from muddery.common.utils.utils import get_module_path
 
 
 class ElementSet(object):

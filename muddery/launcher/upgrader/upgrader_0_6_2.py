@@ -9,7 +9,6 @@ from evennia.server.evennia_launcher import init_game_directory
 from muddery.launcher.upgrader.base_upgrader import BaseUpgrader
 from muddery.launcher.upgrader.utils import file_append
 from muddery.launcher.utils import import_system_data
-from muddery.server.utils.exception import MudderyError, ERR
 
 
 class Upgrader(BaseUpgrader):

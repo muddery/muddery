@@ -4,13 +4,12 @@ General commands usually availabe to all users.
 
 import re
 import time
-import hashlib
 from collections import defaultdict
 from muddery.server.settings import SETTINGS
 from muddery.server.mappings.element_set import ELEMENT
 from muddery.server.utils.logger import logger
 from muddery.server.commands.base_command import BaseCommand
-from muddery.server.utils.exception import MudderyError, ERR
+from muddery.common.utils.exception import MudderyError, ERR
 from muddery.server.utils.localized_strings_handler import _
 from muddery.server.utils.game_settings import GameSettings
 from muddery.server.database.worlddata.equipment_positions import EquipmentPositions

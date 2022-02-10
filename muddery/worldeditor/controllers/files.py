@@ -4,15 +4,15 @@ Battle commands. They only can be used when a character is in a combat.
 
 import os, tempfile, time
 from PIL import Image
-from muddery.server.utils.logger import logger
-from muddery.server.utils.exception import MudderyError, ERR
-from muddery.worldeditor.settings import SETTINGS
-from muddery.worldeditor.services import exporter
-from muddery.server.utils import importer
+from muddery.common.utils.exception import MudderyError, ERR
 from muddery.common.networks.responses import success_response, file_response
 from muddery.common.utils import writers
+from muddery.server.utils import importer
 from muddery.worldeditor.controllers.base_request_processer import BaseRequestProcesser
 from muddery.worldeditor.dao.image_resources_mapper import ImageResourcesMapper
+from muddery.worldeditor.utils.logger import logger
+from muddery.worldeditor.settings import SETTINGS
+from muddery.worldeditor.services import exporter
 
 
 class upload_zip(BaseRequestProcesser):
@@ -25,7 +25,7 @@ class upload_zip(BaseRequestProcesser):
     path = "upload_zip"
     name = ""
 
-    def func(self, args):
+    async def func(self, args):
         file_obj = request.FILES.get("file", None)
 
         if not file_obj:
@@ -53,7 +53,7 @@ class upload_resources(BaseRequestProcesser):
     path = "upload_resources"
     name = ""
 
-    def func(self, args):
+    async def func(self, args):
         file_obj = request.FILES.get("file", None)
 
         if not file_obj:
@@ -82,7 +82,7 @@ class upload_single_data(BaseRequestProcesser):
     path = "upload_single_data"
     name = ""
 
-    def func(self, args):
+    async def func(self, args):
         file_obj = request.FILES.get("file", None)
 
         if not file_obj:
@@ -120,7 +120,7 @@ class upload_single_data(BaseRequestProcesser):
         return success_response("success")
 
 
-class download_zip(BaseRequestProcesser):
+class DownloadZip(BaseRequestProcesser):
     """
     Download a zip package of data.
 
@@ -131,17 +131,18 @@ class download_zip(BaseRequestProcesser):
     path = "download_zip"
     name = ""
 
-    def func(self, args):
+    async def func(self, args):
         file_type = args.get("type", "csv")
 
         # get data's zip
         fp = tempfile.TemporaryFile()
         try:
             exporter.export_zip_all(fp, file_type)
+            fp.flush()
             fp.seek(0)
 
             filename = time.strftime("worlddata_%Y%m%d_%H%M%S.zip", time.localtime())
-            return file_response(fp, filename)
+            return await file_response(fp, filename)
         except Exception as e:
             if fp:
                 fp.close()
@@ -159,7 +160,7 @@ class download_resources(BaseRequestProcesser):
     path = "download_resources"
     name = ""
 
-    def func(self, args):
+    async def func(self, args):
         # get data's zip
         fp = tempfile.TemporaryFile()
         try:
@@ -167,7 +168,7 @@ class download_resources(BaseRequestProcesser):
             fp.seek(0)
 
             filename = time.strftime("resources_%Y%m%d_%H%M%S.zip", time.localtime())
-            return file_response(fp, filename)
+            return await file_response(fp, filename)
         except Exception as e:
             if fp:
                 fp.close()
@@ -187,7 +188,7 @@ class download_single_data(BaseRequestProcesser):
     path = "download_single_data"
     name = ""
 
-    def func(self, args):
+    async def func(self, args):
         if ('table' not in args):
             raise MudderyError(ERR.missing_args, 'Missing the table name.')
 
@@ -204,7 +205,7 @@ class download_single_data(BaseRequestProcesser):
         fp = open(temp_name, "rb")
         try:
             filename = table_name + "." + writer_class.file_ext
-            return file_response(fp, filename)
+            return await file_response(fp, filename)
         except Exception as e:
             if fp:
                 fp.close()
@@ -221,7 +222,7 @@ class query_data_file_types(BaseRequestProcesser):
     path = "query_data_file_types"
     name = ""
 
-    def func(self, args):
+    async def func(self, args):
         writer_list = writers.get_writers()
         data = [{"type": item.type, "name": item.name} for item in writer_list]
         return success_response(data)
@@ -238,7 +239,7 @@ class upload_image(BaseRequestProcesser):
     path = "upload_image"
     name = ""
 
-    def func(self, args):
+    async def func(self, args):
         file_obj = request.FILES.get("file", None)
 
         if not file_obj:

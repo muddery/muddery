@@ -7,7 +7,7 @@
 #
 
 from django.conf import settings
-from muddery.server.utils import utils
+from muddery.common.utils import utils
 from muddery.server.utils.game_settings import GameSettings
 
 # Determine the site name and server version

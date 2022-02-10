@@ -3,8 +3,8 @@ Battle commands. They only can be used when a character is in a combat.
 """
 
 from sqlalchemy.orm.exc import NoResultFound
-from muddery.server.utils.password import check_password
-from muddery.server.utils.exception import MudderyError, ERR
+from muddery.common.utils.password import check_password
+from muddery.common.utils.exception import MudderyError, ERR
 from muddery.worldeditor.utils.auth import generate_token
 from muddery.common.networks.responses import success_response
 from muddery.worldeditor.controllers.base_request_processer import BaseRequestProcesser
@@ -25,7 +25,7 @@ class login(BaseRequestProcesser):
     login = False
     staff = False
 
-    def func(self, args):
+    async def func(self, args):
         if not args or ('username' not in args) or ('password' not in args):
             raise MudderyError(ERR.missing_args, 'Missing arguments.')
 
@@ -60,7 +60,7 @@ class logout(BaseRequestProcesser):
     path = "logout"
     name = ""
 
-    def func(self, args):
+    async def func(self, args):
         """
         Logout the editor.
 
@@ -81,7 +81,7 @@ class query_status(BaseRequestProcesser):
     path = "status"
     name = ""
 
-    def func(self, args):
+    async def func(self, args):
         """
         Get the server's status.
 

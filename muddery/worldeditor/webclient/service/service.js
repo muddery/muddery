@@ -79,10 +79,17 @@ service = {
         form_file.append("args", JSON.stringify(args));
         form_file.append("file", file_obj);
 
+        var headers = {};
+        var token = sessionStorage.getItem("token");
+        if (token) {
+            headers["Authorization"] = "Bearer " + token;
+        }
+
         $.ajax({
             url: url,
             type: "POST",
             contentType: false,
+            headers: headers,
             cache: false,
             data: form_file,
             dataType: "json",
@@ -103,12 +110,20 @@ service = {
             .attr("name", "func_no")
             .attr("value", func_no)
             .appendTo(form);
-        
+
         var args = JSON.stringify(args);
         $("<input>")
             .attr("name", "args")
             .attr("value", args)
             .appendTo(form);
+
+        var token = sessionStorage.getItem("token");
+        if (token) {
+            $("<input>")
+                .attr("name", "token")
+                .attr("value", token)
+                .appendTo(form);
+        }
 
         form.appendTo('body').submit().remove();
     },

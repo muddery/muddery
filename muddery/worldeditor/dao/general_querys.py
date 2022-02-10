@@ -5,10 +5,9 @@ Query and deal common tables.
 import importlib
 from sqlalchemy import select, delete, update, func
 from muddery.server.mappings.element_set import ELEMENT
-from muddery.worldeditor.settings import SETTINGS
-from muddery.worldeditor.database.db_manager import DBManager
+from muddery.server.database.worlddata_db import WorldDataDB
+from muddery.server.settings import SETTINGS
 from muddery.worldeditor.dao.dict_record import DictRecord
-from muddery.server.utils.logger import logger
 
 
 def get_field_names(table_name):
@@ -19,7 +18,7 @@ def get_field_names(table_name):
         table_name: (string) db table's name.
     """
     # get model
-    model = DBManager.inst().get_model(SETTINGS.WORLD_DATA_APP, table_name)
+    model = WorldDataDB.inst().get_model(table_name)
     return model.__table__.columns.keys()
 
 
@@ -27,9 +26,8 @@ def count(table_name, condition=None):
     """
     Count the number of records with conditions in kwargs.
     """
-    session_name = SETTINGS.WORLD_DATA_APP
-    session = DBManager.inst().get_session(session_name)
-    model = DBManager.inst().get_model(session_name, table_name)
+    session = WorldDataDB.inst().get_session()
+    model = WorldDataDB.inst().get_model(table_name)
 
     stmt = select(func.count()).select_from(model)
     for field, value in condition.items():
@@ -43,9 +41,8 @@ def get_query(table_name, condition=None):
     """
     Get a query of given condition.
     """
-    session_name = SETTINGS.WORLD_DATA_APP
-    session = DBManager.inst().get_session(session_name)
-    model = DBManager.inst().get_model(session_name, table_name)
+    session = WorldDataDB.inst().get_session()
+    model = WorldDataDB.inst().get_model(table_name)
 
     # set conditions
     stmt = select(model)
@@ -62,9 +59,8 @@ def get_one(table_name, condition=None):
     """
     Get a record of given condition. Compatible with the wtforms_alchemy's unique validator.
     """
-    session_name = SETTINGS.WORLD_DATA_APP
-    session = DBManager.inst().get_session(session_name)
-    model = DBManager.inst().get_model(session_name, table_name)
+    session = WorldDataDB.inst().get_session()
+    model = WorldDataDB.inst().get_model(table_name)
 
     # set conditions
     stmt = session.query(model)
@@ -146,9 +142,8 @@ def delete_records(table_name, condition=None):
     """
     Delete records with the given conditions.
     """
-    session_name = SETTINGS.WORLD_DATA_APP
-    session = DBManager.inst().get_session(session_name)
-    model = DBManager.inst().get_model(session_name, table_name)
+    session = WorldDataDB.inst().get_session()
+    model = WorldDataDB.inst().get_model(table_name)
 
     # set conditions
     stmt = delete(model)
@@ -197,10 +192,8 @@ def get_all_from_tables(tables, condition=None):
     if not tables:
         return
 
-    session_name = SETTINGS.WORLD_DATA_APP
-    session = DBManager.inst().get_session(session_name)
-    config = SETTINGS.DATABASES[session_name]
-    module = importlib.import_module(config["MODELS"])
+    session = WorldDataDB.inst().get_session()
+    module = importlib.import_module(SETTINGS.WORLDDATA_DB["MODELS"])
 
     if len(tables) == 1:
         # only one table
@@ -274,12 +267,11 @@ def delete_tables_record_by_key(tables, key):
     Return:
         a dict of values.
     """
-    session_name = SETTINGS.WORLD_DATA_APP
-    session = DBManager.inst().get_session(session_name)
+    session = WorldDataDB.inst().get_session()
 
     with session.begin():
         for table_name in tables:
-            model = DBManager.inst().get_model(session_name, table_name)
+            model = WorldDataDB.inst().get_model(table_name)
 
             # set conditions
             stmt = delete(model).where(model.key==key)
@@ -297,9 +289,8 @@ def update_records(table_name, values, condition=None):
         values: (dict) keys and values to update
         condition: (dict) update conditions
     """
-    session_name = SETTINGS.WORLD_DATA_APP
-    session = DBManager.inst().get_session(session_name)
-    model = DBManager.inst().get_model(session_name, table_name)
+    session = WorldDataDB.inst().get_session()
+    model = WorldDataDB.inst().get_model(table_name)
 
     # set conditions
     stmt = update(model).values(**values)

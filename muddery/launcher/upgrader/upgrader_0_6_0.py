@@ -2,11 +2,8 @@
 Upgrade custom's game dir to the latest version.
 """
 
-import os
-import django.core.management
-from evennia.server.evennia_launcher import init_game_directory
 from muddery.launcher.upgrader.base_upgrader import BaseUpgrader
-from muddery.server.utils.exception import MudderyError, ERR
+from muddery.common.utils.exception import MudderyError, ERR
 
 
 class Upgrader(BaseUpgrader):

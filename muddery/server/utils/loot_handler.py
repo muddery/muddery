@@ -6,7 +6,7 @@ import random
 import math
 from muddery.server.utils.logger import logger
 from muddery.server.statements.statement_handler import STATEMENT_HANDLER
-from muddery.server.utils.utils import async_gather
+from muddery.common.utils.utils import async_gather
 
 
 class LootHandler(object):

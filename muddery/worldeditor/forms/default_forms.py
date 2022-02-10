@@ -5,21 +5,20 @@ from muddery.server.mappings.quest_objective_set import QUEST_OBJECTIVE_SET
 from muddery.server.mappings.quest_status_set import QUEST_STATUS_SET
 from muddery.server.mappings.event_action_set import EVENT_ACTION_SET
 from muddery.server.mappings.event_trigger_set import EVENT_TRIGGER_SET
-from muddery.worldeditor.settings import SETTINGS
-from muddery.worldeditor.database.db_manager import DBManager
+from muddery.server.database.worlddata_db import WorldDataDB
 from muddery.worldeditor.dao import common_mappers as CM
 from muddery.worldeditor.dao.general_querys import get_element_base_data
 from muddery.worldeditor.forms.location_field import LocationField
 from muddery.worldeditor.forms.image_field import ImageField
 from muddery.worldeditor.forms.base_form import BaseForm
+from muddery.worldeditor.utils.localized_strings import LocalizedStrings
 
 
 def get_model(table_name):
     """
     Get a form of a table.
     """
-    session_name = SETTINGS.WORLD_DATA_APP
-    return DBManager.inst().get_model(session_name, table_name)
+    return WorldDataDB.inst().get_model(table_name)
 
 
 def get_all_pocketable_objects():
@@ -357,7 +356,9 @@ class QuestObjectivesForm(BaseForm):
     choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]
     quest = SelectField(choices=choices)
 
-    choices = QUEST_OBJECTIVE_SET.choice_all()
+    objectives = QUEST_OBJECTIVE_SET.all()
+    choices = [(key, "%s (%s)" % (LocalizedStrings.inst().trans(key, category = "quest_objective"), key))
+               for key in objectives]
     type = SelectField(choices=choices)
 
     class Meta:

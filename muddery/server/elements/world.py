@@ -9,9 +9,9 @@ from muddery.server.database.gamedata.honours_mapper import HonoursMapper
 from muddery.server.database.worlddata.world_areas import WorldAreas
 from muddery.server.database.worlddata.world_channels import WorldChannels
 from muddery.server.database.worlddata.worlddata import WorldData
-from muddery.server.utils.defines import ConversationType
-from muddery.server.utils.utils import class_from_path
-from muddery.server.utils.utils import async_wait
+from muddery.common.utils.defines import ConversationType
+from muddery.common.utils.utils import class_from_path
+from muddery.common.utils.utils import async_wait
 
 
 class MudderyWorld(BaseElement):

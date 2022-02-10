@@ -4,7 +4,7 @@ Event action.
 
 from muddery.server.events.base_interval_action import BaseIntervalAction
 from muddery.server.database.worlddata.worlddata import WorldData
-from muddery.server.utils.utils import async_wait
+from muddery.common.utils.utils import async_wait
 
 
 class ActionMessage(BaseIntervalAction):
