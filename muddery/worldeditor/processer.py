@@ -23,7 +23,7 @@ class Processor(object):
         self.path_prefix = path_prefix
         self.request_set = RequestSet()
 
-    async def process(self, method, path, data, token=None):
+    async def process(self, method, path, data, request, token=None):
         """
         Process a request by the func key.
         
@@ -59,7 +59,7 @@ class Processor(object):
 
         # call function
         try:
-            response = await processor.func(args)
+            response = await processor.func(args, request)
         except MudderyError as e:
             logger.log_err("Error: %s, %s" % (e.code, e))
             response = responses.error_response(e.code, msg=str(e), data=e.data, status=200)

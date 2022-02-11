@@ -60,6 +60,9 @@ class Settings(object):
     # World data API's url path.
     WORLD_EDITOR_API_PATH = "/api"
 
+    # World data upload file's path.
+    WORLD_EDITOR_UPLOAD_PATH = "/upload"
+
     # http port to open for the worldeditor.
     WORLD_EDITOR_PORT = 8002
 

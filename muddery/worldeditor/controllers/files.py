@@ -3,6 +3,7 @@ Battle commands. They only can be used when a character is in a combat.
 """
 
 import os, tempfile, time
+from io import BytesIO
 from PIL import Image
 from muddery.common.utils.exception import MudderyError, ERR
 from muddery.common.networks.responses import success_response, file_response
@@ -13,9 +14,10 @@ from muddery.worldeditor.dao.image_resources_mapper import ImageResourcesMapper
 from muddery.worldeditor.utils.logger import logger
 from muddery.worldeditor.settings import SETTINGS
 from muddery.worldeditor.services import exporter
+from muddery.worldeditor.networks.request_parser import parse_file
 
 
-class upload_zip(BaseRequestProcesser):
+class UploadZip(BaseRequestProcesser):
     """
     Upload a zip package of data.
 
@@ -25,25 +27,22 @@ class upload_zip(BaseRequestProcesser):
     path = "upload_zip"
     name = ""
 
-    async def func(self, args):
-        file_obj = request.FILES.get("file", None)
+    async def func(self, args, request):
+        file_data, origin_name = await parse_file(request)
 
-        if not file_obj:
+        if not file_data:
             raise MudderyError(ERR.missing_args, 'Missing zip files.')
 
-        with tempfile.TemporaryFile() as fp:
-            try:
-                for chunk in file_obj.chunks():
-                    fp.write(chunk)
-                importer.unzip_data_all(fp)
-            except Exception as e:
-                logger.log_trace("Upload error: %s" % e)
-                raise MudderyError(ERR.upload_error, str(e))
+        try:
+            importer.unzip_data_all(BytesIO(file_data))
+        except Exception as e:
+            logger.log_trace("Upload error: %s" % e)
+            raise MudderyError(ERR.upload_error, str(e))
 
         return success_response("success")
 
 
-class upload_resources(BaseRequestProcesser):
+class UuploadResources(BaseRequestProcesser):
     """
     Upload a zip package of resources.
 
@@ -53,25 +52,22 @@ class upload_resources(BaseRequestProcesser):
     path = "upload_resources"
     name = ""
 
-    async def func(self, args):
-        file_obj = request.FILES.get("file", None)
+    async def func(self, args, request):
+        file_data, origin_name = await parse_file(request)
 
-        if not file_obj:
+        if not file_data:
             raise MudderyError(ERR.missing_args, 'Missing zip files.')
 
-        with tempfile.TemporaryFile() as fp:
-            try:
-                for chunk in file_obj.chunks():
-                    fp.write(chunk)
-                importer.unzip_resources_all(fp)
-            except Exception as e:
-                logger.log_trace("Upload error: %s" % e)
-                raise MudderyError(ERR.upload_error, str(e))
+        try:
+            importer.unzip_resources_all(BytesIO(file_data))
+        except Exception as e:
+            logger.log_trace("Upload error: %s" % e)
+            raise MudderyError(ERR.upload_error, str(e))
 
         return success_response("success")
 
 
-class upload_single_data(BaseRequestProcesser):
+class UploadSingleData(BaseRequestProcesser):
     """
     Upload a data file.
 
@@ -82,14 +78,13 @@ class upload_single_data(BaseRequestProcesser):
     path = "upload_single_data"
     name = ""
 
-    async def func(self, args):
-        file_obj = request.FILES.get("file", None)
+    async def func(self, args, request):
+        file_data, origin_name = await parse_file(request)
 
-        if not file_obj:
+        if not file_data:
             raise MudderyError(ERR.missing_args, 'Missing data files.')
 
-        fullname = file_obj.name
-        filename, ext_name = os.path.splitext(fullname)
+        filename, ext_name = os.path.splitext(origin_name)
         table_name = args.get("table", None)
 
         if not table_name:
@@ -103,19 +98,19 @@ class upload_single_data(BaseRequestProcesser):
         try:
             # Write data to a template file.
             with open(temp_filename, 'wb') as fp:
-                for chunk in file_obj.chunks():
-                    fp.write(chunk)
+                fp.write(file_data)
+                fp.flush()
 
-            # Import the template file.
-            importer.import_file(temp_filename, table_name=table_name, file_type=file_type, clear=True)
+                # Import the template file.
+                importer.import_file(temp_filename, table_name=table_name, file_type=file_type, clear=True)
+
+                try:
+                    os.remove(temp_filename)
+                except IOError:
+                    pass
         except Exception as e:
             logger.log_trace("Upload error: %s" % e)
             raise MudderyError(ERR.upload_error, str(e))
-        finally:
-            try:
-                os.remove(temp_filename)
-            except IOError:
-                pass
 
         return success_response("success")
 
@@ -131,7 +126,7 @@ class DownloadZip(BaseRequestProcesser):
     path = "download_zip"
     name = ""
 
-    async def func(self, args):
+    async def func(self, args, request):
         file_type = args.get("type", "csv")
 
         # get data's zip
@@ -139,7 +134,6 @@ class DownloadZip(BaseRequestProcesser):
         try:
             exporter.export_zip_all(fp, file_type)
             fp.flush()
-            fp.seek(0)
 
             filename = time.strftime("worlddata_%Y%m%d_%H%M%S.zip", time.localtime())
             return await file_response(fp, filename)
@@ -150,7 +144,7 @@ class DownloadZip(BaseRequestProcesser):
             raise MudderyError(ERR.download_error, "Download file error: %s" % e)
 
 
-class download_resources(BaseRequestProcesser):
+class DownloadResources(BaseRequestProcesser):
     """
     Download a zip package of resources.
 
@@ -160,12 +154,12 @@ class download_resources(BaseRequestProcesser):
     path = "download_resources"
     name = ""
 
-    async def func(self, args):
+    async def func(self, args, request):
         # get data's zip
         fp = tempfile.TemporaryFile()
         try:
             exporter.export_resources(fp)
-            fp.seek(0)
+            fp.flush()
 
             filename = time.strftime("resources_%Y%m%d_%H%M%S.zip", time.localtime())
             return await file_response(fp, filename)
@@ -176,7 +170,7 @@ class download_resources(BaseRequestProcesser):
             raise MudderyError(ERR.download_error, "Download file error: %s" % e)
 
 
-class download_single_data(BaseRequestProcesser):
+class DownloadSingleData(BaseRequestProcesser):
     """
     Export a data table.
 
@@ -188,8 +182,8 @@ class download_single_data(BaseRequestProcesser):
     path = "download_single_data"
     name = ""
 
-    async def func(self, args):
-        if ('table' not in args):
+    async def func(self, args, request):
+        if 'table' not in args:
             raise MudderyError(ERR.missing_args, 'Missing the table name.')
 
         table_name = args['table']
@@ -213,7 +207,7 @@ class download_single_data(BaseRequestProcesser):
             raise MudderyError(ERR.download_error, "Download file error: %s" % e)
 
 
-class query_data_file_types(BaseRequestProcesser):
+class QueryDataFileTypes(BaseRequestProcesser):
     """
     Query available data file types.
 
@@ -222,13 +216,13 @@ class query_data_file_types(BaseRequestProcesser):
     path = "query_data_file_types"
     name = ""
 
-    async def func(self, args):
+    async def func(self, args, request):
         writer_list = writers.get_writers()
         data = [{"type": item.type, "name": item.name} for item in writer_list]
         return success_response(data)
 
 
-class upload_image(BaseRequestProcesser):
+class UploadImage(BaseRequestProcesser):
     """
     Upload a file.
 
@@ -239,67 +233,46 @@ class upload_image(BaseRequestProcesser):
     path = "upload_image"
     name = ""
 
-    async def func(self, args):
-        file_obj = request.FILES.get("file", None)
+    async def func(self, args, request):
+        file_data, origin_name = await parse_file(request)
 
-        if not file_obj:
+        if not file_data:
             raise MudderyError(ERR.missing_args, 'Missing icon files.')
 
         file_type = args["type"]
-        filename = file_obj.name
         path = os.path.join(SETTINGS.MEDIA_ROOT, SETTINGS.IMAGE_PATH, file_type)
-        filepath = os.path.join(path, filename)
+        filepath = os.path.join(path, origin_name)
         exist = False
 
-        if not os.path.exists(filepath):
-
+        if os.path.exists(filepath):
+            # remove old file
+            os.remove(filepath)
+        else:
             if not os.path.exists(path):
                 # If does not exist, create one.
                 os.makedirs(path)
 
-            # save file
-            fp = None
-            try:
-                fp = open(filepath, "wb+")
-                for chunk in file_obj.chunks():
-                    fp.write(chunk)
-                fp.flush()
-            except Exception as e:
-                if fp:
-                    fp.close()
-                logger.log_trace("Upload error: %s" % e)
-                raise MudderyError(ERR.upload_error, str(e))
-        else:
-            # Compare the uploaded file with the local file.
-            same = True
-            fp = None
-            try:
-                fp = open(filepath, "rb")
-                for chunk in file_obj.chunks():
-                    data = fp.read(len(chunk))
-                    compare = [0 for item in zip(chunk, data) if item[0] != item[1]]
-                    same = (len(compare) == 0)
-                    if not same:
-                        break
-            except Exception as e:
-                same = False
+        # save file
+        fp = None
+        try:
+            fp = open(filepath, "wb+")
+            fp.write(file_data)
+            fp.flush()
+        except Exception as e:
+            if fp:
+                fp.close()
+            logger.log_trace("Upload error: %s" % e)
+            raise MudderyError(ERR.upload_error, str(e))
 
-            if not same:
-                raise MudderyError(ERR.upload_image_exist, 'File %s already exists.' % filename)
-
-            exist = True
-
-        icon_location = SETTINGS.IMAGE_PATH + "/" + file_type + "/" + filename
-        if not exist:
-            try:
-                image = Image.open(filepath)
-                size = image.size
-
-                ImageResourcesMapper.inst().add(icon_location, file_type, size[0], size[1])
-            except Exception as e:
-                if fp:
-                    fp.close()
-                logger.log_trace("Upload error: %s" % e)
-                raise MudderyError(ERR.upload_error, str(e))
+        icon_location = SETTINGS.IMAGE_PATH + "/" + file_type + "/" + origin_name
+        try:
+            image = Image.open(filepath)
+            size = image.size
+            ImageResourcesMapper.inst().add(icon_location, file_type, size[0], size[1])
+        except Exception as e:
+            if fp:
+                fp.close()
+            logger.log_trace("Upload error: %s" % e)
+            raise MudderyError(ERR.upload_error, str(e))
 
         return success_response({"resource": icon_location})

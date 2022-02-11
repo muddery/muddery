@@ -15,6 +15,7 @@ menu. Run the script with the -h flag to see usage information.
 import traceback
 import sys
 import argparse
+import asyncio
 from argparse import ArgumentParser
 from muddery.launcher import configs
 
@@ -180,13 +181,13 @@ def main():
     if operation == "start":
         try:
             if not args.run_server and not args.run_webclient and not args.run_editor:
-                manager.run(server=True, webclient=True, editor=True)
+                asyncio.run(manager.run(server=True, webclient=True, editor=True))
             else:
-                manager.run(
+                asyncio.run(manager.run(
                     server=args.run_server,
                     webclient=args.run_webclient,
                     editor=args.run_editor
-                )
+                ))
         except Exception as e:
             traceback.print_exc()
             print(e)

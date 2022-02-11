@@ -25,7 +25,7 @@ class login(BaseRequestProcesser):
     login = False
     staff = False
 
-    async def func(self, args):
+    async def func(self, args, request):
         if not args or ('username' not in args) or ('password' not in args):
             raise MudderyError(ERR.missing_args, 'Missing arguments.')
 
@@ -60,7 +60,7 @@ class logout(BaseRequestProcesser):
     path = "logout"
     name = ""
 
-    async def func(self, args):
+    async def func(self, args, request):
         """
         Logout the editor.
 
@@ -69,23 +69,3 @@ class logout(BaseRequestProcesser):
         """
         Accounts.inst().set_last_token("")
         return success_response("success")
-
-
-class query_status(BaseRequestProcesser):
-    """
-    Get the server's status.
-
-    Args:
-        args: None
-    """
-    path = "status"
-    name = ""
-
-    async def func(self, args):
-        """
-        Get the server's status.
-
-        Args:
-            args: None
-        """
-        return success_response("running")

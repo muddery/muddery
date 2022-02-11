@@ -65,13 +65,7 @@ class CSVReader(DataReader):
 
         if filename:
             try:
-                self.csvfile = open(filename, 'r', encoding='utf-8')
-
-                # test BOM
-                head = self.csvfile.read(len(codecs.BOM_UTF8))
-                if head != codecs.BOM_UTF8:
-                    # read from beginning
-                    self.csvfile.seek(0)
+                self.csvfile = open(filename, 'r', encoding='utf-8-sig')
             except UnicodeDecodeError:
                 self.csvfile = open(filename, 'r')
 

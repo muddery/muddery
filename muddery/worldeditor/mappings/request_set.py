@@ -29,9 +29,6 @@ class RequestSet(object):
                 logger.log_err("Missing request's path and name.")
                 continue
 
-            if path[0] != "/":
-                path = "/" + path
-
             if name is None:
                 name = ""
 

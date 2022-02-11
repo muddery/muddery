@@ -72,7 +72,7 @@ service = {
     },
 
     sendFile: function(path, func_no, file_obj, args, callback_success, callback_failed) {
-	    var url = CONFIG.api_url + path;
+	    var url = CONFIG.upload_url + path;
 
         var form_file = new FormData();
         form_file.append("func", func_no);
@@ -465,10 +465,6 @@ service = {
     applyChanges: function(callback_success, callback_failed) {
         this.sendRequest("apply_changes", "", {}, callback_success, callback_failed);
     },
-
-    checkStatus: function(callback_success, callback_failed) {
-        this.sendRequest("status", "", {}, callback_success, callback_failed);
-    }
 }
 
 

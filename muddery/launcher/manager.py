@@ -351,7 +351,7 @@ async def wait_server_status(server_process, webclient_process, worldeditor_proc
         print("Can not start all servers.")
 
 
-def run(server: bool = False, webclient: bool = False, editor: bool = False, restart: bool = False):
+async def run(server: bool = False, webclient: bool = False, editor: bool = False, restart: bool = False):
     """
     Run servers.
 
@@ -396,7 +396,7 @@ def run(server: bool = False, webclient: bool = False, editor: bool = False, res
         command = template % "run_worldeditor.py"
         worldeditor_process = subprocess.Popen(command, **options)
 
-    asyncio.run(wait_server_status(server_process, webclient_process, worldeditor_process, 30))
+    await wait_server_status(server_process, webclient_process, worldeditor_process, 30)
 
 
 def kill(server: bool = True, webclient: bool = True, editor: bool = True):

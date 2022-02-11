@@ -65,11 +65,13 @@ async def file_response(file_obj, filename):
         filename: (string) filename.
     """
     async def streaming_fn(response):
+        file_obj.seek(0)
         while True:
             content = file_obj.read(4096)
             if len(content) < 1:
                 break
             await response.write(content)
+        file_obj.close()
 
     headers = {"Content-Disposition": f'attachment; filename="{filename}"'}
     mime_type = guess_type(filename)[0] or "text/plain"

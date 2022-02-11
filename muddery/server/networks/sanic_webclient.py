@@ -17,8 +17,9 @@ def run():
         return
 
     app = Sanic("muddery_webclient")
-    app.static('/webclient', SETTINGS.WEBCLIENT_ROOT)
-    app.static('/media', SETTINGS.MEDIA_ROOT)
+    app.static("/", os.path.join(SETTINGS.WEBCLIENT_ROOT, "index.html"), strict_slashes=True)
+    app.static("/", SETTINGS.WEBCLIENT_ROOT)
+    app.static("/media", SETTINGS.MEDIA_ROOT)
 
     @app.before_server_start
     async def before_server_start(app, loop):

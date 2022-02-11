@@ -46,8 +46,9 @@ def run():
         print("Worldeditor server stopped.")
 
     # static web pages
-    app.static('/editor', SETTINGS.WORLD_EDITOR_WEBROOT)
-    app.static('/media', SETTINGS.MEDIA_ROOT)
+    app.static("/", os.path.join(SETTINGS.WORLD_EDITOR_WEBROOT, "index.html"), strict_slashes=True)
+    app.static("/", SETTINGS.WORLD_EDITOR_WEBROOT)
+    app.static("/media", SETTINGS.MEDIA_ROOT)
 
     # check the server's status
     @app.get("/status")
@@ -63,6 +64,7 @@ def run():
             if token.find(token_prefix) == 0:
                 token = token[len(token_prefix):]
 
+        data = None
         if request.content_type == "application/json":
             data = request.json
         elif request.content_type == "application/x-www-form-urlencoded":
@@ -75,10 +77,45 @@ def run():
                 token = request.form["token"][0]
         elif request.content_type.index("multipart/form-data;") == 0:
             data = request.form
-        else:
-            data = None
 
-        response = await Server.inst().handle_request(request.method, request.path, data, token)
+        if not data:
+            data = {}
+
+        response = await Server.inst().handle_request(request.method, func, data, request, token)
+
+        if hasattr(response, "body"):
+            print("[RESPOND] '%s' '%s'" % (response.status, response.body))
+            logger.log_info("[RESPOND] '%s' '%s'" % (response.status, response.body))
+        elif hasattr(response, "streaming_content"):
+            logger.log_info("[RESPOND] '%s' streaming_content" % response.status)
+        else:
+            logger.log_info("[RESPOND] '%s'" % response.status)
+
+        return response
+
+    # upload files
+    @app.post(SETTINGS.WORLD_EDITOR_UPLOAD_PATH + "/<func>")
+    async def handler(request, func):
+        token = request.headers.get("Authorization")
+        if token:
+            token_prefix = "Bearer "
+            if token.find(token_prefix) == 0:
+                token = token[len(token_prefix):]
+
+        data = None
+        if request.content_type == "application/json":
+            data = request.json
+        elif request.content_type.index("multipart/form-data;") == 0:
+            data = {}
+            if "func_no" in request.form and len(request.form["func_no"]) > 0:
+                data["func_no"] = json.loads(request.form["func_no"][0])
+            if "args" in request.form and len(request.form["args"]) > 0:
+                data["args"] = json.loads(request.form["args"][0])
+
+        if not data:
+            data = {}
+
+        response = await Server.inst().handle_request(request.method, func, data, request, token)
 
         if hasattr(response, "body"):
             print("[RESPOND] '%s' '%s'" % (response.status, response.body))

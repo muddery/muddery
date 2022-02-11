@@ -21,24 +21,13 @@ controller = {
     },
 
     applySuccess: function(data) {
-        controller.checkStatus();
-        controller.status_interval_id = window.setInterval("controller.checkStatus()", 3000);
+        window.parent.controller.hideWaiting();
+        window.parent.controller.notify("", "Apply success.");
     },
 
     applyFailed: function(code, message, data) {
         window.parent.controller.hideWaiting();
         window.parent.controller.notify("", "Apply failed: " + code + ": " + message);
-    },
-
-    checkStatus: function() {
-        service.checkStatus(controller.checkStatusSuccess);
-    },
-
-    checkStatusSuccess: function(data) {
-        window.clearInterval(controller.status_interval_id);
-
-        window.parent.controller.hideWaiting();
-        window.parent.controller.notify("", "The server restarted.");
     },
 }
 

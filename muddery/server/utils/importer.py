@@ -184,12 +184,15 @@ def import_file(fullname, file_type=None, table_name=None, clear=True, except_er
         return "%s (model: %s, line: %s)" % (err_message, model_name, line)
 
     # separate name and ext name
-    (filename, ext_name) = os.path.splitext(fullname)
-    if not table_name:
-        table_name = filename
-    if not file_type:
-        if ext_name:
-            file_type = ext_name[1:].lower()
+    try:
+        filename, ext_name = os.path.splitext(fullname)
+        if not table_name:
+            table_name = filename
+        if not file_type:
+            if ext_name:
+                file_type = ext_name[1:].lower()
+    except:
+        pass
 
     # get model
     session = WorldDataDB.inst().get_session()

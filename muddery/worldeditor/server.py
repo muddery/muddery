@@ -22,7 +22,7 @@ class Server(Singleton):
     def init(self):
         self.connect_db()
         self.check_admin()
-        self.processor = Processor(SETTINGS.WORLD_EDITOR_API_PATH)
+        self.processor = Processor()
 
     def connect_db(self):
         """
@@ -51,5 +51,5 @@ class Server(Singleton):
             password = hash_password(SETTINGS.ADMIN_PASSWORD, salt)
             Accounts.inst().add(SETTINGS.ADMIN_NAME, password, salt, "ADMIN")
 
-    async def handle_request(self, method, path, data, token=None):
-        return await self.processor.process(method, path, data, token)
+    async def handle_request(self, method, path, data, request, token=None):
+        return await self.processor.process(method, path, data, request, token)

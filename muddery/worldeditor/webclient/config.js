@@ -5,6 +5,8 @@
 CONFIG = {
 	api_url: window.location.protocol + "//" + window.location.host + "/api/",
 
+	upload_url: window.location.protocol + "//" + window.location.host + "/upload/",
+
     // resource's url
     resource_url: window.location.protocol + "//" + window.location.host + "/media/",
 };
