@@ -66,7 +66,7 @@ def create_secret_key():
     return secret_key
 
 
-def create_server_settings_file(gamedir, setting_dict=None):
+def create_server_settings_file(gamedir, setting_dict):
     """
     Uses the template settings file to build a working
     settings file.
@@ -75,33 +75,18 @@ def create_server_settings_file(gamedir, setting_dict=None):
         gamedir: (string) game root's path
         setting_dict: (dict)preset settings.
     """
-    settings_path = os.path.join(gamedir, "server", "conf", "settings.py")
+    settings_path = os.path.join(gamedir, "server", "settings.py")
     with open(settings_path, 'r') as f:
         settings_string = f.read()
 
-    # tweak the settings
-    muddery_settings_file = Path(os.path.join(configs.MUDDERY_LIB, "settings_default.py")).as_posix()
-    default_setting_dict = {"MUDDERY_SETTINGS_DEFAULT": muddery_settings_file,
-                            "ALLOWED_HOSTS": "['*']",
-                            "WEBSERVER_PORTS": "[(8000, 5001)]",
-                            "WEBSOCKET_CLIENT_PORT": "8001",
-                            "AMP_PORT": "5000",
-                            "LANGUAGE_CODE": "'en-us'",
-                            "SECRET_KEY":"'%s'" % create_secret_key()}
-
-    if setting_dict:
-        merged_setting_dict = dict(default_setting_dict, **setting_dict)
-    else:
-        merged_setting_dict = default_setting_dict
-
     # modify the settings
-    settings_string = settings_string.format(**merged_setting_dict)
+    settings_string = settings_string.format(**setting_dict)
 
     with open(settings_path, 'w') as f:
         f.write(settings_string)
 
 
-def create_editor_settings_file(gamedir, setting_dict=None):
+def create_editor_settings_file(gamedir, setting_dict):
     """
     Uses the template settings file to build a working
     settings file.
@@ -110,33 +95,18 @@ def create_editor_settings_file(gamedir, setting_dict=None):
         gamedir: (string) game root's path
         setting_dict: (dict)preset settings.
     """
-    settings_path = os.path.join(gamedir, "worldeditor", "conf", "settings.py")
+    settings_path = os.path.join(gamedir, "worldeditor", "settings.py")
     with open(settings_path, 'r') as f:
         settings_string = f.read()
 
-    # tweak the settings
-    muddery_settings_file = Path(os.path.join(configs.MUDDERY_LIB, "worldeditor", "settings_default.py")).as_posix()
-    default_setting_dict = {"MUDDERY_SETTINGS_DEFAULT": muddery_settings_file,
-                            "ALLOWED_HOSTS": "['*']",
-                            "WEBSERVER_PORTS": "[(8000, 5001)]",
-                            "WEBSOCKET_CLIENT_PORT": "8001",
-                            "AMP_PORT": "5000",
-                            "LANGUAGE_CODE": "'en-us'",
-                            "SECRET_KEY":"'%s'" % create_secret_key()}
-
-    if setting_dict:
-        merged_setting_dict = dict(default_setting_dict, **setting_dict)
-    else:
-        merged_setting_dict = default_setting_dict
-
     # modify the settings
-    settings_string = settings_string.format(**merged_setting_dict)
+    settings_string = settings_string.format(**setting_dict)
 
     with open(settings_path, 'w') as f:
         f.write(settings_string)
 
 
-def create_webclient_settings(gamedir, setting_dict=None):
+def create_webclient_settings(gamedir, setting_dict):
     """
     Uses the template settings file to build a working
     webclient settings file.
@@ -149,19 +119,8 @@ def create_webclient_settings(gamedir, setting_dict=None):
     with open(settings_path, 'r') as f:
         settings_string = f.read()
 
-    # tweak the settings
-    default_setting_dict = {
-        "WEBSOCKET_HOST": "'ws://' + window.location.hostname + ':8001'",
-        "RESOURCE_HOST": "window.location.protocol + '//' + window.location.host + '/media/'",
-    }
-
-    if setting_dict:
-        merged_setting_dict = dict(default_setting_dict, **setting_dict)
-    else:
-        merged_setting_dict = default_setting_dict
-
     # modify the settings
-    settings_string = settings_string.format(**merged_setting_dict)
+    settings_string = settings_string.format(**setting_dict)
 
     with open(settings_path, 'w') as f:
         f.write(settings_string)
@@ -191,7 +150,7 @@ def copy_tree(source, destination):
             print("Can not copy file:%s to %s for %s." % (srcname, dstname, e))
                 
 
-def create_game_directory(gamedir, template, port=None):
+def create_game_directory(gamedir, template, port):
     """
     Initialize a new game directory named dirname
     at the current path. This means copying the
@@ -223,26 +182,16 @@ def create_game_directory(gamedir, template, port=None):
     if template_dir:
         copy_tree(template_dir, gamedir)
 
-    """
     # pre-build settings file in the new gamedir
-    setting_py_dict = None
-    if port:
-        setting_py_dict = {
-            "WEBSERVER_PORTS": "[(%s, %s)]" % (port, port + 3),
-            "WEBSOCKET_CLIENT_PORT": "%s" % (port + 1),
-            "AMP_PORT": "%s" % (port + 2),
-        }
+    setting_dict = {
+        "WEBCLIENT_PORT": port,
+        "GAME_SERVER_PORT": port + 1,
+        "WORLD_EDITOR_PORT": port + 2,
+    }
 
-    create_server_settings_file(gamedir, setting_py_dict)
-    create_editor_settings_file(gamedir, setting_py_dict)
-
-    setting_js_dict = None
-    if port:
-        setting_js_dict = {
-            "WEBSOCKET_HOST": "'ws://' + window.location.hostname + ':%s'" % (port + 1),
-        }
-    create_webclient_settings(gamedir, setting_js_dict)
-    """
+    create_server_settings_file(gamedir, setting_dict)
+    create_editor_settings_file(gamedir, setting_dict)
+    create_webclient_settings(gamedir, setting_dict)
 
 
 def check_gamedir(path):

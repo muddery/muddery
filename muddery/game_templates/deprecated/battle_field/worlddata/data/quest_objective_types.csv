@@ -1,5 +1,0 @@
-key,name,desc
-OBJECTIVE_TALK,Talk,finish a dialogue, object: dialogue_id
-OBJECTIVE_ARRIVE,Arrive,arrive a room, object: room_id
-OBJECTIVE_OBJECT,Object,get some objects, object: object_id
-OBJECTIVE_KILL,Kill,kill some characters, object: character_id

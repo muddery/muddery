@@ -2,14 +2,7 @@
 """
 MUDDERY SERVER LAUNCHER SCRIPT
 
-This is adapt from evennia/evennia/server/evennia_launcher.py.
-The licence of Evennia can be found in evennia/LICENSE.txt.
-
 This is the start point for running Muddery.
-
-Sets the appropriate environmental variables and launches the server
-and portal through the evennia_runner. Run without arguments to get a
-menu. Run the script with the -h flag to see usage information.
 """
 
 import traceback
@@ -25,57 +18,89 @@ def main():
     Run the muddery main program.
     """
     # set up argument parser
+    CMDLINE_HELP = \
+        """
+Starts or operates the Muddery game server.
+"""
 
-    parser = ArgumentParser(description=configs.CMDLINE_HELP, formatter_class=argparse.RawTextHelpFormatter)
+    parser = ArgumentParser(description=CMDLINE_HELP, formatter_class=argparse.RawTextHelpFormatter)
 
     parser.add_argument(
-        '--init',
-        nargs='+',
-        action='store',
-        dest="init",
-        metavar="<gamename> [template name]",
-        help="Creates a new gamedir 'name' at current location (from optional template).")
+        "operation",
+        nargs='?',
+        default="noop",
+        help=configs.ARG_OPTIONS)
     parser.add_argument(
-        '--setup', action='store_true', dest='setup', default=False,
-        help="Setup a new created game dir.")
-    parser.add_argument(
-        '-v', '--version', action='store_true',
-        dest='show_version', default=False,
-        help="show version info")
-    parser.add_argument(
-        '--upgrade', nargs='?', const='', dest='upgrade', metavar="[template]",
-        help="Upgrade a game directory 'game_name' to the latest version.")
-    parser.add_argument(
-        '--loaddata', action='store_true', dest='loaddata', default=False,
-        help="Load local data from the worlddata folder.")
-    parser.add_argument(
-        '--sysdata', action='store_true', dest='sysdata', default=False,
-        help="Load system default data.")
-    parser.add_argument(
-        '--migrate', action='store_true', dest='migrate', default=False,
-        help="Migrate databases to new version.")
-    parser.add_argument(
-        '--collect-static', action='store_true', dest='collect_static', default=False,
-        help="Collect static web files.")
-    parser.add_argument(
-        '--port', '-p', nargs=1, action='store', dest='port',
-        metavar="<N>",
-        help="Set game's network ports when init the game, recommend to use ports above 10000.")
-    parser.add_argument(
-        '--server', '-s', action='store_true', dest='run_server', default=False,
+        '-s', '--server',
+        action='store_true',
+        dest='run_server',
+        default=False,
         help="Run the game server only.")
     parser.add_argument(
-        '--webclient', '-w', action='store_true', dest='run_webclient', default=False,
+        '-w', '--webclient',
+        action='store_true',
+        dest='run_webclient',
+        default=False,
         help="Run the web client only.")
     parser.add_argument(
-        '--editor', '-e', action='store_true', dest='run_editor', default=False,
+        '-e', '--editor',
+        action='store_true',
+        dest='run_editor',
+        default=False,
         help="Run the world editor only.")
     parser.add_argument(
-        "operation", nargs='?', default="noop",
-        help=configs.ARG_OPTIONS)
+        '-v', '--version',
+        action='store_true',
+        dest='show_version',
+        default=False,
+        help="show version info")
+    parser.add_argument(
+        '--init',
+        nargs="+",
+        action='store',
+        dest="init",
+        metavar="<dir> [template]",
+        help="Creates a new gamedir 'name' at current location (from optional template).")
+    parser.add_argument(
+        '--setup',
+        action='store_true',
+        dest='setup',
+        default=False,
+        help="Setup a new created game dir.")
+    parser.add_argument(
+        '--upgrade',
+        nargs='?',
+        dest='upgrade',
+        metavar="template",
+        help="Upgrade a game directory 'game_name' to the latest version.")
+    parser.add_argument(
+        '--loaddata',
+        action='store_true',
+        dest='loaddata',
+        default=False,
+        help="Load local data from the worlddata folder.")
+    parser.add_argument(
+        '--sysdata',
+        action='store_true',
+        dest='sysdata',
+        default=False,
+        help="Load system default data.")
+    parser.add_argument(
+        '--migrate',
+        action='store_true',
+        dest='migrate',
+        default=False,
+        help="Migrate databases to new version.")
+    parser.add_argument(
+        '-p', '--port',
+        nargs=1,
+        action='store',
+        dest='port',
+        metavar="<N>",
+        help="Set game's network default ports when init the game, recommend to use ports above 10000.")
+
     parser.epilog = (
-        "Common Django-admin commands are shell, dbshell, test and migrate.\n"
-        "See the Django documentation for more management commands.")
+        "")
 
     args, unknown_args = parser.parse_known_args()
 
@@ -87,7 +112,7 @@ def main():
 
     if not args:
         # show help pane
-        manager.print_help()
+        manager.print_about()
         sys.exit()
 
     elif args.init:
@@ -164,26 +189,17 @@ def main():
             sys.exit(-1)
         sys.exit()
 
-    elif args.collect_static:
-        try:
-            manager.collect_webclient_static()
-            manager.collect_worldeditor_static()
-        except Exception as e:
-            print(e)
-            sys.exit(-1)
-        sys.exit()
-
     if args.show_version:
         # show the version info
-        manager.show_version(operation == "help")
+        manager.show_version()
         sys.exit()
 
     if operation == "start":
         try:
             if not args.run_server and not args.run_webclient and not args.run_editor:
-                asyncio.run(manager.run(server=True, webclient=True, editor=True))
+                asyncio.run(manager.run_servers(server=True, webclient=True, editor=True))
             else:
-                asyncio.run(manager.run(
+                asyncio.run(manager.run_servers(
                     server=args.run_server,
                     webclient=args.run_webclient,
                     editor=args.run_editor
@@ -196,9 +212,9 @@ def main():
     elif operation == "stop":
         try:
             if not args.run_server and not args.run_webclient and not args.run_editor:
-                manager.kill()
+                manager.kill_servers()
             else:
-                manager.kill(
+                manager.kill_servers(
                     server=args.run_server,
                     webclient=args.run_webclient,
                     editor=args.run_editor

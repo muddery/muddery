@@ -12,7 +12,7 @@ from muddery.worldeditor.settings import SETTINGS
 from muddery.worldeditor.utils.logger import logger
 
 
-def run():
+def run(port):
     # Check if a server is running.
     pid = read_pid_file(SETTINGS.WORLD_EDITOR_PID)
     if pid:
@@ -46,7 +46,7 @@ def run():
         print("Worldeditor server stopped.")
 
     # static web pages
-    app.static("/", os.path.join(SETTINGS.WORLD_EDITOR_WEBROOT, "index.html"), strict_slashes=True)
+    app.static("/", os.path.join(SETTINGS.WORLD_EDITOR_WEBROOT, "index.html"))
     app.static("/", SETTINGS.WORLD_EDITOR_WEBROOT)
     app.static("/media", SETTINGS.MEDIA_ROOT)
 
@@ -128,7 +128,7 @@ def run():
         return response
 
     # run the server
-    app.run(port=SETTINGS.WORLD_EDITOR_PORT)
+    app.run(port=port)
 
 
 def stop():

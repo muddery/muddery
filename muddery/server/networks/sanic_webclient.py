@@ -9,7 +9,7 @@ from muddery.launcher.manager import collect_webclient_static
 from muddery.common.networks import responses
 
 
-def run():
+def run(port):
     # Check if a server is running.
     pid = read_pid_file(SETTINGS.WEBCLIENT_PID)
     if pid:
@@ -17,7 +17,7 @@ def run():
         return
 
     app = Sanic("muddery_webclient")
-    app.static("/", os.path.join(SETTINGS.WEBCLIENT_ROOT, "index.html"), strict_slashes=True)
+    app.static("/", os.path.join(SETTINGS.WEBCLIENT_ROOT, "index.html"))
     app.static("/", SETTINGS.WEBCLIENT_ROOT)
     app.static("/media", SETTINGS.MEDIA_ROOT)
 
@@ -46,7 +46,7 @@ def run():
     async def get_status(request):
         return responses.success_response()
 
-    app.run(port=SETTINGS.WEBCLIENT_PORT)
+    app.run(port=port)
 
 
 def stop():

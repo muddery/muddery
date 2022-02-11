@@ -1,1 +1,0 @@
-This directory holds files of the world editor's webclient.

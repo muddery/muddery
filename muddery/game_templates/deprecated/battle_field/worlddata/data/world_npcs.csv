@@ -1,4 +1,0 @@
-key,name,typeclass,desc,model,level,reborn_time,location,condition
-npc_teleporter,传送师,CLASS_COMMON_NPC,传送师能把你送进战场。,MODEL_COMMON_NPC,1,0,room_intro,
-npc_master,技能师,CLASS_COMMON_NPC,技能师能教会你技能。,MODEL_COMMON_NPC,1,0,room_intro,
-npc_trainer,教练,CLASS_COMMON_NPC,此人看上去威风凛凛。,MODEL_TRAINER,1,0,room_intro,

@@ -30,6 +30,23 @@ class Settings(object):
             if name[0] != "_":
                 setattr(self, name, getattr(settings, name))
 
+    ######################################################################
+    # Base server config
+    ######################################################################
+
+    # This is a security setting protecting against host poisoning
+    # attacks.  It defaults to allowing all. In production, make
+    # sure to change this to your actual host addresses/IPs.
+    ALLOWED_HOSTS = "['*']"
+
+    # The webserver sits behind a Portal proxy.
+    WEBCLIENT_PORT = 8000
+
+    # Server-side websocket port to open for the webclient.
+    WEBSERVER_PORT = 8001
+
+    # The secret key of jwt.
+    WORLD_EDITOR_SECRET = "SET_YOUR_SECRET_KEY"
 
     ######################################################################
     # Muddery base server config
@@ -54,19 +71,6 @@ class Settings(object):
     LOG_DIR = os.path.join(GAME_DIR, "server", "logs")
     LOG_NAME = 'server.log'
     LOG_LEVEL = logging.INFO
-
-    # How long time (in seconds) a user may idle before being logged
-    # out. This can be set as big as desired. A user may avoid being
-    # thrown off by sending the empty system command 'idle' to the server
-    # at regular intervals. Set <=0 to deactivate idle timeout completely.
-    IDLE_TIMEOUT = 60
-
-    # Determine how many commands per second a given Session is allowed
-    # to send to the Portal via a connected protocol. Too high rate will
-    # drop the command and echo a warning. Note that this will also cap
-    # OOB messages so don't set it too low if you expect a lot of events
-    # from the client! To turn the limiter off, set to <= 0.
-    MAX_COMMAND_RATE = 20
 
     # The maximum number of characters allowed by the default.
     MAX_PLAYER_CHARACTERS = 5
@@ -209,40 +213,16 @@ class Settings(object):
 
 
     ######################################################################
-    # Muddery additional data features
-    ######################################################################
-    # wsgi setting
-    WSGI_APPLICATION = 'muddery.server.service.router.wsgi_application'
-
-    # websocket setting
-    ASGI_APPLICATION = 'muddery.server.service.router.asgi_application'
-
-    # data file's folder under user's game directory.
-    WORLD_DATA_FOLDER = os.path.join("worlddata", "data")
-
-
-    ######################################################################
     # World data features
     ######################################################################
-
-    # add data app
-    # INSTALLED_APPS = INSTALLED_APPS + [WORLD_EDITOR_APP, ]
+    # data file's folder under user's game directory.
+    WORLD_DATA_FOLDER = os.path.join("worlddata", "data")
 
     # Localized string data's folder.
     LOCALIZED_STRINGS_FOLDER = "languages"
 
     # Localized string model's name
     LOCALIZED_STRINGS_MODEL = "localized_strings"
-
-
-    ###################################
-    # permissions
-    ###################################
-    # Characters who have these permission can bypass events.
-    PERMISSION_BYPASS_EVENTS = {"builders", "wizards", "immortals"}
-
-    # Characters who have these permission can use text commands.
-    PERMISSION_COMMANDS = {"playerhelpers", "builders", "wizards", "immortals"}
 
 
     ###################################

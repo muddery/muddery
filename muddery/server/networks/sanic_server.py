@@ -12,7 +12,7 @@ from muddery.common.utils.utils import write_pid_file, read_pid_file
 from muddery.common.networks import responses
 
 
-def run():
+def run(port):
     # Check if a server is running.
     pid = read_pid_file(SETTINGS.SERVER_PID)
     if pid:
@@ -66,7 +66,7 @@ def run():
         await ws.close()
 
     # run the server
-    app.run(port=SETTINGS.WEBSERVER_PORT)
+    app.run(port=port)
 
 
 def stop():

@@ -84,11 +84,7 @@ class CmdConnectAccount(BaseCommand):
     @classmethod
     async def func(cls, session, args):
         """
-        Uses the Django admin api. Note that unlogged-in commands
-        have a unique position in that their func() receives
-        a session object instead of a source_object like all
-        other types of logged-in commands (this is because
-        there is no object yet before the player has logged in)
+        Login the game server.
         """
         try:
             username = args["username"]

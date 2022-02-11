@@ -15,4 +15,7 @@ class ServerSettings(object):
     ALLOWED_HOSTS = "['*']"
 
     # http port to open for the worldeditor.
-    WORLD_EDITOR_PORT = 8002
+    WORLD_EDITOR_PORT = {WORLD_EDITOR_PORT}
+
+    # The secret key of jwt.
+    WORLD_EDITOR_SECRET = "SET_YOUR_SECRET_KEY"

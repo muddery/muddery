@@ -45,20 +45,22 @@ CREATED_NEW_GAMEDIR = \
     will work out of the box. When ready to continue, 'cd' to your
     game directory and run:
 
-       muddery start
+        muddery setup
+
+    Then run:
+    
+        muddery start
 
     This starts the server for the first time. Make sure to create
     a superuser when asked for it. You should now be able to (by
     default) connect to your server by pointing your web browser to
-    http://localhost:{port}.
-    """
+    
+        http://localhost:{game_server_port}
+    
+    and connect to the game world editor at
+    
+        http://localhost:{world_editor_port}
 
-CMDLINE_HELP = \
-    """
-    Starts or operates the Muddery game server. Also allows for
-    initializing a new game directory and manages the game's database.
-    You can also pass most standard django-admin arguments and
-    options.
     """
 
 VERSION_INFO = \
@@ -66,17 +68,16 @@ VERSION_INFO = \
     Muddery {version}
     OS: {os}
     Python: {python}
-    Django: {django}
+
     {about}
     """
 
 ABOUT_INFO = \
     """
-    Muddery text game development system
+    Muddery online game development system
 
     Licence: BSD 3-Clause Licence
     Web: http://www.muddery.org
-    Forum: http://www.muddery.org/forum
     Maintainer (2015-):   Lu Yijun
 
     Use -h for command line options.
@@ -112,18 +113,8 @@ SERVER_INFO = \
     """
 
 ARG_OPTIONS = \
-    """Actions on installed server. One of:
- start   - launch server+portal if not running
- reload  - restart server in 'reload' mode
- stop    - shutdown server+portal
- reboot  - shutdown server+portal, then start again
- reset   - restart server in 'shutdown' mode
- istart  - start server in foreground (until reload)
- ipstart - start portal in foreground
- sstop   - stop only server
- kill    - send kill signal to portal+server (force)
- skill   - send kill signal only to server
- status  - show server and portal run state
- info    - show server and portal port info
- menu    - show a menu of options
-Others, like migrate, test and shell is passed on to Django."""
+        """Actions on installed server. One of:
+start   - launch servers
+restart - restart servers
+stop    - shutdown servers
+"""

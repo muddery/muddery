@@ -31,6 +31,21 @@ class Settings(object):
                 setattr(self, name, getattr(settings, name))
 
     ######################################################################
+    # Base server config
+    ######################################################################
+
+    # This is a security setting protecting against host poisoning
+    # attacks.  It defaults to allowing all. In production, make
+    # sure to change this to your actual host addresses/IPs.
+    ALLOWED_HOSTS = "['*']"
+
+    # http port to open for the worldeditor.
+    WORLD_EDITOR_PORT = 8002
+
+    # The secret key of jwt.
+    WORLD_EDITOR_SECRET = "SET_YOUR_SECRET_KEY"
+
+    ######################################################################
     # Muddery base server config
     ######################################################################
 
@@ -62,12 +77,6 @@ class Settings(object):
 
     # World data upload file's path.
     WORLD_EDITOR_UPLOAD_PATH = "/upload"
-
-    # http port to open for the worldeditor.
-    WORLD_EDITOR_PORT = 8002
-
-    # The secret key of jwt.
-    WORLD_EDITOR_SECRET = "SET_YOUR_SECRET_KEY"
 
     # The webpage's root of the world editor.
     WORLD_EDITOR_WEBROOT = os.path.join(GAME_DIR, "web", "worldeditor")

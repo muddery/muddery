@@ -4,14 +4,8 @@ import traceback
 import asyncio
 import subprocess
 from urllib import request, error
+from argparse import ArgumentParser
 from muddery.launcher import configs, utils
-
-
-def print_help():
-    """
-    Print help messages.
-    """
-    print(configs.CMDLINE_HELP)
 
 
 def print_about():
@@ -21,6 +15,13 @@ def print_about():
     :return:
     """
     print(configs.ABOUT_INFO)
+
+
+def show_version():
+    """
+    Show game version.
+    """
+    print("Muddery version: " + utils.muddery_version())
 
 
 def init_game(game_name, template=None, port=None):
@@ -33,12 +34,18 @@ def init_game(game_name, template=None, port=None):
     :return:
     """
     gamedir = os.path.abspath(os.path.join(configs.CURRENT_DIR, game_name))
+    if not port:
+        port = 8000
+
     utils.create_game_directory(gamedir, template, port)
     utils.init_game_env(gamedir)
 
-    print(configs.CREATED_NEW_GAMEDIR.format(gamedir=game_name,
-                                             settings_path=os.path.join(game_name, configs.SETTINGS_PATH),
-                                             port=port if port else 8000))
+    print(configs.CREATED_NEW_GAMEDIR.format(
+        gamedir=game_name,
+        settings_path=os.path.join(game_name, configs.SETTINGS_PATH),
+        game_server_port=port,
+        world_editor_port=port+2
+    ))
 
 
 def upgrade_game(template=None):
@@ -275,7 +282,7 @@ async def wait_server_status(server_process, webclient_process, worldeditor_proc
                 from muddery.server.settings import SETTINGS as SERVER_SETTINGS
                 from server.settings import ServerSettings
                 SERVER_SETTINGS.update(ServerSettings())
-                server_status_url = "http://localhost:%s/status" % SERVER_SETTINGS.WEBSERVER_PORT
+                server_status_url = "http://localhost:%s/status" % SERVER_SETTINGS.GAME_SERVER_PORT
                 webclient_status_url = "http://localhost:%s/status" % SERVER_SETTINGS.WEBCLIENT_PORT
             except Exception as e:
                 traceback.print_exc()
@@ -351,7 +358,7 @@ async def wait_server_status(server_process, webclient_process, worldeditor_proc
         print("Can not start all servers.")
 
 
-async def run(server: bool = False, webclient: bool = False, editor: bool = False, restart: bool = False):
+async def run_servers(server: bool = False, webclient: bool = False, editor: bool = False, restart: bool = False):
     """
     Run servers.
 
@@ -399,7 +406,7 @@ async def run(server: bool = False, webclient: bool = False, editor: bool = Fals
     await wait_server_status(server_process, webclient_process, worldeditor_process, 30)
 
 
-def kill(server: bool = True, webclient: bool = True, editor: bool = True):
+def kill_servers(server: bool = True, webclient: bool = True, editor: bool = True):
     """
     kill servers.
 
@@ -450,3 +457,41 @@ def kill(server: bool = True, webclient: bool = True, editor: bool = True):
 
     if worldeditor_process:
         worldeditor_process.wait()
+
+
+def run_server_command(run_func, stop_func, default_port):
+    parser = ArgumentParser()
+    parser.add_argument(
+        "operation",
+        nargs='?',
+        default="run",
+        help=configs.ARG_OPTIONS)
+    parser.add_argument(
+        '-p', '--port',
+        nargs=1,
+        action='store',
+        dest='port',
+        metavar="<N>",
+        help="Set game's network ports, recommend to use ports above 10000.")
+
+    args, unknown_args = parser.parse_known_args()
+    operation = args.operation
+
+    port = default_port
+    if args.port:
+        try:
+            port = int(args.port[0])
+        except:
+            print("Port must be a number.")
+            return
+
+    if operation == "run":
+        # start the server
+        run_func(port)
+    elif operation == "restart":
+        # stop and start a new server
+        stop_func()
+        run_func(port)
+    elif operation == "stop":
+        # stop the server
+        stop_func()

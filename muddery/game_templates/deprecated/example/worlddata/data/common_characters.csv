@@ -1,3 +1,0 @@
-key,name,typeclass,desc,model,level,reborn_time,icon
-player,Player,CLASS_PLAYER,"This is a player.",MODEL_PLAYER,1,10,icon_player
-char_robot_mob,Robot A,CLASS_COMMON_MONSTER,"This is a robot of TYPE-A.",MODEL_MOB_ROBOT_A,1,0,icon_robot
