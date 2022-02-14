@@ -278,57 +278,32 @@ async def wait_server_status(server_process, webclient_process, worldeditor_proc
         worldeditor_status_url = None
 
         if server_process or webclient_process:
-            try:
-                from muddery.server.settings import SETTINGS as SERVER_SETTINGS
-                from server.settings import ServerSettings
-                SERVER_SETTINGS.update(ServerSettings())
+            from muddery.server.settings import SETTINGS as SERVER_SETTINGS
+            from server.settings import ServerSettings
+            SERVER_SETTINGS.update(ServerSettings())
+
+            if server_process:
                 server_status_url = "http://localhost:%s/status" % SERVER_SETTINGS.GAME_SERVER_PORT
+
+            if webclient_process:
                 webclient_status_url = "http://localhost:%s/status" % SERVER_SETTINGS.WEBCLIENT_PORT
-            except Exception as e:
-                traceback.print_exc()
-                if server_process:
-                    server_process = None
-                    print("Can not start the game server.")
-                if webclient_process:
-                    webclient_process = None
-                    print("Can not start the webclient server.")
 
         if worldeditor_process:
-            try:
-                from muddery.worldeditor.settings import SETTINGS as WORLDEDITOR_SETTINGS
-                from worldeditor.settings import ServerSettings
-                WORLDEDITOR_SETTINGS.update(ServerSettings())
-                worldeditor_status_url = "http://localhost:%s/status" % WORLDEDITOR_SETTINGS.WORLD_EDITOR_PORT
-            except Exception as e:
-                traceback.print_exc()
-                worldeditor_process = None
-                print("Can not start the worldeditor server.")
+            from muddery.worldeditor.settings import SETTINGS as WORLDEDITOR_SETTINGS
+            from worldeditor.settings import ServerSettings
+            WORLDEDITOR_SETTINGS.update(ServerSettings())
+            worldeditor_status_url = "http://localhost:%s/status" % WORLDEDITOR_SETTINGS.WORLD_EDITOR_PORT
 
         while server_process or webclient_process or worldeditor_process:
             awaits = []
             if server_process:
-                if server_process.poll() is not None:
-                    # process stopped
-                    server_process = None
-                    print("Can not start the game server.")
-                else:
-                    awaits.append(asyncio.create_task(async_reqeust(server_status_url, timeout=5)))
+                awaits.append(asyncio.create_task(async_reqeust(server_status_url, timeout=5)))
 
             if webclient_process:
-                if webclient_process.poll() is not None:
-                    # process stopped
-                    webclient_process = None
-                    print("Can not start the webclient server.")
-                else:
-                    awaits.append(asyncio.create_task(async_reqeust(webclient_status_url, timeout=5)))
+                awaits.append(asyncio.create_task(async_reqeust(webclient_status_url, timeout=5)))
 
             if worldeditor_process:
-                if worldeditor_process.poll() is not None:
-                    # process stopped
-                    worldeditor_process = None
-                    print("Can not start the worldeditor server.")
-                else:
-                    awaits.append(asyncio.create_task(async_reqeust(worldeditor_status_url, timeout=5)))
+                awaits.append(asyncio.create_task(async_reqeust(worldeditor_status_url, timeout=5)))
 
             results = await asyncio.gather(*awaits)
 
@@ -351,11 +326,7 @@ async def wait_server_status(server_process, webclient_process, worldeditor_proc
 
             await asyncio.sleep(1)
 
-    try:
-        await asyncio.wait_for(get_server_status(server_process, webclient_process, worldeditor_process), timeout)
-        print("All servers are running.")
-    except asyncio.TimeoutError:
-        print("Can not start all servers.")
+    await asyncio.wait_for(get_server_status(server_process, webclient_process, worldeditor_process), timeout)
 
 
 async def run_servers(server: bool = False, webclient: bool = False, editor: bool = False, restart: bool = False):
@@ -403,7 +374,7 @@ async def run_servers(server: bool = False, webclient: bool = False, editor: boo
         command = template % "run_worldeditor.py"
         worldeditor_process = subprocess.Popen(command, **options)
 
-    await wait_server_status(server_process, webclient_process, worldeditor_process, 30)
+    await wait_server_status(server_process, webclient_process, worldeditor_process, 10)
 
 
 def kill_servers(server: bool = True, webclient: bool = True, editor: bool = True):

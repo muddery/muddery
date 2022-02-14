@@ -46,7 +46,9 @@ def run(port):
     async def get_status(request):
         return responses.success_response()
 
-    app.run(port=port)
+    if not port:
+        port = SETTINGS.WEBSERVER_PORT
+    app.run(host=SETTINGS.ALLOWED_HOST, port=port)
 
 
 def stop():

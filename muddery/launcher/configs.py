@@ -118,3 +118,42 @@ start   - launch servers
 restart - restart servers
 stop    - shutdown servers
 """
+
+CMDLINE_HELP = \
+"""
+Starts or operates the Muddery game server.
+
+usage: muddery operation 
+ 
+operations:
+  muddery init <dir> [template] [-p <number>]
+    Creates a new game dir at current location.
+    arguments:
+      <dir>                 The game directory's name.
+      [template]            (optional) The game template's name. 
+      -p, --port <number>   (optional) Set game's network default ports when init the game, default is 8000.
+
+  muddery setup
+    Setup a new created game dir.
+
+  muddery start [-s] [-c] [-e]
+    Run game servers.
+    arguments:
+      -s, --server          Run the game server only.
+      -c, --client          Run the web client only.
+      -e, --editor          Run the world editor only.
+
+  muddery stop [-s] [-c] [-e]
+    Stop game servers.
+    arguments:
+      -s, --server          Stop the game server only.
+      -c, --client          Stop the web client only.
+      -e, --editor          Stop the world editor only.
+
+  muddery upgrade           Upgrade a game directory to the latest version.
+  muddery migrate           Migrate databases to new version.
+  muddery loaddata          Load game data from the worlddata folder.
+  muddery sysdata           Reload system default data.
+  muddery -h                -h, --help      Show help messages.
+  muddery -v                -v, --version   Show version info.
+"""

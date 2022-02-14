@@ -66,7 +66,9 @@ def run(port):
         await ws.close()
 
     # run the server
-    app.run(port=port)
+    if not port:
+        port = SETTINGS.WEBSERVER_PORT
+    app.run(host=SETTINGS.ALLOWED_HOST, port=port)
 
 
 def stop():
