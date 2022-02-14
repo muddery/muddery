@@ -17,8 +17,7 @@ class CommandHandler(object):
         self.character_cmdset = character_cmdset
 
     async def handler_command(self, session, raw_string):
-        print("[Receive command][%s]%s" % (session, raw_string))
-        logger.log_info("[Receive command][%s]%s" % (session, raw_string))
+        logger.log_debug("[Receive command][%s]%s" % (session, raw_string))
 
         # Parse JSON formated command.
         try:
@@ -52,7 +51,6 @@ class CommandHandler(object):
             try:
                 await command.func(caller, args)
             except Exception as e:
-                traceback.print_exc()
                 logger.log_err("Run command error, %s: %s %s" % (session, raw_string, e))
             return
         else:

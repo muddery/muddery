@@ -395,7 +395,6 @@ class QueryFormFirstRecord(BaseRequestProcesser):
             else:
                 record_id = None
         except Exception as e:
-            traceback.print_exc()
             raise MudderyError(ERR.invalid_form, "Wrong table: %s." % table_name)
 
         data = data_edit.query_form(table_name, {"id": record_id})

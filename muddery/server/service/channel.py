@@ -102,9 +102,7 @@ class Channel(object):
                 self.msg_list.append(data)
         else:
             # Send out this message immediately.
-            log_info = "[Send message][%s]%s" % (self, data)
-            print(log_info)
-            logger.log_info(log_info)
+            logger.log_debug("[Send message][%s]%s" % (self, data))
 
             # send message
             try:

@@ -25,7 +25,7 @@ class QuestStatusSet(object):
             key = cls.key
 
             if key in self.dict:
-                logger.log_info("Quest status %s is replaced by %s." % (key, cls))
+                logger.log_debug("Quest status %s is replaced by %s." % (key, cls))
 
             self.dict[key] = cls()
 

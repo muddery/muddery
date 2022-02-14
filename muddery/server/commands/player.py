@@ -148,7 +148,6 @@ class CmdPuppet(BaseCommand):
         try:
             await account.puppet_character(puppet_id)
         except Exception as e:
-            traceback.print_exc()
             await account.msg({"alert": _("That is not a valid character choice.")})
             return
 
@@ -196,7 +195,6 @@ class CmdPuppetName(BaseCommand):
         try:
             await account.puppet_character(puppet_id)
         except Exception as e:
-            traceback.print_exc()
             await account.msg({"alert": _("That is not a valid character choice.")})
             return
 
@@ -329,7 +327,6 @@ class CmdCharDelete(BaseCommand):
         try:
             await account.delete_character(char_id)
         except Exception as e:
-            traceback.print_exc()
             logger.log_err("Can not delete character %s: %s")
             await account.msg({"alert": _("You can not delete this character.")})
             return

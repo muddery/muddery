@@ -212,7 +212,7 @@ def import_file(fullname, file_type=None, table_name=None, clear=True, except_er
         # Does support this file type.
         raise(MudderyError(ERR.import_data_error, "Does not support this file type."))
 
-    logger.log_info("Importing %s" % table_name)
+    logger.log_debug("Importing %s" % table_name)
     import_data(session, model, reader)
 
 

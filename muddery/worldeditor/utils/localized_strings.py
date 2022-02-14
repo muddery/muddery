@@ -4,6 +4,7 @@ This model translates default strings into localized strings.
 
 from muddery.common.utils.singleton import Singleton
 from muddery.worldeditor.dao.common_mappers import LOCALIZED_STRINGS
+from muddery.worldeditor.utils.logger import logger
 
 
 class LocalizedStrings(Singleton):
@@ -39,7 +40,7 @@ class LocalizedStrings(Singleton):
 
             self.loaded = True
         except Exception as e:
-            print("Can not load custom localized string: %s" % e)
+            logger.log_err("Can not load custom localized string: %s" % e)
 
     def trans(self, origin, category="", default=None):
         """

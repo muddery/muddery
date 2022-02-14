@@ -2,8 +2,9 @@
 Set the game's configuration.
 """
 
-from muddery.server.database.worlddata.game_settings import GameSettings as GameSettingsData
 from muddery.common.utils.singleton import Singleton
+from muddery.server.database.worlddata.game_settings import GameSettings as GameSettingsData
+from muddery.server.utils.logger import logger
 
 
 class GameSettings(Singleton):
@@ -49,7 +50,7 @@ class GameSettings(Singleton):
                 for field in GameSettingsData.get_fields():
                     self.values[field] = getattr(record, field)
         except Exception as e:
-            print("Can not load settings: %s" % e)
+            logger.log_err("Can not load settings: %s" % e)
             pass
 
     def get(self, key):

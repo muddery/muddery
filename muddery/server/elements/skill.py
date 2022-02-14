@@ -81,7 +81,6 @@ class MudderySkill(ELEMENT("MATTER")):
         """
         case_message = await self.cast_message(caller, target)
 
-        # traceback.print_stack()
         results = await self.do_skill(caller, target)
 
         # set message

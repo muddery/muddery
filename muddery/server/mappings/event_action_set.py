@@ -24,7 +24,7 @@ class EventActionSet(object):
             key = cls.key
             if key:
                 if key in self.dict:
-                    logger.log_info("Event action %s is replaced by %s." % (key, cls))
+                    logger.log_debug("Event action %s is replaced by %s." % (key, cls))
                 self.dict[key] = cls()
 
     def get(self, key):

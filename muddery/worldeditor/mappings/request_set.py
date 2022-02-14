@@ -33,7 +33,7 @@ class RequestSet(object):
                 name = ""
 
             if (path, name,) in self.dict:
-                logger.log_info("Request %s-%s is replaced by %s." % (path, name, cls))
+                logger.log_debug("Request %s-%s is replaced by %s." % (path, name, cls))
 
             self.dict[(path, name,)] = cls()
 

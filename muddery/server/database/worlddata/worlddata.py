@@ -52,7 +52,6 @@ class WorldData(object):
                 config["MODELS"],
                 table_name)
         except Exception as e:
-            traceback.print_exc()
             raise MudderyError("Can not load table %s: %s" % (table_name, e))
 
     @classmethod

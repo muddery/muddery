@@ -3,6 +3,7 @@
 import os
 import signal
 import json
+import logging
 from sanic import Sanic
 from muddery.common.utils.utils import write_pid_file, read_pid_file
 from muddery.common.networks import responses
@@ -35,6 +36,7 @@ def run(port):
         # save pid
         write_pid_file(SETTINGS.WORLD_EDITOR_PID, os.getpid())
         print("\nWorldeditor server started.\n")
+        logger.log_critical("Worldeditor server started.")
 
     @app.after_server_stop
     async def after_server_stop(app, loop):
@@ -44,6 +46,7 @@ def run(port):
         except:
             pass
         print("Worldeditor server stopped.")
+        logger.log_critical("Worldeditor server stopped.")
 
     # static web pages
     app.static("/", os.path.join(SETTINGS.WORLD_EDITOR_WEBROOT, "index.html"))
@@ -84,12 +87,11 @@ def run(port):
         response = await Server.inst().handle_request(request.method, func, data, request, token)
 
         if hasattr(response, "body"):
-            print("[RESPOND] '%s' '%s'" % (response.status, response.body))
-            logger.log_info("[RESPOND] '%s' '%s'" % (response.status, response.body))
+            logger.log_debug("[RESPOND] '%s' '%s'" % (response.status, response.body))
         elif hasattr(response, "streaming_content"):
-            logger.log_info("[RESPOND] '%s' streaming_content" % response.status)
+            logger.log_debug("[RESPOND] '%s' streaming_content" % response.status)
         else:
-            logger.log_info("[RESPOND] '%s'" % response.status)
+            logger.log_debug("[RESPOND] '%s'" % response.status)
 
         return response
 
@@ -118,19 +120,19 @@ def run(port):
         response = await Server.inst().handle_request(request.method, func, data, request, token)
 
         if hasattr(response, "body"):
-            print("[RESPOND] '%s' '%s'" % (response.status, response.body))
-            logger.log_info("[RESPOND] '%s' '%s'" % (response.status, response.body))
+            logger.log_debug("[RESPOND] '%s' '%s'" % (response.status, response.body))
         elif hasattr(response, "streaming_content"):
-            logger.log_info("[RESPOND] '%s' streaming_content" % response.status)
+            logger.log_debug("[RESPOND] '%s' streaming_content" % response.status)
         else:
-            logger.log_info("[RESPOND] '%s'" % response.status)
+            logger.log_debug("[RESPOND] '%s'" % response.status)
 
         return response
 
     # run the server
     if not port:
         port = SETTINGS.WEBSERVER_PORT
-    app.run(host=SETTINGS.ALLOWED_HOST, port=port)
+    enable_access_log = (SETTINGS.LOG_LEVEL <= logging.INFO)
+    app.run(host=SETTINGS.ALLOWED_HOST, port=port, access_log=enable_access_log)
 
 
 def stop():
@@ -143,6 +145,7 @@ def stop():
     try:
         os.kill(pid, signal.SIGTERM)
         print("Worldeditor server stopped.")
+        logger.log_critical("Worldeditor server killed.")
     except:
         print("Can not stop the worldeditor server correctly.")
 

@@ -61,7 +61,6 @@ class MudderyExit(ELEMENT("MATTER")):
         try:
             await character.move_to(self.destination_obj())
         except Exception as e:
-            traceback.print_exc()
             logger.log_err("%s cannot set location: (%s)%s." % (character.get_id(), type(e).__name__, e))
             await character.msg({"msg": _("You can not go there.")})
 

@@ -3,13 +3,15 @@
 import traceback
 import os
 import signal
+import logging
 from sanic import Sanic
 from asyncio import CancelledError
+from muddery.common.utils.utils import write_pid_file, read_pid_file
+from muddery.common.networks import responses
 from muddery.server.networks.sanic_channel import SanicChannel
 from muddery.server.settings import SETTINGS
 from muddery.server.server import Server
-from muddery.common.utils.utils import write_pid_file, read_pid_file
-from muddery.common.networks import responses
+from muddery.server.utils.logger import logger
 
 
 def run(port):
@@ -31,6 +33,7 @@ def run(port):
         # save pid
         write_pid_file(SETTINGS.SERVER_PID, os.getpid())
         print("\nGame server server started.\n")
+        logger.log_critical("Game server server started.")
 
     @app.after_server_stop
     async def after_server_stop(app, loop):
@@ -40,6 +43,7 @@ def run(port):
         except:
             pass
         print("Game server stopped.")
+        logger.log_critical("Game server stopped.")
 
     # check the server's status
     @app.get("/status")
@@ -50,7 +54,7 @@ def run(port):
     @app.websocket("/")
     async def handler(request, ws):
         channel = SanicChannel()
-        print("[Connection created] %s:%s" % (request.ip, request.port))
+        logger.log_info("[Connection created] %s:%s" % (request.ip, request.port))
         try:
             channel.connect(request, ws)
             while True:
@@ -59,16 +63,17 @@ def run(port):
         except CancelledError as e:
             await channel.disconnect(0)
         except Exception as e:
-            traceback.print_exc()
+            logger.log_trace("Connection Exception: %s" % e)
             await channel.disconnect(-1)
 
-        print("[Connection closed] %s:%s" % (request.ip, request.port))
+        logger.log_info("[Connection closed] %s:%s" % (request.ip, request.port))
         await ws.close()
 
     # run the server
     if not port:
         port = SETTINGS.WEBSERVER_PORT
-    app.run(host=SETTINGS.ALLOWED_HOST, port=port)
+    enable_access_log = (SETTINGS.LOG_LEVEL <= logging.INFO)
+    app.run(host=SETTINGS.ALLOWED_HOST, port=port, access_log=enable_access_log)
 
 
 def stop():
@@ -81,6 +86,7 @@ def stop():
     try:
         os.kill(pid, signal.SIGTERM)
         print("Game server stopped.")
+        logger.log_critical("Game server killed.")
     except:
         print("Can not stop the game server correctly.")
 

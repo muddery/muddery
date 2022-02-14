@@ -269,7 +269,6 @@ class MudderyAccount(BaseElement):
             new_char.set_account(self)
             await new_char.setup_element(char_key)
         except Exception as e:
-            traceback.print_exc()
             await self.msg({"alert": _("That is not a valid character choice.")})
             return
 

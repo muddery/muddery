@@ -4,11 +4,11 @@ This model translates default strings into localized strings.
 
 import importlib
 import traceback
-
-from muddery.server.settings import SETTINGS
 from sqlalchemy import select, update, delete
-from muddery.server.database.gamedata_db import GameDataDB
 from muddery.common.utils.singleton import Singleton
+from muddery.server.settings import SETTINGS
+from muddery.server.database.gamedata_db import GameDataDB
+from muddery.server.utils.logger import logger
 
 
 class HonoursMapper(Singleton):
@@ -91,7 +91,7 @@ class HonoursMapper(Singleton):
         try:
             return self.honours[character.id]
         except Exception as e:
-            print("Can not get character's honour: %s" % e)
+            logger.log_err("Can not get character's honour: %s" % e)
 
     def get_honour(self, char_db_id, default=None):
         """
@@ -109,7 +109,7 @@ class HonoursMapper(Singleton):
             if default is not None:
                 return default
             else:
-                print("Can not get character's honour: %s" % e)
+                logger.log_err("Can not get character's honour: %s" % e)
             
     def get_ranking(self, char_db_id):
         """
@@ -124,7 +124,7 @@ class HonoursMapper(Singleton):
         try:
             return self.honours[char_db_id]["ranking"]
         except Exception as e:
-            print("Can not get character's ranking: %s" % e)
+            logger.log_err("Can not get character's ranking: %s" % e)
             
     def get_top_rankings(self, number):
         """
@@ -176,7 +176,7 @@ class HonoursMapper(Singleton):
             }
             self.make_rankings()
         except Exception as e:
-            print("Can not create character's honour: %s" % e)
+            logger.log_err("Can not create character's honour: %s" % e)
 
     async def set_honour(self, char_id, honour):
         """
@@ -192,7 +192,7 @@ class HonoursMapper(Singleton):
             try:
                 self.honours[char_id]["honour"] = honour
             except Exception as e:
-                print("Can not set character's honour: %s" % e)
+                logger.log_err("Can not set character's honour: %s" % e)
         else:
             # Add a new honour record.
             await self.create_honour(char_id, honour)
@@ -222,7 +222,7 @@ class HonoursMapper(Singleton):
                 self.honours[key]["honour"] = value
             self.make_rankings()
         else:
-            print("Can not set character's honours")
+            logger.log_err("Can not set character's honours")
             
     async def remove_character(self, char_db_id):
         """
@@ -237,8 +237,7 @@ class HonoursMapper(Singleton):
 
             self.make_rankings()
         except Exception as e:
-            traceback.print_exc()
-            print("Can not remove character's honour: %s" % e)
+            logger.log_err("Can not remove character's honour: %s" % e)
 
     def get_characters(self, character, number):
         """

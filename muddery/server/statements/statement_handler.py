@@ -48,7 +48,6 @@ async def exec_function(func_set, func_word, caller, obj, **kwargs):
         return await func_obj.func()
     except Exception as e:
         logger.log_err("Exec function error: %s %s" % (func_word, repr(e)))
-        traceback.print_exc()
         return
 
 
@@ -192,7 +191,6 @@ class StatementHandler(object):
             result = eval(exec_string)
         except Exception as e:
             logger.log_err("Exec condition error: %s %s" % (condition, repr(e)))
-            traceback.print_exc()
             return False
 
         return result

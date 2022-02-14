@@ -675,7 +675,6 @@ class CmdAttack(BaseCommand):
                 timeout=0
             )
         except Exception as e:
-            traceback.print_exc()
             logger.log_err("Can not create combat: [%s] %s" % (type(e).__name__, e))
             await caller.msg({"alert": _("You can not attack %s.") % target.get_name()})
             return

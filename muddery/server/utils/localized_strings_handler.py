@@ -2,8 +2,9 @@
 This model translates default strings into localized strings.
 """
 
-from muddery.server.database.worlddata.localized_strings import LocalizedStrings
 from muddery.common.utils.singleton import Singleton
+from muddery.server.database.worlddata.localized_strings import LocalizedStrings
+from muddery.server.utils.logger import logger
 
 
 class LocalizedStringsHandler(Singleton):
@@ -39,7 +40,7 @@ class LocalizedStringsHandler(Singleton):
 
             self.loaded = True
         except Exception as e:
-            print("Can not load custom localized string: %s" % e)
+            logger.log_err("Can not load custom localized string: %s" % e)
 
     def translate(self, origin, category="", default=None):
         """

@@ -17,9 +17,6 @@ class HonoursHandler(object):
             winners: (list) a list of winner's db_id
             losers: (list) a list of loser's db_id
         """
-        print("winners: %s" % winners)
-        print("losers: %s" % losers)
-
         total_losers = 0
         average_losers = 0
         if losers:
@@ -81,7 +78,6 @@ class HonoursHandler(object):
             total_honours[char] = value
 
         # Set new honours.
-        print("total_honours: %s" % total_honours)
         await HonoursMapper.inst().set_honours(total_honours)
 
         return honour_changes

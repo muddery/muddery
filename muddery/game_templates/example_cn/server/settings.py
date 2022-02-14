@@ -1,6 +1,8 @@
 """
 Game settings file.
 """
+import logging
+
 
 class ServerSettings(object):
 
@@ -11,7 +13,7 @@ class ServerSettings(object):
     # This is a security setting protecting against host poisoning
     # attacks.  It defaults to allowing all. In production, make
     # sure to change this to your actual host addresses/IPs.
-    ALLOWED_HOSTS = "['*']"
+    ALLOWED_HOST = "0.0.0.0"
 
     # The webserver sits behind a Portal proxy.
     WEBCLIENT_PORT = {WEBCLIENT_PORT}
@@ -23,6 +25,8 @@ class ServerSettings(object):
     # http://www.w3.org/TR/REC-html40/struct/dirlang.html#langcodes
     LANGUAGE_CODE = 'zh-Hans'
 
+    # The log level
+    LOG_LEVEL = logging.INFO
 
     ######################################################################
     # Default statement sets

@@ -62,7 +62,7 @@ class ElementSet(object):
                                     module_path += "." + relative_path + "." + name + "." + class_name
 
                                 if key_name in self.module_dict:
-                                    logger.log_info("Element %s is replaced by %s." % (key_name, module_path))
+                                    logger.log_debug("Element %s is replaced by %s." % (key_name, module_path))
 
                                 self.module_dict[key_name] = module_path
                                 class_name = ""
@@ -95,11 +95,10 @@ class ElementSet(object):
                 cls = class_from_path(self.module_dict[key])
                 if key in self.class_dict:
                     if self.class_dict[key] != cls:
-                        logger.log_info("Element %s is replaced by %s." % (key, cls))
+                        logger.log_debug("Element %s is replaced by %s." % (key, cls))
                 self.class_dict[key] = cls
                 return cls
             except Exception as e:
-                traceback.print_exc()
                 logger.log_trace("Load module error: %s" % e)
 
         # If can not find the element, return the base element.

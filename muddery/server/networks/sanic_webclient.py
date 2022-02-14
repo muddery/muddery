@@ -2,11 +2,13 @@
 
 import os
 import signal
+import logging
 from sanic import Sanic
-from muddery.server.settings import SETTINGS
 from muddery.common.utils.utils import write_pid_file, read_pid_file
-from muddery.launcher.manager import collect_webclient_static
 from muddery.common.networks import responses
+from muddery.launcher.manager import collect_webclient_static
+from muddery.server.settings import SETTINGS
+from muddery.server.utils.logger import logger
 
 
 def run(port):
@@ -31,6 +33,7 @@ def run(port):
         # save pid
         write_pid_file(SETTINGS.WEBCLIENT_PID, os.getpid())
         print("\nWebclient server started.\n")
+        logger.log_critical("Webclient server started.")
 
     @app.after_server_stop
     async def after_server_stop(app, loop):
@@ -39,7 +42,8 @@ def run(port):
             os.remove(SETTINGS.WEBCLIENT_PID)
         except:
             pass
-        print("Webclient stopped.")
+        print("Webclient server stopped.")
+        logger.log_critical("Webclient server stopped.")
 
     # check the server's status
     @app.get("/status")
@@ -48,7 +52,8 @@ def run(port):
 
     if not port:
         port = SETTINGS.WEBSERVER_PORT
-    app.run(host=SETTINGS.ALLOWED_HOST, port=port)
+    enable_access_log = (SETTINGS.LOG_LEVEL <= logging.INFO)
+    app.run(host=SETTINGS.ALLOWED_HOST, port=port, access_log=enable_access_log)
 
 
 def stop():
@@ -61,6 +66,7 @@ def stop():
     try:
         os.kill(pid, signal.SIGTERM)
         print("Webclient server stopped.")
+        logger.log_critical("Webclient server killed.")
     except:
         print("Can not stop the webclient server correctly.")
 

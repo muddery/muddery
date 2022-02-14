@@ -31,7 +31,7 @@ class FormSet(object):
                 if form_class.Meta and form_class.Meta.model:
                     model_name = form_class.Meta.model.__name__
                     if model_name and model_name in self.dict:
-                        logger.log_info("Form %s is replaced by %s." % (model_name, form_class))
+                        logger.log_debug("Form %s is replaced by %s." % (model_name, form_class))
 
                     self.dict[model_name] = form_class
 

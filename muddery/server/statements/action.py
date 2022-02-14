@@ -229,7 +229,6 @@ class FuncSetRelationship(StatementFunction):
             await self.caller.set_relationship(element_type, element_key, number)
             return True
         except:
-            traceback.print_exc()
             logger.log_trace("Set relationship error.")
             return False
 
@@ -262,6 +261,5 @@ class FuncAddRelationship(StatementFunction):
             await self.caller.increase_relationship(element_type, element_key, number)
             return True
         except:
-            traceback.print_exc()
             logger.log_trace("Set relationship error.")
             return False

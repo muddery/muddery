@@ -40,8 +40,7 @@ class Processor(object):
         func = data.get("func", "")
         args = data.get("args", {})
 
-        logger.log_info("[REQUEST] '%s' '%s' '%s'" % (path, func, args))
-        print("[REQUEST] '%s' '%s' '%s'" % (path, func, args))
+        logger.log_debug("[REQUEST] '%s' '%s' '%s'" % (path, func, args))
 
         processor = self.request_set.get(path, func)
         if not processor:
