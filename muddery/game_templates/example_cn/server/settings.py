@@ -26,7 +26,10 @@ class ServerSettings(object):
     LANGUAGE_CODE = 'zh-Hans'
 
     # The log level
-    LOG_LEVEL = logging.INFO
+    LOG_LEVEL = logging.DEBUG
+
+    # Also print logs to the console.
+    LOG_TO_CONSOLE = False
 
     ######################################################################
     # Default statement sets

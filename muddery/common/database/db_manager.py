@@ -3,6 +3,7 @@ import importlib
 import inspect
 from sqlalchemy.orm import Session
 from sqlalchemy import delete
+from sqlalchemy import inspect as sql_inspect
 from muddery.common.database.engines import get_engine, get_db_link
 from muddery.common.utils.singleton import Singleton
 
@@ -46,6 +47,18 @@ class DBManager(Singleton):
         except Exception as e:
             self.logger.log_trace("Can not connect to db.")
             raise e
+
+    def check_tables(self):
+        """
+        Check if all database tables exist.
+        """
+        try:
+            table_names = sql_inspect(self.engine).get_table_names()
+        except Exception as e:
+            self.logger.log_trace("Can not connect to db.")
+            raise e
+
+        return len(table_names) > 0
 
     def get_db_link(self):
         """

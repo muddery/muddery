@@ -177,4 +177,5 @@ MudderyLocalDict = {
     "ME": "我",
     "LOCAL": "本地",
     "ADMIN": "管理员",
+    "An error occurred while setting up the client!": "设置客户端时发生错误！",
 };

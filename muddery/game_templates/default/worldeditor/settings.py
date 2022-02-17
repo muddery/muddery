@@ -19,7 +19,10 @@ class ServerSettings(object):
     WORLD_EDITOR_PORT = {WORLD_EDITOR_PORT}
 
     # The secret key of jwt.
-    WORLD_EDITOR_SECRET = "SET_YOUR_SECRET_KEY"
+    WORLD_EDITOR_SECRET = "{WORLD_EDITOR_SECRET}"
 
     # The log level
-    LOG_LEVEL = logging.INFO
+    LOG_LEVEL = logging.DEBUG
+
+    # Also print logs to the console.
+    LOG_TO_CONSOLE = False

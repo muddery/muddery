@@ -70,7 +70,10 @@ class Settings(object):
     # Place to put log files
     LOG_DIR = os.path.join(GAME_DIR, "server", "logs")
     LOG_NAME = 'server.log'
-    LOG_LEVEL = logging.INFO
+    LOG_LEVEL = logging.DEBUG
+
+    # Also print logs to the console.
+    LOG_TO_CONSOLE = False
 
     # The maximum number of characters allowed by the default.
     MAX_PLAYER_CHARACTERS = 5
@@ -128,14 +131,17 @@ class Settings(object):
     # Directories from which static files will be gathered from.
     WEBCLIENT_SOURCE_DIRS = (
         (WEBCLIENT_ROOT, os.path.join(MUDDERY_DIR, "webclient")),
-        (WEBCLIENT_ROOT, os.path.join(GAME_DIR, "web", "webclient_overrides", "webclient")),
+        (WEBCLIENT_ROOT, os.path.join(GAME_DIR, "webclient")),
     )
 
     # Media files root dir
     MEDIA_ROOT = os.path.join(GAME_DIR, "web", "media")
 
     # resource's location
-    IMAGE_PATH = 'image'
+    IMAGE_PATH = "image"
+
+    # RSA private key file
+    RSA_PRIVATE_KEY_FILE = os.path.join(GAME_DIR, "server", "keys", "rsa_private.pem")
 
     ######################################################################
     # Typeclasses and other paths

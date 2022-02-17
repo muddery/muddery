@@ -60,8 +60,11 @@ class Settings(object):
 
     # Place to put log files
     LOG_DIR = os.path.join(GAME_DIR, "worldeditor", "logs")
-    LOG_NAME = 'server.log'
-    LOG_LEVEL = logging.INFO
+    LOG_NAME = 'editor.log'
+    LOG_LEVEL = logging.DEBUG
+
+    # Also print logs to the console.
+    LOG_TO_CONSOLE = False
 
     ROOT_LOG = "root.log"
     ACCESS_LOG = "access.log"
@@ -84,10 +87,14 @@ class Settings(object):
     # Directories from which static files will be gathered from.
     WEBCLIENT_SOURCE_DIRS = (
         (WORLD_EDITOR_WEBROOT, os.path.join(MUDDERY_DIR, "worldeditor", "webclient")),
+        (WORLD_EDITOR_WEBROOT, os.path.join(GAME_DIR, "worldeditor", "webclient")),
     )
 
     # Media files root dir
     MEDIA_ROOT = os.path.join(GAME_DIR, "web", "media")
+
+    # RSA private key file
+    RSA_PRIVATE_KEY_FILE = os.path.join(GAME_DIR, "worldeditor", "keys", "rsa_private.pem")
 
     ######################################################################
     # Database config

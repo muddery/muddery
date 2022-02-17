@@ -163,7 +163,7 @@ MudderyClient.prototype = {
                     } else if (key == "logout") {
                         mud.main_frame.onLogout(data[key]);
                     } else if (key == "pw_changed") {
-                        mud.main_frame.popWindow(password_window);
+                        mud.main_frame.popWindow(mud.password_window);
                     } else if (key == "unpuppet") {
                         mud.main_frame.onUnpuppet(data[key]);
                     } else if (key == "char_all") {

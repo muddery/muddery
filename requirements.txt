@@ -7,6 +7,7 @@ wtforms-alchemy >= 0.18.0
 apscheduler >= 3.7.0
 pymysql >= 1.0.2
 pyjwt >= 2.3.0
+pycryptodome >= 3.14.1
 
 # world editor
 pillow >= 8.4.0

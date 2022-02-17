@@ -5,7 +5,7 @@ These are thin wrappers on logging facilities; logs
 are all directed either to stdout or to $GAME_DIR/server/logs.
 
 """
-
+import sys
 from traceback import format_exc
 import os
 import threading
@@ -17,13 +17,13 @@ class Logger(object):
     """
     The logger object.
     """
-    def __init__(self, log_path, log_name, log_level):
+    def __init__(self, log_path, log_name, log_level, log_to_console):
         """
         Init the logger.
         """
-        self.logger = self.setup_log(log_path, log_name, log_level)
+        self.logger = self.setup_log(log_path, log_name, log_level, log_to_console)
 
-    def setup_log(self, log_path, log_name, log_level):
+    def setup_log(self, log_path, log_name, log_level, log_to_console):
         """
         Create a logger.
         """
@@ -40,12 +40,15 @@ class Logger(object):
         file_handler.suffix = "%Y-%m-%d.log"
 
         # Set output format.
-        file_handler.setFormatter(
-            logging.Formatter(
-                "[%(asctime)s] - %(message)s"
-            )
-        )
+        file_handler.setFormatter(logging.Formatter("[%(asctime)s] - %(message)s"))
+
         logger.addHandler(file_handler)
+
+        if log_to_console:
+            console_handler = logging.StreamHandler(sys.stdout)
+            console_handler.setFormatter(logging.Formatter("[%(asctime)s] - %(message)s"))
+            logger.addHandler(console_handler)
+
         return logger
 
     def log_trace(self, errmsg=None):
@@ -148,7 +151,7 @@ class Logger(object):
             msg = str(e)
 
         for line in msg.splitlines():
-            self.logger.debug("[BG] %s" % line)
+            self.logger.debug("[DD] %s" % line)
 
     def log_dep(self, depmsg):
         """

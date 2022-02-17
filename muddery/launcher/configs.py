@@ -63,6 +63,13 @@ CREATED_NEW_GAMEDIR = \
 
     """
 
+NO_GAME_TABLES = \
+    """
+    You must run this command inside a valid game directory first
+
+        muddery setup
+    """
+
 VERSION_INFO = \
     """
     Muddery {version}
@@ -88,14 +95,6 @@ ERROR_INPUT = \
     Command
     {args} {kwargs}
     raised an error: '{traceback}'.
-    """
-
-ERROR_NO_GAMEDIR = \
-    """
-    You must run this command inside a valid game directory first
-    created with
-
-        muddery --init mygamename
     """
 
 NEED_UPGRADE = \

@@ -326,7 +326,10 @@ async def wait_server_status(server_process, webclient_process, worldeditor_proc
 
             await asyncio.sleep(1)
 
-    await asyncio.wait_for(get_server_status(server_process, webclient_process, worldeditor_process), timeout)
+    try:
+        await asyncio.wait_for(get_server_status(server_process, webclient_process, worldeditor_process), timeout)
+    except asyncio.TimeoutError:
+        print("One or more servers are not working correctly.")
 
 
 async def run_servers(server: bool = False, webclient: bool = False, editor: bool = False, restart: bool = False):
@@ -341,6 +344,28 @@ async def run_servers(server: bool = False, webclient: bool = False, editor: boo
     """
     gamedir = os.path.abspath(configs.CURRENT_DIR)
     utils.init_game_env(gamedir)
+
+    # Load settings.
+    try:
+        from muddery.server.settings import SETTINGS
+        from server.settings import ServerSettings
+        SETTINGS.update(ServerSettings())
+    except Exception as e:
+        traceback.print_exc()
+        raise
+
+    # check tables
+    try:
+        from muddery.server.database.gamedata_db import GameDataDB
+        GameDataDB.inst().connect()
+        has_tables = GameDataDB.inst().check_tables()
+    except Exception as e:
+        traceback.print_exc()
+        raise
+
+    if not has_tables:
+        print(configs.NO_GAME_TABLES)
+        return
 
     print("Starting ...")
 
@@ -374,7 +399,7 @@ async def run_servers(server: bool = False, webclient: bool = False, editor: boo
         command = template % "run_worldeditor.py"
         worldeditor_process = subprocess.Popen(command, **options)
 
-    await wait_server_status(server_process, webclient_process, worldeditor_process, 10)
+    await wait_server_status(server_process, webclient_process, worldeditor_process, 30)
 
 
 def kill_servers(server: bool = True, webclient: bool = True, editor: bool = True):

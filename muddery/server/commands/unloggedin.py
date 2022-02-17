@@ -3,13 +3,16 @@ General commands usually availabe to all users.
 """
 
 import re
+import os
 import time
+import base64
 from collections import defaultdict
+from muddery.common.utils.exception import MudderyError, ERR
 from muddery.server.settings import SETTINGS
 from muddery.server.mappings.element_set import ELEMENT
 from muddery.server.utils.logger import logger
+from muddery.server.utils.crypto import RSA
 from muddery.server.commands.base_command import BaseCommand
-from muddery.common.utils.exception import MudderyError, ERR
 from muddery.server.utils.localized_strings_handler import _
 from muddery.server.utils.game_settings import GameSettings
 from muddery.server.database.worlddata.equipment_positions import EquipmentPositions
@@ -86,23 +89,29 @@ class CmdConnectAccount(BaseCommand):
         """
         Login the game server.
         """
-        try:
-            username = args["username"]
-            password = args["password"]
-        except Exception:
-            string = 'Can not log in.'
-            logger.log_err(string)
-            await session.msg({"alert":string})
-            return
-
         # check for too many login errors too quick.
         if _throttle(session, maxlim=5, timeout=5*60, storage=_LATEST_FAILED_LOGINS):
             # timeout is 5 minutes.
-            await session.msg({"alert":_("{RYou made too many connection attempts. Try again in a few minutes.{n")})
+            await session.msg({"alert": _("{RYou made too many connection attempts. Try again in a few minutes.{n")})
             return
 
+        if "username" not in args:
+            await session.msg({"alert": _("You should input a username.")})
+            return
+
+        if "password" not in args:
+            await session.msg({"alert": _("You should input a password.")})
+            return
+
+        username = args["username"]
+        username = re.sub(r"\s+", " ", username).strip()
+
+        encrypted = base64.b64decode(args["password"])
+        decrypted = RSA.inst().decrypt(encrypted)
+        password = decrypted.decode("utf-8")
+
         if not password:
-            await session.msg({"alert":_("Please input password.")})
+            await session.msg({"alert": _("You should input a password.")})
             return
 
         # Get the account.
@@ -169,7 +178,13 @@ class CmdCreateAccount(BaseCommand):
         username = args["username"]
         username = re.sub(r"\s+", " ", username).strip()
 
-        password = args["password"]
+        encrypted = base64.b64decode(args["password"])
+        decrypted = RSA.inst().decrypt(encrypted)
+        password = decrypted.decode("utf-8")
+
+        if not password:
+            await session.msg({"alert": _("You should input a password.")})
+            return
 
         connect = True
         if "connect" in args:

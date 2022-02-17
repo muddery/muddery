@@ -128,14 +128,29 @@ service = {
         form.appendTo('body').submit().remove();
     },
 
+    getData: function(path, callback_success, callback_failed) {
+        var url = window.location.origin + "/"+ path;
+        $.ajax({
+            url: url,
+            type: "GET",
+            cache: false,
+            success: callback_success,
+            error: callback_failed
+        });
+    },
+
     set_token: function(token) {
         sessionStorage.setItem("token", token);
+    },
+
+    getEncryptKey: function(callback_success, callback_failed) {
+        this.getData("keys/rsa_public.pem", callback_success, callback_failed);
     },
 
     login: function(username, password, callback_success, callback_failed) {
         var args = {
             username: username,
-            password: password
+            password: muddery_crypto.encrypt(password),
         };
         this.sendRequest("login", "", args, callback_success, callback_failed);
     },
@@ -468,3 +483,30 @@ service = {
 }
 
 
+muddery_crypto = {
+    init: function() {
+	    this.crypt = new JSEncrypt();
+        this.getEncryptKey();
+    },
+
+    /*
+     * Query encrypt key from the server.
+     */
+    getEncryptKey: function() {
+        service.getEncryptKey(this.getEncryptKeySuccess, this.getEncryptKeyFailed);
+    },
+
+    getEncryptKeySuccess: function(data) {
+        muddery_crypto.crypt.setPublicKey(data);
+    },
+
+    getEncryptKeyFailed: function(request, status) {
+        alert("An error occurred while setting up the client!");
+    },
+
+    encrypt: function(data) {
+        return this.crypt.encrypt(data)
+    },
+}
+
+muddery_crypto.init();

@@ -3,12 +3,13 @@ General account commands usually availabe to all players.
 """
 
 import re, traceback
+import base64
 from muddery.server.settings import SETTINGS
 from muddery.server.utils.logger import logger
+from muddery.server.utils.crypto import RSA
 from muddery.server.commands.base_command import BaseCommand
 from muddery.server.utils.localized_strings_handler import _
 from muddery.server.utils.builder import create_character
-from muddery.server.database.gamedata.account_characters import AccountCharacters
 from muddery.server.database.gamedata.character_info import CharacterInfo
 
 
@@ -43,17 +44,23 @@ class CmdDeleteAccount(BaseCommand):
             return
 
         if "username" not in args:
-            await account.msg({"alert": _("You should appoint a username.")})
+            await account.msg({"alert": _("You should input a username.")})
             return
 
         if "password" not in args:
-            await account.msg({"alert": _("You should appoint a password.")})
+            await account.msg({"alert": _("You should input a password.")})
             return
 
         username = args["username"]
         username = re.sub(r"\s+", " ", username).strip()
 
-        password = args["password"]
+        encrypted = base64.b64decode(args["password"])
+        decrypted = RSA.inst().decrypt(encrypted)
+        password = decrypted.decode("utf-8")
+
+        if not password:
+            await account.msg({"alert": _("You should input a password.")})
+            return
 
         # Set the account with username and password.
         if not await account.check_password(username, password):
@@ -106,10 +113,31 @@ class CmdChangePassword(BaseCommand):
     @classmethod
     async def func(cls, account, args):
         "hook function"
-        current_password = args["current"]
-        new_password = args["new"]
+        if "current" not in args:
+            await account.msg({"alert": _("You should input your current password.")})
+            return
 
-        account.change_password(current_password, new_password)
+        if "new" not in args:
+            await account.msg({"alert": _("You should input a new password.")})
+            return
+
+        encrypted = base64.b64decode(args["current"])
+        decrypted = RSA.inst().decrypt(encrypted)
+        current_password = decrypted.decode("utf-8")
+
+        if not current_password:
+            await account.msg({"alert": _("You should input your current password.")})
+            return
+
+        encrypted = base64.b64decode(args["new"])
+        decrypted = RSA.inst().decrypt(encrypted)
+        new_password = decrypted.decode("utf-8")
+
+        if not new_password:
+            await account.msg({"alert": _("You should input a new password.")})
+            return
+
+        await account.change_password(current_password, new_password)
 
 
 class CmdPuppet(BaseCommand):
@@ -355,12 +383,27 @@ class CmdCharDeleteWithPW(BaseCommand):
     async def func(cls, account, args):
         "delete the character"
         if not args:
-            await account.msg({"alert":_("Please select a character")})
+            await account.msg({"alert": _("Please select a character")})
             return
-            
+
+        if "id" not in args:
+            await account.msg({"alert": _("Please select a character")})
+            return
+
+        if "password" not in args:
+            await account.msg({"alert": _("You should input your password.")})
+            return
+
         char_id = args["id"]
-        password = args["password"]
-            
+
+        encrypted = base64.b64decode(args["password"])
+        decrypted = RSA.inst().decrypt(encrypted)
+        password = decrypted.decode("utf-8")
+
+        if not password:
+            await account.msg({"alert": _("You should input your password.")})
+            return
+
         check = await account.check_password(password)
         if not check:
             # No password match

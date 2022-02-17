@@ -10,4 +10,4 @@ from muddery.common.utils.logger import Logger
 from muddery.worldeditor.settings import SETTINGS
 
 
-logger = Logger(SETTINGS.LOG_DIR, SETTINGS.LOG_NAME, SETTINGS.LOG_LEVEL)
+logger = Logger(SETTINGS.LOG_DIR, SETTINGS.LOG_NAME, SETTINGS.LOG_LEVEL, SETTINGS.LOG_TO_CONSOLE)

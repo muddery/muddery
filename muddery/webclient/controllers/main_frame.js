@@ -296,7 +296,7 @@ MudderyMainFrame.prototype.onConnectionOpen = function() {
 	self.showLoginWindow();
 	if (self.first_connection) {
 	    self.first_connection = false;
-	    core.service.queryUnloggedIn();
+	    core.command.queryUnloggedIn();
 	    mud.login_window.checkAutoLogin();
 	}
 }
@@ -657,7 +657,7 @@ MudderyPopupObject.prototype.onClose = function(element) {
 MudderyPopupObject.prototype.onCommand = function(element) {
 	var index = $(element).data("index");
 	if ("cmd" in this.buttons[index] && "args" in this.buttons[index]) {
-		core.service.sendCommandLink(this.buttons[index]["cmd"], this.buttons[index]["args"]);
+		core.command.sendCommandLink(this.buttons[index]["cmd"], this.buttons[index]["args"]);
 	}
 
 	this.onClose();
@@ -852,7 +852,7 @@ MudderyPopupDialogue.prototype.gotoNext = function() {
         this.displaySentence(this.dialogues[this.d_index].sentences[this.s_index]);
     }
     else {
-		core.service.finishDialogue(this.dialogues[this.d_index].key, this.target.id? this.target.id: "");
+		core.command.finishDialogue(this.dialogues[this.d_index].key, this.target.id? this.target.id: "");
 	}
 }
 
@@ -1133,7 +1133,7 @@ MudderyPopupConfirmCombat.prototype.onConfirmCombat = function(element) {
 	}
 	this.confirmed = true;
 
-	core.service.confirmCombat();
+	core.command.confirmCombat();
 
 	this.select(".confirm-body").text(core.trans("Waiting the opponent to confirm."));
 	this.select(".button-cancel").hide();
@@ -1149,7 +1149,7 @@ MudderyPopupConfirmCombat.prototype.onRejectCombat = function(element) {
 	}
 
     this.el.hide();
-	core.service.rejectCombat();
+	core.command.rejectCombat();
 	mud.honour_window.leftCombatQueue();
 
 	if (this.interval_id != null) {
@@ -1250,7 +1250,7 @@ MudderyPopupInputCommand.prototype.onSend = function(element) {
 	var command = this.select(".command-text").val();
 	this.select(".command-text").val("");
 
-	core.service.sendRawCommand(command);
+	core.command.sendRawCommand(command);
 }
 
 /******************************************
@@ -1318,7 +1318,12 @@ MudderyLogin.prototype.onClickRegister = function(element) {
     var password = this.select(".reg-password").val();
     var password_verify = this.select(".reg-password-verify").val();
 
-    core.service.register(username, password, password_verify, true);
+    if (password != password_verify) {
+        this.popupMessage(core.trans("Error"), core.trans("Password does not match."));
+        return;
+    }
+
+    core.command.register(username, password, true);
     this.clearValues();
 }
 
@@ -1328,7 +1333,8 @@ MudderyLogin.prototype.onClickRegister = function(element) {
 MudderyLogin.prototype.onClickLogin = function(element) {
     var name = this.select(".login-name").val();
     var password = this.select(".login-password").val();
-    core.service.login(name, password);
+
+    core.command.login(name, password);
 }
 
 /*
@@ -1401,7 +1407,7 @@ MudderyLogin.prototype.checkAutoLogin = function() {
         var password = localStorage.login_password;
 
         this.setValues(name, password, true);
-	    core.service.login(name, password);
+	    core.command.login(name, password);
     }
 }
 
@@ -1488,7 +1494,7 @@ MudderySelectChar.prototype.onNewCharacter = function(element) {
  * Event when clicks the logout button.
  */
 MudderySelectChar.prototype.onLogout = function(element) {
-    core.service.logout();
+    core.command.logout();
     mud.main_frame.showLoginWindow();
 }
 
@@ -1497,7 +1503,7 @@ MudderySelectChar.prototype.onLogout = function(element) {
  */
 MudderySelectChar.prototype.onSelectCharacter = function(element) {
     var index = this.select(element).data("index");
-    core.service.puppetCharacter(this.characters[index]["id"]);
+    core.command.puppetCharacter(this.characters[index]["id"]);
 }
 
 /*
@@ -1528,7 +1534,7 @@ MudderySelectChar.prototype.onDeleteCharacter = function(element, event) {
  */
 MudderySelectChar.prototype.confirmDelete = function(data) {
 	var obj_id = data;
-    core.service.deleteCharacter(obj_id);
+    core.command.deleteCharacter(obj_id);
 }
 
 /*
@@ -1630,7 +1636,7 @@ MudderyNewChar.prototype.onClickBack = function(element) {
  */
 MudderyNewChar.prototype.onCreate = function(element) {
 	var char_name = this.select(".new-char-name").val();
-	core.service.createCharacter(char_name);
+	core.command.createCharacter(char_name);
 	this.reset();
 }
 
@@ -1690,7 +1696,12 @@ MudderyPassword.prototype.onConfirm = function(element) {
     var password = this.select(".new-password").val();
     var password_verify = this.select(".new-password-verify").val();
 
-    core.service.changePassword(current, password, password_verify);
+    if (password != password_verify) {
+        mud.main_frame.popupMessage(core.trans("Error"), core.trans("Password does not match."));
+        return;
+    }
+
+    core.command.changePassword(current, password);
     this.clearValues();
 }
 
@@ -1863,7 +1874,7 @@ MudderyGame.prototype.onSystem = function(element) {
  * Event when clicks the logout button.
  */
 MudderyGame.prototype.onLogout = function(element) {
-    core.service.logout();
+    core.command.logout();
     mud.main_frame.showLoginWindow();
 }
 
@@ -1871,7 +1882,7 @@ MudderyGame.prototype.onLogout = function(element) {
  * Event when clicks the unpuppet button.
  */
 MudderyGame.prototype.onUnpuppet = function(element) {
-	core.service.unpuppetCharacter();
+	core.command.unpuppetCharacter();
 	mud.main_frame.onUnpuppet();
 }
 
@@ -1988,7 +1999,7 @@ MudderyScene.prototype.onCommand = function(element) {
     var index = $(element).data("index");
     var cmd = this.scene["cmds"][index]["cmd_name"];
     var args = this.scene["cmds"][index]["cmd_args"];
-    core.service.sendCommandLink(cmd, args);
+    core.command.sendCommandLink(cmd, args);
 }
 
 /*
@@ -1997,7 +2008,7 @@ MudderyScene.prototype.onCommand = function(element) {
 MudderyScene.prototype.onObject = function(element) {
     var index = $(element).data("index");
     var object_key = this.scene["objects"][index]["key"];
-    core.service.look_room_obj(object_key);
+    core.command.look_room_obj(object_key);
 }
 
 /*
@@ -2006,7 +2017,7 @@ MudderyScene.prototype.onObject = function(element) {
 MudderyScene.prototype.onNPC = function(element) {
     var index = $(element).data("index");
     var obj_id = this.scene["npcs"][index]["id"];
-    core.service.look_room_char(obj_id);
+    core.command.look_room_char(obj_id);
 }
 
 /*
@@ -2015,7 +2026,7 @@ MudderyScene.prototype.onNPC = function(element) {
 MudderyScene.prototype.onPlayer = function(element) {
     var index = $(element).data("index");
     var obj_id = this.scene["players"][index]["id"];
-    core.service.look_room_char(obj_id);
+    core.command.look_room_char(obj_id);
 }
 
 /*
@@ -2024,7 +2035,7 @@ MudderyScene.prototype.onPlayer = function(element) {
 MudderyScene.prototype.onExit = function(element) {
     var index = $(element).data("index");
     var exit_key = this.scene["exits"][index]["key"];
-    core.service.traverse(exit_key);
+    core.command.traverse(exit_key);
 }
 
 /*
@@ -2880,7 +2891,7 @@ MudderyCharData.prototype.setEquipments = function(equipments) {
     }
 
     if (has_selected_item) {
-        core.service.equipmentsObject(this.item_selected);
+        core.command.equipmentsObject(this.item_selected);
     }
     else {
         this.item_selected = null;
@@ -2898,7 +2909,7 @@ MudderyCharData.prototype.onClickEquipment = function(target, event) {
     var position = $(target).data("position");
     if (position && position in this.equipments) {
         mud.char_data_window.item_selected = position;
-        core.service.equipmentsObject(position);
+        core.command.equipmentsObject(position);
     }
     else {
         this.showStatus();
@@ -2912,7 +2923,7 @@ MudderyCharData.prototype.onCommand = function(element) {
 	var index = $(element).data("index");
 	if ("cmd" in this.buttons[index] && "args" in this.buttons[index]) {
 	    if (!this.buttons[index]["confirm"]) {
-		    core.service.sendCommandLink(this.buttons[index]["cmd"], this.buttons[index]["args"]);
+		    core.command.sendCommandLink(this.buttons[index]["cmd"], this.buttons[index]["args"]);
 		}
 		else {
 		    var self = this;
@@ -2942,7 +2953,7 @@ MudderyCharData.prototype.onCommand = function(element) {
  */
 MudderyCharData.prototype.confirmCommand = function(data) {
 	var index = data;
-    core.service.sendCommandLink(this.buttons[index]["cmd"], this.buttons[index]["args"]);
+    core.command.sendCommandLink(this.buttons[index]["cmd"], this.buttons[index]["args"]);
 }
 
 /*
@@ -3025,7 +3036,7 @@ MudderyInventory.prototype.onCommand = function(element) {
 	    if (!this.buttons[index]["confirm"]) {
 	        var args = this.buttons[index]["args"]? this.buttons[index]["args"]: {};
 	        args["position"] = this.item_selected;
-		    core.service.sendCommandLink(this.buttons[index]["cmd"], args);
+		    core.command.sendCommandLink(this.buttons[index]["cmd"], args);
 		}
 		else {
 		    var self = this;
@@ -3055,7 +3066,7 @@ MudderyInventory.prototype.confirmCommand = function(data) {
 	var index = data;
 	var args = this.buttons[index]["args"]? this.buttons[index]["args"]: {};
 	args["position"] = this.item_selected;
-    core.service.sendCommandLink(this.buttons[index]["cmd"], args);
+    core.command.sendCommandLink(this.buttons[index]["cmd"], args);
 }
 
 /*
@@ -3086,7 +3097,7 @@ MudderyInventory.prototype.resetSize = function() {
 MudderyInventory.prototype.onSelect = function(element) {
     var index = $(element).data("index");
     if (index < this.inventory.length) {
-        core.service.inventoryObject(this.inventory[index]["position"], "inventory");
+        core.command.inventoryObject(this.inventory[index]["position"], "inventory");
     }
 }
 
@@ -3136,7 +3147,7 @@ MudderyInventory.prototype.setInventory = function(inventory) {
     }
 
     if (has_selected_item) {
-        core.service.inventoryObject(this.item_selected, "inventory");
+        core.command.inventoryObject(this.item_selected, "inventory");
     }
     else {
         this.item_selected = null;
@@ -3215,7 +3226,7 @@ MudderySkills.prototype.onSelect = function(element) {
     var index = $(element).data("index");
     if (index < this.skills.length) {
         this.item_selected = this.skills[index].key;
-        core.service.querySkill(this.item_selected);
+        core.command.querySkill(this.item_selected);
     }
 }
 
@@ -3226,7 +3237,7 @@ MudderySkills.prototype.onCommand = function(element) {
 	var index = $(element).data("index");
 	if ("cmd" in this.buttons[index] && "args" in this.buttons[index]) {
 	    if (!this.buttons[index]["confirm"]) {
-		    core.service.sendCommandLink(this.buttons[index]["cmd"], this.buttons[index]["args"]);
+		    core.command.sendCommandLink(this.buttons[index]["cmd"], this.buttons[index]["args"]);
 		}
 		else {
 		    var self = this;
@@ -3254,7 +3265,7 @@ MudderySkills.prototype.onCommand = function(element) {
  */
 MudderySkills.prototype.confirmCommand = function(data) {
 	var index = data;
-    core.service.sendCommandLink(this.buttons[index]["cmd"], this.buttons[index]["args"]);
+    core.command.sendCommandLink(this.buttons[index]["cmd"], this.buttons[index]["args"]);
 }
 
 /*
@@ -3310,7 +3321,7 @@ MudderySkills.prototype.setSkills = function(skills) {
     }
 
     if (has_selected_item) {
-        core.service.querySkill(this.item_selected);
+        core.command.querySkill(this.item_selected);
     }
     else {
         this.item_selected = null;
@@ -3383,7 +3394,7 @@ MudderyQuests.prototype.onSelect = function(element) {
     if (index < this.quests.length) {
         var key = this.quests[index].key;
         this.item_selected = key;
-        core.service.queryQuest(key);
+        core.command.queryQuest(key);
     }
 }
 
@@ -3394,7 +3405,7 @@ MudderyQuests.prototype.onCommand = function(element) {
 	var index = $(element).data("index");
 	if ("cmd" in this.buttons[index] && "args" in this.buttons[index]) {
 	    if (!this.buttons[index]["confirm"]) {
-		    core.service.sendCommandLink(this.buttons[index]["cmd"], this.buttons[index]["args"]);
+		    core.command.sendCommandLink(this.buttons[index]["cmd"], this.buttons[index]["args"]);
 		}
 		else {
 		    var self = this;
@@ -3422,7 +3433,7 @@ MudderyQuests.prototype.onCommand = function(element) {
  */
 MudderyQuests.prototype.confirmCommand = function(data) {
 	var index = data;
-    core.service.sendCommandLink(this.buttons[index]["cmd"], this.buttons[index]["args"]);
+    core.command.sendCommandLink(this.buttons[index]["cmd"], this.buttons[index]["args"]);
 }
 
 /*
@@ -3483,7 +3494,7 @@ MudderyQuests.prototype.setQuests = function(quests) {
     }
 
     if (has_selected_item) {
-        core.service.queryQuest(this.item_selected);
+        core.command.queryQuest(this.item_selected);
     }
     else {
         this.item_selected = null;
@@ -3571,7 +3582,7 @@ MudderyHonour.prototype.constructor = MudderyHonour;
 MudderyHonour.prototype.onShow = function() {
     var container = this.select(".rank-table");
     container.empty();
-    core.service.getRankings();
+    core.command.getRankings();
 }
 
 /*
@@ -3594,7 +3605,7 @@ MudderyHonour.prototype.onQueueUpCombat = function(element) {
     }
 
     this.inCombatQueue();
-    core.service.queueUpCombat();
+    core.command.queueUpCombat();
 }
 
 /*
@@ -3602,7 +3613,7 @@ MudderyHonour.prototype.onQueueUpCombat = function(element) {
  */
 MudderyHonour.prototype.onQuitCombatQueue = function(element) {
 	this.leftCombatQueue();
-    core.service.quitCombatQueue();
+    core.command.quitCombatQueue();
 }
 
 /*
@@ -4023,7 +4034,7 @@ MudderyCombat.prototype.onCombatSkill = function(element) {
 		}
 	}
 
-	core.service.castCombatSkill(key, this.target);
+	core.command.castCombatSkill(key, this.target);
 }
 
 /*
@@ -4472,7 +4483,7 @@ MudderyCombatResult.prototype.bindEvents = function() {
  */
 MudderyCombatResult.prototype.onClose = function(element) {
 	// close popup box
-	core.service.leaveCombat();
+	core.command.leaveCombat();
     mud.combat_window.leaveCombat();
 }
 
@@ -4752,7 +4763,7 @@ MudderyGoodsDetail.prototype.onClose = function(element) {
  */
 MudderyGoodsDetail.prototype.onBuy = function(element) {
     if (this.goods) {
-        core.service.buyGoods(this.npc, this.shop, this.goods["index"]);
+        core.command.buyGoods(this.npc, this.shop, this.goods["index"]);
     }
 
     // close this window
@@ -4863,13 +4874,13 @@ MudderyConversation.prototype.onSend = function() {
 	}
 
     if (this.conversation_type == "LOCAL") {
-	    core.service.say(this.conversation_type, core.map_data._current_location.key, message);
+	    core.command.say(this.conversation_type, core.map_data._current_location.key, message);
 	}
 	else if (this.conversation_type == "CHANNEL") {
-	    core.service.say(this.conversation_type, this.target, message);
+	    core.command.say(this.conversation_type, this.target, message);
 	}
 	else {
-		core.service.say(this.conversation_type, this.target, message);
+		core.command.say(this.conversation_type, this.target, message);
 	}
 }
 

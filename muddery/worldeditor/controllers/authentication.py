@@ -2,11 +2,13 @@
 Battle commands. They only can be used when a character is in a combat.
 """
 
+import base64
 from sqlalchemy.orm.exc import NoResultFound
 from muddery.common.utils.password import check_password
 from muddery.common.utils.exception import MudderyError, ERR
-from muddery.worldeditor.utils.auth import generate_token
 from muddery.common.networks.responses import success_response
+from muddery.worldeditor.utils.auth import generate_token
+from muddery.worldeditor.utils.crypto import RSA
 from muddery.worldeditor.controllers.base_request_processer import BaseRequestProcesser
 from muddery.worldeditor.dao.accounts import Accounts
 
@@ -30,7 +32,10 @@ class login(BaseRequestProcesser):
             raise MudderyError(ERR.missing_args, 'Missing arguments.')
 
         username = args['username']
-        raw_password = args['password']
+
+        encrypted = base64.b64decode(args["password"])
+        decrypted = RSA.inst().decrypt(encrypted)
+        raw_password = decrypted.decode("utf-8")
 
         # Match account name and check password
         try:

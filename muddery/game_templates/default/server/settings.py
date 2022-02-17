@@ -21,8 +21,8 @@ class ServerSettings(object):
     # Server-side websocket port to open for the webclient.
     GAME_SERVER_PORT = {GAME_SERVER_PORT}
 
-    # The secret key of jwt.
-    WORLD_EDITOR_SECRET = "SET_YOUR_SECRET_KEY"
-
     # The log level
-    LOG_LEVEL = logging.INFO
+    LOG_LEVEL = logging.DEBUG
+
+    # Also print logs to the console.
+    LOG_TO_CONSOLE = False

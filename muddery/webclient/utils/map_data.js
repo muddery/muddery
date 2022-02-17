@@ -72,7 +72,7 @@ MudderyMapData.prototype = {
     checkNeighbourRooms: function (room_key) {
         // Check if has the room's map, else query the map.
         if (!(room_key in this._map_rooms)) {
-            core.service.queryMaps([room_key]);
+            core.command.queryMaps([room_key]);
             return;
         }
 
@@ -94,7 +94,7 @@ MudderyMapData.prototype = {
         }
 
         if (room_list.length > 0) {
-            core.service.queryMaps(room_list);
+            core.command.queryMaps(room_list);
         }
     },
 

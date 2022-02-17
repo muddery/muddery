@@ -35,7 +35,6 @@ def run(port):
     async def after_server_start(app, loop):
         # save pid
         write_pid_file(SETTINGS.WORLD_EDITOR_PID, os.getpid())
-        print("\nWorldeditor server started.\n")
         logger.log_critical("Worldeditor server started.")
 
     @app.after_server_stop

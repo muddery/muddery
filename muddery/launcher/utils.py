@@ -7,8 +7,10 @@ import os
 import sys
 import shutil
 import configparser
-from pathlib import Path
+import random
+import string
 from subprocess import check_output, CalledProcessError, STDOUT
+from muddery.common.utils.crypto import RSA
 from muddery.launcher import configs
 
 
@@ -115,7 +117,7 @@ def create_webclient_settings(gamedir, setting_dict):
         gamedir: (string) game root's path
         setting_dict: (dict)preset settings.
     """
-    settings_path = os.path.join(gamedir, "web", "webclient_overrides", "webclient", "settings.js")
+    settings_path = os.path.join(gamedir, "webclient", "settings.js")
     with open(settings_path, 'r') as f:
         settings_string = f.read()
 
@@ -182,16 +184,43 @@ def create_game_directory(gamedir, template, port):
     if template_dir:
         copy_tree(template_dir, gamedir)
 
-    # pre-build settings file in the new gamedir
+    # Create the settings file in the new game dir.
     setting_dict = {
         "WEBCLIENT_PORT": port,
         "GAME_SERVER_PORT": port + 1,
-        "WORLD_EDITOR_PORT": port + 2,
     }
-
     create_server_settings_file(gamedir, setting_dict)
-    create_editor_settings_file(gamedir, setting_dict)
     create_webclient_settings(gamedir, setting_dict)
+
+    # Create game server's RSA keys.
+    rsa = RSA()
+    rsa.generate_key()
+
+    server_private_key_path = os.path.join(gamedir, "server", "keys", "rsa_private.pem")
+    with open(server_private_key_path, "wb") as fp:
+        fp.write(rsa.export_private_key())
+
+    server_public_key_path = os.path.join(gamedir, "webclient", "keys", "rsa_public.pem")
+    with open(server_public_key_path, "wb") as fp:
+        fp.write(rsa.export_public_key())
+
+    # Create the world editor's setting file.
+    setting_dict = {
+        "WORLD_EDITOR_PORT": port + 2,
+        "WORLD_EDITOR_SECRET": ''.join(random.sample(string.ascii_letters + string.digits, 32)),
+    }
+    create_editor_settings_file(gamedir, setting_dict)
+
+    # Create world editor's RSA keys.
+    rsa.generate_key()
+
+    server_private_key_path = os.path.join(gamedir, "worldeditor", "keys", "rsa_private.pem")
+    with open(server_private_key_path, "wb") as fp:
+        fp.write(rsa.export_private_key())
+
+    server_public_key_path = os.path.join(gamedir, "worldeditor", "webclient", "keys", "rsa_public.pem")
+    with open(server_public_key_path, "wb") as fp:
+        fp.write(rsa.export_public_key())
 
 
 def check_gamedir(path):
