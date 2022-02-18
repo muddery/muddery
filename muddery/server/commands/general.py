@@ -1044,7 +1044,7 @@ class CmdQuerySkill(BaseCommand):
 
 class CmdQueryMaps(BaseCommand):
     """
-    Query an area's map by a room's key
+    Query area's maps by a list of room keys.
 
     Usage:
         {

@@ -469,28 +469,24 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
 
     async def show_location(self):
         """
-        Show character's location.
+        Show characters and objects in this location.
         """
         if not self.location:
             return
 
         room_key = self.location.get_element_key()
-        area = Server.world.get_area_by_room(room_key)
-        # get appearance
-        appearance = self.location.get_appearance()
-        appearance.update(self.location.get_surroundings(self))
-
         msg = [
             {
                 "current_location": {
-                    "key": room_key,
-                    "area": area.get_appearance(),
-                }
+                    "area": Server.world.get_area_key_by_room(room_key),
+                    "room": room_key,
+                },
             },
             {
-                "look_around": appearance,
+                "look_around": self.location.get_surroundings(self),
             },
         ]
+
         await self.msg(msg)
 
     ################################################

@@ -291,7 +291,6 @@ class MudderyRoom(ELEMENT("MATTER")):
         info = super(MudderyRoom, self).get_appearance()
         info["peaceful"] = self.peaceful
         info["background"] = self.background
-
         return info
 
     def get_exits(self):
@@ -307,6 +306,30 @@ class MudderyRoom(ELEMENT("MATTER")):
                 }
         return exits
 
+    def get_map_data(self):
+        """
+        Get the room's map.
+        :return:
+        """
+        appearance = self.get_appearance()
+        if self.position:
+            appearance["pos"] = self.position
+
+        objects = [item["obj"].get_appearance() for item in self.all_objects.values()]
+
+        exits = [
+            dict(item["obj"].get_appearance(), **{
+                "from": self.get_element_key(),
+                "to": item["destination"],
+            }) for item in self.all_exits.values()
+        ]
+
+        return {
+            "room": appearance,
+            "objects": objects,
+            "exits": exits,
+        }
+
     def get_surroundings(self, caller):
         """
         This is a convenient hook for a 'look'
@@ -317,12 +340,25 @@ class MudderyRoom(ELEMENT("MATTER")):
 
         if not GameSettings.inst().get("solo_mode"):
             # Players can not see other players in solo mode.
-            info["players"] = [item.get_appearance() for key, item in self.all_characters.items()
-                               if item.is_player() and item.get_id() != caller.get_id()]
+            players = [{
+                "id": item.get_id(),
+                "key": key,
+                "name": item.get_name(),
+                "icon": item.get_icon(),
+            } for key, item in self.all_characters.items() if item.is_player() and item.get_id() != caller.get_id()]
 
-        info["npcs"] = [item.get_appearance() for key, item in self.all_characters.items() if not item.is_player()]
-        info["exits"] = [item["obj"].get_appearance() for key, item in self.all_exits.items()]
-        info["objects"] = [item["obj"].get_appearance() for key, item in self.all_objects.items()]
+            if players:
+                info["players"] = players
+
+        npcs = [{
+            "id": item.get_id(),
+            "key": key,
+            "name": item.get_name(),
+            "icon": item.get_icon(),
+        } for key, item in self.all_characters.items() if not item.is_player()]
+
+        if npcs:
+            info["npcs"] = npcs
 
         return info
 

@@ -95,7 +95,7 @@ MudderyClient.prototype = {
                     } else if (key == "min_honour_level") {
                         mud.honour_window.setMinHonourLevel(data[key]);
                     } else if (key == "look_around") {
-                        mud.scene_window.setScene(data[key]);
+                        mud.scene_window.setSurroundings(data[key]);
                     } else if (key == "obj_moved_in") {
                         mud.main_frame.objMovedIn(data[key]);
                     } else if (key == "obj_moved_out") {

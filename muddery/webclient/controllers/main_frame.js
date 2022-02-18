@@ -1957,7 +1957,7 @@ MudderyScene = function(el) {
     this.path_width = "3";
 	this.max_messages = 200;
 
-	this.scene = null;
+	this.surroundings = null;
 }
 
 MudderyScene.prototype = prototype(BaseController.prototype);
@@ -1997,8 +1997,8 @@ MudderyScene.prototype.show = function() {
  */
 MudderyScene.prototype.onCommand = function(element) {
     var index = $(element).data("index");
-    var cmd = this.scene["cmds"][index]["cmd_name"];
-    var args = this.scene["cmds"][index]["cmd_args"];
+    var cmd = this.surroundings["cmds"][index]["cmd_name"];
+    var args = this.surroundings["cmds"][index]["cmd_args"];
     core.command.sendCommandLink(cmd, args);
 }
 
@@ -2007,7 +2007,9 @@ MudderyScene.prototype.onCommand = function(element) {
  */
 MudderyScene.prototype.onObject = function(element) {
     var index = $(element).data("index");
-    var object_key = this.scene["objects"][index]["key"];
+
+    var room_map = core.map_data.getCurrentRoomMap();
+    var object_key = room_map["objects"][index]["key"];
     core.command.look_room_obj(object_key);
 }
 
@@ -2016,7 +2018,7 @@ MudderyScene.prototype.onObject = function(element) {
  */
 MudderyScene.prototype.onNPC = function(element) {
     var index = $(element).data("index");
-    var obj_id = this.scene["npcs"][index]["id"];
+    var obj_id = this.surroundings["npcs"][index]["id"];
     core.command.look_room_char(obj_id);
 }
 
@@ -2025,7 +2027,7 @@ MudderyScene.prototype.onNPC = function(element) {
  */
 MudderyScene.prototype.onPlayer = function(element) {
     var index = $(element).data("index");
-    var obj_id = this.scene["players"][index]["id"];
+    var obj_id = this.surroundings["players"][index]["id"];
     core.command.look_room_char(obj_id);
 }
 
@@ -2034,7 +2036,9 @@ MudderyScene.prototype.onPlayer = function(element) {
  */
 MudderyScene.prototype.onExit = function(element) {
     var index = $(element).data("index");
-    var exit_key = this.scene["exits"][index]["key"];
+
+    var room_map = core.map_data.getCurrentRoomMap();
+    var exit_key = room_map["exits"][index]["key"];
     core.command.traverse(exit_key);
 }
 
@@ -2059,8 +2063,9 @@ MudderyScene.prototype.resetSize = function() {
     var svg = document.getElementById("exits-svg");
     svg.innerHTML = "";
 
-    if (this.scene && "exits" in this.scene) {
-        this.drawExitPaths(this.scene["exits"]);
+    var room_map = core.map_data.getCurrentRoomMap();
+    if (room_map && "exits" in room_map) {
+        this.drawExitPaths(room_map["exits"]);
     }
 }
 
@@ -2076,7 +2081,7 @@ MudderyScene.prototype.clear = function() {
  * Clear the view.
  */
 MudderyScene.prototype.clearScene = function() {
-    this.scene = null;
+    this.surroundings = null;
 
     this.select(".scene-name").empty();
     this.select(".scene-desc").empty();
@@ -2144,34 +2149,51 @@ MudderyScene.prototype.leftCombatQueue = function() {
  * Refresh the scene window.
  */
 MudderyScene.prototype.refresh = function() {
-    this.setScene(this.scene);
+    this.setSurroundings(this.surroundings);
 }
 
 /*
  * Set the scene's data.
  */
-MudderyScene.prototype.setScene = function(scene) {
+MudderyScene.prototype.setSurroundings = function(surroundings) {
     this.clearScene();
-    this.scene = scene;
+    this.surroundings = surroundings;
 
-    // add room's name
-    var room_name = core.text2html.parseHtml(scene["name"]);
-    this.select(".scene-name").html(room_name);
+    var has_objects = false;
 
-    // add room's desc
-    this.select(".scene-desc").html(core.text2html.parseHtml(scene["desc"]));
+    // get current room's data
+    var room_map = core.map_data.getCurrentRoomMap();
+    var room_data = room_map["room"];
+    if (room_data) {
+        // add room's name
+        var room_name = core.text2html.parseHtml(room_data["name"]);
+        this.select(".scene-name").html(room_name);
+
+        // add room's desc
+        this.select(".scene-desc").html(core.text2html.parseHtml(room_data["desc"]));
+
+        // set background
+        var backview = this.select("#scene-contents");
+        if ("background" in room_data && room_data["background"]) {
+            var url = settings.resource_url + room_data["background"]["resource"];
+            backview.css("background", "url(" + url + ") no-repeat center center");
+        }
+        else {
+            backview.css("background", "");
+        }
+    }
 
     // set commands
     var commands = this.select(".scene-commands");
-    if (!("cmds" in scene)) {
-        scene["cmds"] = [];
+    if (!("cmds" in surroundings)) {
+        surroundings["cmds"] = [];
     }
-    if (scene["cmds"].length > 0) {
-        for (var i = 0; i < scene["cmds"].length; i++) {
+    if (surroundings["cmds"].length > 0) {
+        for (var i = 0; i < surroundings["cmds"].length; i++) {
             $("<div>")
                 .addClass("object-button")
                 .data("index", i)
-                .text(scene["cmds"][i]["name"])
+                .text(surroundings["cmds"][i]["name"])
                 .appendTo(commands);
         }
         commands.show();
@@ -2180,18 +2202,15 @@ MudderyScene.prototype.setScene = function(scene) {
         commands.hide();
     }
 
-    // set objects
+    // set room objects
+    var objects_data = room_map["objects"];
     var objects = this.select(".scene-objects");
-    var has_objects = false;
-    if (!("objects" in scene)) {
-        scene["objects"] = [];
-    }
-    if (scene["objects"].length > 0) {
-        for (var i = 0; i < scene["objects"].length; i++) {
+    if (objects_data.length > 0) {
+        for (var i = 0; i < objects_data.length; i++) {
             $("<div>")
                 .addClass("scene-button object-button object")
                 .data("index", i)
-                .text(scene["objects"][i]["name"])
+                .text(objects_data[i]["name"])
                 .appendTo(objects);
         }
         has_objects = true;
@@ -2199,15 +2218,15 @@ MudderyScene.prototype.setScene = function(scene) {
 
     // set npcs
     var has_npcs = false;
-    if (!("npcs" in scene)) {
-        scene["npcs"] = [];
+    if (!("npcs" in surroundings)) {
+        surroundings["npcs"] = [];
     }
-    if (scene["npcs"].length > 0) {
-        for (var i = 0; i < scene["npcs"].length; i++) {
+    if (surroundings["npcs"].length > 0) {
+        for (var i = 0; i < surroundings["npcs"].length; i++) {
             $("<div>")
                 .addClass("scene-button object-button npc")
                 .data("index", i)
-                .text(scene["npcs"][i]["name"])
+                .text(surroundings["npcs"][i]["name"])
                 .appendTo(objects);
         }
         has_npcs = true;
@@ -2222,22 +2241,22 @@ MudderyScene.prototype.setScene = function(scene) {
 
     // set players
     var players = this.select(".scene-players");
-    if (!("players" in scene)) {
-        scene["players"] = [];
+    if (!("players" in surroundings)) {
+        surroundings["players"] = [];
     }
-    if (scene["players"].length > 0) {
+    if (surroundings["players"].length > 0) {
         // Only show 10 players.
         var count = 0;
-        for (var i = 0; i < scene["players"].length; i++) {
-            var name = scene["players"][i]["name"];
-            if (scene["players"][i]["is_staff"]) {
+        for (var i = 0; i < surroundings["players"].length; i++) {
+            var name = surroundings["players"][i]["name"];
+            if (surroundings["players"][i]["is_staff"]) {
                 name += "[" + core.trans("ADMIN") + "]";
             }
 
             $("<div>")
                 .addClass("scene-button object-button player")
                 .data("index", i)
-                .text(scene["players"][i]["name"])
+                .text(surroundings["players"][i]["name"])
                 .appendTo(players);
 
             count++
@@ -2252,25 +2271,13 @@ MudderyScene.prototype.setScene = function(scene) {
     }
 
     // add exits
-    if (!("exits" in scene)) {
-        scene["exits"] = [];
-    }
-    if (scene["exits"].length > 0) {
-        this.setExitsMap(scene["exits"], room_name);
-    }
-
-    // set background
-    var backview = this.select("#scene-contents");
-    if ("background" in scene && scene["background"]) {
-        var url = settings.resource_url + scene["background"]["resource"];
-        backview.css("background", "url(" + url + ") no-repeat center center");
-    }
-    else {
-        backview.css("background", "");
+    var exits_data = room_map["exits"];
+    if (exits_data.length > 0) {
+        this.setExitsMap(exits_data, room_name);
     }
 
     // check neighbour rooms
-	core.map_data.checkNeighbourRooms(scene["key"]);
+	core.map_data.checkNeighbourRooms();
 }
 
 /*
@@ -2492,18 +2499,24 @@ MudderyScene.prototype.drawExitPaths = function(exits) {
     // draw exit lines
     var svg = document.getElementById("exits-svg");
     var namespace = "http://www.w3.org/2000/svg";
+
     var center_dom = this.select(".direction-4");
-    var x1 = center_dom.position().left + center_dom.outerWidth(true) / 2;
-    var y1 = center_dom.position().top + center_dom.outerHeight(true) / 2;
+    if (center_dom) {
+        var x1 = center_dom.position().left + center_dom.outerWidth(true) / 2;
+        var y1 = center_dom.position().top + center_dom.outerHeight(true) / 2;
+    }
+
     for (var i = 0; i < exits.length; i++) {
         var exit_dom = this.select(".exit-" + i);
-        var x2 = exit_dom.position().left + exit_dom.outerWidth(true) / 2;
-        var y2 = exit_dom.position().top + exit_dom.outerHeight(true) / 2;
-        var path = document.createElementNS(namespace, "path");
-        path.setAttribute("stroke", this.path_color);
-        path.setAttribute("stroke-width", this.path_width);
-        path.setAttribute("d", "M " + x1 + " " + y1 + " L " + x2 + " " + y2);
-        svg.appendChild(path);
+        if (exit_dom) {
+            var x2 = exit_dom.position().left + exit_dom.outerWidth(true) / 2;
+            var y2 = exit_dom.position().top + exit_dom.outerHeight(true) / 2;
+            var path = document.createElementNS(namespace, "path");
+            path.setAttribute("stroke", this.path_color);
+            path.setAttribute("stroke-width", this.path_width);
+            path.setAttribute("d", "M " + x1 + " " + y1 + " L " + x2 + " " + y2);
+            svg.appendChild(path);
+        }
     }
 }
 
@@ -3705,7 +3718,7 @@ MudderyMap.prototype.constructor = MudderyMap;
  * Called when the controller shows.
  */
 MudderyMap.prototype.onShow = function() {
-    this.showMap(core.map_data._current_location);
+    this.showMap(core.map_data.getCurrentLocation());
 }
 
 /*
@@ -3744,19 +3757,19 @@ MudderyMap.prototype.clear = function() {
 MudderyMap.prototype.showMap = function(location) {
 	this.clear();
 
-	if (!(location && location.key in core.map_data._map_rooms)){
+	if (!(location && location["room"] in core.map_data._map_rooms)){
 		// does not have current location, can not show map.
 		return;
 	}
 
-	if (location["area"]) {
-		var area_name = core.text2html.parseHtml(location["area"]["name"]);
+	if (location["area"] && location["area"] in core.map_data._map_areas){
+		var area_name = core.text2html.parseHtml(core.map_data._map_areas[location["area"]]["name"]);
 		if (area_name) {
 			this.select(".header-text").html(area_name);
 		}
 	}
 
-	var current_room = core.map_data._map_rooms[location.key];
+	var current_room = core.map_data._map_rooms[location["room"]];
 
 	var map_width = this.select("#map-svg").width();
 	var map_height = this.select("#map-svg").height();
@@ -3770,59 +3783,62 @@ MudderyMap.prototype.showMap = function(location) {
 	var svg = document.getElementById("map-svg");
 	var namespace = "http://www.w3.org/2000/svg";
 
-	if (current_room["pos"]) {
+	if (current_room["room"]["pos"]) {
 		// set origin point
 		//origin_x -= current_room["pos"][0] * scale;
 		//origin_y -= -current_room["pos"][1] * scale;
-		origin_x -= current_room["pos"][0];
-		origin_y -= current_room["pos"][1];
+		origin_x -= current_room["room"]["pos"][0];
+		origin_y -= current_room["room"]["pos"][1];
 
 		current_area_key = current_room["area"];
 	}
 
 	// background
-	if (location["area"] && location["area"]["background"]) {
-	    /*
-	    if (origin_x < map_width - location["area"]["background"]["width"]) {
-	        origin_x = map_width - location["area"]["background"]["width"];
-	    }
-	    if (origin_y < map_height - location["area"]["background"]["height"]) {
-	        origin_y = map_height - location["area"]["background"]["height"];
-	    }
-	    if (origin_x > 0) {
-	        origin_x = 0;
-	    }
-	    if (origin_y > 0) {
-	        origin_y = 0;
-	    }
-	    */
+	if (location["area"] && location["area"] in core.map_data._map_areas) {
+	    var area_background = core.map_data._map_areas[location["area"]]["background"];
+	    if (area_background) {
+            /*
+            if (origin_x < map_width - location["area"]["background"]["width"]) {
+                origin_x = map_width - location["area"]["background"]["width"];
+            }
+            if (origin_y < map_height - location["area"]["background"]["height"]) {
+                origin_y = map_height - location["area"]["background"]["height"];
+            }
+            if (origin_x > 0) {
+                origin_x = 0;
+            }
+            if (origin_y > 0) {
+                origin_y = 0;
+            }
+            */
 
-        var x = origin_x;
-        var y = origin_y;
+            var x = origin_x;
+            var y = origin_y;
 
-        /*
-        if (location["area"]["background_point"]) {
-            x -= location["area"]["background_point"][0];
-            y -= location["area"]["background_point"][1];
+            /*
+            if (location["area"]["background_point"]) {
+                x -= location["area"]["background_point"][0];
+                y -= location["area"]["background_point"][1];
+            }
+
+            if (location["area"]["corresp_map_pos"]) {
+                x += location["area"]["corresp_map_pos"][0] * scale + origin_x;
+                y += -location["area"]["corresp_map_pos"][1] * scale + origin_y;
+            }
+            */
+
+            var map_back = settings.resource_url + area_background["resource"];
+            var background = document.createElementNS(namespace, "image");
+            background.setAttribute("x", x);
+            background.setAttribute("y", y);
+            background.setAttribute("width", area_background["width"]);
+            background.setAttribute("height", area_background["height"]);
+            background.href.baseVal = settings.resource_url + area_background["resource"];
+            svg.appendChild(background);
         }
-
-        if (location["area"]["corresp_map_pos"]) {
-            x += location["area"]["corresp_map_pos"][0] * scale + origin_x;
-            y += -location["area"]["corresp_map_pos"][1] * scale + origin_y;
-        }
-        */
-
-        var map_back = settings.resource_url + location["area"]["background"]["resource"];
-        var background = document.createElementNS(namespace, "image");
-        background.setAttribute("x", x);
-        background.setAttribute("y", y);
-        background.setAttribute("width", location["area"]["background"]["width"]);
-        background.setAttribute("height", location["area"]["background"]["height"]);
-        background.href.baseVal = settings.resource_url + location["area"]["background"]["resource"];
-        svg.appendChild(background);
 	}
 
-	if (current_room["pos"] && core.map_data._map_paths) {
+	if (current_room["room"]["pos"] && core.map_data._map_paths) {
 		// get path positions
 		var path_data = [];
 		for (var begin in core.map_data._map_paths) {
@@ -3836,7 +3852,7 @@ MudderyMap.prototype.showMap = function(location) {
                 continue;
             }
 
-            var from = from_room["pos"];
+            var from = from_room["room"]["pos"];
             if (!from) {
                 continue;
             }
@@ -3852,7 +3868,7 @@ MudderyMap.prototype.showMap = function(location) {
                     continue;
                 }
 
-                var to = to_room["pos"];
+                var to = to_room["room"]["pos"];
                 if (!to) {
                     continue;
                 }
@@ -3882,21 +3898,21 @@ MudderyMap.prototype.showMap = function(location) {
 		var room_data = [];
 		var current_room_index = -1;
 
-		if (current_room["pos"]) {
+		if (current_room["room"]["pos"]) {
 			var count = 0;
 			for (var key in core.map_data._map_rooms) {
 				var room = core.map_data._map_rooms[key];
-				if (room["pos"]) {
+				if (room["room"]["pos"]) {
 					var area_key = room["area"];
 					if (area_key != current_area_key) {
 						continue;
 					}
 
-					room_data.push({"name": core.utils.truncate_string(room["name"], 10, true),
-									"icon": room["icon"]? settings.resource_url + room["icon"]: null,
+					room_data.push({"name": core.utils.truncate_string(room["room"]["name"], 10, true),
+									"icon": room["room"]["icon"]? settings.resource_url + room["room"]["icon"]: null,
 									"area": room["area"],
-									"pos": room["pos"]});
-					if (key == location.key) {
+									"pos": room["room"]["pos"]});
+					if (key == location["room"]) {
 						current_room_index = count;
 					}
 					count++;
@@ -3905,8 +3921,8 @@ MudderyMap.prototype.showMap = function(location) {
 		}
 		else {
 			// does not have current position, only show current room at center.
-			room_data.push({"name": core.utils.truncate_string(current_room["name"], 10, true),
-							"icon": current_room["icon"]? settings.resource_url + current_room["icon"]: null,
+			room_data.push({"name": core.utils.truncate_string(current_room["room"]["name"], 10, true),
+							"icon": current_room["room"]["icon"]? settings.resource_url + current_room["room"]["icon"]: null,
 							"area": current_room["area"],
 							"pos": [0, 0]});
 			current_room_index = 0;
@@ -4874,7 +4890,8 @@ MudderyConversation.prototype.onSend = function() {
 	}
 
     if (this.conversation_type == "LOCAL") {
-	    core.command.say(this.conversation_type, core.map_data._current_location.key, message);
+        var location = core.map_data.getCurrentLocation();
+	    core.command.say(this.conversation_type, location["room"], message);
 	}
 	else if (this.conversation_type == "CHANNEL") {
 	    core.command.say(this.conversation_type, this.target, message);

@@ -3,6 +3,12 @@ MudderyMapData = function() {
 }
 
 MudderyMapData.prototype = {
+    _map_areas: {},     // area's key: {
+                        //     "name": area's name,
+                        //     "icon": area's icon,
+                        //     "desc": area's description,
+                        //     "background": area's background,
+                        // }
 
     _map_rooms: {},     // room's key: {"name": room's name,
                         //              "icon": room's icon,
@@ -19,6 +25,7 @@ MudderyMapData.prototype = {
     _current_location: null,
 
     clearData: function() {
+        this._map_areas = {};
         this._map_rooms = {};
         this._map_exits = {};
         this._map_paths = {};
@@ -29,16 +36,39 @@ MudderyMapData.prototype = {
         this._current_location = location;
     },
 
+    getCurrentLocation: function(location) {
+        return this._current_location;
+    },
+
+    getCurrentRoomMap: function() {
+        if (!this._current_location) {
+            return;
+        }
+
+        if (!(this._current_location["room"] in this._map_rooms)) {
+            return;
+        }
+
+        return this._map_rooms[this._current_location["room"]];
+    },
+
     revealMaps: function(data) {
-        // add data to map
+        // save map data
         var new_map = false;
-        for (var area in data) {
-            var rooms = data[area];
+        for (var area_key in data) {
+            if (area_key in this._map_areas) {
+                continue;
+            }
+
+            new_map = true;
+            var area_map = data[area_key];
+
+            this._map_areas[area_key] = area_map["area"];
+            var rooms = area_map["rooms"];
 
             // Add room.
             for (var room_key in rooms) {
-                rooms[room_key]["area"] = area;
-                new_map = true;
+                rooms[room_key]["area"] = area_key;
             }
             this._map_rooms = Object.assign(this._map_rooms, rooms);
 
@@ -46,9 +76,12 @@ MudderyMapData.prototype = {
             var new_exits = {};
             for (var room_key in rooms) {
                 var exits = rooms[room_key]["exits"];
-                for (var exit_key in exits) {
-                    this._map_exits[exit_key] = exits[exit_key];
-                    new_exits[exit_key] = exits[exit_key];
+                for (var i = 0; i < exits.length; i++) {
+                    var exit_key = exits[i]["key"];
+                    if (!(exit_key in this._map_exits)) {
+                        this._map_exits[exit_key] = exits[i];
+                        new_exits[exit_key] = exits[i];
+                    }
                 }
             }
 
@@ -65,11 +98,17 @@ MudderyMapData.prototype = {
         }
 
         if (new_map && this._current_location) {
-            this.checkNeighbourRooms(this._current_location["key"]);
+            this.checkNeighbourRooms(this._current_location.room);
         }
     },
 
-    checkNeighbourRooms: function (room_key) {
+    checkNeighbourRooms: function () {
+        if (!this._current_location) {
+            return;
+        }
+
+        var room_key = this._current_location["room"];
+
         // Check if has the room's map, else query the map.
         if (!(room_key in this._map_rooms)) {
             core.command.queryMaps([room_key]);
@@ -121,8 +160,8 @@ MudderyMapData.prototype = {
             return;
         }
 
-        var from = this._map_rooms[location]["pos"];
-        var to = this._map_rooms[destination]["pos"];
+        var from = this._map_rooms[location]["room"]["pos"];
+        var to = this._map_rooms[destination]["room"]["pos"];
         if (!from || !to) {
             return;
         }

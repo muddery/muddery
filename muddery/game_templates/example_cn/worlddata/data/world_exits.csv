@@ -17,7 +17,5 @@ exit_colorfulworld_gate_path,游乐园大门,LOCKED_EXIT,前往,room_colorfulwor
 exit_path_colorfulworld_gate,缤纷天地,EXIT,前往,room_colorfulworld_to_gate,room_colorfulworld_street
 exit_path_gate,游乐园大门,EXIT,前往,room_colorfulworld_to_gate,room_gate_fountain
 exit_path_colorfulworld_1,缤纷天地,EXIT,前往,room_gate_fountain,room_colorfulworld_to_gate
-exit_path_village,度假村,EXIT,前往,room_colorfulworld_to_gate,room_village_gate
-exit_path_colorfulworld_2,缤纷天地,EXIT,前往,room_village_gate,room_colorfulworld_to_gate
 exit_gate_gate,游乐园大门,EXIT,前往,room_gate_fountain,room_gate_gate
 exit_gate_fountain,喷水池,EXIT,前往,room_gate_gate,room_gate_fountain

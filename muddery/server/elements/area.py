@@ -57,8 +57,14 @@ class MudderyArea(ELEMENT("MATTER")):
         """
         info = super(MudderyArea, self).get_appearance()
         info["background"] = self.background
-        
         return info
+
+    def get_map_data(self):
+        """
+        Get the area's map data.
+        :return:
+        """
+        return self.get_appearance()
 
     async def load_rooms(self):
         """
@@ -100,27 +106,24 @@ class MudderyArea(ELEMENT("MATTER")):
         Get all rooms and exits' positions in this area.
 
         {
-            room's key: {
-                "name": name,
-                "icon": icon,
-                "pos": position,
-                "exits": {
-                    {
-                        exit's key:
-                            {
-                                "from": room's key,
-                                "to": room's key,
-                            },
-                    }
-            },
+            "area": area's appearance,
+            "rooms" : {
+                room's key: {
+                    "room": room's appearance,
+                    "exits": {
+                        {
+                            exit's key:
+                                {
+                                    "exit": exit's appearance,
+                                    "from": room's key,
+                                    "to": room's key,
+                                },
+                        }
+                },
+            }
         }
         """
-
-        all_rooms = {key: {
-            "name": room.get_name(),
-            "icon": room.get_icon(),
-            "pos": room.position,
-            "exits": room.get_exits()
-        } for key, room in self.all_rooms.items()}
-
-        return all_rooms
+        return {
+            "area": self.get_map_data(),
+            "rooms": {key: room.get_map_data() for key, room in self.all_rooms.items()}
+        }
