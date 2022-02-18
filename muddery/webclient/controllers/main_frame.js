@@ -2286,9 +2286,9 @@ MudderyScene.prototype.setSurroundings = function(surroundings) {
 MudderyScene.prototype.addObject = function(obj) {
     // set object
     var index = 0;
-    if (obj["type"] in this.scene) {
+    if (obj["type"] in this.surroundings) {
         if (obj["type"] == "npcs" ||　obj["type"] == "players") {
-            for (var item in this.scene[obj["type"]]) {
+            for (var item in this.surroundings[obj["type"]]) {
                 if (item["id"] == obj["id"]) {
                     // already has this character
                     return;
@@ -2296,7 +2296,7 @@ MudderyScene.prototype.addObject = function(obj) {
             }
         }
         else {
-            for (var item in this.scene[obj["type"]]) {
+            for (var item in this.surroundings[obj["type"]]) {
                 if (item["key"] == obj["key"]) {
                     // already has this object
                     return;
@@ -2304,8 +2304,8 @@ MudderyScene.prototype.addObject = function(obj) {
             }
         }
 
-        index = this.scene[obj["type"]].length;
-        this.scene[obj["type"]].push(obj)
+        index = this.surroundings[obj["type"]].length;
+        this.surroundings[obj["type"]].push(obj)
     }
     else {
         return;
@@ -2332,7 +2332,7 @@ MudderyScene.prototype.addObject = function(obj) {
     }
     else if (obj["type"] == "players") {
         // set players
-        if (this.scene["players"].length < this.max_player) {
+        if (this.surroundings["players"].length < this.max_player) {
             var players = this.select(".scene-players");
             $("<div>")
                 .addClass("scene-button object-button player")
@@ -2350,14 +2350,14 @@ MudderyScene.prototype.addObject = function(obj) {
 MudderyScene.prototype.removeObject = function(obj) {
     // Search this object in the scene.
     var type = obj["type"];
-    if (!(type in this.scene)) {
+    if (!(type in this.surroundings)) {
         return;
     }
 
     var index = -1;
-    for (var i = 0; i < this.scene[type].length; i++) {
-        if (this.scene[type][i]["id"] == obj["id"]) {
-            this.scene[type].splice(i, 1);
+    for (var i = 0; i < this.surroundings[type].length; i++) {
+        if (this.surroundings[type][i]["id"] == obj["id"]) {
+            this.surroundings[type].splice(i, 1);
             index = i;
             break;
         }

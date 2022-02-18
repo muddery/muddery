@@ -680,8 +680,8 @@ class CmdAttack(BaseCommand):
             return
 
         await async_wait([
-            caller.msg(_("You are attacking {R%s{n! You are in combat.") % target.get_name()),
-            target.msg(_("{R%s{n is attacking you! You are in combat.") % caller.get_name()),
+            caller.msg({"msg": _("You are attacking {R%s{n! You are in combat.") % target.get_name()}),
+            target.msg({"msg": _("{R%s{n is attacking you! You are in combat.") % caller.get_name()}),
         ])
 
 
