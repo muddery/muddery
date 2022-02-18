@@ -31,7 +31,24 @@ class Settings(object):
                 setattr(self, name, getattr(settings, name))
 
     ######################################################################
-    # Base server config
+    # Base server settings
+    ######################################################################
+
+    # Set test mode.
+    TEST_MODE = False
+
+    # This is the name of your server.
+    GAME_SERVERNAME = "Muddery"
+
+    # The maximum number of characters allowed by the default.
+    MAX_PLAYER_CHARACTERS = 5
+
+    # Language code for this installation. All choices can be found here:
+    # http://www.w3.org/TR/REC-html40/struct/dirlang.html#langcodes
+    LANGUAGE_CODE = "en-US"
+
+    ######################################################################
+    # Network settings
     ######################################################################
 
     # This is a security setting protecting against host poisoning
@@ -45,18 +62,10 @@ class Settings(object):
     # Server-side websocket port to open for the webclient.
     WEBSERVER_PORT = 8001
 
-    # The secret key of jwt.
-    WORLD_EDITOR_SECRET = "SET_YOUR_SECRET_KEY"
 
     ######################################################################
-    # Muddery base server config
+    # Folders and files settings
     ######################################################################
-
-    # Set test mode.
-    TEST_MODE = False
-
-    # This is the name of your server.
-    GAME_SERVERNAME = "Muddery"
 
     MUDDERY_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     GAME_DIR = os.getcwd()
@@ -67,20 +76,18 @@ class Settings(object):
     # Webclient's pid file
     WEBCLIENT_PID = os.path.join(GAME_DIR, "webclient.pid")
 
+
+    ######################################################################
+    # Logging settings
+    ######################################################################
     # Place to put log files
-    LOG_DIR = os.path.join(GAME_DIR, "server", "logs")
-    LOG_NAME = 'server.log'
-    LOG_LEVEL = logging.DEBUG
+    LOG_NAME = "muddery_gameserver"
+    LOG_FILE = os.path.join(GAME_DIR, "server", "logs", "server.log")
+    LOG_LEVEL = logging.WARNING
 
     # Also print logs to the console.
     LOG_TO_CONSOLE = False
 
-    # The maximum number of characters allowed by the default.
-    MAX_PLAYER_CHARACTERS = 5
-
-    # Language code for this installation. All choices can be found here:
-    # http://www.w3.org/TR/REC-html40/struct/dirlang.html#langcodes
-    LANGUAGE_CODE = "en-US"
 
     ######################################################################
     # Database config
@@ -121,6 +128,7 @@ class Settings(object):
     # Database Access Object without cache
     DATABASE_CACHE_OBJECT = 'muddery.server.database.storage.memory_kv_storage.MemoryKVStorage'
 
+
     ######################################################################
     # Web features
     ######################################################################
@@ -140,11 +148,15 @@ class Settings(object):
     # resource's location
     IMAGE_PATH = "image"
 
+    # Encrypt secret messages in transporting messages.
+    ENABLE_ENCRYPT = True
+
     # RSA private key file
     RSA_PRIVATE_KEY_FILE = os.path.join(GAME_DIR, "server", "keys", "rsa_private.pem")
 
+
     ######################################################################
-    # Typeclasses and other paths
+    # Elements and other paths
     ######################################################################
 
     # Element type for accounts.

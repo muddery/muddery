@@ -54,9 +54,12 @@ class CmdDeleteAccount(BaseCommand):
         username = args["username"]
         username = re.sub(r"\s+", " ", username).strip()
 
-        encrypted = base64.b64decode(args["password"])
-        decrypted = RSA.inst().decrypt(encrypted)
-        password = decrypted.decode("utf-8")
+        if SETTINGS.ENABLE_ENCRYPT:
+            encrypted = base64.b64decode(args["password"])
+            decrypted = RSA.inst().decrypt(encrypted)
+            password = decrypted.decode("utf-8")
+        else:
+            password = args["password"]
 
         if not password:
             await account.msg({"alert": _("You should input a password.")})
@@ -121,17 +124,23 @@ class CmdChangePassword(BaseCommand):
             await account.msg({"alert": _("You should input a new password.")})
             return
 
-        encrypted = base64.b64decode(args["current"])
-        decrypted = RSA.inst().decrypt(encrypted)
-        current_password = decrypted.decode("utf-8")
+        if SETTINGS.ENABLE_ENCRYPT:
+            encrypted = base64.b64decode(args["current"])
+            decrypted = RSA.inst().decrypt(encrypted)
+            current_password = decrypted.decode("utf-8")
+        else:
+            current_password = args["current"]
 
         if not current_password:
             await account.msg({"alert": _("You should input your current password.")})
             return
 
-        encrypted = base64.b64decode(args["new"])
-        decrypted = RSA.inst().decrypt(encrypted)
-        new_password = decrypted.decode("utf-8")
+        if SETTINGS.ENABLE_ENCRYPT:
+            encrypted = base64.b64decode(args["new"])
+            decrypted = RSA.inst().decrypt(encrypted)
+            new_password = decrypted.decode("utf-8")
+        else:
+            new_password = args["new"]
 
         if not new_password:
             await account.msg({"alert": _("You should input a new password.")})
@@ -396,9 +405,12 @@ class CmdCharDeleteWithPW(BaseCommand):
 
         char_id = args["id"]
 
-        encrypted = base64.b64decode(args["password"])
-        decrypted = RSA.inst().decrypt(encrypted)
-        password = decrypted.decode("utf-8")
+        if SETTINGS.ENABLE_ENCRYPT:
+            encrypted = base64.b64decode(args["password"])
+            decrypted = RSA.inst().decrypt(encrypted)
+            password = decrypted.decode("utf-8")
+        else:
+            password = args["password"]
 
         if not password:
             await account.msg({"alert": _("You should input your password.")})

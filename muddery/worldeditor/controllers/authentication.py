@@ -11,6 +11,7 @@ from muddery.worldeditor.utils.auth import generate_token
 from muddery.worldeditor.utils.crypto import RSA
 from muddery.worldeditor.controllers.base_request_processer import BaseRequestProcesser
 from muddery.worldeditor.dao.accounts import Accounts
+from muddery.worldeditor.settings import SETTINGS
 
 
 class login(BaseRequestProcesser):
@@ -33,9 +34,12 @@ class login(BaseRequestProcesser):
 
         username = args['username']
 
-        encrypted = base64.b64decode(args["password"])
-        decrypted = RSA.inst().decrypt(encrypted)
-        raw_password = decrypted.decode("utf-8")
+        if SETTINGS.ENABLE_ENCRYPT:
+            encrypted = base64.b64decode(args["password"])
+            decrypted = RSA.inst().decrypt(encrypted)
+            raw_password = decrypted.decode("utf-8")
+        else:
+            raw_password = args["password"]
 
         # Match account name and check password
         try:

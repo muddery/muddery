@@ -10,4 +10,7 @@ var settings = {{
 
     // default language
     default_language: "zh-cn",
+
+    // Encrypt secret messages in transporting messages.
+    enable_encrypt: true,
 }};

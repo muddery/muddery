@@ -31,7 +31,20 @@ class Settings(object):
                 setattr(self, name, getattr(settings, name))
 
     ######################################################################
-    # Base server config
+    # Base server settings
+    ######################################################################
+
+    # This is the name of your server.
+    GAME_SERVERNAME = "Muddery"
+
+    # Administrator's name and password.
+    ADMIN_NAME = "admin"
+
+    ADMIN_PASSWORD = "administrator"
+
+
+    ######################################################################
+    # Network settings
     ######################################################################
 
     # This is a security setting protecting against host poisoning
@@ -45,12 +58,10 @@ class Settings(object):
     # The secret key of jwt.
     WORLD_EDITOR_SECRET = "SET_YOUR_SECRET_KEY"
 
-    ######################################################################
-    # Muddery base server config
-    ######################################################################
 
-    # This is the name of your server.
-    GAME_SERVERNAME = "Muddery"
+    ######################################################################
+    # Folders and files settings
+    ######################################################################
 
     MUDDERY_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     GAME_DIR = os.getcwd()
@@ -58,10 +69,14 @@ class Settings(object):
     # Worldedotir's pid file
     WORLD_EDITOR_PID = os.path.join(GAME_DIR, "worldeditor.pid")
 
+
+    ######################################################################
+    # Logging settings
+    ######################################################################
     # Place to put log files
-    LOG_DIR = os.path.join(GAME_DIR, "worldeditor", "logs")
-    LOG_NAME = 'editor.log'
-    LOG_LEVEL = logging.DEBUG
+    LOG_NAME = 'muddery_worldeditor'
+    LOG_FILE = os.path.join(GAME_DIR, "worldeditor", "logs", "editor.log")
+    LOG_LEVEL = logging.WARNING
 
     # Also print logs to the console.
     LOG_TO_CONSOLE = False
@@ -70,31 +85,6 @@ class Settings(object):
     ACCESS_LOG = "access.log"
     ERROR_LOG = "error.log"
 
-    # Administrator's name and password.
-    ADMIN_NAME = "admin"
-
-    ADMIN_PASSWORD = "administrator"
-
-    # World data API's url path.
-    WORLD_EDITOR_API_PATH = "/api"
-
-    # World data upload file's path.
-    WORLD_EDITOR_UPLOAD_PATH = "/upload"
-
-    # The webpage's root of the world editor.
-    WORLD_EDITOR_WEBROOT = os.path.join(GAME_DIR, "web", "worldeditor")
-
-    # Directories from which static files will be gathered from.
-    WEBCLIENT_SOURCE_DIRS = (
-        (WORLD_EDITOR_WEBROOT, os.path.join(MUDDERY_DIR, "worldeditor", "webclient")),
-        (WORLD_EDITOR_WEBROOT, os.path.join(GAME_DIR, "worldeditor", "webclient")),
-    )
-
-    # Media files root dir
-    MEDIA_ROOT = os.path.join(GAME_DIR, "web", "media")
-
-    # RSA private key file
-    RSA_PRIVATE_KEY_FILE = os.path.join(GAME_DIR, "worldeditor", "keys", "rsa_private.pem")
 
     ######################################################################
     # Database config
@@ -118,8 +108,38 @@ class Settings(object):
         'DEBUG': False,
     }
 
+
     ######################################################################
-    # Typeclasses and other paths
+    # Web features
+    ######################################################################
+
+    # World data API's url path.
+    WORLD_EDITOR_API_PATH = "/api"
+
+    # World data upload file's path.
+    WORLD_EDITOR_UPLOAD_PATH = "/upload"
+
+    # The webpage's root of the world editor.
+    WORLD_EDITOR_WEBROOT = os.path.join(GAME_DIR, "web", "worldeditor")
+
+    # Directories from which static files will be gathered from.
+    WEBCLIENT_SOURCE_DIRS = (
+        (WORLD_EDITOR_WEBROOT, os.path.join(MUDDERY_DIR, "worldeditor", "webclient")),
+        (WORLD_EDITOR_WEBROOT, os.path.join(GAME_DIR, "worldeditor", "webclient")),
+    )
+
+    # Media files root dir
+    MEDIA_ROOT = os.path.join(GAME_DIR, "web", "media")
+
+    # Encrypt secret messages in transporting messages.
+    ENABLE_ENCRYPT = True
+
+    # RSA private key file
+    RSA_PRIVATE_KEY_FILE = os.path.join(GAME_DIR, "worldeditor", "keys", "rsa_private.pem")
+
+
+    ######################################################################
+    # Elements and other paths
     ######################################################################
 
     # Path of base world data forms.

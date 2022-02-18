@@ -52,6 +52,8 @@ class CommandHandler(object):
                 await command.func(caller, args)
             except Exception as e:
                 logger.log_err("Run command error, %s: %s %s" % (session, raw_string, e))
+                await session.msg({"alert": "Command error: %s %s" % (raw_string, e)})
             return
         else:
             logger.log_err("Can not find command, %s: %s" % (session, raw_string))
+            await session.msg({"alert": "Can not find command: %s" % raw_string})

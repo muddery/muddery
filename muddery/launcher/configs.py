@@ -149,6 +149,7 @@ operations:
       -c, --client          Stop the web client only.
       -e, --editor          Stop the world editor only.
 
+  muddery state             Check servers running states.
   muddery upgrade           Upgrade a game directory to the latest version.
   muddery migrate           Migrate databases to new version.
   muddery loaddata          Load game data from the worlddata folder.

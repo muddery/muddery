@@ -40,9 +40,6 @@ class MudderyLockedExit(ELEMENT("EXIT")):
         if not await super(MudderyLockedExit, self).can_traverse(character):
             return False
 
-        if character.bypass_events():
-            return True
-
         # Only can pass exits which have already been unlocked.
         if await character.is_exit_unlocked(self.get_element_key()):
             if not self.const.unlock_forever:
@@ -60,6 +57,10 @@ class MudderyLockedExit(ELEMENT("EXIT")):
         # Show the object's appearance.
         detail_appearance = await self.get_detail_appearance(character)
         await character.msg({"look_obj": detail_appearance})
+
+        if character.bypass_events():
+            return True
+
         return False
 
     async def can_unlock(self, caller):

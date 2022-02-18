@@ -106,9 +106,12 @@ class CmdConnectAccount(BaseCommand):
         username = args["username"]
         username = re.sub(r"\s+", " ", username).strip()
 
-        encrypted = base64.b64decode(args["password"])
-        decrypted = RSA.inst().decrypt(encrypted)
-        password = decrypted.decode("utf-8")
+        if SETTINGS.ENABLE_ENCRYPT:
+            encrypted = base64.b64decode(args["password"])
+            decrypted = RSA.inst().decrypt(encrypted)
+            password = decrypted.decode("utf-8")
+        else:
+            password = args["password"]
 
         if not password:
             await session.msg({"alert": _("You should input a password.")})
@@ -178,9 +181,12 @@ class CmdCreateAccount(BaseCommand):
         username = args["username"]
         username = re.sub(r"\s+", " ", username).strip()
 
-        encrypted = base64.b64decode(args["password"])
-        decrypted = RSA.inst().decrypt(encrypted)
-        password = decrypted.decode("utf-8")
+        if SETTINGS.ENABLE_ENCRYPT:
+            encrypted = base64.b64decode(args["password"])
+            decrypted = RSA.inst().decrypt(encrypted)
+            password = decrypted.decode("utf-8")
+        else:
+            password = args["password"]
 
         if not password:
             await session.msg({"alert": _("You should input a password.")})

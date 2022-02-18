@@ -66,7 +66,6 @@ def stop():
     try:
         os.kill(pid, signal.SIGTERM)
         print("Webclient server stopped.")
-        logger.log_critical("Webclient server killed.")
     except:
         print("Can not stop the webclient server correctly.")
 

@@ -22,7 +22,7 @@ class ServerSettings(object):
     GAME_SERVER_PORT = {GAME_SERVER_PORT}
 
     # The log level
-    LOG_LEVEL = logging.DEBUG
+    LOG_LEVEL = logging.WARNING
 
     # Also print logs to the console.
     LOG_TO_CONSOLE = False

@@ -86,7 +86,6 @@ def stop():
     try:
         os.kill(pid, signal.SIGTERM)
         print("Game server stopped.")
-        logger.log_critical("Game server killed.")
     except:
         print("Can not stop the game server correctly.")
 

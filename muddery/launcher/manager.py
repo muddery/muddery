@@ -251,14 +251,15 @@ def collect_worldeditor_static():
     print("Worldeditor's static files collected.")
 
 
-async def wait_server_status(server_process, webclient_process, worldeditor_process, timeout):
+async def get_server_state(gameserver:bool=False, webclient:bool=False, editor:bool=False, req_timeout:float=0) -> dict:
     """
-    Check server's status.
+    Check server's state.
 
-    :param server_process:
-    :param webclient_process:
-    :param worldeditor_process:
-    :param timeout:
+    :param:
+        gameserver: check the game server
+        webclient: check the webclient
+        editor: check the world editor
+        req_timeout: timeout for waiting state request
     :return:
     """
     async def async_reqeust(url, timeout):
@@ -271,65 +272,106 @@ async def wait_server_status(server_process, webclient_process, worldeditor_proc
             code = -1
         return code
 
-    async def get_server_status(server_process, webclient_process, worldeditor_process):
-        # get status url
-        server_status_url = None
-        webclient_status_url = None
-        worldeditor_status_url = None
+    gamedir = os.path.abspath(configs.CURRENT_DIR)
+    utils.init_game_env(gamedir)
 
-        if server_process or webclient_process:
-            from muddery.server.settings import SETTINGS as SERVER_SETTINGS
-            from server.settings import ServerSettings
-            SERVER_SETTINGS.update(ServerSettings())
+    servers = {}
 
-            if server_process:
-                server_status_url = "http://localhost:%s/status" % SERVER_SETTINGS.GAME_SERVER_PORT
+    if gameserver or webclient:
+        from muddery.server.settings import SETTINGS as SERVER_SETTINGS
+        from server.settings import ServerSettings
+        SERVER_SETTINGS.update(ServerSettings())
 
-            if webclient_process:
-                webclient_status_url = "http://localhost:%s/status" % SERVER_SETTINGS.WEBCLIENT_PORT
+        if gameserver:
+            servers["server"] = {
+                "name": "Game server",
+                "port": SERVER_SETTINGS.GAME_SERVER_PORT,
+                "url": "http://localhost:%s/status" % SERVER_SETTINGS.GAME_SERVER_PORT,
+            }
 
-        if worldeditor_process:
-            from muddery.worldeditor.settings import SETTINGS as WORLDEDITOR_SETTINGS
-            from worldeditor.settings import ServerSettings
-            WORLDEDITOR_SETTINGS.update(ServerSettings())
-            worldeditor_status_url = "http://localhost:%s/status" % WORLDEDITOR_SETTINGS.WORLD_EDITOR_PORT
+        if webclient:
+            servers["webclient"] = {
+                "name": "Webclient",
+                "port": SERVER_SETTINGS.WEBCLIENT_PORT,
+                "url": "http://localhost:%s/status" % SERVER_SETTINGS.WEBCLIENT_PORT,
+            }
 
-        while server_process or webclient_process or worldeditor_process:
-            awaits = []
-            if server_process:
-                awaits.append(asyncio.create_task(async_reqeust(server_status_url, timeout=5)))
+    if editor:
+        from muddery.worldeditor.settings import SETTINGS as WORLDEDITOR_SETTINGS
+        from worldeditor.settings import ServerSettings
+        WORLDEDITOR_SETTINGS.update(ServerSettings())
 
-            if webclient_process:
-                awaits.append(asyncio.create_task(async_reqeust(webclient_status_url, timeout=5)))
+        servers["editor"] = {
+            "name": "World editor",
+            "port": WORLDEDITOR_SETTINGS.WORLD_EDITOR_PORT,
+            "url": "http://localhost:%s/status" % WORLDEDITOR_SETTINGS.WORLD_EDITOR_PORT,
+        }
 
-            if worldeditor_process:
-                awaits.append(asyncio.create_task(async_reqeust(worldeditor_status_url, timeout=5)))
+    awaits = [asyncio.create_task(async_reqeust(item["url"], timeout=req_timeout)) for item in servers.values()]
+    responses = await asyncio.gather(*awaits)
 
-            results = await asyncio.gather(*awaits)
+    for key, response in zip(servers, responses):
+        servers[key]["running"] = (response == 200)
 
-            if server_process:
-                if results[0] == 200:
-                    server_process = None
-                    print("Game server is running.")
-                results = results[1:]
+    return servers
 
-            if webclient_process:
-                if results[0] == 200:
-                    webclient_process = None
-                    print("Webclient is running.")
-                results = results[1:]
 
-            if worldeditor_process:
-                if results[0] == 200:
-                    worldeditor_process = None
-                    print("Worldeditor is running.")
+async def wait_server_state(gameserver: bool = False, webclient: bool = False, editor: bool = False, req_timeout: float = 0,
+                            total_wait_time: float = 0) -> dict:
+    """
+    Check server's state until all servers are running.
+    
+    :param
+        gameserver: check the game server
+        webclient: check the webclient
+        editor: check the world editor
+        req_timeout: timeout for waiting state request
+        total_wait_time: total time for waiting server states
+    :return:
+    """
+    if req_timeout < 1:
+        req_timeout = 1
 
-            await asyncio.sleep(1)
+    if total_wait_time < req_timeout:
+        total_wait_time = req_timeout
 
-    try:
-        await asyncio.wait_for(get_server_status(server_process, webclient_process, worldeditor_process), timeout)
-    except asyncio.TimeoutError:
-        print("One or more servers are not working correctly.")
+    wait_time = 0
+    states = {}
+    while wait_time < total_wait_time:
+        wait_time += req_timeout
+        states = await get_server_state(gameserver, webclient, editor, req_timeout)
+
+        all_running = True
+        for item in states.values():
+            if not item["running"]:
+                all_running = False
+                break
+
+        if all_running:
+            break
+
+    return states
+
+
+async def show_server_state(gameserver: bool = False, webclient: bool = False, editor: bool = False, req_timeout: float = 0,
+                            total_wait_time: float = 0):
+    """
+    Show server's state.
+
+    :param
+        gameserver: check the game server
+        webclient: check the webclient
+        editor: check the world editor
+        req_timeout: timeout for waiting state request
+        total_wait_time: total time for waiting server states
+    :return:
+    """
+    states = await wait_server_state(gameserver, webclient, editor, req_timeout, total_wait_time)
+    for item in states.values():
+        if item["running"]:
+            print("%s is running at port %s." % (item["name"], item["port"]))
+        else:
+            print("%s is not running at port %s." % (item["name"], item["port"]))
 
 
 async def run_servers(server: bool = False, webclient: bool = False, editor: bool = False, restart: bool = False):
@@ -399,8 +441,7 @@ async def run_servers(server: bool = False, webclient: bool = False, editor: boo
         command = template % "run_worldeditor.py"
         worldeditor_process = subprocess.Popen(command, **options)
 
-    await wait_server_status(server_process, webclient_process, worldeditor_process, 30)
-
+    await show_server_state(server, webclient, editor, 5, 20)
 
 def kill_servers(server: bool = True, webclient: bool = True, editor: bool = True):
     """

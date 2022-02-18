@@ -22,7 +22,7 @@ class ServerSettings(object):
     WORLD_EDITOR_SECRET = "{WORLD_EDITOR_SECRET}"
 
     # The log level
-    LOG_LEVEL = logging.DEBUG
+    LOG_LEVEL = logging.WARNING
 
     # Also print logs to the console.
     LOG_TO_CONSOLE = False

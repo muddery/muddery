@@ -156,6 +156,17 @@ def main():
             sys.exit(-1)
         sys.exit(0)
 
+    elif sys_argv[1] == "state":
+        # Check servers running states.
+        print("Checking server state ...")
+        from muddery.launcher import manager
+        try:
+            asyncio.run(manager.show_server_state(gameserver=True, webclient=True, editor=True, req_timeout=5))
+        except Exception as e:
+            traceback.print_exc()
+            sys.exit(-1)
+        sys.exit(0)
+
     else:
         # Other operations
         parser = ArgumentParser(add_help=False)

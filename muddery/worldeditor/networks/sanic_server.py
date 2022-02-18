@@ -144,7 +144,6 @@ def stop():
     try:
         os.kill(pid, signal.SIGTERM)
         print("Worldeditor server stopped.")
-        logger.log_critical("Worldeditor server killed.")
     except:
         print("Can not stop the worldeditor server correctly.")
 

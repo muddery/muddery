@@ -54,7 +54,7 @@ MudderyCommand.prototype = {
     login: function(username, password) {
         var args = {
             "username" : username,
-            "password" : core.crypto.encrypt(password),
+            "password" : settings.enable_encrypt? core.crypto.encrypt(password): password,
         };
         
         this.sendCommand("connect", args);
@@ -64,17 +64,17 @@ MudderyCommand.prototype = {
     register: function(username, password, connect) {
         var args = {
             "username": username,
-            "password": core.crypto.encrypt(password),
+            "password": settings.enable_encrypt? core.crypto.encrypt(password): password,
             "connect": connect
         };
         this.sendCommand("create", args);
     },
 
     // change password
-    changePassword: function(current, password, password_verify) {
+    changePassword: function(current, new_password) {
         var args = {
-            "current": core.crypto.encrypt(current),
-            "new": core.crypto.encrypt(password),
+            "current": settings.enable_encrypt? core.crypto.encrypt(current): current,
+            "new": settings.enable_encrypt? core.crypto.encrypt(new_password): new_password,
         };
         this.sendCommand("change_pw", args);
     },

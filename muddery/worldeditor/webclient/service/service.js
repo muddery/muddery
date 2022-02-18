@@ -150,7 +150,7 @@ service = {
     login: function(username, password, callback_success, callback_failed) {
         var args = {
             username: username,
-            password: muddery_crypto.encrypt(password),
+            password: CONFIG.enable_encrypt? muddery_crypto.encrypt(password): password,
         };
         this.sendRequest("login", "", args, callback_success, callback_failed);
     },

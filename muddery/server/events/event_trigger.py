@@ -78,9 +78,6 @@ class EventTrigger(object):
         Return:
             triggered: (boolean) if an event is triggered.
         """
-        if self.can_bypass:
-            return False
-
         # Query events.
         events = EventData.get_element_event(event_type.value, obj_key)
         if not events:
@@ -92,12 +89,8 @@ class EventTrigger(object):
         if not active_events:
             return False
 
-        if active_events:
-            matches = await async_gather([STATEMENT_HANDLER.match_condition(e.condition, self.owner, obj) for e in active_events])
-            candidates = [e for index, e in enumerate(active_events) if matches[index]]
-        else:
-            candidates = []
-
+        matches = await async_gather([STATEMENT_HANDLER.match_condition(e.condition, self.owner, obj) for e in active_events])
+        candidates = [e for index, e in enumerate(active_events) if matches[index]]
         if not candidates:
             return False
 
@@ -119,6 +112,9 @@ class EventTrigger(object):
                     triggered = True
                     break
                 rand -= event.odds
+
+        if self.can_bypass:
+            return False
 
         return triggered
 

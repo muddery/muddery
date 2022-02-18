@@ -17,13 +17,13 @@ class Logger(object):
     """
     The logger object.
     """
-    def __init__(self, log_path, log_name, log_level, log_to_console):
+    def __init__(self, log_name, log_file, log_level, log_to_console):
         """
         Init the logger.
         """
-        self.logger = self.setup_log(log_path, log_name, log_level, log_to_console)
+        self.logger = self.setup_log(log_name, log_file, log_level, log_to_console)
 
-    def setup_log(self, log_path, log_name, log_level, log_to_console):
+    def setup_log(self, log_name, log_file, log_level, log_to_console):
         """
         Create a logger.
         """
@@ -35,8 +35,7 @@ class Logger(object):
         logging.getLogger('apscheduler.executors.default').setLevel(log_level)
 
         # Divide logs by date.
-        filepath = os.path.join(log_path, log_name)
-        file_handler = TimedRotatingFileHandler(filename=filepath, when="MIDNIGHT", interval=1)
+        file_handler = TimedRotatingFileHandler(filename=log_file, when="MIDNIGHT", interval=1)
         file_handler.suffix = "%Y-%m-%d.log"
 
         # Set output format.
