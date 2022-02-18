@@ -54,12 +54,12 @@ class MudderyLockedExit(ELEMENT("EXIT")):
                 await character.unlock_exit(self.get_element_key())
             return True
 
+        if character.bypass_events():
+            return True
+
         # Show the object's appearance.
         detail_appearance = await self.get_detail_appearance(character)
         await character.msg({"look_obj": detail_appearance})
-
-        if character.bypass_events():
-            return True
 
         return False
 
