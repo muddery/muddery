@@ -1,4 +1,5 @@
 
+import time
 import os
 import traceback
 import asyncio
@@ -338,8 +339,15 @@ async def wait_server_state(gameserver: bool = False, webclient: bool = False, e
     wait_time = 0
     states = {}
     while wait_time < total_wait_time:
-        wait_time += req_timeout
+        time_begin = time.time()
         states = await get_server_state(gameserver, webclient, editor, req_timeout)
+        time_end = time.time()
+
+        time_spend = time_end - time_begin
+        if time_spend < req_timeout:
+            # wait until the request time finished.
+            await asyncio.sleep(req_timeout - time_spend)
+        wait_time += req_timeout
 
         all_running = True
         for item in states.values():
