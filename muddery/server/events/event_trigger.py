@@ -94,6 +94,9 @@ class EventTrigger(object):
         if not candidates:
             return False
 
+        if self.can_bypass:
+            return False
+
         triggered = False
         rand = random.random()
         for event in candidates:
@@ -112,9 +115,6 @@ class EventTrigger(object):
                     triggered = True
                     break
                 rand -= event.odds
-
-        if self.can_bypass:
-            return False
 
         return triggered
 
