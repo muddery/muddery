@@ -4,8 +4,9 @@ LootHandler handles matters of loots.
 
 import random
 import math
-from evennia.utils import logger
+from muddery.server.utils.logger import logger
 from muddery.server.statements.statement_handler import STATEMENT_HANDLER
+from muddery.common.utils.utils import async_gather
 
 
 class LootHandler(object):
@@ -34,11 +35,11 @@ class LootHandler(object):
                     "condition": d.condition
                 })
         except Exception as e:
-            logger.log_errmsg("Can't load loot info %s" % e)
+            logger.log_err("Can't load loot info %s" % e)
 
         self.loot_list = loot_list
 
-    def get_obj_list(self, looter, times=1):
+    async def get_obj_list(self, looter, times=1):
         """
         Get loot objects list.
 
@@ -47,9 +48,24 @@ class LootHandler(object):
         :return:
         """
         # get available loot list
-        available_list = [item for item in self.loot_list
-            if (not item["quest"] or looter.quest_handler.is_not_accomplished(item["quest"]))
-                and STATEMENT_HANDLER.match_condition(item["condition"], looter, None)]
+        loot_list = [item for item in self.loot_list if not item["quest"]]
+        quest_list = [item for item in self.loot_list if item["quest"]]
+        if quest_list:
+            accomplished = await async_gather([
+                looter.quest_handler.is_not_accomplished(item["quest"]) for item in quest_list
+            ])
+            loot_list += [item for index, item in enumerate(quest_list) if accomplished[index]]
+
+        if loot_list:
+            match = await async_gather([
+                STATEMENT_HANDLER.match_condition(item["condition"], looter, None) for item in loot_list
+            ])
+            available_list = [item for index, item in enumerate(loot_list) if match[index]]
+        else:
+            available_list = []
+
+        if not available_list:
+            return []
 
         # get object list
         objects_dict = {}

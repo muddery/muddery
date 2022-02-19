@@ -5,31 +5,28 @@ The DialogueHandler maintains a pool of dialogues.
 
 """
 
-from evennia.utils import logger
 from muddery.server.mappings.element_set import ELEMENT
-from muddery.server.utils.localized_strings_handler import _
 from muddery.server.statements.statement_handler import STATEMENT_HANDLER
 from muddery.server.database.worlddata.shop_goods import ShopGoods
-from muddery.server.database.worlddata.worlddata import WorldData
-from muddery.server.elements.base_element import BaseElement
+from muddery.common.utils.utils import async_gather
 
 
-class MudderyShop(BaseElement):
+class MudderyShop(ELEMENT("MATTER")):
     """
     A shop.
     """
     element_type = "SHOP"
-    element_name = _("Shop", "elements")
+    element_name = "Shop"
     model_name = "shops"
 
-    def at_element_setup(self, first_time):
+    async def at_element_setup(self, first_time):
         """
         Set data_info to the object.
 
         Returns:
             None
         """
-        super(MudderyShop, self).at_element_setup(first_time)
+        await super(MudderyShop, self).at_element_setup(first_time)
 
         # load shop goods
         self.load_goods()
@@ -42,14 +39,14 @@ class MudderyShop(BaseElement):
         """
         if owner:
             if not self.const.icon:
-                self.const_data_handler.add("icon", owner.get_icon())
+                self.set_icon(owner.get_icon())
 
     def load_goods(self):
         """
         Load shop goods.
         :return:
         """
-        goods_data = ShopGoods.get_by_shop(self.element_key)
+        goods_data = ShopGoods.get_by_shop(self.get_element_key())
 
         self.goods = []
         for item in goods_data:
@@ -57,27 +54,26 @@ class MudderyShop(BaseElement):
             goods.set_data(item)
             self.goods.append(goods)
 
-    def get_info(self, caller):
+    async def get_detail_appearance(self, caller):
         """
         Get shop information.
 
         Args:
             caller (obj): the custom
         """
-        info = {
-            "key": self.element_key,
-            "name": self.const.name,
-            "desc": self.const.desc,
-            "icon": self.const.icon,
-            "goods": [],
-        }
+        info = await super(MudderyShop, self).get_detail_appearance(caller)
 
-        for index, item in enumerate(self.goods):
-            if item.is_available(caller):
-                goods = item.get_info(caller)
-                goods["index"] = index
-                info["goods"].append(goods)
+        goods_list = []
+        if self.goods:
+            is_available = await async_gather([item.is_available(caller) for item in self.goods])
+            available_goods = [index for index in range(len(self.goods)) if is_available[index]]
 
+            if available_goods:
+                goods_list = await async_gather([self.goods[index].get_info(caller) for index in available_goods])
+                for index, item in enumerate(goods_list):
+                    item["index"] = available_goods[index]
+
+        info["goods"] = goods_list
         return info
 
     def get_verb(self):
@@ -87,7 +83,7 @@ class MudderyShop(BaseElement):
         """
         return self.const.verb if self.const.verb else self.const.name
 
-    def is_available(self, caller):
+    async def is_available(self, caller):
         """
         Is it available to the customer.
 
@@ -97,13 +93,13 @@ class MudderyShop(BaseElement):
         if not self.const.condition:
             return True
 
-        return STATEMENT_HANDLER.match_condition(self.const.condition, caller, None)
+        return await STATEMENT_HANDLER.match_condition(self.const.condition, caller, None)
 
-    def sell_goods(self, goods_index, caller):
+    async def sell_goods(self, goods_index, caller):
         """
         Sell goods to the caller.
         :param goods_index:
         :param caller:
         :return:
         """
-        self.goods[goods_index].sell_to(caller)
+        await self.goods[goods_index].sell_to(caller)

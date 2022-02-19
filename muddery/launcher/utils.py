@@ -7,12 +7,12 @@ import os
 import sys
 import shutil
 import configparser
-import traceback
-from pathlib import Path
+import random
+import string
 from subprocess import check_output, CalledProcessError, STDOUT
-import django.core.management
-from evennia.server import evennia_launcher
+from muddery.common.utils.crypto import RSA
 from muddery.launcher import configs
+
 
 # ------------------------------------------------------------
 #
@@ -68,7 +68,7 @@ def create_secret_key():
     return secret_key
 
 
-def create_settings_file(gamedir, setting_dict=None):
+def create_server_settings_file(gamedir, setting_dict):
     """
     Uses the template settings file to build a working
     settings file.
@@ -77,35 +77,38 @@ def create_settings_file(gamedir, setting_dict=None):
         gamedir: (string) game root's path
         setting_dict: (dict)preset settings.
     """
-    settings_path = os.path.join(gamedir, "server", "conf", "settings.py")
+    settings_path = os.path.join(gamedir, "server", "settings.py")
     with open(settings_path, 'r') as f:
         settings_string = f.read()
 
-    # tweak the settings
-    evennia_settings_file = Path(os.path.join(evennia_launcher.EVENNIA_LIB, "settings_default.py")).as_posix()
-    muddery_settings_file = Path(os.path.join(configs.MUDDERY_LIB, "settings_default.py")).as_posix()
-    default_setting_dict = {"EVENNIA_SETTINGS_DEFAULT": evennia_settings_file,
-                            "MUDDERY_SETTINGS_DEFAULT": muddery_settings_file,
-                            "ALLOWED_HOSTS": "['*']",
-                            "WEBSERVER_PORTS": "[(8000, 5001)]",
-                            "WEBSOCKET_CLIENT_PORT": "8001",
-                            "AMP_PORT": "5000",
-                            "LANGUAGE_CODE": "'en-us'",
-                            "SECRET_KEY":"'%s'" % create_secret_key()}
-
-    if setting_dict:
-        merged_setting_dict = dict(default_setting_dict, **setting_dict)
-    else:
-        merged_setting_dict = default_setting_dict
-
     # modify the settings
-    settings_string = settings_string.format(**merged_setting_dict)
+    settings_string = settings_string.format(**setting_dict)
 
     with open(settings_path, 'w') as f:
         f.write(settings_string)
 
 
-def create_webclient_settings(gamedir, setting_dict=None):
+def create_editor_settings_file(gamedir, setting_dict):
+    """
+    Uses the template settings file to build a working
+    settings file.
+
+    Args:
+        gamedir: (string) game root's path
+        setting_dict: (dict)preset settings.
+    """
+    settings_path = os.path.join(gamedir, "worldeditor", "settings.py")
+    with open(settings_path, 'r') as f:
+        settings_string = f.read()
+
+    # modify the settings
+    settings_string = settings_string.format(**setting_dict)
+
+    with open(settings_path, 'w') as f:
+        f.write(settings_string)
+
+
+def create_webclient_settings(gamedir, setting_dict):
     """
     Uses the template settings file to build a working
     webclient settings file.
@@ -114,23 +117,12 @@ def create_webclient_settings(gamedir, setting_dict=None):
         gamedir: (string) game root's path
         setting_dict: (dict)preset settings.
     """
-    settings_path = os.path.join(gamedir, "web", "webclient_overrides", "webclient", "settings.js")
+    settings_path = os.path.join(gamedir, "webclient", "settings.js")
     with open(settings_path, 'r') as f:
         settings_string = f.read()
 
-    # tweak the settings
-    default_setting_dict = {
-        "WEBSOCKET_HOST": "'ws://' + window.location.hostname + ':8001'",
-        "RESOURCE_HOST": "window.location.protocol + '//' + window.location.host + '/media/'",
-    }
-
-    if setting_dict:
-        merged_setting_dict = dict(default_setting_dict, **setting_dict)
-    else:
-        merged_setting_dict = default_setting_dict
-
     # modify the settings
-    settings_string = settings_string.format(**merged_setting_dict)
+    settings_string = settings_string.format(**setting_dict)
 
     with open(settings_path, 'w') as f:
         f.write(settings_string)
@@ -142,7 +134,7 @@ def copy_tree(source, destination):
     """
     if not os.path.exists(destination):
         # If does not exist, create one.
-        os.mkdir(destination)
+        os.makedirs(destination)
         
     # traverse files and folders
     names = os.listdir(source)
@@ -160,7 +152,7 @@ def copy_tree(source, destination):
             print("Can not copy file:%s to %s for %s." % (srcname, dstname, e))
                 
 
-def create_game_directory(gamedir, template, port=None):
+def create_game_directory(gamedir, template, port):
     """
     Initialize a new game directory named dirname
     at the current path. This means copying the
@@ -192,47 +184,50 @@ def create_game_directory(gamedir, template, port=None):
     if template_dir:
         copy_tree(template_dir, gamedir)
 
-    # pre-build settings file in the new gamedir
-    setting_py_dict = None
-    if port:
-        setting_py_dict = {
-            "WEBSERVER_PORTS": "[(%s, %s)]" % (port, port + 3),
-            "WEBSOCKET_CLIENT_PORT": "%s" % (port + 1),
-            "AMP_PORT": "%s" % (port + 2),
-        }
+    # Create the settings file in the new game dir.
+    setting_dict = {
+        "WEBCLIENT_PORT": port,
+        "GAME_SERVER_PORT": port + 1,
+    }
+    create_server_settings_file(gamedir, setting_dict)
+    create_webclient_settings(gamedir, setting_dict)
 
-    create_settings_file(gamedir, setting_py_dict)
+    # Create game server's RSA keys.
+    rsa = RSA()
+    rsa.generate_key()
 
-    setting_js_dict = None
-    if port:
-        setting_js_dict = {
-            "WEBSOCKET_HOST": "'ws://' + window.location.hostname + ':%s'" % (port + 1),
-        }
-    create_webclient_settings(gamedir, setting_js_dict)
+    server_private_key_path = os.path.join(gamedir, "server", "keys", "rsa_private.pem")
+    with open(server_private_key_path, "wb") as fp:
+        fp.write(rsa.export_private_key())
 
+    server_public_key_path = os.path.join(gamedir, "webclient", "keys", "rsa_public.pem")
+    with open(server_public_key_path, "wb") as fp:
+        fp.write(rsa.export_public_key())
 
-def show_version_info(about=False):
-    """
-    Display version info
-    """
-    import os, sys
-    import twisted
-    import django
-    import evennia
+    # Create the world editor's setting file.
+    setting_dict = {
+        "WORLD_EDITOR_PORT": port + 2,
+        "WORLD_EDITOR_SECRET": ''.join(random.sample(string.ascii_letters + string.digits, 32)),
+    }
+    create_editor_settings_file(gamedir, setting_dict)
 
-    return configs.VERSION_INFO.format(version=muddery_version(),
-                                       about=configs.ABOUT_INFO if about else "",
-                                       os=os.name, python=sys.version.split()[0],
-                                       twisted=twisted.version.short(),
-                                       django=django.get_version(),
-                                       evennia=evennia.__version__,)
+    # Create world editor's RSA keys.
+    rsa.generate_key()
+
+    server_private_key_path = os.path.join(gamedir, "worldeditor", "keys", "rsa_private.pem")
+    with open(server_private_key_path, "wb") as fp:
+        fp.write(rsa.export_private_key())
+
+    server_public_key_path = os.path.join(gamedir, "worldeditor", "webclient", "keys", "rsa_public.pem")
+    with open(server_public_key_path, "wb") as fp:
+        fp.write(rsa.export_public_key())
 
 
 def check_gamedir(path):
     """
     Check if the path is a game dir.
     """
-    settings_path = os.path.join(path, "server", "conf", "settings.py")
+    settings_path = os.path.join(path, "server", "settings.py")
     if os.path.isfile(settings_path):
         return True
 
@@ -251,22 +246,6 @@ def check_version():
         return False
 
     return True
-
-
-def check_database():
-    """
-    Check so the database exists.
-
-    Returns:
-        exists (bool): `True` if the database exists, otherwise `False`.
-    """
-    # Check so a database exists and is accessible
-    from django.db import connection
-
-    tables = connection.introspection.get_table_list(connection.cursor())
-    if not tables or not isinstance(tables[0], str):  # django 1.8+
-        tables = [tableinfo.name for tableinfo in tables]
-    return tables and "accounts_accountdb" in tables
 
 
 def create_config_file(game_dir, template):
@@ -331,97 +310,51 @@ def get_game_config(path):
     return tuple(num_list), game_template
 
 
-def import_local_data():
+def import_local_data(clear=False):
     """
     Import all local data files to models.
     """
-    from django.conf import settings
-    from muddery.worldeditor.services import importer
+    from muddery.server.settings import SETTINGS
+    from muddery.server.utils import importer
 
     # load custom data
     # data file's path
-    data_path = os.path.join(settings.GAME_DIR, settings.WORLD_DATA_FOLDER)
-    importer.import_data_path(data_path, clear=False, except_errors=True)
+    data_path = os.path.join(SETTINGS.GAME_DIR, SETTINGS.WORLD_DATA_FOLDER)
+    importer.import_data_path(data_path, clear=clear, except_errors=True)
 
     # localized string file's path
-    localized_string_path = os.path.join(data_path, settings.LOCALIZED_STRINGS_FOLDER, settings.LANGUAGE_CODE)
-    importer.import_table_path(localized_string_path, settings.LOCALIZED_STRINGS_MODEL, clear=False, except_errors=True)
+    localized_string_path = os.path.join(data_path, SETTINGS.LOCALIZED_STRINGS_FOLDER, SETTINGS.LANGUAGE_CODE)
+    importer.import_table_path(localized_string_path, SETTINGS.LOCALIZED_STRINGS_MODEL, clear=clear, except_errors=True)
 
 
 def import_system_data():
     """
     Import all local data files to models.
     """
-    from django.conf import settings
-    from muddery.worldeditor.services import importer
+    from muddery.server.settings import SETTINGS
+    from muddery.server.utils import importer
 
     # load system default data
     default_template = os.path.join(configs.GAME_TEMPLATES, configs.DEFAULT_TEMPLATE)
 
     # data file's path
-    data_path = os.path.join(default_template, settings.WORLD_DATA_FOLDER)
+    data_path = os.path.join(default_template, SETTINGS.WORLD_DATA_FOLDER)
     importer.import_data_path(data_path, clear=False, except_errors=True)
 
     # localized string file's path
-    localized_string_path = os.path.join(data_path, settings.LOCALIZED_STRINGS_FOLDER, settings.LANGUAGE_CODE)
-    importer.import_table_path(localized_string_path, settings.LOCALIZED_STRINGS_MODEL, clear=False, except_errors=True)
+    localized_string_path = os.path.join(data_path, SETTINGS.LOCALIZED_STRINGS_FOLDER, SETTINGS.LANGUAGE_CODE)
+    importer.import_table_path(localized_string_path, SETTINGS.LOCALIZED_STRINGS_MODEL, clear=False, except_errors=True)
 
 
-def create_superuser(username, password):
+def init_game_env(gamedir):
     """
-    Create the superuser's account.
+    Set the environment to the game dir.
     """
-    from evennia.accounts.models import AccountDB
-    AccountDB.objects.create_superuser(username, '', password)
+    os.chdir(gamedir)
 
-
-def create_database():
-    """
-    Create the game's database.
-    """
-    # make migrations
-    django_args = ["makemigrations"]
-    django_kwargs = {}
-    try:
-        django.core.management.call_command(*django_args, **django_kwargs)
-    except django.core.management.base.CommandError as exc:
-        raise(configs.ERROR_INPUT.format(traceback=exc, args=django_args, kwargs=django_kwargs))
-
-    django_args = ["makemigrations", "gamedata"]
-    django_kwargs = {}
-    try:
-        django.core.management.call_command(*django_args, **django_kwargs)
-    except django.core.management.base.CommandError as exc:
-        raise(configs.ERROR_INPUT.format(traceback=exc, args=django_args, kwargs=django_kwargs))
-
-    django_args = ["makemigrations", "worlddata"]
-    django_kwargs = {}
-    try:
-        django.core.management.call_command(*django_args, **django_kwargs)
-    except django.core.management.base.CommandError as exc:
-        raise(configs.ERROR_INPUT.format(traceback=exc, args=django_args, kwargs=django_kwargs))
-
-    # migrate the database
-    django_args = ["migrate"]
-    django_kwargs = {}
-    try:
-        django.core.management.call_command(*django_args, **django_kwargs)
-    except django.core.management.base.CommandError as exc:
-        raise(configs.ERROR_INPUT.format(traceback=exc, args=django_args, kwargs=django_kwargs))
-
-    django_args = ["migrate", "gamedata"]
-    django_kwargs = {"database": "gamedata"}
-    try:
-        django.core.management.call_command(*django_args, **django_kwargs)
-    except django.core.management.base.CommandError as exc:
-        raise(configs.ERROR_INPUT.format(traceback=exc, args=django_args, kwargs=django_kwargs))
-
-    django_args = ["migrate", "worlddata"]
-    django_kwargs = {"database": "worlddata"}
-    try:
-        django.core.management.call_command(*django_args, **django_kwargs)
-    except django.core.management.base.CommandError as exc:
-        raise(configs.ERROR_INPUT.format(traceback=exc, args=django_args, kwargs=django_kwargs))
+    # Add gamedir to python path
+    if len(sys.path) == 0 or sys.path[0] != gamedir:
+        sys.path.insert(0, gamedir)
 
 
 def print_info():
@@ -429,11 +362,11 @@ def print_info():
     Format info dicts from the Portal/Server for display
 
     """
-    from django.conf import settings
+    from muddery.server.settings import SETTINGS
 
     ind = " " * 8
     info = {
-        "servername": settings.GAME_SERVERNAME,
+        "servername": SETTINGS.GAME_SERVERNAME,
         "version": muddery_version(),
         "status": ""
     }

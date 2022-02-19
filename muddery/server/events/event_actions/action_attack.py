@@ -5,7 +5,6 @@ Event action.
 import random
 from muddery.server.events.base_event_action import BaseEventAction
 from muddery.server.database.worlddata.worlddata import WorldData
-from muddery.server.utils.localized_strings_handler import _
 
 
 class ActionAttack(BaseEventAction):
@@ -13,11 +12,11 @@ class ActionAttack(BaseEventAction):
     Attack a target.
     """
     key = "ACTION_ATTACK"
-    name = _("Attack", category="event_actions")
+    name = "Attack"
     model_name = "action_attack"
     repeatedly = False
 
-    def func(self, event_key, character, obj):
+    async def func(self, event_key, character, obj):
         """
         Start a combat.
 
@@ -36,7 +35,7 @@ class ActionAttack(BaseEventAction):
         for record in records:
             if rand <= record.odds:
                 # Attack mob.
-                character.attack_temp_target(record.mob, record.level, record.desc)
+                await character.attack_temp_target(record.mob, record.level, record.desc)
                 return
 
             rand -= record.odds

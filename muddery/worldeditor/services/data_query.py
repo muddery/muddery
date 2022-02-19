@@ -3,24 +3,83 @@ Battle commands. They only can be used when a character is in a combat.
 """
 
 import ast
-from django.conf import settings
-from django.db import connections
-from django.core.exceptions import ObjectDoesNotExist
-from evennia.utils import logger
-from muddery.server.utils.game_settings import GAME_SETTINGS
-from muddery.worldeditor.dao import common_mappers as CM
-from muddery.worldeditor.dao.common_mappers import WORLD_AREAS
-from muddery.worldeditor.dao.world_rooms_mapper import WORLD_ROOMS_MAPPER
-from muddery.worldeditor.dao.world_exits_mapper import WORLD_EXITS_MAPPER
-from muddery.worldeditor.dao import general_query_mapper as query
-from muddery.worldeditor.dao.element_properties_mapper import ELEMENT_PROPERTIES
-from muddery.worldeditor.dao.event_mapper import get_element_event
-from muddery.worldeditor.services.general_query import query_fields
+from sqlalchemy.sql import text
+from muddery.common.utils.exception import MudderyError, ERR
+from muddery.common.utils.defines import EventType
 from muddery.server.mappings.element_set import ELEMENT_SET, ELEMENT
-from muddery.server.mappings.event_action_set import EVENT_ACTION_SET
-from muddery.server.utils.defines import EventType
-from muddery.server.utils.exception import MudderyError, ERR
-from muddery.server.utils.localized_strings_handler import _
+from muddery.server.database.worlddata_db import WorldDataDB
+from muddery.worldeditor.utils.localized_strings import LocalizedStrings
+from muddery.worldeditor.utils.logger import logger
+from muddery.worldeditor.dao.common_mappers import WORLD_AREAS
+from muddery.worldeditor.dao.world_rooms_mapper import WorldRoomsMapper
+from muddery.worldeditor.dao.world_exits_mapper import WorldExitsMapper
+from muddery.worldeditor.dao.element_properties_mapper import ElementPropertiesMapper
+from muddery.worldeditor.dao.events_mapper import EventsMapper
+from muddery.worldeditor.dao import general_querys
+from muddery.worldeditor.mappings.form_set import FORM_SET
+
+
+def query_fields_info(table_name):
+    """
+    Query table's data.
+    """
+    field_names = general_querys.get_field_names(table_name)
+    form_class = FORM_SET.get(table_name)
+    form = form_class()
+
+    fields = []
+    for field_name in field_names:
+        field = form[field_name]
+        info = {
+            "name": field.id,
+            "label": field.name,
+            "default": field.default,
+            "disabled": (field.name == "id"),
+            "help_text": field.description,
+            "type": type(field.widget).__name__,
+        }
+        fields.append(info)
+
+    return fields
+
+
+def query_table(table_name):
+    """
+    Query table's data.
+    """
+    fields = query_fields_info(table_name)
+    records = general_querys.get_all_records(table_name)
+    rows = []
+    for record in records:
+        line = [getattr(record, field["name"]) for field in fields]
+        rows.append(line)
+
+    table = {
+        "fields": fields,
+        "records": rows,
+    }
+    return table
+
+
+def query_record(table_name, record_id):
+    """
+    Query a record of a table.
+    """
+    fields = query_fields_info(table_name)
+    record = general_querys.get_record_by_id(table_name, record_id)
+    return [getattr(record, field["name"]) for field in fields]
+
+
+def query_tables():
+    """
+    Query all tables' names.
+    """
+    tables = WorldDataDB.inst().get_tables()
+    models_info = [{
+        "key": table,
+        "name": LocalizedStrings.inst().trans(table, category="models") + "(" + table + ")"
+    } for table in tables]
+    return models_info
 
 
 def query_all_elements():
@@ -42,10 +101,10 @@ def query_areas():
     if not room_class:
         raise MudderyError(ERR.no_table, "Can not find the element AREA")
 
-    records = query.get_all_records(area_class.model_name)
+    records = general_querys.get_all_records(area_class.model_name)
     areas = {r.key: {"name": r.name + "(" + r.key + ")", "rooms": []} for r in records}
 
-    records = query.get_all_records(room_class.model_name)
+    records = general_querys.get_all_records(room_class.model_name)
     for r in records:
         key = r.area
         choice = (r.key, r.name + " (" + r.key + ")")
@@ -64,11 +123,13 @@ def query_element_type_properties(element_type):
         element_type: (string) the element' type
     """
     table_name = "properties_dict"
-    fields = query_fields(table_name)
-    records = query.filter_records(table_name, element_type=element_type)
+    fields = query_fields_info(table_name)
+    records = general_querys.filter_records(table_name, {
+        "element_type": element_type
+    })
     rows = []
     for record in records:
-        line = [str(record.serializable_value(field["name"])) for field in fields]
+        line = [getattr(record, field["name"]) for field in fields]
         rows.append(line)
 
     table = {
@@ -90,8 +151,8 @@ def query_element_properties(element_type, element_key):
     fields = []
     fields.append({
         "name": "level",
-        "label": _("Level"),
-        "help_text": _("Properties's level.")
+        "label": LocalizedStrings.inst().trans("Level"),
+        "help_text": LocalizedStrings.inst().trans("Properties's level.")
     })
 
     properties_info = ELEMENT(element_type).get_properties_info()
@@ -113,7 +174,7 @@ def query_element_properties(element_type, element_key):
     # Get rows.
     levels = []
     data = {}
-    records = ELEMENT_PROPERTIES.get_properties_all_levels(element_type, element_key)
+    records = ElementPropertiesMapper.inst().get_properties_all_levels(element_type, element_key)
     for record in records:
         if record.level not in levels:
             levels.append(record.level)
@@ -148,7 +209,7 @@ def query_element_level_properties(element_type, element_key, level):
     # Object's key.
     fields.append({
         "name": "key",
-        "label": _("Key"),
+        "label": LocalizedStrings.inst().trans("Key"),
         "disabled": True,
         "help_text": "",
         "type": "TextInput",
@@ -158,7 +219,7 @@ def query_element_level_properties(element_type, element_key, level):
     # Object's level.
     fields.append({
         "name": "level",
-        "label": _("Level"),
+        "label": LocalizedStrings.inst().trans("Level"),
         "disabled": False,
         "help_text": "",
         "type": "NumberInput",
@@ -169,7 +230,7 @@ def query_element_level_properties(element_type, element_key, level):
 
     # Get properties.
     data = {}
-    records = ELEMENT_PROPERTIES.get_properties(element_type, element_key, level)
+    records = ElementPropertiesMapper.inst().get_properties(element_type, element_key, level)
     for record in records:
         data[record.property] = record.value
 
@@ -187,6 +248,33 @@ def query_element_level_properties(element_type, element_key, level):
         fields.append(field)
 
     return fields
+
+
+def query_conditional_desc(element_type, element_key):
+    """
+    Query all properties of the given element.
+
+    Args:
+        element_type: (string) the object's element type.
+        element_key: (string) object's element key.
+    """
+    # Get fields.
+    table_fields = query_fields_info("conditional_desc")
+    fields = [field for field in table_fields if field["name"] != "element" and field["name"] != "key"]
+    records = general_querys.filter_records("conditional_desc", {
+        "element": element_type,
+        "key": element_key,
+    })
+    rows = []
+    for record in records:
+        line = [getattr(record, field["name"]) for field in fields]
+        rows.append(line)
+
+    table = {
+        "fields": fields,
+        "records": rows,
+    }
+    return table
 
 
 def query_element_event_triggers(element_type):
@@ -216,11 +304,11 @@ def query_element_events(element_key):
     Args:
         element_key: (string) the element' key.
     """
-    fields = query_fields("event_data")
-    records = get_element_event(element_key)
+    fields = query_fields_info("event_data")
+    records = EventsMapper.inst().get_element_events(element_key)
     rows = []
     for record in records:
-        line = [str(record.serializable_value(field["name"])) for field in fields]
+        line = [getattr(record, field["name"]) for field in fields]
         rows.append(line)
 
     table = {
@@ -229,52 +317,6 @@ def query_element_events(element_key):
     }
 
     return table
-
-
-def get_event_data_table(self, event_key):
-    """
-    Query all actions of an event.
-
-    Args:
-        event_key: (string)event's key.
-    """
-    if not self.model_name:
-        return
-
-    fields = query_fields(self.model_name)
-    rows = []
-
-    record = query.get_record(self.model_name, event_key=event_key)
-    line = [str(record.serializable_value(field["name"])) for field in fields]
-    rows.append(line)
-
-    table = {
-        "table": self.model_name,
-        "fields": fields,
-        "records": rows,
-    }
-    return table
-
-def query_event_action_data(action_type, event_key):
-    """
-    Query an event action's data.
-
-    Args:
-        action_type: (string) action's type
-        event_key: (string) event's key
-    """
-    # Get action's data.
-    action = EVENT_ACTION_SET.get(action_type)
-    if not action:
-        raise MudderyError(ERR.no_table, "Can not find action: %s" % action_type)
-
-    record = None
-    try:
-        record = action.get_event_data_table(event_key)
-    except ObjectDoesNotExist:
-        pass
-
-    return record
 
 
 def query_element_table(element_type):
@@ -295,26 +337,26 @@ def query_element_table(element_type):
 
     # get all tables' fields
     # add the first table
-    table_fields = query_fields(tables[0])
+    table_fields = query_fields_info(tables[0])
     fields = [field for field in table_fields if field["name"] != "id"]
 
     if len(tables) == 1:
-        records = query.get_all_records(tables[0])
+        records = general_querys.get_all_records(tables[0])
         rows = []
         for record in records:
-            line = [str(record.serializable_value(field["name"])) for field in fields]
+            line = [getattr(record, field["name"]) for field in fields]
             rows.append(line)
     else:
         # add other tables
         for table in tables[1:]:
-            table_fields = query_fields(table)
-            fields.extend([field for field in table_fields if field["name"] != "id" and field["name"] != "key"])
+            table_fields = query_fields_info(table)
+            fields.extend([field for field in table_fields if field["name"] != "name" and field["name"] != "key"])
 
         # get all tables' data
-        records = query.get_all_from_tables(tables)
+        records = general_querys.get_all_from_tables(tables)
         rows = []
         for record in records:
-            line = [str(record[field["name"]]) for field in fields]
+            line = [getattr(record, field["name"]) for field in fields]
             rows.append(line)
 
     table = {
@@ -331,13 +373,14 @@ def query_map(area_key):
     Args:
         area_key: (string) area's key.
     """
-    try:
-        area_record = WORLD_AREAS.get_by_key_with_base(area_key)
-    except ObjectDoesNotExist:
+    area_table_fields = general_querys.get_field_names("world_areas")
+    area_records = WORLD_AREAS.get_by_key_with_base(area_key)
+    if not area_records:
         raise MudderyError(ERR.no_data, "Can not find map: %s" % area_key)
-    area_info = area_record
+    area_record = area_records[0]
+    area_info = {field: getattr(area_record, field) for field in area_table_fields}
 
-    room_records = WORLD_ROOMS_MAPPER.rooms_in_area(area_key)
+    room_records = WorldRoomsMapper.inst().rooms_in_area(area_key)
     room_info = []
     room_keys = []
     for record in room_records:
@@ -346,7 +389,7 @@ def query_map(area_key):
         try:
             position = ast.literal_eval(record.position)
         except SyntaxError as e:
-            logger.log_errmsg("Parse map %s's position error: %s" % (record["key"], e))
+            logger.log_err("Parse map %s's position error: %s" % (record["key"], e))
             position = ()
 
         info = {
@@ -359,7 +402,7 @@ def query_map(area_key):
         }
         room_info.append(info)
 
-    exit_records = WORLD_EXITS_MAPPER.exits_of_rooms(room_keys)
+    exit_records = WorldExitsMapper.inst().exits_of_rooms(room_keys)
     exit_info = []
     for record in exit_records:
         info = {
@@ -383,43 +426,44 @@ def query_dialogues_table():
     """
     Query dialogues.
     """
-    cursor = connections[settings.WORLD_DATA_APP].cursor()
-    query_string = "SELECT T1.*, T2.event event, T5.name npc_name, T5.npc npc_key " \
-                "FROM (worlddata_dialogues T1 LEFT JOIN " \
-                    "(SELECT MIN(T6.key) event, T6.trigger_obj FROM worlddata_event_data T6 " \
+    session = WorldDataDB.inst().get_session()
+    stmt = text("SELECT T1.*, T2.event event, T5.name npc_name, T5.npc npc_key " \
+                "FROM (dialogues T1 LEFT JOIN " \
+                    "(SELECT MIN(T6.key) event, T6.trigger_obj FROM event_data T6 " \
                          "WHERE T6.trigger_type='EVENT_TRIGGER_DIALOGUE' GROUP BY trigger_obj) T2 " \
                     "ON T1.key=T2.trigger_obj) " \
-                "LEFT JOIN (SELECT T3.npc, T3.dialogue, T4.name FROM worlddata_npc_dialogues T3 " \
-                    "JOIN worlddata_characters T4 ON T3.npc=T4.key) T5 " \
-                "ON T1.key=T5.dialogue"
-    cursor.execute(query_string)
+                "LEFT JOIN (SELECT T3.npc, T3.dialogue, T4.name FROM npc_dialogues T3 " \
+                    "JOIN characters T4 ON T3.npc=T4.key) T5 " \
+                "ON T1.key=T5.dialogue")
 
-    fields = query_fields("dialogues")
+    result = session.execute(stmt)
+
+    fields = query_fields_info("dialogues")
     # add event and npc fields
     fields.append({
         "default": "",
-        "editable": False,
-        "help_text": _("Has event.", "help_text"),
-        "label": _("event", "field"),
+        "disabled": True,
+        "help_text": LocalizedStrings.inst().trans("Has event.", "help_text"),
+        "label": LocalizedStrings.inst().trans("event", "field"),
         "name": "event",
         "type": "BooleanField",
     })
 
     fields.append({
         "default": "",
-        "editable": False,
-        "help_text": _("Dialogue's NPC.", "help_text"),
-        "label": _("NPC", "field"),
+        "disabled": True,
+        "help_text": LocalizedStrings.inst().trans("Dialogue's NPC.", "help_text"),
+        "label": LocalizedStrings.inst().trans("NPC", "field"),
         "name": "npc",
         "type": "CharField",
     })
 
-    columns = [col[0] for col in cursor.description]
+    columns = [col[0] for col in result.cursor.description]
     key_column = columns.index("key")
 
     # get records
     rows = []
-    record = cursor.fetchone()
+    record = result.fetchone()
     while record is not None:
         if len(rows) > 0 and record[key_column] == rows[-1][key_column]:
             rows[-1][-2] += "," + record[-2] + "(" + record[-1] + ")"
@@ -436,7 +480,7 @@ def query_dialogues_table():
                 row[-2] += "(" + row[-1] + ")"
 
             rows.append(row)
-        record = cursor.fetchone()
+        record = result.fetchone()
 
     table = {
         "fields": fields,

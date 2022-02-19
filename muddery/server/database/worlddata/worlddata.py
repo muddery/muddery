@@ -1,12 +1,14 @@
 """
 Load and cache all worlddata.
 """
-
-from django.conf import settings
-from django.apps import apps
-from evennia.utils import logger
-from muddery.server.database.storage.memory_table import MemoryTable, RecordData
-from muddery.server.utils.exception import MudderyError
+import importlib
+import inspect
+import traceback
+from muddery.common.utils.exception import MudderyError
+from muddery.server.settings import SETTINGS
+from muddery.server.database.storage.memory_record import MemoryRecord
+from muddery.server.database.storage.memory_table import MemoryTable
+from muddery.server.database.worlddata_db import WorldDataDB
 
 
 class WorldData(object):
@@ -29,11 +31,14 @@ class WorldData(object):
         """
         cls.clear()
 
-        config = apps.get_app_config(settings.WORLD_DATA_APP)
-        all_models = config.get_models()
-        for model_obj in all_models:
-            name = model_obj.__name__
-            cls.tables[name] = MemoryTable(settings.WORLD_DATA_APP, name)
+        module = importlib.import_module(SETTINGS.WORLD_DATA_MODEL_FILE)
+        models = [cls for cls in vars(module).values() if inspect.isclass(cls)]
+        for model in models:
+            config = SETTINGS.DATABASES[SETTINGS.WORLD_DATA_APP]
+            cls.tables[model.__name__] = MemoryTable(
+                SETTINGS.WORLD_DATA_APP,
+                config["MODELS"],
+                model.__name__)
 
     @classmethod
     def load_table(cls, table_name):
@@ -41,9 +46,11 @@ class WorldData(object):
         Load a table to the local storage.
         """
         try:
-            model_obj = apps.get_model(settings.WORLD_DATA_APP, table_name)
-            name = model_obj.__name__
-            cls.tables[name] = MemoryTable(settings.WORLD_DATA_APP, name)
+            config = SETTINGS.WORLDDATA_DB
+            cls.tables[table_name] = MemoryTable(
+                WorldDataDB.inst().get_session(),
+                config["MODELS"],
+                table_name)
         except Exception as e:
             raise MudderyError("Can not load table %s: %s" % (table_name, e))
 
@@ -95,7 +102,6 @@ class WorldData(object):
         Return:
             (list) records
         """
-        has_data = True
         all_fields = {}
         row_data = []
         for table_name in tables:
@@ -107,18 +113,13 @@ class WorldData(object):
             field_pos = dict(zip(fields, range(len(row_data), len(row_data) + len(fields))))
 
             if not records:
-                # all_fields.update(field_pos)
-                # row_data.extend([None] * len(fields))
-                logger.log_errmsg("Can not load data of %s from table %s." % (key, table_name))
-                has_data = False
+                all_fields.update(field_pos)
+                row_data.extend([None] * len(fields))
             elif len(records) > 1:
-                raise MudderyError("Can not solve more than one records of %s from table %s" % (key, table_name))
+                raise MudderyError("Can not solve more than one records from table: %s" % table_name)
             else:
                 record = records[0]
                 all_fields.update(field_pos)
                 row_data.extend([getattr(record, field_name) for field_name in fields])
 
-        if has_data:
-            return [RecordData(all_fields, row_data)]
-        else:
-            return []
+        return [MemoryRecord(all_fields, row_data)]

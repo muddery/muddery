@@ -3,39 +3,38 @@
 Store object's element key data in memory.
 """
 
-from django.apps import apps
-from django.conf import settings
-from django.core.exceptions import ObjectDoesNotExist
-from evennia.utils import logger
-from muddery.server.utils import utils
+from muddery.server.database.gamedata.base_data import BaseData
+from muddery.common.utils.singleton import Singleton
 
 
-class SystemData(object):
+class SystemData(BaseData, Singleton):
     """
     The storage of system data.
     """
-    # data storage
-    storage_class = utils.class_from_path(settings.DATABASE_ACCESS_OBJECT)
-    storage = storage_class("system_data", "", "")
+    __table_name = "system_data"
+    __category_name = None
+    __key_field = None
+    __default_value_field = None
 
-    @classmethod
-    def save(cls, key, value):
+    def __init__(self):
+        # data storage
+        super(SystemData, self).__init__()
+        self.storage = self.create_storage_no_cache(self.__table_name, self.__category_name, self.__key_field, self.__default_value_field)
+
+    async def save(self, key, value):
         """
         Store a value.
         :return:
         """
-        cls.storage.save("", "", {
-            key: value
-        })
+        await self.storage.save("", "", {key: value})
 
-    @classmethod
-    def load(cls, key, *default):
+    async def load(self, key, *default, for_update=False):
         """
         Load a value.
         :return:
         """
         try:
-            data = cls.storage.load("", "")
+            data = await self.storage.load("", "", {}, for_update=for_update)
             return data[key]
         except KeyError as e:
             if len(default) > 0:

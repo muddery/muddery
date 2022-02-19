@@ -78,6 +78,9 @@ EventEditor.prototype.saveActionForms = function() {
                 if (control.attr("type") == "checkbox") {
                     values[name] = control.prop("checked");
                 }
+                else if (control.prop("tagName") == "SELECT") {
+                    values[name] = control.val();
+                }
                 else {
                     // Leave the value blank if it is an empty string.
                     var value = control.val();
@@ -130,6 +133,9 @@ EventEditor.prototype.saveActionActionForms = function() {
             if (control.length > 0) {
                 if (control.attr("type") == "checkbox") {
                     values[name] = control.prop("checked");
+                }
+                else if (control.prop("tagName") == "SELECT") {
+                    values[name] = control.val();
                 }
                 else {
                     // Leave the value blank if it is an empty string.
@@ -225,10 +231,10 @@ EventEditor.prototype.setFields = function() {
 
         // Users can not set the event's key and trigger object.
         if (field.name == "key") {
-            field.type = "Hidden";
+            field.type = "HiddenInput";
         }
         else if (field.name == "trigger_obj") {
-            field.type = "Hidden";
+            field.type = "HiddenInput";
             field.value = this.trigger_obj;
         }
 
@@ -341,7 +347,7 @@ EventEditor.prototype.addActionForm = function(data, container) {
     for (var i = 0; i < data.length; i++) {
         if (data[i].name == "event_key") {
             // Hide the event key field.
-            data[i].type = "Hidden";
+            data[i].type = "HiddenInput";
         }
 
         var field_controller = this.createFieldController(data[i]);
@@ -424,7 +430,7 @@ EventEditor.prototype.addActionActionForm = function(data, container) {
     for (var i = 0; i < data.length; i++) {
         if (data[i].name == "event_key") {
             // Hide the event key field.
-            data[i].type = "Hidden";
+            data[i].type = "HiddenInput";
         }
 
         var field_controller = this.createFieldController(data[i]);

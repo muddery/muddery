@@ -1,14 +1,9 @@
 """
-This is adapt from evennia/evennia/objects/objects.py.
-The licence of Evennia can be found in evennia/LICENSE.txt.
-
 MudderyObject is an object which can load it's data automatically.
-
 """
 
 import ast
-from evennia.utils import logger
-from evennia.utils.utils import lazy_property
+from muddery.server.utils.logger import logger
 from muddery.server.utils.data_field_handler import DataFieldHandler, ConstDataHolder
 from muddery.server.database.worlddata.properties_dict import PropertiesDict
 from muddery.server.mappings.element_set import ELEMENT
@@ -28,8 +23,11 @@ class BaseElement(object):
 
     def __init__(self, *agrs, **wargs):
         super(BaseElement, self).__init__(*agrs, **wargs)
+
         self.element_key = ""
         self.level = None
+
+        self.const_data_handler = DataFieldHandler(self)
 
         # is temporary element.
         self.is_temp = False
@@ -98,10 +96,6 @@ class BaseElement(object):
 
         return cls._all_properties_
 
-    @lazy_property
-    def const_data_handler(self):
-        return DataFieldHandler(self)
-
     # @property system stores object's data.
     def __const_get(self):
         """
@@ -150,7 +144,7 @@ class BaseElement(object):
         """
         return isinstance(self, ELEMENT(element_type))
 
-    def setup_element(self, element_key="", level=None, first_time=False, temp=False):
+    async def setup_element(self, element_key="", level=None, first_time=False, temp=False):
         """
         Set element data's key.
 
@@ -164,13 +158,11 @@ class BaseElement(object):
         self.level = level
         self.is_temp = temp
 
-        self.load_data(element_key, level)
+        await self.load_data(element_key, level)
+        await self.at_element_setup(first_time)
+        await self.after_element_setup(first_time)
 
-        self.at_element_setup(first_time)
-
-        self.after_element_setup(first_time)
-
-    def load_data(self, element_key, level=None):
+    async def load_data(self, element_key, level=None):
         """
         Load the object's data.
 
@@ -188,14 +180,14 @@ class BaseElement(object):
 
             # check element type
             if self.const_data_handler.has("element_type") and self.const.element_type != self.element_type:
-                logger.log_errmsg("Wrong element type %s: %s" % (element_key, self.element_type))
+                logger.log_err("Wrong element type %s: %s" % (element_key, self.element_type))
 
             # Load extend data.
             self.load_extend_data(base_model, element_key)
         except Exception as e:
-            logger.log_errmsg("%s %s can not load data:%s" % (self.model_name, element_key, e))
+            logger.log_err("%s %s can not load data:%s" % (self.model_name, element_key, e))
 
-        self.load_custom_level_data(self.element_type, element_key, level)
+        await self.load_custom_level_data(self.element_type, element_key, level)
 
     def load_base_data(self, model, key):
         """
@@ -214,7 +206,7 @@ class BaseElement(object):
             record = WorldData.get_table_data(model, key=key)
             record = record[0]
         except Exception as e:
-            logger.log_errmsg("Can not find key %s in %s" % (key, model))
+            logger.log_err("Can not find key %s in %s" % (key, model))
             return
 
         # Set data.
@@ -243,40 +235,40 @@ class BaseElement(object):
                 record = WorldData.get_table_data(data_model, key=key)
                 record = record[0]
             except Exception as e:
-                logger.log_errmsg("Can not find key %s in %s" % (key, data_model))
+                logger.log_err("Can not find key %s in %s" % (key, data_model))
                 continue
 
             # Set data.
             for field_name in fields:
                 self.const_data_handler.add(field_name, getattr(record, field_name))
 
-    def set_level(self, level):
+    async def set_level(self, level):
         """
         Set element's level.
         :param level:
         :return:
         """
         self.level = level
-        self.load_custom_level_data(self.element_type, self.element_key, level)
+        await self.load_custom_level_data(self.element_type, self.get_element_key(), level)
 
-    def get_level(self):
+    async def get_level(self):
         """
         Get the elemet's level.
         :return:
         """
         return self.level
 
-    def level_up(self):
+    async def level_up(self):
         """
         Upgrade level.
 
         Returns:
             None
         """
-        level = self.get_level()
-        self.set_level(level + 1)
+        level = await self.get_level()
+        await self.set_level(level + 1)
 
-    def load_custom_level_data(self, element_type, element_key, level):
+    async def load_custom_level_data(self, element_type, element_key, level):
         """
         Load custom's level data.
 
@@ -319,7 +311,7 @@ class BaseElement(object):
 
             self.const_data_handler.add(key, value)
 
-    def at_element_setup(self, first_time):
+    async def at_element_setup(self, first_time):
         """
         Called when the element is setting up.
 
@@ -328,7 +320,7 @@ class BaseElement(object):
         """
         pass
 
-    def after_element_setup(self, first_time):
+    async def after_element_setup(self, first_time):
         """
         Called after the element is setting up.
 

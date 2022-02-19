@@ -1,5 +1,8 @@
-from django.db import models
+
 from muddery.server.database import worlddata_models as BaseModels
+
+
+Base = BaseModels.Base
 
 
 # ------------------------------------------------------------
@@ -35,6 +38,16 @@ class honour_settings(BaseModels.honour_settings):
     """
     Honour combat's settings
     """
+    pass
+
+
+# ------------------------------------------------------------
+#
+# world channels
+#
+# ------------------------------------------------------------
+class world_channels(BaseModels.world_channels):
+    "Communication channels."
     pass
 
 
@@ -235,10 +248,6 @@ class player_characters(BaseModels.player_characters):
     pass
 
 
-class staff_characters(BaseModels.staff_characters):
-    pass
-
-
 # ------------------------------------------------------------
 #
 # store common characters
@@ -266,6 +275,16 @@ class character_loot_list(BaseModels.character_loot_list):
 # ------------------------------------------------------------
 class default_objects(BaseModels.default_objects):
     "Store character's default objects information."
+    pass
+
+
+# ------------------------------------------------------------
+#
+# Condition desc
+#
+# ------------------------------------------------------------
+class conditional_desc(BaseModels.conditional_desc):
+    "Matter's conditional descriptions"
     pass
 
 
@@ -499,6 +518,26 @@ class action_message(BaseModels.action_message):
 #
 # ------------------------------------------------------------
 class action_get_objects(BaseModels.action_get_objects):
+    pass
+
+
+# ------------------------------------------------------------
+#
+# action to set the relationship between a player and an element.
+#
+# ------------------------------------------------------------
+class action_set_relation(BaseModels.action_set_relation):
+    "The Action to send a message to the character."
+    pass
+
+
+# ------------------------------------------------------------
+#
+# action to add the relationship between a player and an element.
+#
+# ------------------------------------------------------------
+class action_add_relation(BaseModels.action_add_relation):
+    "The Action to send a message to the character."
     pass
 
 

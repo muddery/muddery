@@ -2,104 +2,41 @@
 """
 MUDDERY SERVER LAUNCHER SCRIPT
 
-This is adapt from evennia/evennia/server/evennia_launcher.py.
-The licence of Evennia can be found in evennia/LICENSE.txt.
-
 This is the start point for running Muddery.
-
-Sets the appropriate environmental variables and launches the server
-and portal through the evennia_runner. Run without arguments to get a
-menu. Run the script with the -h flag to see usage information.
 """
 
+import traceback
 import sys
 import argparse
+import asyncio
 from argparse import ArgumentParser
 from muddery.launcher import configs
-
-
-def check_main_dependencies():
-    """
-    Check Muddery's main dependencies.
-
-    :return:
-    """
-    # add evennia's path
-    sys.path.insert(1, configs.EVENNIA_LIB)
-    from evennia.server import evennia_launcher
-    evennia_launcher.check_main_evennia_dependencies()
 
 
 def main():
     """
     Run the muddery main program.
     """
+    sys_argv = sys.argv
+    if len(sys_argv) <= 1:
+        # no argv, show help
+        print(configs.ABOUT_INFO)
+        sys.exit(0)
 
-    # set up argument parser
-
-    parser = ArgumentParser(description=configs.CMDLINE_HELP, formatter_class=argparse.RawTextHelpFormatter)
-
-    parser.add_argument(
-        '--init',
-        nargs='+',
-        action='store',
-        dest="init",
-        metavar="<gamename> [template name]",
-        help="creates a new gamedir 'name' at current location (from optional template).")
-    parser.add_argument(
-        '--log', '-l',
-        action='store_true',
-        dest='tail_log',
-        default=False,
-        help="tail the portal and server logfiles and print to stdout")
-    parser.add_argument(
-        '-v', '--version', action='store_true',
-        dest='show_version', default=False,
-        help="show version info")
-    parser.add_argument(
-        '--upgrade', nargs='?', const='', dest='upgrade', metavar="[template]",
-        help="Upgrade a game directory 'game_name' to the latest version.")
-    parser.add_argument(
-        '--loaddata', action='store_true', dest='loaddata', default=False,
-        help="Load local data from the worlddata folder.")
-    parser.add_argument(
-        '--sysdata', action='store_true', dest='sysdata', default=False,
-        help="Load system default data.")
-    parser.add_argument(
-        '--migrate', action='store_true', dest='migrate', default=False,
-        help="Migrate databases to new version.")
-    parser.add_argument(
-        '--port', '-p', nargs=1, action='store', dest='port',
-        metavar="<N>",
-        help="Set game's network ports when init the game, recommend to use ports above 10000.")
-    parser.add_argument(
-        "operation", nargs='?', default="noop",
-        help=configs.ARG_OPTIONS)
-    parser.epilog = (
-        "Common Django-admin commands are shell, dbshell, test and migrate.\n"
-        "See the Django documentation for more management commands.")
-
-    args, unknown_args = parser.parse_known_args()
-
-    # handle arguments
-    option = args.operation
-
-    # make sure we have everything
-    check_main_dependencies()
-    from muddery.launcher import manager
-
-    if not args:
-        # show help pane
-        manager.print_help()
-        sys.exit()
-
-    elif args.init:
+    elif sys_argv[1] == "init":
         # initialization of game directory
-        game_name = args.init[0]
+        if len(sys_argv) <= 2:
+            print("You should input the game directory's name.")
+            sys.exit(-1)
 
+        parser = ArgumentParser()
+        parser.add_argument('-p', '--port', nargs=1, action='store', dest='port')
+        args, unknown_args = parser.parse_known_args()
+
+        game_name = sys_argv[2]
         template = None
-        if len(args.init) > 1:
-            template = args.init[1]
+        if len(sys_argv) >= 4:
+            template = sys_argv[3]
 
         port = None
         if args.port:
@@ -109,65 +46,148 @@ def main():
                 print("Port must be a number.")
                 sys.exit(-1)
 
+        from muddery.launcher import manager
         try:
             manager.init_game(game_name, template, port)
         except Exception as e:
-            print(e)
+            traceback.print_exc()
             sys.exit(-1)
-        sys.exit()
+        sys.exit(0)
 
-    elif args.upgrade is not None:
-        template = None
-        if args.upgrade:
-            template = args.upgrade
-
+    elif sys_argv[1] == "setup":
+        # Create databases and load default data.
+        from muddery.launcher import manager
         try:
-            manager.upgrade_game(template)
+            manager.create_server_tables()
+            manager.create_worldeditor_tables()
+            manager.load_game_data()
+            manager.collect_webclient_static()
+            manager.collect_worldeditor_static()
+        except Exception as e:
+            traceback.print_exc()
+            sys.exit(-1)
+        sys.exit(0)
+
+    elif sys_argv[1] == "upgrade":
+        # Upgrade the game dir to the latest version.
+        from muddery.launcher import manager
+        try:
+            manager.upgrade_game()
         except Exception as e:
             print(e)
             sys.exit(-1)
-        sys.exit()
+        sys.exit(0)
 
-    elif args.loaddata:
+    elif sys_argv[1] == "migrate":
+        # Migrate databases to new version.
+        from muddery.launcher import manager
+        try:
+            manager.migrate_database("gamedata")
+            manager.migrate_database("worlddata")
+            manager.migrate_database("worldeditor")
+        except Exception as e:
+            print(e)
+            sys.exit(-1)
+        sys.exit(0)
+
+    elif sys_argv[1] == "loaddata":
+        # Load game data from the worlddata folder.
+        from muddery.launcher import manager
         try:
             manager.load_game_data()
         except Exception as e:
             print(e)
             sys.exit(-1)
-        sys.exit()
+        sys.exit(0)
 
-    elif args.sysdata:
+    elif sys_argv[1] == "sysdata":
+        # Reload system default data.
+        from muddery.launcher import manager
         try:
             manager.load_system_data()
         except Exception as e:
             print(e)
             sys.exit(-1)
-        sys.exit()
+        sys.exit(0)
 
-    elif args.migrate:
+    elif sys_argv[1] == "start":
+        # Start servers.
+        parser = ArgumentParser()
+        parser.add_argument('-s', '--server', action='store_true', dest='server', default=False)
+        parser.add_argument('-c', '--client', action='store_true', dest='client', default=False)
+        parser.add_argument('-e', '--editor', action='store_true', dest='editor', default=False)
+        args, unknown_args = parser.parse_known_args()
+
+        from muddery.launcher import manager
         try:
-            manager.migrate_database()
+            if not args.server and not args.client and not args.editor:
+                asyncio.run(manager.run_servers(server=True, webclient=True, editor=True))
+            else:
+                asyncio.run(manager.run_servers(
+                    server=args.server,
+                    webclient=args.client,
+                    editor=args.editor
+                ))
         except Exception as e:
-            print(e)
+            traceback.print_exc()
             sys.exit(-1)
-        sys.exit()
+        sys.exit(0)
 
-    if args.show_version:
-        # show the version info
-        manager.show_version(option == "help")
-        sys.exit()
+    elif sys_argv[1] == "stop":
+        # Stop servers.
+        parser = ArgumentParser()
+        parser.add_argument('-s', '--server', action='store_true', dest='server', default=False)
+        parser.add_argument('-c', '--client', action='store_true', dest='client', default=False)
+        parser.add_argument('-e', '--editor', action='store_true', dest='editor', default=False)
+        args, unknown_args = parser.parse_known_args()
 
-    if option != "noop":
+        from muddery.launcher import manager
         try:
-            manager.run_evennia(option)
+            if not args.server and not args.client and not args.editor:
+                manager.kill_servers()
+            else:
+                manager.kill_servers(
+                    server=args.server,
+                    webclient=args.client,
+                    editor=args.editor
+                )
         except Exception as e:
-            print(e)
+            traceback.print_exc()
             sys.exit(-1)
-        sys.exit()
+        sys.exit(0)
+
+    elif sys_argv[1] == "state":
+        # Check servers running states.
+        print("Checking server state ...")
+        from muddery.launcher import manager
+        try:
+            asyncio.run(manager.show_server_state(gameserver=True, webclient=True, editor=True, req_timeout=5))
+        except Exception as e:
+            traceback.print_exc()
+            sys.exit(-1)
+        sys.exit(0)
+
     else:
-        # no input; print muddery info
-        manager.print_about()
-        sys.exit()
+        # Other operations
+        parser = ArgumentParser(add_help=False)
+        parser.add_argument('-v', '--version', action='store_true', dest='show_version', default=False)
+        parser.add_argument('-h', '--help', action='store_true', dest='show_help', default=False)
+        args, unknown_args = parser.parse_known_args()
+
+        from muddery.launcher import manager
+
+        if args.show_version:
+            # show the version info
+            manager.show_version()
+            sys.exit(0)
+        elif args.show_help:
+            # show the help info
+            print(configs.CMDLINE_HELP)
+            sys.exit(0)
+        else:
+            # no input; print muddery info
+            print(configs.ABOUT_INFO)
+            sys.exit(0)
 
 
 if __name__ == '__main__':

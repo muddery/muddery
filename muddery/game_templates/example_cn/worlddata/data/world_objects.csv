@@ -1,7 +1,7 @@
-key,location,condition
-object_alley_box_01,room_colorfulworld_alley,
-object_colorfulworld_hole,room_colorfulworld_alley,
-creator_alley_pile,room_colorfulworld_alley,"obj_less_than(""weapon_wood_stick"", 1)"
-creator_street_body,room_colorfulworld_street,"is_quest_in_progress(""quest_find_guardhouse_key"")"
-creator_storeroom_box,room_colorfulworld_storeroom,
-creator_photo_studio_box,room_colorfulworld_printing_room,
+key,location
+object_alley_box_01,room_colorfulworld_alley
+object_colorfulworld_hole,room_colorfulworld_alley
+creator_alley_pile,room_colorfulworld_alley
+creator_street_body,room_colorfulworld_street
+creator_storeroom_box,room_colorfulworld_storeroom
+creator_photo_studio_box,room_colorfulworld_printing_room

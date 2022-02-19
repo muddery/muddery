@@ -1,74 +1,62 @@
 
 """
-Store object's element key data in memory.
+The storage of all character's quests that are doing.
 """
 
-from django.conf import settings
-from evennia.utils import logger
-from muddery.server.utils import utils
+from muddery.server.database.gamedata.base_data import BaseData
+from muddery.common.utils.singleton import Singleton
 
 
-class CharacterQuests(object):
+class CharacterQuests(BaseData, Singleton):
     """
-    The storage of all character's quest's objectives.
+    The storage of all character's quests that are doing.
     """
-    # data storage
-    storage_class = utils.class_from_path(settings.DATABASE_ACCESS_OBJECT)
-    storage = storage_class("character_quests", "character_id", "quest")
+    __table_name = "character_quests"
+    __category_name = "character_id"
+    __key_field = "quest"
+    __default_value_field = None
 
-    @classmethod
-    def get_character(cls, character_id):
+    def __init__(self):
+        # data storage
+        super(CharacterQuests, self).__init__()
+        self.storage = self.create_storage(self.__table_name, self.__category_name, self.__key_field, self.__default_value_field)
+
+    async def get_character(self, character_id):
         """
         Get a character's quest info.
         :param character_id:
         :return:
         """
-        return cls.storage.load_category(character_id, {})
+        return await self.storage.load_category(character_id, {})
 
-    @classmethod
-    def get_quest(cls, character_id, quest):
+    async def has(self, character_id, quest):
         """
-        Get a character's quest info.
+        Check if the character has this quest.
         :param character_id: (int) character's id
         :param quest: (string) quest's key
         :return:
         """
-        return cls.storage.load(character_id, quest)
+        return await self.storage.has(character_id, quest)
 
-    @classmethod
-    def add(cls, character_id, quest):
+    async def add(self, character_id, quest):
         """
         Add a new quest.
         :param character_id:
         :param quest:
         :return:
         """
-        cls.storage.add(character_id, quest, {"finished": False})
+        await self.storage.add(character_id, quest)
 
-    @classmethod
-    def set(cls, character_id, quest, values):
-        """
-        Set a quest's data.
-
-        :param character_id:
-        :param quest:
-        :param values:
-        :return:
-        """
-        cls.storage.save(character_id, quest, values)
-
-    @classmethod
-    def remove_character(cls, character_id):
+    async def remove_character(self, character_id):
         """
         Remove a character's all quests.
 
         :param character_id:
         :return:
         """
-        cls.storage.delete_category(character_id)
+        await self.storage.delete_category(character_id)
 
-    @classmethod
-    def remove_quest(cls, character_id, quest):
+    async def remove(self, character_id, quest):
         """
         Remove a quest
 
@@ -76,4 +64,4 @@ class CharacterQuests(object):
         :param quest: (string) quest's key
         :return:
         """
-        cls.storage.delete(character_id, quest)
+        await self.storage.delete(character_id, quest)

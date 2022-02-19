@@ -19,7 +19,7 @@ class FuncHit(StatementFunction):
     key = "hit"
     const = False
 
-    def func(self):
+    async def func(self):
         """
         Implement the function.
         """
@@ -40,7 +40,7 @@ class FuncHit(StatementFunction):
         damage = round(damage * effect)
 
         # hit the target
-        changed = self.obj.change_state("hp", -damage)
+        changed = await self.obj.change_state("hp", -damage)
 
         # send skill result
         return _("Hit %s by %d points.") % (target_name, -changed)
@@ -60,7 +60,7 @@ class FuncHeal(StatementFunction):
     key = "heal"
     const = False
 
-    def func(self):
+    async def func(self):
         """
         Implement the function.
         """
@@ -77,7 +77,7 @@ class FuncHeal(StatementFunction):
         heal = int(effect)
 
         # heal the target
-        changed = self.obj.change_state("hp", heal)
+        changed = await self.obj.change_state("hp", heal)
 
         # send skill result
         return _("Healed %s by %d points.") % (self.obj.get_name(), changed)
@@ -96,7 +96,7 @@ class FuncIncreaseMaxHP(StatementFunction):
     key = "max_hp"
     const = False
 
-    def func(self):
+    async def func(self):
         """
         Implement the function.
         """
@@ -114,10 +114,10 @@ class FuncIncreaseMaxHP(StatementFunction):
         changed = 0
 
         if increase > 0:
-            changed = self.obj.change_const_property("max_hp", increase)
+            changed = await self.obj.change_const_property("max_hp", increase)
 
             # increase hp
-            self.obj.change_state("hp", changed)
+            await self.obj.change_state("hp", changed)
 
         # send skill result
         return _("Raised %s's max HP by %d points.") % (self.obj.get_name(), changed)

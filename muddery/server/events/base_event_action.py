@@ -2,9 +2,9 @@
 Event action's base class.
 """
 
-from django.apps import apps
-from django.conf import settings
+from muddery.server.settings import SETTINGS
 from muddery.server.database.worlddata.worlddata import WorldData
+from muddery.server.database.worlddata_db import WorldDataDB
 
 
 class BaseEventAction(object):
@@ -34,10 +34,10 @@ class BaseEventAction(object):
         if cls.__model__:
             return cls.__model__
 
-        cls.__model__ = apps.get_model(settings.WORLD_DATA_APP, cls.model_name)
+        cls.__model__ = WorldDataDB.inst().get_model(cls.model_name)
         return cls.__model__
 
-    def func(self, event_key, character, obj):
+    async def func(self, event_key, character, obj):
         """
         Event action's function.
 

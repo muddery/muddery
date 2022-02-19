@@ -1,26 +1,18 @@
-# Evennia dependencies
-
 # general
-django >= 2.2.5, < 2.3
-twisted >= 19.2.1, < 20.0.0
-pytz
-django-sekizai
-inflect
-autobahn >= 20.2.1
-model_mommy
+sanic >= 21.12.0
+sqlalchemy[asyncio] >= 1.4.0
+alembic >= 1.7.5
+wtforms >= 3.0.0
+wtforms-alchemy >= 0.18.0
+apscheduler >= 3.7.0
+pymysql >= 1.0.2
+pyjwt >= 2.3.0
+pycryptodome >= 3.14.1
 
-# testing and development
-mock >= 1.0.1
-anything
-black
+# world editor
+pillow >= 8.4.0
+xlrd >= 1.0.0
+xlwt >= 1.2.0
 
 # windows-specific
 pypiwin32;platform_system=="Windows"
-
-# Muddery dependencies
-apscheduler >= 3.7.0
-
-# world editor
-pillow
-xlrd >= 1.0.0
-xlwt >= 1.2.0

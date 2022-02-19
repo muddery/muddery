@@ -6,20 +6,19 @@ in the character. It controls quest's objectives.
 
 """
 
-from evennia.utils import logger
-from evennia.utils.utils import lazy_property
-from muddery.server.utils import defines
-from muddery.server.database.gamedata.quest_objectives import QUEST_OBJECTIVES_DATA
+from muddery.server.utils.logger import logger
+from muddery.common.utils import defines
+from muddery.server.database.gamedata.character_quest_objectives import CharacterQuestObjectives
 from muddery.server.statements.statement_handler import STATEMENT_HANDLER
-from muddery.server.utils.dialogue_handler import DIALOGUE_HANDLER
 from muddery.server.utils.loot_handler import LootHandler
 from muddery.server.utils.localized_strings_handler import _
-from muddery.server.utils.game_settings import GAME_SETTINGS
+from muddery.server.utils.game_settings import GameSettings
 from muddery.server.database.worlddata.worlddata import WorldData
 from muddery.server.database.worlddata.loot_list import QuestRewardList
 from muddery.server.database.worlddata.quest_objectives import QuestObjectives
 from muddery.server.mappings.element_set import ELEMENT
 from muddery.server.elements.base_element import BaseElement
+from muddery.common.utils.utils import async_gather, async_wait
 
 
 class MudderyQuest(BaseElement):
@@ -27,13 +26,25 @@ class MudderyQuest(BaseElement):
     This class controls quest's objectives. Hooks are called when a character doing some things.
     """
     element_type = "QUEST"
-    element_name = _("Quest", "elements")
+    element_name = "Quest"
     model_name = "quests"
 
-    # initialize loot handler in a lazy fashion
-    @lazy_property
-    def loot_handler(self):
-        return LootHandler(QuestRewardList.get(self.element_key))
+    def __init__(self):
+        """
+        Init the element.
+        """
+        super(MudderyQuest, self).__init__()
+
+        self.loot_handler = None
+
+    async def at_element_setup(self, first_time):
+        """
+        Set data_info to the object.
+        """
+        await super(MudderyQuest, self).at_element_setup(first_time)
+
+        # initialize loot handler
+        self.loot_handler = LootHandler(QuestRewardList.get(self.get_element_key()))
 
     def set_character(self, character_id):
         """
@@ -42,11 +53,8 @@ class MudderyQuest(BaseElement):
         self.character_id = character_id
         self.objectives = {}
 
-        if not self.element_key:
-            return
-
         # Get objectives.
-        records = QuestObjectives.get(self.element_key)
+        records = QuestObjectives.get(self.get_element_key())
 
         for record in records:
             self.objectives[(record.type, record.object)] = {
@@ -63,37 +71,51 @@ class MudderyQuest(BaseElement):
         """
         return self.const.name
 
-    def return_info(self):
+    async def return_info(self):
         """
         Get return messages for the client.
         """
         # Get name, description and available commands.
+        cmds, objectives = await async_gather([
+            self.get_available_commands(),
+            self.return_objectives(),
+        ])
         info = {
             "key": self.const.key,
             "name": self.const.name,
             "desc": self.const.desc,
-            "cmds": self.get_available_commands(),
+            "cmds": cmds,
             "icon": getattr(self, "icon", None),
-            "objectives": self.return_objectives(),
+            "objectives": objectives,
         }
         return info
 
-    def get_available_commands(self):
+    async def get_available_commands(self):
         """
         This returns a list of available commands.
         """
         commands = []
-        if GAME_SETTINGS.get("can_give_up_quests"):
+        if GameSettings.inst().get("can_give_up_quests"):
             commands.append({"name": _("Give Up"), "cmd": "giveup_quest", "args": self.const.key})
         return commands
 
-    def return_objectives(self):
+    def get_objective_types(self):
+        """
+        Get objective's type and objective's key.
+        :return:
+        """
+        return self.objectives.keys()
+
+    async def return_objectives(self):
         """
         Get the information of all objectives.
         Set desc to an objective can hide the details of the objective.
         """
         output = []
-        all_accomplished = QUEST_OBJECTIVES_DATA.get_character_quest(self.character_id, self.element_key)
+        all_objectives = await CharacterQuestObjectives.inst().get_character_quest(
+            self.character_id,
+            self.get_element_key()
+        )
 
         for item in self.objectives.values():
             desc = item["desc"]
@@ -106,7 +128,8 @@ class MudderyQuest(BaseElement):
                 # Or make a desc by other data.
                 obj_num = item["number"]
                 character_quest = "%s:%s" % (item["type"], item["object"])
-                accomplished = all_accomplished.get(character_quest, 0)
+                accomplished = all_objectives.get(character_quest)
+                accomplished = accomplished if accomplished else 0
                 
                 if item["type"] == defines.OBJECTIVE_TALK:
                     # talk to a character
@@ -205,21 +228,25 @@ class MudderyQuest(BaseElement):
 
         return output
 
-    def is_accomplished(self):
+    async def is_accomplished(self):
         """
         All objectives of this quest are accomplished.
         """
-        all_accomplished = QUEST_OBJECTIVES_DATA.get_character_quest(self.character_id, self.element_key)
+        all_objectives = await CharacterQuestObjectives.inst().get_character_quest(
+            self.character_id,
+            self.get_element_key()
+        )
 
         for item in self.objectives.values():
             character_quest = "%s:%s" % (item["type"], item["object"])
-            accomplished = all_accomplished.get(character_quest, 0)
+            accomplished = all_objectives.get(character_quest)
+            accomplished = accomplished if accomplished else 0
             if accomplished < item["number"]:
                 return False
 
         return True
 
-    def turn_in(self, caller):
+    async def turn_in(self, caller):
         """
         Turn in a quest, do its action.
         """
@@ -227,36 +254,44 @@ class MudderyQuest(BaseElement):
             return
 
         # get rewards
-        obj_list = self.loot_handler.get_obj_list(caller)
-        if obj_list:
+        receive_list = await self.loot_handler.get_obj_list(caller)
+
+        awaits = []
+        if receive_list:
             # give objects to winner
-            caller.receive_objects(obj_list)
+            awaits.append(caller.receive_objects(receive_list))
 
         # get exp
         exp = self.const.exp
         if exp:
-            caller.add_exp(exp)
+            awaits.append(caller.add_exp(exp))
 
         # do quest's action
         action = self.const.action
         if action:
-            STATEMENT_HANDLER.do_action(action, caller, None)
+            awaits.append(STATEMENT_HANDLER.do_action(action, caller, None))
 
         # remove objective objects
-        obj_list = []
+        remove_list = []
         for item in self.objectives.values():
             if item["type"] == defines.OBJECTIVE_OBJECT:
-                obj_list.append({
+                remove_list.append({
                     "object_key": item["object"],
                     "number": item["number"]
                 })
-        if obj_list:
-            caller.remove_objects_by_list(obj_list)
+        if remove_list:
+            await caller.remove_objects_by_list(remove_list)
+
+        if awaits:
+            await async_wait(awaits)
 
         # remove quest objectives records
-        QUEST_OBJECTIVES_DATA.remove(self.character_id, self.const.key)
+        await CharacterQuestObjectives.inst().remove(
+            self.character_id,
+            self.const.key
+        )
 
-    def at_objective(self, objective_type, object_key, number=1):
+    async def at_objective(self, objective_type, object_key, number=1):
         """
         Called when the owner may complete some objectives.
         
@@ -273,8 +308,13 @@ class MudderyQuest(BaseElement):
 
         item = self.objectives[(objective_type, object_key)]
 
-        accomplished = QUEST_OBJECTIVES_DATA.get_progress(self.character_id, self.element_key, item["type"],
-                                                          item["object"], 0)
+        accomplished = await CharacterQuestObjectives.inst().get_progress(
+            self.character_id,
+            self.get_element_key(),
+            item["type"],
+            item["object"],
+            0
+        )
 
         if accomplished == item["number"]:
             # already accomplished
@@ -284,7 +324,13 @@ class MudderyQuest(BaseElement):
         if accomplished > item["number"]:
             accomplished = item["number"]
 
-        QUEST_OBJECTIVES_DATA.save_progress(self.character_id, self.element_key, objective_type, object_key, accomplished)
+        await CharacterQuestObjectives.inst().save_progress(
+            self.character_id,
+            self.get_element_key(),
+            objective_type,
+            object_key,
+            accomplished
+        )
 
         return True
 

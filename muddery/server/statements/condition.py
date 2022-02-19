@@ -19,7 +19,7 @@ class FuncIsQuestAccepted(StatementFunction):
     key = "is_quest_accepted"
     const = True
 
-    def func(self):
+    async def func(self):
         """
         Implement the function.
         """
@@ -27,7 +27,11 @@ class FuncIsQuestAccepted(StatementFunction):
             return False
 
         quest_key = self.args[0]
-        return self.caller.quest_handler.is_finished(quest_key) or self.caller.quest_handler.is_in_progress(quest_key)
+        results = [
+            self.caller.quest_handler.is_finished(quest_key),
+            self.caller.quest_handler.is_in_progress(quest_key),
+        ]
+        return results[0] or results[1]
 
 
 class FuncIsQuestAccomplished(StatementFunction):
@@ -44,7 +48,7 @@ class FuncIsQuestAccomplished(StatementFunction):
     key = "is_quest_accomplished"
     const = True
 
-    def func(self):
+    async def func(self):
         """
         Implement the function.
         """
@@ -52,7 +56,7 @@ class FuncIsQuestAccomplished(StatementFunction):
             return False
 
         quest_key = self.args[0]
-        return self.caller.quest_handler.is_accomplished(quest_key)
+        return await self.caller.quest_handler.is_accomplished(quest_key)
 
 
 class FuncIsQuestInProgress(StatementFunction):
@@ -69,7 +73,7 @@ class FuncIsQuestInProgress(StatementFunction):
     key = "is_quest_in_progress"
     const = True
 
-    def func(self):
+    async def func(self):
         """
         Implement the function.
         """
@@ -94,7 +98,7 @@ class FuncCanProvideQuest(StatementFunction):
     key = "can_provide_quest"
     const = True
 
-    def func(self):
+    async def func(self):
         """
         Implement the function.
         """
@@ -102,7 +106,7 @@ class FuncCanProvideQuest(StatementFunction):
             return False
 
         quest_key = self.args[0]
-        return self.caller.quest_handler.can_provide(quest_key)
+        return await self.caller.quest_handler.can_provide(quest_key)
 
 
 class FuncIsQuestFinished(StatementFunction):
@@ -119,7 +123,7 @@ class FuncIsQuestFinished(StatementFunction):
     key = "is_quest_finished"
     const = True
 
-    def func(self):
+    async def func(self):
         """
         Implement the function.
         """
@@ -144,7 +148,7 @@ class FuncHasObject(StatementFunction):
     key = "has_object"
     const = True
 
-    def func(self):
+    async def func(self):
         """
         Implement the function.
         """
@@ -170,7 +174,7 @@ class FuncObjectsEqualTo(StatementFunction):
     key = "obj_equal_to"
     const = True
 
-    def func(self):
+    async def func(self):
         """
         Implement the function.
         """
@@ -199,7 +203,7 @@ class FuncObjectsMoreThan(StatementFunction):
     key = "obj_more_than"
     const = True
 
-    def func(self):
+    async def func(self):
         """
         Implement the function.
         """
@@ -228,7 +232,7 @@ class FuncObjectsLessThan(StatementFunction):
     key = "obj_less_than"
     const = True
 
-    def func(self):
+    async def func(self):
         """
         Implement the function.
         """
@@ -256,7 +260,7 @@ class FuncHasSkill(StatementFunction):
     key = "has_skill"
     const = True
 
-    def func(self):
+    async def func(self):
         """
         Implement the function.
         """
@@ -283,7 +287,7 @@ class FuncSkillEqualTo(StatementFunction):
     key = "skill_equal_to"
     const = True
 
-    def func(self):
+    async def func(self):
         """
         Implement the function.
         """
@@ -297,7 +301,7 @@ class FuncSkillEqualTo(StatementFunction):
         if not skill:
             return False
 
-        return skill.level == level
+        return await skill.get_level() == level
 
 
 class FuncSkillMoreThan(StatementFunction):
@@ -315,7 +319,7 @@ class FuncSkillMoreThan(StatementFunction):
     key = "skill_more_than"
     const = True
 
-    def func(self):
+    async def func(self):
         """
         Implement the function.
         """
@@ -329,7 +333,7 @@ class FuncSkillMoreThan(StatementFunction):
         if not skill:
             return False
 
-        return skill.level > level
+        return await skill.get_level() > level
 
 
 class FuncSkillLessThan(StatementFunction):
@@ -347,7 +351,7 @@ class FuncSkillLessThan(StatementFunction):
     key = "skill_less_than"
     const = True
 
-    def func(self):
+    async def func(self):
         """
         Implement the function.
         """
@@ -361,7 +365,7 @@ class FuncSkillLessThan(StatementFunction):
         if not skill:
             return False
 
-        return skill.level < level
+        return await skill.get_level() < level
 
 
 class FuncAttributeEqualTo(StatementFunction):
@@ -379,7 +383,7 @@ class FuncAttributeEqualTo(StatementFunction):
     key = "attr_equal_to"
     const = True
 
-    def func(self):
+    async def func(self):
         """
         Implement the function.
         """
@@ -389,8 +393,8 @@ class FuncAttributeEqualTo(StatementFunction):
         attr_key = self.args[0]
         number = self.args[1]
 
-        if self.caller.states.has(attr_key):
-            value = self.caller.states.get(attr_key)
+        if await self.caller.states.has(attr_key):
+            value = await self.caller.states.get(attr_key)
         elif self.caller.const_data_handler.has(attr_key):
             value = self.caller.const_data_handler.get(attr_key)
         else:
@@ -414,7 +418,7 @@ class FuncAttributeMoreThan(StatementFunction):
     key = "attr_more_than"
     const = True
 
-    def func(self):
+    async def func(self):
         """
         Implement the function.
         """
@@ -424,8 +428,8 @@ class FuncAttributeMoreThan(StatementFunction):
         attr_key = self.args[0]
         number = self.args[1]
 
-        if self.caller.states.has(attr_key):
-            value = self.caller.states.get(attr_key)
+        if await self.caller.states.has(attr_key):
+            value = await self.caller.states.get(attr_key)
         elif self.caller.const_data_handler.has(attr_key):
             value = self.caller.const_data_handler.get(attr_key)
         else:
@@ -449,7 +453,7 @@ class FuncAttributeLessThan(StatementFunction):
     key = "attr_less_than"
     const = True
 
-    def func(self):
+    async def func(self):
         """
         Implement the function.
         """
@@ -459,11 +463,110 @@ class FuncAttributeLessThan(StatementFunction):
         attr_key = self.args[0]
         number = self.args[1]
 
-        if self.caller.states.has(attr_key):
-            value = self.caller.states.get(attr_key)
+        if await self.caller.states.has(attr_key):
+            value = await self.caller.states.get(attr_key)
         elif self.caller.const_data_handler.has(attr_key):
             value = self.caller.const_data_handler.get(attr_key)
         else:
             return
 
         return value < number
+
+
+class FuncRelationshipEqualTo(StatementFunction):
+    """
+    Check if the caller and the element's relationship equals to the number.
+
+    Args:
+        args[0]: (string) element's type
+        args[1]: (string) element's key
+        args[2]: (number) number
+
+    Returns:
+        boolean result
+    """
+
+    key = "relation_equal_to"
+    const = True
+
+    async def func(self):
+        """
+        Implement the function.
+        """
+        if not self.args:
+            return False
+
+        element_type = self.args[0]
+        element_key = self.args[1]
+        number = self.args[2]
+
+        relationship = await self.caller.get_relationship(element_type, element_key)
+        if relationship is None:
+            return False
+        return relationship == number
+
+
+class FuncRelationshipMoreThan(StatementFunction):
+    """
+    Check if the caller and the element's relationship is more than the number.
+
+    Args:
+        args[0]: (string) element's type
+        args[1]: (string) element's key
+        args[2]: (number) number
+
+    Returns:
+        boolean result
+    """
+
+    key = "relation_more_than"
+    const = True
+
+    async def func(self):
+        """
+        Implement the function.
+        """
+        if not self.args:
+            return False
+
+        element_type = self.args[0]
+        element_key = self.args[1]
+        number = self.args[2]
+
+        relationship = await self.caller.get_relationship(element_type, element_key)
+        if relationship is None:
+            return False
+        return relationship > number
+
+
+class FuncRelationshipLessThan(StatementFunction):
+    """
+    Check if the caller and the element's relationship is less than the number.
+
+    Args:
+        args[0]: (string) element's type
+        args[1]: (string) element's key
+        args[2]: (number) number
+
+    Returns:
+        boolean result
+    """
+
+    key = "relation_less_than"
+    const = True
+
+    async def func(self):
+        """
+        Implement the function.
+        """
+        if not self.args:
+            return False
+
+        element_type = self.args[0]
+        element_key = self.args[1]
+        number = self.args[2]
+
+        relationship = await self.caller.get_relationship(element_type, element_key)
+        if relationship is None:
+            return False
+        return relationship < number

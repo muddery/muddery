@@ -6,20 +6,18 @@ actions of a skill.
 
 """
 
-import time, re, traceback
+import re, traceback
 from muddery.server.utils.localized_strings_handler import _
-from muddery.server.utils.game_settings import GAME_SETTINGS
 from muddery.server.statements.statement_handler import STATEMENT_HANDLER
 from muddery.server.mappings.element_set import ELEMENT
-from muddery.server.elements.base_element import BaseElement
 
 
-class MudderySkill(BaseElement):
+class MudderySkill(ELEMENT("MATTER")):
     """
     A skill of the character.
     """
     element_type = "SKILL"
-    element_name = _("Skill", "elements")
+    element_name = "Skill"
     model_name = "skills"
 
     msg_escape = re.compile(r'%[%|n|c|t]')
@@ -36,14 +34,14 @@ class MudderySkill(BaseElement):
         else:
             return "%(" + char + ")s"
 
-    def at_element_setup(self, first_time):
+    async def at_element_setup(self, first_time):
         """
         Set data_info to the object.
 
         Returns:
             None
         """
-        super(MudderySkill, self).at_element_setup(first_time)
+        await super(MudderySkill, self).at_element_setup(first_time)
 
         # set data
         self.function = self.const.function
@@ -55,7 +53,7 @@ class MudderySkill(BaseElement):
         message_model = self.const.message
         self.message_model = self.msg_escape.sub(self.escape_fun, message_model)
 
-    def get_available_commands(self, caller):
+    async def get_available_commands(self, caller):
         """
         This returns a list of available commands.
 
@@ -71,7 +69,7 @@ class MudderySkill(BaseElement):
         commands = [{"name": _("Cast"), "cmd": "cast_skill", "args": self.get_element_key()}]
         return commands
 
-    def cast(self, caller, target):
+    async def cast(self, caller, target):
         """
         Cast this skill.
 
@@ -81,10 +79,9 @@ class MudderySkill(BaseElement):
         Returns:
             skill_cast: (dict) skill's result
         """
-        case_message = self.cast_message(caller, target)
+        case_message = await self.cast_message(caller, target)
 
-        # traceback.print_stack()
-        results = self.do_skill(caller, target)
+        results = await self.do_skill(caller, target)
 
         # set message
         skill_cast = {
@@ -97,26 +94,26 @@ class MudderySkill(BaseElement):
         if caller:
             skill_cast["caller"] = caller.get_id()
             skill_cast["status"] = {
-                caller.get_id(): caller.get_combat_status(),
+                caller.get_id(): await caller.get_combat_status(),
             }
 
         if target:
             skill_cast["target"] = target.get_id()
-            skill_cast["status"][target.get_id()] = target.get_combat_status()
+            skill_cast["status"][target.get_id()] = await target.get_combat_status()
 
         if results:
             skill_cast["result"] = " ".join(results)
 
         return skill_cast
         
-    def do_skill(self, caller, target):
+    async def do_skill(self, caller, target):
         """
         Do this skill.
         """
         # call skill function
-        return STATEMENT_HANDLER.do_skill(self.function, caller, target)
+        return await STATEMENT_HANDLER.do_skill(self.function, caller, target)
 
-    def is_available(self, caller, passive):
+    async def is_available(self, caller, passive):
         """
         If this skill is available.
 
@@ -131,7 +128,7 @@ class MudderySkill(BaseElement):
 
         return True
 
-    def cast_message(self, caller, target):
+    async def cast_message(self, caller, target):
         """
         Create skill's result message.
         """
@@ -160,20 +157,6 @@ class MudderySkill(BaseElement):
         """
         return self.passive
 
-    def get_name(self):
-        """
-        Get skill's name.
-        :return:
-        """
-        return self.const.name
-
-    def get_desc(self):
-        """
-        Get skill's name.
-        :return:
-        """
-        return self.const.desc
-
     def get_cd(self):
         """
         Get this skill's CD
@@ -184,26 +167,12 @@ class MudderySkill(BaseElement):
 
         return self.cd
 
-    def get_icon(self):
+    def get_appearance(self):
         """
-        Get this skill's icon.
-        :return:
+        The common appearance for all players.
         """
-        return self.const.icon
-
-    def get_appearance(self, caller):
-        """
-        This is a convenient hook for a 'look'
-        command to call.
-        """
-        info = {
-            "key": self.const.key,
-            "name": self.get_name(),
-            "desc": self.get_desc(),
-            "cmds": self.get_available_commands(caller),
-            "icon": self.get_icon(),
-            "passive": self.is_passive(),
-            "cd": self.get_cd(),
-        }
+        info = super(MudderySkill, self).get_appearance()
+        info["passive"] = self.passive
+        info["cd"] = self.get_cd()
 
         return info

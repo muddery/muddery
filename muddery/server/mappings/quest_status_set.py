@@ -2,9 +2,9 @@
 All available event actions.
 """
 
-from django.conf import settings
-from evennia.utils import logger
-from muddery.server.utils.utils import classes_in_path
+from muddery.server.settings import SETTINGS
+from muddery.server.utils.logger import logger
+from muddery.common.utils.utils import classes_in_path
 from muddery.server.quests.base_quest_status import BaseQuestStatus
 
 
@@ -21,11 +21,11 @@ class QuestStatusSet(object):
         Add all quest status from the path.
         """
         # load classes
-        for cls in classes_in_path(settings.PATH_QUEST_STATUS_BASE, BaseQuestStatus):
+        for cls in classes_in_path(SETTINGS.PATH_QUEST_STATUS_BASE, BaseQuestStatus):
             key = cls.key
 
             if key in self.dict:
-                logger.log_infomsg("Quest status %s is replaced by %s." % (key, cls))
+                logger.log_debug("Quest status %s is replaced by %s." % (key, cls))
 
             self.dict[key] = cls()
 

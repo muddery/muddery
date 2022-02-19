@@ -8,15 +8,15 @@ creation commands.
 
 """
 
-import traceback
-from evennia.utils import logger
-from muddery.server.utils.dialogue_handler import DIALOGUE_HANDLER
+from muddery.server.utils.logger import logger
+from muddery.server.utils.dialogue_handler import DialogueHandler
 from muddery.server.mappings.element_set import ELEMENT
 from muddery.server.database.worlddata.npc_dialogues import NPCDialogues
 from muddery.server.database.worlddata.npc_shops import NPCShops
 from muddery.server.database.worlddata.worlddata import WorldData
-from muddery.server.utils import defines
+from muddery.common.utils import defines
 from muddery.server.utils.localized_strings_handler import _
+from muddery.common.utils.utils import async_gather
 
 
 class MudderyBaseNPC(ELEMENT("CHARACTER")):
@@ -27,14 +27,19 @@ class MudderyBaseNPC(ELEMENT("CHARACTER")):
         shops
     """
     element_type = "BASE_NPC"
-    element_name = _("Base None Player Character", "elements")
+    element_name = "Base None Player Character"
     model_name = ""
 
-    def at_element_setup(self, first_time):
+    def __init__(self, *agrs, **wargs):
+        super(MudderyBaseNPC, self).__init__(*agrs, **wargs)
+
+        self.shops = {}
+
+    async def at_element_setup(self, first_time):
         """
         Init the character.
         """
-        super(MudderyBaseNPC, self).at_element_setup(first_time)
+        await super(MudderyBaseNPC, self).at_element_setup(first_time)
 
         # Character can auto fight.
         self.auto_fight = True
@@ -43,7 +48,7 @@ class MudderyBaseNPC(ELEMENT("CHARACTER")):
         self.load_dialogues()
 
         # load shops
-        self.load_shops()
+        await self.load_shops()
 
     def load_dialogues(self):
         """
@@ -54,7 +59,7 @@ class MudderyBaseNPC(ELEMENT("CHARACTER")):
         self.default_dialogues = [dialogue.dialogue for dialogue in dialogues if dialogue.dialogue and dialogue.default]
         self.dialogues = [dialogue.dialogue for dialogue in dialogues if dialogue.dialogue and not dialogue.default]
 
-    def load_shops(self):
+    async def load_shops(self):
         """
         Load character's shop.
         """
@@ -64,35 +69,28 @@ class MudderyBaseNPC(ELEMENT("CHARACTER")):
         base_model = ELEMENT("SHOP").get_base_model()
 
         # NPC's shop
-        self.shops = {}
-        for key in shop_keys:
-            try:
-                table_data = WorldData.get_table_data(base_model, key=key)
-                table_data = table_data[0]
+        if shop_keys:
+            shops = await async_gather([self.create_shop(base_model, key) for key in shop_keys])
+            self.shops = dict(zip(shop_keys, shops))
 
-                shop = ELEMENT(table_data.element_type)()
-                shop.setup_element(key)
-                shop.set_owner(self)
-                self.shops[key] = shop
-            except Exception as e:
-                logger.log_errmsg("Can not create shop %s: (%s)%s" % (key, type(e).__name__, e))
-                continue
-
-    def get_appearance(self, caller):
+    async def create_shop(self, base_model, shop_key):
         """
-        This is a convenient hook for a 'look'
-        command to call.
+        Create a shop.
         """
-        info = super(MudderyBaseNPC, self).get_appearance(caller)
+        try:
+            table_data = WorldData.get_table_data(base_model, key=shop_key)
+            table_data = table_data[0]
 
-        # quest mark
-        provide_quest, complete_quest = self.have_quest(caller)
-        info["provide_quest"] = provide_quest
-        info["complete_quest"] = complete_quest
+            shop = ELEMENT(table_data.element_type)()
+            await shop.setup_element(shop_key)
+            shop.set_owner(self)
+        except Exception as e:
+            logger.log_err("Can not create shop %s: (%s)%s" % (shop_key, type(e).__name__, e))
+            return
 
-        return info
+        return shop
 
-    def get_shop_info(self, shop_key, caller):
+    async def get_shop_info(self, shop_key, caller):
         """
         Show shop's information to the player.
         :param shop_key:
@@ -102,11 +100,11 @@ class MudderyBaseNPC(ELEMENT("CHARACTER")):
         if shop_key not in self.shops:
             return None
 
-        shop_info = self.shops[shop_key].get_info(caller)
+        shop_info = await self.shops[shop_key].get_detail_appearance(caller)
         shop_info["npc"] = self.get_id()
         return shop_info
 
-    def sell_goods(self, shop_key, goods_index, caller):
+    async def sell_goods(self, shop_key, goods_index, caller):
         """
         Sell goods to the caller.
         :param shop_key:
@@ -117,46 +115,54 @@ class MudderyBaseNPC(ELEMENT("CHARACTER")):
         if shop_key not in self.shops:
             return None
 
-        self.shops[shop_key].sell_goods(goods_index, caller)
+        await self.shops[shop_key].sell_goods(goods_index, caller)
 
-    def get_available_commands(self, caller):
+    async def get_available_commands(self, caller):
         """
         This returns a list of available commands.
         """
         commands = []
-        if self.is_alive():
-            if self.dialogues or self.default_dialogues:
-                # If the character have something to talk, add talk command.
-                commands.append({"name": _("Talk"), "cmd": "talk", "args": self.get_id()})
+        if self.is_alive:
+            relationship = await caller.get_relationship(self.element_type, self.get_element_key())
+            if relationship is None:
+                # Use the default relationship.
+                relationship = self.default_relationship
 
-            # Add shops.
-            for key, obj in self.shops.items():
-                if not obj.is_available(caller):
-                    continue
-
-                verb = obj.get_verb()
-                commands.append({
-                    "name": verb,
-                    "cmd": "shopping",
-                    "args": {
-                        "npc": self.get_id(),
-                        "shop": obj.get_element_key(),
-                    }
-                })
-
-            if self.friendly <= 0:
+            if relationship <= 0:
                 commands.append({"name": _("Attack"), "cmd": "attack", "args": self.get_id()})
+            else:
+                if self.dialogues or self.default_dialogues:
+                    # If the character have something to talk, add talk command.
+                    commands.append({"name": _("Talk"), "cmd": "talk", "args": self.get_id()})
+
+                # Add shops.
+                if self.shops:
+                    available_shops = await async_gather([obj.is_available(caller) for obj in self.shops.values()])
+                    for index, key in enumerate(self.shops.keys()):
+                        if not available_shops[index]:
+                            continue
+
+                        obj = self.shops[key]
+                        verb = obj.get_verb()
+                        commands.append({
+                            "name": verb,
+                            "cmd": "shopping",
+                            "args": {
+                                "npc": self.get_id(),
+                                "shop": obj.get_element_key(),
+                            }
+                        })
 
         return commands
 
-    def have_quest(self, caller):
+    async def have_quest(self, caller):
         """
         If the npc can complete or provide quests.
         Returns (can_provide_quest, can_complete_quest).
         """
-        return DIALOGUE_HANDLER.have_quest(caller, self)
+        return await DialogueHandler.inst().have_quest(caller, self)
 
-    def remove_from_combat(self):
+    async def remove_from_combat(self):
         """
         Removed from the current combat.
         """
@@ -164,7 +170,7 @@ class MudderyBaseNPC(ELEMENT("CHARACTER")):
         opponents = None
         rewards = None
 
-        combat = self.get_combat()
+        combat = await self.get_combat()
         if combat:
             result = combat.get_combat_result(self.id)
             if result:
@@ -172,10 +178,10 @@ class MudderyBaseNPC(ELEMENT("CHARACTER")):
 
         if not self.is_temp:
             if status == defines.COMBAT_LOSE:
-                self.die(opponents)
+                await self.die(opponents)
 
-        super(MudderyBaseNPC, self).remove_from_combat()
+        await super(MudderyBaseNPC, self).remove_from_combat()
 
         if not self.is_temp:
             if status != defines.COMBAT_LOSE:
-                self.recover()
+                await self.recover()

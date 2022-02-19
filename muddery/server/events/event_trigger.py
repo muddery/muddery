@@ -4,16 +4,11 @@ EventHandler handles all events. The handler sets on every object.
 
 import random
 import weakref
-from django.conf import settings
-from muddery.server.utils import defines
 from muddery.server.statements.statement_handler import STATEMENT_HANDLER
 from muddery.server.database.worlddata.event_data import EventData
 from muddery.server.mappings.event_action_set import EVENT_ACTION_SET
-from muddery.server.utils.defines import EventType
-from muddery.server.utils.localized_strings_handler import _
-
-
-PERMISSION_BYPASS_EVENTS = {perm.lower() for perm in settings.PERMISSION_BYPASS_EVENTS}
+from muddery.common.utils.defines import EventType
+from muddery.common.utils.utils import async_gather
 
 
 class EventTrigger(object):
@@ -25,23 +20,23 @@ class EventTrigger(object):
     triggers = {
         # at attriving a room. trigger_obj: room_id
         EventType.EVENT_TRIGGER_ARRIVE: {
-            "name": _("On Arrive", category="event_triggers")
+            "name": "On Arrive"
         },
         # caller kills one. trigger_obj: dead_one_id
         EventType.EVENT_TRIGGER_KILL: {
-            "name": _("On kill the Target", category="event_triggers")
+            "name": "On kill the Target"
         },
         # caller die. trigger_obj: killer_id
         EventType.EVENT_TRIGGER_DIE: {
-            "name": _("On Die", category="event_triggers")
+            "name": "On Die"
         },
         # before traverse an exit. trigger_obj: exit_id
         EventType.EVENT_TRIGGER_TRAVERSE: {
-            "name": _("On Traverse An Exit", category="event_triggers")
+            "name": "On Traverse An Exit"
         },
         # when a character finishes a dialogue sentence. trigger_obj: sentence_id
         EventType.EVENT_TRIGGER_DIALOGUE: {
-            "name": _("On Finish a Dialogue", category="event_triggers")
+            "name": "On Finish a Dialogue"
         }
     }
 
@@ -52,7 +47,7 @@ class EventTrigger(object):
         self.owner = weakref.proxy(owner)
 
         # The owner can bypass all events.
-        self.can_bypass = self.owner.is_staff()
+        self.can_bypass = self.owner.bypass_events()
 
     @classmethod
     def all_triggers(cls):
@@ -69,9 +64,9 @@ class EventTrigger(object):
         """
         Get all event triggers' types and names.
         """
-        return [(key, "%s (%s)" % (value["name"], key)) for key, value in cls.triggers.items()]
+        return [(key.value, "%s (%s)" % (value["name"], key.value)) for key, value in cls.triggers.items()]
 
-    def trigger(self, event_type, obj_key="", obj=None):
+    async def trigger(self, event_type, obj_key="", obj=None):
         """
         Trigger an event.
 
@@ -83,17 +78,24 @@ class EventTrigger(object):
         Return:
             triggered: (boolean) if an event is triggered.
         """
-        if self.can_bypass:
-            return False
-
         # Query events.
         events = EventData.get_element_event(event_type.value, obj_key)
         if not events:
             return False
 
         # Get available events.
-        candidates = [e for e in events if not self.owner.is_event_closed(e.key) and
-                      STATEMENT_HANDLER.match_condition(e.condition, self.owner, obj)]
+        closed_events = await self.owner.all_closed_events()
+        active_events = [e for e in events if e not in closed_events]
+        if not active_events:
+            return False
+
+        matches = await async_gather([STATEMENT_HANDLER.match_condition(e.condition, self.owner, obj) for e in active_events])
+        candidates = [e for index, e in enumerate(active_events) if matches[index]]
+        if not candidates:
+            return False
+
+        if self.can_bypass:
+            return False
 
         triggered = False
         rand = random.random()
@@ -102,14 +104,14 @@ class EventTrigger(object):
                 if rand < event.odds:
                     func = EVENT_ACTION_SET.func(event.action)
                     if func:
-                        func(event.key, self.owner, obj)
+                        await func(event.key, self.owner, obj)
                     triggered = True
                 rand = random.random()
             else:
                 if rand < event.odds:
                     func = EVENT_ACTION_SET.func(event.action)
                     if func:
-                        func(event.key, self.owner, obj)
+                        await func(event.key, self.owner, obj)
                     triggered = True
                     break
                 rand -= event.odds
@@ -121,38 +123,40 @@ class EventTrigger(object):
     # Event triggers
     #
     #########################
-    def at_character_move_in(self, location):
+    async def at_character_move_in(self, location):
         """
         Called when a character moves in the event handler's owner, usually a room.
         """
-        self.trigger(EventType.EVENT_TRIGGER_ARRIVE, location.get_element_key(), location)
+        await self.trigger(EventType.EVENT_TRIGGER_ARRIVE, location.get_element_key(), location)
 
     def at_character_move_out(self, location):
         """
         Called when a character moves out of a room.
         """
         # Remove room interval actions.
+        """
         scripts = self.owner.scripts.all()
         for script in scripts:
             if script.is_element("SCRIPT_ROOM_INTERVAL"):
                 script.stop()
+        """
 
-    def at_character_die(self):
+    async def at_character_die(self):
         """
         Called when a character is killed.
         """
-        self.trigger(EventType.EVENT_TRIGGER_DIE)
+        await self.trigger(EventType.EVENT_TRIGGER_DIE)
 
-    def at_character_kill(self, opponent):
+    async def at_character_kill(self, opponent):
         """
         Called when a character kills another one.
         """
         # If has kill event.
-        self.trigger(EventType.EVENT_TRIGGER_KILL, opponent.get_element_key(), opponent)
+        await self.trigger(EventType.EVENT_TRIGGER_KILL, opponent.get_element_key(), opponent)
 
-    def at_dialogue(self, dlg_key):
+    async def at_dialogue(self, dlg_key):
         """
         Called when a character finishes a dialogue.
         """
-        triggered = self.trigger(EventType.EVENT_TRIGGER_DIALOGUE, dlg_key)
+        triggered = await self.trigger(EventType.EVENT_TRIGGER_DIALOGUE, dlg_key)
         return not triggered

@@ -16,20 +16,20 @@ class Skill(MudderySkill):
     """
     element_type = "SKILL"
 
-    def do_skill(self, caller, target):
+    async def do_skill(self, caller, target):
         """
         Do this skill.
         """
         if not self.passive:
             # set mp
-            mp = caller.states.load("mp")
+            mp = await caller.states.load("mp")
             new_mp = mp - self.const.mp
             if new_mp != mp:
-                caller.states.save("mp", new_mp)
+                await caller.states.save("mp", new_mp)
 
-        return super(Skill, self).do_skill(caller, target)
+        return await super(Skill, self).do_skill(caller, target)
 
-    def is_available(self, caller, passive):
+    async def is_available(self, caller, passive):
         """
         If this skill is available.
 
@@ -39,11 +39,11 @@ class Skill(MudderySkill):
         Returns:
             (boolean) available or not.
         """
-        result = super(Skill, self).is_available(caller, passive)
+        result = await super(Skill, self).is_available(caller, passive)
         if not result:
             return result
             
-        if caller.states.load("mp") < self.const.mp:
+        if await caller.states.load("mp") < self.const.mp:
             return False
 
         return True
@@ -55,13 +55,12 @@ class Skill(MudderySkill):
         """
         return self.const.mp
 
-    def get_appearance(self, caller):
+    def get_appearance(self):
         """
         This is a convenient hook for a 'look'
         command to call.
         """
-        info = super(Skill, self).get_appearance(caller)
-        
+        info = super(Skill, self).get_appearance()
         info["mp"] = self.const.mp
 
         return info

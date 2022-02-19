@@ -296,6 +296,7 @@ MudderyMainFrame.prototype.onConnectionOpen = function() {
 	self.showLoginWindow();
 	if (self.first_connection) {
 	    self.first_connection = false;
+	    core.command.queryUnloggedIn();
 	    mud.login_window.checkAutoLogin();
 	}
 }
@@ -335,9 +336,6 @@ MudderyMainFrame.prototype.onLogout = function(data) {
 	this.showLoginWindow();
 
 	mud.select_char_window.clear();
-	
-	//reconnect, show the connection screen
-	Evennia.connect();
 }
 
 /*
@@ -659,7 +657,7 @@ MudderyPopupObject.prototype.onClose = function(element) {
 MudderyPopupObject.prototype.onCommand = function(element) {
 	var index = $(element).data("index");
 	if ("cmd" in this.buttons[index] && "args" in this.buttons[index]) {
-		core.service.sendCommandLink(this.buttons[index]["cmd"], this.buttons[index]["args"]);
+		core.command.sendCommandLink(this.buttons[index]["cmd"], this.buttons[index]["args"]);
 	}
 
 	this.onClose();
@@ -854,7 +852,7 @@ MudderyPopupDialogue.prototype.gotoNext = function() {
         this.displaySentence(this.dialogues[this.d_index].sentences[this.s_index]);
     }
     else {
-		core.service.finishDialogue(this.dialogues[this.d_index].key, this.target.id? this.target.id: "");
+		core.command.finishDialogue(this.dialogues[this.d_index].key, this.target.id? this.target.id: "");
 	}
 }
 
@@ -1135,7 +1133,7 @@ MudderyPopupConfirmCombat.prototype.onConfirmCombat = function(element) {
 	}
 	this.confirmed = true;
 
-	core.service.confirmCombat();
+	core.command.confirmCombat();
 
 	this.select(".confirm-body").text(core.trans("Waiting the opponent to confirm."));
 	this.select(".button-cancel").hide();
@@ -1151,7 +1149,7 @@ MudderyPopupConfirmCombat.prototype.onRejectCombat = function(element) {
 	}
 
     this.el.hide();
-	core.service.rejectCombat();
+	core.command.rejectCombat();
 	mud.honour_window.leftCombatQueue();
 
 	if (this.interval_id != null) {
@@ -1252,7 +1250,7 @@ MudderyPopupInputCommand.prototype.onSend = function(element) {
 	var command = this.select(".command-text").val();
 	this.select(".command-text").val("");
 
-	core.service.sendRawCommand(command);
+	core.command.sendRawCommand(command);
 }
 
 /******************************************
@@ -1316,11 +1314,16 @@ MudderyLogin.prototype.onTabRegister = function(element) {
  * Event when clicks the register button.
  */
 MudderyLogin.prototype.onClickRegister = function(element) {
-    var playername = this.select(".reg-name").val();
+    var username = this.select(".reg-name").val();
     var password = this.select(".reg-password").val();
     var password_verify = this.select(".reg-password-verify").val();
 
-    core.service.register(playername, password, password_verify, true);
+    if (password != password_verify) {
+        this.popupMessage(core.trans("Error"), core.trans("Password does not match."));
+        return;
+    }
+
+    core.command.register(username, password, true);
     this.clearValues();
 }
 
@@ -1330,7 +1333,8 @@ MudderyLogin.prototype.onClickRegister = function(element) {
 MudderyLogin.prototype.onClickLogin = function(element) {
     var name = this.select(".login-name").val();
     var password = this.select(".login-password").val();
-    core.service.login(name, password);
+
+    core.command.login(name, password);
 }
 
 /*
@@ -1374,8 +1378,8 @@ MudderyLogin.prototype.setConnScreen = function(conn_screen) {
 /*
  * Set values.
  */
-MudderyLogin.prototype.setValues = function(playername, password, auto_login) {
-    this.select(".login-name").val(playername);
+MudderyLogin.prototype.setValues = function(username, password, auto_login) {
+    this.select(".login-name").val(username);
     this.select(".login-password").val(password);
     if (auto_login) {
         this.select(".checkbox-auto-login").addClass("checked");
@@ -1403,7 +1407,7 @@ MudderyLogin.prototype.checkAutoLogin = function() {
         var password = localStorage.login_password;
 
         this.setValues(name, password, true);
-	    core.service.login(name, password);
+	    core.command.login(name, password);
     }
 }
 
@@ -1490,8 +1494,7 @@ MudderySelectChar.prototype.onNewCharacter = function(element) {
  * Event when clicks the logout button.
  */
 MudderySelectChar.prototype.onLogout = function(element) {
-    core.service.logout();
-    Evennia.reconnect();
+    core.command.logout();
     mud.main_frame.showLoginWindow();
 }
 
@@ -1500,7 +1503,7 @@ MudderySelectChar.prototype.onLogout = function(element) {
  */
 MudderySelectChar.prototype.onSelectCharacter = function(element) {
     var index = this.select(element).data("index");
-    core.service.puppetCharacter(this.characters[index]["id"]);
+    core.command.puppetCharacter(this.characters[index]["id"]);
 }
 
 /*
@@ -1531,7 +1534,7 @@ MudderySelectChar.prototype.onDeleteCharacter = function(element, event) {
  */
 MudderySelectChar.prototype.confirmDelete = function(data) {
 	var obj_id = data;
-    core.service.deleteCharacter(obj_id);
+    core.command.deleteCharacter(obj_id);
 }
 
 /*
@@ -1633,7 +1636,7 @@ MudderyNewChar.prototype.onClickBack = function(element) {
  */
 MudderyNewChar.prototype.onCreate = function(element) {
 	var char_name = this.select(".new-char-name").val();
-	core.service.createCharacter(char_name);
+	core.command.createCharacter(char_name);
 	this.reset();
 }
 
@@ -1693,7 +1696,12 @@ MudderyPassword.prototype.onConfirm = function(element) {
     var password = this.select(".new-password").val();
     var password_verify = this.select(".new-password-verify").val();
 
-    core.service.changePassword(current, password, password_verify);
+    if (password != password_verify) {
+        mud.main_frame.popupMessage(core.trans("Error"), core.trans("Password does not match."));
+        return;
+    }
+
+    core.command.changePassword(current, password);
     this.clearValues();
 }
 
@@ -1866,8 +1874,7 @@ MudderyGame.prototype.onSystem = function(element) {
  * Event when clicks the logout button.
  */
 MudderyGame.prototype.onLogout = function(element) {
-    core.service.logout();
-    Evennia.reconnect();
+    core.command.logout();
     mud.main_frame.showLoginWindow();
 }
 
@@ -1875,7 +1882,7 @@ MudderyGame.prototype.onLogout = function(element) {
  * Event when clicks the unpuppet button.
  */
 MudderyGame.prototype.onUnpuppet = function(element) {
-	core.service.unpuppetCharacter();
+	core.command.unpuppetCharacter();
 	mud.main_frame.onUnpuppet();
 }
 
@@ -1950,7 +1957,7 @@ MudderyScene = function(el) {
     this.path_width = "3";
 	this.max_messages = 200;
 
-	this.scene = null;
+	this.surroundings = null;
 }
 
 MudderyScene.prototype = prototype(BaseController.prototype);
@@ -1990,9 +1997,9 @@ MudderyScene.prototype.show = function() {
  */
 MudderyScene.prototype.onCommand = function(element) {
     var index = $(element).data("index");
-    var cmd = this.scene["cmds"][index]["cmd_name"];
-    var args = this.scene["cmds"][index]["cmd_args"];
-    core.service.sendCommandLink(cmd, args);
+    var cmd = this.surroundings["cmds"][index]["cmd_name"];
+    var args = this.surroundings["cmds"][index]["cmd_args"];
+    core.command.sendCommandLink(cmd, args);
 }
 
 /*
@@ -2000,8 +2007,10 @@ MudderyScene.prototype.onCommand = function(element) {
  */
 MudderyScene.prototype.onObject = function(element) {
     var index = $(element).data("index");
-    var object_key = this.scene["objects"][index]["key"];
-    core.service.look_room_obj(object_key);
+
+    var room_map = core.map_data.getCurrentRoomMap();
+    var object_key = room_map["objects"][index]["key"];
+    core.command.look_room_obj(object_key);
 }
 
 /*
@@ -2009,8 +2018,8 @@ MudderyScene.prototype.onObject = function(element) {
  */
 MudderyScene.prototype.onNPC = function(element) {
     var index = $(element).data("index");
-    var obj_id = this.scene["npcs"][index]["id"];
-    core.service.look_room_char(obj_id);
+    var obj_id = this.surroundings["npcs"][index]["id"];
+    core.command.look_room_char(obj_id);
 }
 
 /*
@@ -2018,8 +2027,8 @@ MudderyScene.prototype.onNPC = function(element) {
  */
 MudderyScene.prototype.onPlayer = function(element) {
     var index = $(element).data("index");
-    var obj_id = this.scene["players"][index]["id"];
-    core.service.look_room_char(obj_id);
+    var obj_id = this.surroundings["players"][index]["id"];
+    core.command.look_room_char(obj_id);
 }
 
 /*
@@ -2027,8 +2036,10 @@ MudderyScene.prototype.onPlayer = function(element) {
  */
 MudderyScene.prototype.onExit = function(element) {
     var index = $(element).data("index");
-    var exit_key = this.scene["exits"][index]["key"];
-    core.service.traverse(exit_key);
+
+    var room_map = core.map_data.getCurrentRoomMap();
+    var exit_key = room_map["exits"][index]["key"];
+    core.command.traverse(exit_key);
 }
 
 /*
@@ -2052,8 +2063,9 @@ MudderyScene.prototype.resetSize = function() {
     var svg = document.getElementById("exits-svg");
     svg.innerHTML = "";
 
-    if (this.scene && "exits" in this.scene) {
-        this.drawExitPaths(this.scene["exits"]);
+    var room_map = core.map_data.getCurrentRoomMap();
+    if (room_map && "exits" in room_map) {
+        this.drawExitPaths(room_map["exits"]);
     }
 }
 
@@ -2069,7 +2081,7 @@ MudderyScene.prototype.clear = function() {
  * Clear the view.
  */
 MudderyScene.prototype.clearScene = function() {
-    this.scene = null;
+    this.surroundings = null;
 
     this.select(".scene-name").empty();
     this.select(".scene-desc").empty();
@@ -2137,34 +2149,50 @@ MudderyScene.prototype.leftCombatQueue = function() {
  * Refresh the scene window.
  */
 MudderyScene.prototype.refresh = function() {
-    this.setScene(this.scene);
+    this.setSurroundings(this.surroundings);
 }
 
 /*
  * Set the scene's data.
  */
-MudderyScene.prototype.setScene = function(scene) {
+MudderyScene.prototype.setSurroundings = function(surroundings) {
     this.clearScene();
-    this.scene = scene;
+    this.surroundings = surroundings;
 
-    // add room's name
-    var room_name = core.text2html.parseHtml(scene["name"]);
-    this.select(".scene-name").html(room_name);
+    var has_objects = false;
 
-    // add room's desc
-    this.select(".scene-desc").html(core.text2html.parseHtml(scene["desc"]));
+    // get current room's data
+    var room_data = core.map_data.getCurrentRoomMap();
+    if (room_data) {
+        // add room's name
+        var room_name = core.text2html.parseHtml(room_data["name"]);
+        this.select(".scene-name").html(room_name);
+
+        // add room's desc
+        this.select(".scene-desc").html(core.text2html.parseHtml(room_data["desc"]));
+
+        // set background
+        var backview = this.select("#scene-contents");
+        if ("background" in room_data && room_data["background"]) {
+            var url = settings.resource_url + room_data["background"]["resource"];
+            backview.css("background", "url(" + url + ") no-repeat center center");
+        }
+        else {
+            backview.css("background", "");
+        }
+    }
 
     // set commands
     var commands = this.select(".scene-commands");
-    if (!("cmds" in scene)) {
-        scene["cmds"] = [];
+    if (!("cmds" in surroundings)) {
+        surroundings["cmds"] = [];
     }
-    if (scene["cmds"].length > 0) {
-        for (var i = 0; i < scene["cmds"].length; i++) {
+    if (surroundings["cmds"].length > 0) {
+        for (var i = 0; i < surroundings["cmds"].length; i++) {
             $("<div>")
                 .addClass("object-button")
                 .data("index", i)
-                .text(scene["cmds"][i]["name"])
+                .text(surroundings["cmds"][i]["name"])
                 .appendTo(commands);
         }
         commands.show();
@@ -2173,18 +2201,15 @@ MudderyScene.prototype.setScene = function(scene) {
         commands.hide();
     }
 
-    // set objects
+    // set room objects
+    var objects_data = room_data["objects"];
     var objects = this.select(".scene-objects");
-    var has_objects = false;
-    if (!("objects" in scene)) {
-        scene["objects"] = [];
-    }
-    if (scene["objects"].length > 0) {
-        for (var i = 0; i < scene["objects"].length; i++) {
+    if (objects_data.length > 0) {
+        for (var i = 0; i < objects_data.length; i++) {
             $("<div>")
                 .addClass("scene-button object-button object")
                 .data("index", i)
-                .text(scene["objects"][i]["name"])
+                .text(objects_data[i]["name"])
                 .appendTo(objects);
         }
         has_objects = true;
@@ -2192,15 +2217,15 @@ MudderyScene.prototype.setScene = function(scene) {
 
     // set npcs
     var has_npcs = false;
-    if (!("npcs" in scene)) {
-        scene["npcs"] = [];
+    if (!("npcs" in surroundings)) {
+        surroundings["npcs"] = [];
     }
-    if (scene["npcs"].length > 0) {
-        for (var i = 0; i < scene["npcs"].length; i++) {
+    if (surroundings["npcs"].length > 0) {
+        for (var i = 0; i < surroundings["npcs"].length; i++) {
             $("<div>")
                 .addClass("scene-button object-button npc")
                 .data("index", i)
-                .text(scene["npcs"][i]["name"])
+                .text(surroundings["npcs"][i]["name"])
                 .appendTo(objects);
         }
         has_npcs = true;
@@ -2215,22 +2240,22 @@ MudderyScene.prototype.setScene = function(scene) {
 
     // set players
     var players = this.select(".scene-players");
-    if (!("players" in scene)) {
-        scene["players"] = [];
+    if (!("players" in surroundings)) {
+        surroundings["players"] = [];
     }
-    if (scene["players"].length > 0) {
+    if (surroundings["players"].length > 0) {
         // Only show 10 players.
         var count = 0;
-        for (var i = 0; i < scene["players"].length; i++) {
-            var name = scene["players"][i]["name"];
-            if (scene["players"][i]["is_staff"]) {
+        for (var i = 0; i < surroundings["players"].length; i++) {
+            var name = surroundings["players"][i]["name"];
+            if (surroundings["players"][i]["is_staff"]) {
                 name += "[" + core.trans("ADMIN") + "]";
             }
 
             $("<div>")
                 .addClass("scene-button object-button player")
                 .data("index", i)
-                .text(scene["players"][i]["name"])
+                .text(surroundings["players"][i]["name"])
                 .appendTo(players);
 
             count++
@@ -2245,22 +2270,13 @@ MudderyScene.prototype.setScene = function(scene) {
     }
 
     // add exits
-    if (!("exits" in scene)) {
-        scene["exits"] = [];
-    }
-    if (scene["exits"].length > 0) {
-        this.setExitsMap(scene["exits"], room_name);
+    var exits_data = room_data["exits"];
+    if (exits_data.length > 0) {
+        this.setExitsMap(exits_data, room_name);
     }
 
-    // set background
-    var backview = this.select("#scene-contents");
-    if ("background" in scene && scene["background"]) {
-        var url = settings.resource_url + scene["background"]["resource"];
-        backview.css("background", "url(" + url + ") no-repeat center center");
-    }
-    else {
-        backview.css("background", "");
-    }
+    // check neighbour rooms
+	core.map_data.checkNeighbourRooms();
 }
 
 /*
@@ -2269,9 +2285,9 @@ MudderyScene.prototype.setScene = function(scene) {
 MudderyScene.prototype.addObject = function(obj) {
     // set object
     var index = 0;
-    if (obj["type"] in this.scene) {
+    if (obj["type"] in this.surroundings) {
         if (obj["type"] == "npcs" ||　obj["type"] == "players") {
-            for (var item in this.scene[obj["type"]]) {
+            for (var item in this.surroundings[obj["type"]]) {
                 if (item["id"] == obj["id"]) {
                     // already has this character
                     return;
@@ -2279,7 +2295,7 @@ MudderyScene.prototype.addObject = function(obj) {
             }
         }
         else {
-            for (var item in this.scene[obj["type"]]) {
+            for (var item in this.surroundings[obj["type"]]) {
                 if (item["key"] == obj["key"]) {
                     // already has this object
                     return;
@@ -2287,8 +2303,8 @@ MudderyScene.prototype.addObject = function(obj) {
             }
         }
 
-        index = this.scene[obj["type"]].length;
-        this.scene[obj["type"]].push(obj)
+        index = this.surroundings[obj["type"]].length;
+        this.surroundings[obj["type"]].push(obj)
     }
     else {
         return;
@@ -2315,7 +2331,7 @@ MudderyScene.prototype.addObject = function(obj) {
     }
     else if (obj["type"] == "players") {
         // set players
-        if (this.scene["players"].length < this.max_player) {
+        if (this.surroundings["players"].length < this.max_player) {
             var players = this.select(".scene-players");
             $("<div>")
                 .addClass("scene-button object-button player")
@@ -2333,14 +2349,14 @@ MudderyScene.prototype.addObject = function(obj) {
 MudderyScene.prototype.removeObject = function(obj) {
     // Search this object in the scene.
     var type = obj["type"];
-    if (!(type in this.scene)) {
+    if (!(type in this.surroundings)) {
         return;
     }
 
     var index = -1;
-    for (var i = 0; i < this.scene[type].length; i++) {
-        if (this.scene[type][i]["id"] == obj["id"]) {
-            this.scene[type].splice(i, 1);
+    for (var i = 0; i < this.surroundings[type].length; i++) {
+        if (this.surroundings[type][i]["id"] == obj["id"]) {
+            this.surroundings[type].splice(i, 1);
             index = i;
             break;
         }
@@ -2482,18 +2498,24 @@ MudderyScene.prototype.drawExitPaths = function(exits) {
     // draw exit lines
     var svg = document.getElementById("exits-svg");
     var namespace = "http://www.w3.org/2000/svg";
+
     var center_dom = this.select(".direction-4");
-    var x1 = center_dom.position().left + center_dom.outerWidth(true) / 2;
-    var y1 = center_dom.position().top + center_dom.outerHeight(true) / 2;
+    if (center_dom) {
+        var x1 = center_dom.position().left + center_dom.outerWidth(true) / 2;
+        var y1 = center_dom.position().top + center_dom.outerHeight(true) / 2;
+    }
+
     for (var i = 0; i < exits.length; i++) {
         var exit_dom = this.select(".exit-" + i);
-        var x2 = exit_dom.position().left + exit_dom.outerWidth(true) / 2;
-        var y2 = exit_dom.position().top + exit_dom.outerHeight(true) / 2;
-        var path = document.createElementNS(namespace, "path");
-        path.setAttribute("stroke", this.path_color);
-        path.setAttribute("stroke-width", this.path_width);
-        path.setAttribute("d", "M " + x1 + " " + y1 + " L " + x2 + " " + y2);
-        svg.appendChild(path);
+        if (exit_dom) {
+            var x2 = exit_dom.position().left + exit_dom.outerWidth(true) / 2;
+            var y2 = exit_dom.position().top + exit_dom.outerHeight(true) / 2;
+            var path = document.createElementNS(namespace, "path");
+            path.setAttribute("stroke", this.path_color);
+            path.setAttribute("stroke-width", this.path_width);
+            path.setAttribute("d", "M " + x1 + " " + y1 + " L " + x2 + " " + y2);
+            svg.appendChild(path);
+        }
     }
 }
 
@@ -2881,7 +2903,7 @@ MudderyCharData.prototype.setEquipments = function(equipments) {
     }
 
     if (has_selected_item) {
-        core.service.equipmentsObject(this.item_selected);
+        core.command.equipmentsObject(this.item_selected);
     }
     else {
         this.item_selected = null;
@@ -2899,7 +2921,7 @@ MudderyCharData.prototype.onClickEquipment = function(target, event) {
     var position = $(target).data("position");
     if (position && position in this.equipments) {
         mud.char_data_window.item_selected = position;
-        core.service.equipmentsObject(position);
+        core.command.equipmentsObject(position);
     }
     else {
         this.showStatus();
@@ -2913,7 +2935,7 @@ MudderyCharData.prototype.onCommand = function(element) {
 	var index = $(element).data("index");
 	if ("cmd" in this.buttons[index] && "args" in this.buttons[index]) {
 	    if (!this.buttons[index]["confirm"]) {
-		    core.service.sendCommandLink(this.buttons[index]["cmd"], this.buttons[index]["args"]);
+		    core.command.sendCommandLink(this.buttons[index]["cmd"], this.buttons[index]["args"]);
 		}
 		else {
 		    var self = this;
@@ -2943,7 +2965,7 @@ MudderyCharData.prototype.onCommand = function(element) {
  */
 MudderyCharData.prototype.confirmCommand = function(data) {
 	var index = data;
-    core.service.sendCommandLink(this.buttons[index]["cmd"], this.buttons[index]["args"]);
+    core.command.sendCommandLink(this.buttons[index]["cmd"], this.buttons[index]["args"]);
 }
 
 /*
@@ -3026,7 +3048,7 @@ MudderyInventory.prototype.onCommand = function(element) {
 	    if (!this.buttons[index]["confirm"]) {
 	        var args = this.buttons[index]["args"]? this.buttons[index]["args"]: {};
 	        args["position"] = this.item_selected;
-		    core.service.sendCommandLink(this.buttons[index]["cmd"], args);
+		    core.command.sendCommandLink(this.buttons[index]["cmd"], args);
 		}
 		else {
 		    var self = this;
@@ -3056,7 +3078,7 @@ MudderyInventory.prototype.confirmCommand = function(data) {
 	var index = data;
 	var args = this.buttons[index]["args"]? this.buttons[index]["args"]: {};
 	args["position"] = this.item_selected;
-    core.service.sendCommandLink(this.buttons[index]["cmd"], args);
+    core.command.sendCommandLink(this.buttons[index]["cmd"], args);
 }
 
 /*
@@ -3087,7 +3109,7 @@ MudderyInventory.prototype.resetSize = function() {
 MudderyInventory.prototype.onSelect = function(element) {
     var index = $(element).data("index");
     if (index < this.inventory.length) {
-        core.service.inventoryObject(this.inventory[index]["position"], "inventory");
+        core.command.inventoryObject(this.inventory[index]["position"], "inventory");
     }
 }
 
@@ -3137,7 +3159,7 @@ MudderyInventory.prototype.setInventory = function(inventory) {
     }
 
     if (has_selected_item) {
-        core.service.inventoryObject(this.item_selected, "inventory");
+        core.command.inventoryObject(this.item_selected, "inventory");
     }
     else {
         this.item_selected = null;
@@ -3216,7 +3238,7 @@ MudderySkills.prototype.onSelect = function(element) {
     var index = $(element).data("index");
     if (index < this.skills.length) {
         this.item_selected = this.skills[index].key;
-        core.service.querySkill(this.item_selected);
+        core.command.querySkill(this.item_selected);
     }
 }
 
@@ -3227,7 +3249,7 @@ MudderySkills.prototype.onCommand = function(element) {
 	var index = $(element).data("index");
 	if ("cmd" in this.buttons[index] && "args" in this.buttons[index]) {
 	    if (!this.buttons[index]["confirm"]) {
-		    core.service.sendCommandLink(this.buttons[index]["cmd"], this.buttons[index]["args"]);
+		    core.command.sendCommandLink(this.buttons[index]["cmd"], this.buttons[index]["args"]);
 		}
 		else {
 		    var self = this;
@@ -3255,7 +3277,7 @@ MudderySkills.prototype.onCommand = function(element) {
  */
 MudderySkills.prototype.confirmCommand = function(data) {
 	var index = data;
-    core.service.sendCommandLink(this.buttons[index]["cmd"], this.buttons[index]["args"]);
+    core.command.sendCommandLink(this.buttons[index]["cmd"], this.buttons[index]["args"]);
 }
 
 /*
@@ -3311,7 +3333,7 @@ MudderySkills.prototype.setSkills = function(skills) {
     }
 
     if (has_selected_item) {
-        core.service.querySkill(this.item_selected);
+        core.command.querySkill(this.item_selected);
     }
     else {
         this.item_selected = null;
@@ -3384,7 +3406,7 @@ MudderyQuests.prototype.onSelect = function(element) {
     if (index < this.quests.length) {
         var key = this.quests[index].key;
         this.item_selected = key;
-        core.service.queryQuest(key);
+        core.command.queryQuest(key);
     }
 }
 
@@ -3395,7 +3417,7 @@ MudderyQuests.prototype.onCommand = function(element) {
 	var index = $(element).data("index");
 	if ("cmd" in this.buttons[index] && "args" in this.buttons[index]) {
 	    if (!this.buttons[index]["confirm"]) {
-		    core.service.sendCommandLink(this.buttons[index]["cmd"], this.buttons[index]["args"]);
+		    core.command.sendCommandLink(this.buttons[index]["cmd"], this.buttons[index]["args"]);
 		}
 		else {
 		    var self = this;
@@ -3423,7 +3445,7 @@ MudderyQuests.prototype.onCommand = function(element) {
  */
 MudderyQuests.prototype.confirmCommand = function(data) {
 	var index = data;
-    core.service.sendCommandLink(this.buttons[index]["cmd"], this.buttons[index]["args"]);
+    core.command.sendCommandLink(this.buttons[index]["cmd"], this.buttons[index]["args"]);
 }
 
 /*
@@ -3484,7 +3506,7 @@ MudderyQuests.prototype.setQuests = function(quests) {
     }
 
     if (has_selected_item) {
-        core.service.queryQuest(this.item_selected);
+        core.command.queryQuest(this.item_selected);
     }
     else {
         this.item_selected = null;
@@ -3572,7 +3594,7 @@ MudderyHonour.prototype.constructor = MudderyHonour;
 MudderyHonour.prototype.onShow = function() {
     var container = this.select(".rank-table");
     container.empty();
-    core.service.getRankings();
+    core.command.getRankings();
 }
 
 /*
@@ -3595,7 +3617,7 @@ MudderyHonour.prototype.onQueueUpCombat = function(element) {
     }
 
     this.inCombatQueue();
-    core.service.queueUpCombat();
+    core.command.queueUpCombat();
 }
 
 /*
@@ -3603,7 +3625,7 @@ MudderyHonour.prototype.onQueueUpCombat = function(element) {
  */
 MudderyHonour.prototype.onQuitCombatQueue = function(element) {
 	this.leftCombatQueue();
-    core.service.quitCombatQueue();
+    core.command.quitCombatQueue();
 }
 
 /*
@@ -3695,7 +3717,7 @@ MudderyMap.prototype.constructor = MudderyMap;
  * Called when the controller shows.
  */
 MudderyMap.prototype.onShow = function() {
-    this.showMap(core.map_data._current_location);
+    this.showMap(core.map_data.getCurrentLocation());
 }
 
 /*
@@ -3734,19 +3756,18 @@ MudderyMap.prototype.clear = function() {
 MudderyMap.prototype.showMap = function(location) {
 	this.clear();
 
-	if (!(location && location.key in core.map_data._map_rooms)){
+    if (!location) {
+        return;
+    }
+
+    var current_area_key = location["area"];
+    var current_room_key = location["room"];
+
+	if (!(current_room_key in core.map_data._map_rooms)){
 		// does not have current location, can not show map.
 		return;
 	}
-
-	if (location["area"]) {
-		var area_name = core.text2html.parseHtml(location["area"]["name"]);
-		if (area_name) {
-			this.select(".header-text").html(area_name);
-		}
-	}
-
-	var current_room = core.map_data._map_rooms[location.key];
+	var current_room = core.map_data._map_rooms[current_room_key];
 
 	var map_width = this.select("#map-svg").width();
 	var map_height = this.select("#map-svg").height();
@@ -3755,7 +3776,6 @@ MudderyMap.prototype.showMap = function(location) {
 	var room_size = this.room_size;
 	var origin_x = map_width / 2;
 	var origin_y = map_height / 2;
-	var current_area_key = "";		// Only show rooms and exits in the same area.
 
 	var svg = document.getElementById("map-svg");
 	var namespace = "http://www.w3.org/2000/svg";
@@ -3766,61 +3786,68 @@ MudderyMap.prototype.showMap = function(location) {
 		//origin_y -= -current_room["pos"][1] * scale;
 		origin_x -= current_room["pos"][0];
 		origin_y -= current_room["pos"][1];
-
-		current_area_key = current_room["area"];
 	}
 
-	// background
-	if (location["area"] && location["area"]["background"]) {
-	    /*
-	    if (origin_x < map_width - location["area"]["background"]["width"]) {
-	        origin_x = map_width - location["area"]["background"]["width"];
-	    }
-	    if (origin_y < map_height - location["area"]["background"]["height"]) {
-	        origin_y = map_height - location["area"]["background"]["height"];
-	    }
-	    if (origin_x > 0) {
-	        origin_x = 0;
-	    }
-	    if (origin_y > 0) {
-	        origin_y = 0;
-	    }
-	    */
+    // title and background
+	if (current_area_key in core.map_data._map_areas){
+		var area_name = core.text2html.parseHtml(core.map_data._map_areas[current_area_key]["name"]);
+		if (area_name) {
+			this.select(".header-text").html(area_name);
+		}
 
-        var x = origin_x;
-        var y = origin_y;
+	    var area_background = core.map_data._map_areas[current_area_key]["background"];
+	    if (area_background) {
+            /*
+            if (origin_x < map_width - location["area"]["background"]["width"]) {
+                origin_x = map_width - location["area"]["background"]["width"];
+            }
+            if (origin_y < map_height - location["area"]["background"]["height"]) {
+                origin_y = map_height - location["area"]["background"]["height"];
+            }
+            if (origin_x > 0) {
+                origin_x = 0;
+            }
+            if (origin_y > 0) {
+                origin_y = 0;
+            }
+            */
 
-        /*
-        if (location["area"]["background_point"]) {
-            x -= location["area"]["background_point"][0];
-            y -= location["area"]["background_point"][1];
+            var x = origin_x;
+            var y = origin_y;
+
+            /*
+            if (location["area"]["background_point"]) {
+                x -= location["area"]["background_point"][0];
+                y -= location["area"]["background_point"][1];
+            }
+
+            if (location["area"]["corresp_map_pos"]) {
+                x += location["area"]["corresp_map_pos"][0] * scale + origin_x;
+                y += -location["area"]["corresp_map_pos"][1] * scale + origin_y;
+            }
+            */
+
+            var map_back = settings.resource_url + area_background["resource"];
+            var background = document.createElementNS(namespace, "image");
+            background.setAttribute("x", x);
+            background.setAttribute("y", y);
+            background.setAttribute("width", area_background["width"]);
+            background.setAttribute("height", area_background["height"]);
+            background.href.baseVal = settings.resource_url + area_background["resource"];
+            svg.appendChild(background);
         }
-
-        if (location["area"]["corresp_map_pos"]) {
-            x += location["area"]["corresp_map_pos"][0] * scale + origin_x;
-            y += -location["area"]["corresp_map_pos"][1] * scale + origin_y;
-        }
-        */
-
-        var map_back = settings.resource_url + location["area"]["background"]["resource"];
-        var background = document.createElementNS(namespace, "image");
-        background.setAttribute("x", x);
-        background.setAttribute("y", y);
-        background.setAttribute("width", location["area"]["background"]["width"]);
-        background.setAttribute("height", location["area"]["background"]["height"]);
-        background.href.baseVal = settings.resource_url + location["area"]["background"]["resource"];
-        svg.appendChild(background);
 	}
 
+    // draw path
 	if (current_room["pos"] && core.map_data._map_paths) {
 		// get path positions
 		var path_data = [];
-		for (var begin in core.map_data._map_paths) {
-			if (!(begin in core.map_data._map_rooms)) {
+		for (var from_room_key in core.map_data._map_paths) {
+			if (!(from_room_key in core.map_data._map_rooms)) {
 			    continue;
 			}
 
-            var from_room = core.map_data._map_rooms[begin];
+            var from_room = core.map_data._map_rooms[from_room_key];
             var from_area_key = from_room["area"];
             if (from_area_key != current_area_key) {
                 continue;
@@ -3831,12 +3858,12 @@ MudderyMap.prototype.showMap = function(location) {
                 continue;
             }
 
-            for (var end in core.map_data._map_paths[begin]) {
-                if (!(core.map_data._map_paths[begin][end] in core.map_data._map_rooms)) {
+            for (var to_room_key in core.map_data._map_paths[from_room_key]) {
+                if (!(core.map_data._map_paths[from_room_key][to_room_key] in core.map_data._map_rooms)) {
                     continue;
                 }
 
-                var to_room = core.map_data._map_rooms[core.map_data._map_paths[begin][end]];
+                var to_room = core.map_data._map_rooms[core.map_data._map_paths[from_room_key][to_room_key]];
                 var to_area_key = to_room["area"];
                 if (to_area_key != current_area_key) {
                     continue;
@@ -3867,6 +3894,7 @@ MudderyMap.prototype.showMap = function(location) {
 		}
 	}
 
+    // draw room
 	if (core.map_data._map_rooms) {
 		// get room positions
 		var room_data = [];
@@ -3874,8 +3902,8 @@ MudderyMap.prototype.showMap = function(location) {
 
 		if (current_room["pos"]) {
 			var count = 0;
-			for (var key in core.map_data._map_rooms) {
-				var room = core.map_data._map_rooms[key];
+			for (var room_key in core.map_data._map_rooms) {
+				var room = core.map_data._map_rooms[room_key];
 				if (room["pos"]) {
 					var area_key = room["area"];
 					if (area_key != current_area_key) {
@@ -3886,7 +3914,7 @@ MudderyMap.prototype.showMap = function(location) {
 									"icon": room["icon"]? settings.resource_url + room["icon"]: null,
 									"area": room["area"],
 									"pos": room["pos"]});
-					if (key == location.key) {
+					if (room_key == current_room_key) {
 						current_room_index = count;
 					}
 					count++;
@@ -4024,7 +4052,7 @@ MudderyCombat.prototype.onCombatSkill = function(element) {
 		}
 	}
 
-	core.service.castCombatSkill(key, this.target);
+	core.command.castCombatSkill(key, this.target);
 }
 
 /*
@@ -4115,11 +4143,9 @@ MudderyCombat.prototype.setCombat = function(desc, timeout, characters, self_id)
 	var top = 10;
 	var line_height = 30;
 
-	var status = {};
 	for (var i in characters) {
 		var character = characters[i];
 		var obj_id = character["id"];
-		status[obj_id] = character;
 
 		var item = $("<div>")
             .attr("id", "combat-char-" + obj_id)
@@ -4173,7 +4199,6 @@ MudderyCombat.prototype.setCombat = function(desc, timeout, characters, self_id)
 	}
 
     this.character_hp_width = $(".character-hp").width();
-	this.updateStatus(status);
 }
 
 /*
@@ -4476,7 +4501,7 @@ MudderyCombatResult.prototype.bindEvents = function() {
  */
 MudderyCombatResult.prototype.onClose = function(element) {
 	// close popup box
-	core.service.leaveCombat();
+	core.command.leaveCombat();
     mud.combat_window.leaveCombat();
 }
 
@@ -4756,7 +4781,7 @@ MudderyGoodsDetail.prototype.onClose = function(element) {
  */
 MudderyGoodsDetail.prototype.onBuy = function(element) {
     if (this.goods) {
-        core.service.buyGoods(this.npc, this.shop, this.goods["index"]);
+        core.command.buyGoods(this.npc, this.shop, this.goods["index"]);
     }
 
     // close this window
@@ -4867,13 +4892,14 @@ MudderyConversation.prototype.onSend = function() {
 	}
 
     if (this.conversation_type == "LOCAL") {
-	    core.service.say(this.conversation_type, core.map_data._current_location.key, message);
+        var location = core.map_data.getCurrentLocation();
+	    core.command.say(this.conversation_type, location["room"], message);
 	}
 	else if (this.conversation_type == "CHANNEL") {
-	    core.service.say(this.conversation_type, this.target, message);
+	    core.command.say(this.conversation_type, this.target, message);
 	}
 	else {
-		core.service.say(this.conversation_type, this.target, message);
+		core.command.say(this.conversation_type, this.target, message);
 	}
 }
 

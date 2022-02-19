@@ -1,3 +1,0 @@
-key,name,desc
-EVENT_ATTACK,Attack,Event to begin a combat.
-EVENT_DIALOGUE,Dialogue,Event to begin a dialogue.

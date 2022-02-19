@@ -4,6 +4,7 @@ Combat handler.
 
 from muddery.server.combat.combat_runner.base_combat import BaseCombat, CStatus
 from muddery.server.utils.honours_handler import HONOURS_HANDLER
+from muddery.common.utils.utils import async_wait
 
 
 class HonourCombat(BaseCombat):
@@ -20,7 +21,7 @@ class HonourCombat(BaseCombat):
             character = char["char"]
             character.stop_auto_combat_skill()
 
-    def show_combat(self, character):
+    async def show_combat(self, character):
         """
         Show combat information to a character.
         Args:
@@ -29,18 +30,18 @@ class HonourCombat(BaseCombat):
         Returns:
             None
         """
-        super(HonourCombat, self).show_combat(character)
+        await super(HonourCombat, self).show_combat(character)
 
         # send messages in order
-        character.msg({"combat_commands": character.get_combat_commands()})
+        await character.msg({"combat_commands": character.get_combat_commands()})
 
-    def calc_winners(self):
+    async def calc_winners(self):
         """
         Calculate combat winners and losers.
         """
         winner_team = None
         for char in self.characters.values():
-            if char["status"] == CStatus.ACTIVE and char["char"].is_alive():
+            if char["status"] == CStatus.ACTIVE and char["char"].is_alive:
                 winner_team = char["team"]
                 break
 
@@ -52,7 +53,7 @@ class HonourCombat(BaseCombat):
 
         return winners, losers
 
-    def calc_combat_rewards(self, winners, losers):
+    async def calc_combat_rewards(self, winners, losers):
         """
         Called when the character wins the combat.
 
@@ -63,21 +64,21 @@ class HonourCombat(BaseCombat):
         Returns:
             None
         """
-        rewards = super(HonourCombat, self).calc_combat_rewards(winners, losers)
+        rewards = await super(HonourCombat, self).calc_combat_rewards(winners, losers)
 
         # set honour
         winners_db_id = [char.get_db_id() for char in winners.values()]
         losers_db_id = [char.get_db_id() for char in losers.values()]
 
-        honour_changes = HONOURS_HANDLER.set_honours(winners_db_id, losers_db_id)
+        honour_changes = await HONOURS_HANDLER.set_honours(winners_db_id, losers_db_id)
         for char_id in self.characters:
             if char_id not in rewards:
                 rewards[char_id] = {}
             rewards[char_id]["honour"] = honour_changes[char_id] if char_id in honour_changes else 0
 
-        for char in self.characters.values():
-            character = char["char"]
-            character.show_rankings()
-            character.show_status()
+        if self.characters:
+            rankings_awaits = [c["char"].show_rankings() for c in self.characters.values()]
+            status_awaits = [c["char"].show_status() for c in self.characters.values()]
+            await async_wait(rankings_awaits + status_awaits)
 
         return rewards

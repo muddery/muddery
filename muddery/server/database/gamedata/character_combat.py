@@ -2,22 +2,25 @@
 Characters' combat.
 """
 
-import json, traceback
-from django.conf import settings
-from muddery.server.utils import utils
-from muddery.server.utils.exception import MudderyError, ERR
+from muddery.server.database.gamedata.base_data import BaseData
+from muddery.common.utils.singleton import Singleton
 
 
-class CharacterCombat(object):
+class CharacterCombat(BaseData, Singleton):
     """
     Player character's combat data.
     """
-    # data storage
-    storage_class = utils.class_from_path(settings.DATABASE_ACCESS_OBJECT)
-    storage = storage_class("character_combat", "", "character_id", "combat")
+    __table_name = "character_combat"
+    __category_name = None
+    __key_field = "character_id"
+    __default_value_field = "combat"
 
-    @classmethod
-    def save(cls, character_id, combat_id):
+    def __init__(self):
+        # data storage
+        super(CharacterCombat, self).__init__()
+        self.storage = self.create_storage(self.__table_name, self.__category_name, self.__key_field, self.__default_value_field)
+
+    async def save(self, character_id, combat_id):
         """
         Set a combat.
 
@@ -25,20 +28,18 @@ class CharacterCombat(object):
             character_id: (int) character's id.
             combat_id: (int) combat's id.
         """
-        cls.storage.save("", character_id, combat_id)
+        await self.storage.save("", character_id, combat_id)
 
-    @classmethod
-    def has(cls, character_id):
+    async def has(self, character_id):
         """
         Check if the character exists.
 
         Args:
             character_id: (int) character's id.
         """
-        return cls.storage.has("", character_id)
+        return await self.storage.has("", character_id)
 
-    @classmethod
-    def load(cls, character_id, *default):
+    async def load(self, character_id, *default):
         """
         Get the combat's id of a character.
 
@@ -46,14 +47,13 @@ class CharacterCombat(object):
             character_id: (int) character's id.
             default: (int) default value
         """
-        return cls.storage.load("", character_id, *default)
+        return await self.storage.load("", character_id, *default)
 
-    @classmethod
-    def remove_character(cls, character_id):
+    async def remove_character(self, character_id):
         """
         Remove all skills of a character.
 
         Args:
             character_id: (number) character's id.
         """
-        cls.storage.delete("", character_id)
+        await self.storage.delete("", character_id)

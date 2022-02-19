@@ -9,7 +9,6 @@ creation commands.
 """
 
 import traceback
-from evennia.utils import logger
 from muddery.server.elements.character import MudderyCharacter
 
 
@@ -20,67 +19,53 @@ class Character(MudderyCharacter):
     """
     element_type = "CHARACTER"
 
-    def recover(self):
+    async def recover(self):
         """
         Recover properties.
         """
-        super(Character, self).recover()
+        await super(Character, self).recover()
         
         # Recover hp and mp.
         values = {
             "hp": self.const.max_hp,
             "mp": self.const.max_mp
         }
-        self.states.saves(values)
+        await self.states.saves(values)
         
-    def level_up(self):
+    async def level_up(self):
         """
         Upgrade level.
 
         Returns:
             None
         """
-        super(Character, self).level_up()
+        await super(Character, self).level_up()
 
         # Recover hp and mp.
-        self.recover()
+        await self.recover()
 
-    def get_appearance(self, caller):
-        """
-        This is a convenient hook for a 'look'
-        command to call.
-        """
-        # get name, description and available commands.
-        info = super(Character, self).get_appearance(caller)
-
-        info["max_hp"] = self.const.max_hp
-        info["hp"] = self.states.load("hp")
-        info["max_mp"] = self.const.max_mp
-        info["mp"] = self.states.load("mp")
-
-        return info
-
-    def get_combat_status(self):
+    async def get_combat_status(self):
         """
         Get character status used in combats.
         """
-        status = super(Character, self).get_combat_status()
+        status = await super(Character, self).get_combat_status()
 
         status["max_hp"] = self.const.max_hp
-        status["hp"] = self.states.load("hp")
+        status["hp"] = await self.states.load("hp")
         status["max_mp"] = self.const.max_mp
-        status["mp"] = self.states.load("mp")
+        status["mp"] = await self.states.load("mp")
 
         return status
 
-    def is_alive(self):
+    async def check_alive(self):
         """
         Check if the character is alive.
 
         Returns:
             (boolean) the character is alive or not
         """
-        return round(self.states.load("hp")) > 0
+        self.is_alive = round(await self.states.load("hp")) > 0
+        return self.is_alive
 
     def provide_exp(self, killer):
         """
@@ -93,7 +78,7 @@ class Character(MudderyCharacter):
         """
         return self.const.give_exp
 
-    def add_exp(self, exp):
+    async def add_exp(self, exp):
         """
         Add character's exp.
         Args:
@@ -102,19 +87,19 @@ class Character(MudderyCharacter):
         Returns:
             None
         """
-        super(Character, self).add_exp(exp)
+        await super(Character, self).add_exp(exp)
 
-        current_exp = self.states.load("exp")
+        current_exp = await self.states.load("exp")
         new_exp = current_exp + exp
         while new_exp >= self.const.max_exp:
             if self.const.max_exp > 0:
                 # can upgrade
                 new_exp -= self.const.max_exp
-                self.level_up()
+                await self.level_up()
             else:
                 # can not upgrade
                 new_exp = 0
                 break
 
         if new_exp != current_exp:
-            self.states.save("exp", new_exp)
+            await self.states.save("exp", new_exp)

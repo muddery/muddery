@@ -9,7 +9,6 @@ be of use when designing your own game.
 import os
 import shutil
 from datetime import datetime
-from evennia.server import evennia_launcher
 from muddery.launcher import utils as launcher_utils
 
 

@@ -21,7 +21,7 @@ class NormalCombat(BaseCombat):
                 # Monsters auto cast skills
                 character.start_auto_combat_skill()
 
-    def show_combat(self, character):
+    async def show_combat(self, character):
         """
         Show combat information to a character.
         Args:
@@ -30,12 +30,12 @@ class NormalCombat(BaseCombat):
         Returns:
             None
         """
-        super(NormalCombat, self).show_combat(character)
+        await super(NormalCombat, self).show_combat(character)
 
         # send messages in order
-        character.msg({"combat_commands": character.get_combat_commands()})
+        await character.msg({"combat_commands": character.get_combat_commands()})
 
-    def finish(self):
+    async def finish(self):
         """
         Finish a combat. Send results to players, and kill all failed characters.
         """
@@ -43,4 +43,4 @@ class NormalCombat(BaseCombat):
             # Stop auto cast skills
             char["char"].stop_auto_combat_skill()
 
-        super(NormalCombat, self).finish()
+        await super(NormalCombat, self).finish()

@@ -3,7 +3,6 @@ Quest status.
 """
 
 from muddery.server.quests.base_quest_status import BaseQuestStatus
-from muddery.server.utils.localized_strings_handler import _
 
 
 class InProgress(BaseQuestStatus):
@@ -11,9 +10,9 @@ class InProgress(BaseQuestStatus):
     The quest is in progress.
     """
     key = "IN_PROGRESS"
-    name = _("Quest In Progress", category="quest_status")
+    name = "Quest In Progress"
 
-    def match(self, caller, quest_key):
+    async def match(self, caller, quest_key):
         """
         Check.
         """

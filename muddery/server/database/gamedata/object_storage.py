@@ -2,13 +2,13 @@
 Object's attributes cache.
 """
 
-import json, traceback
-from collections import OrderedDict, deque
-from django.apps import apps
-from django.conf import settings
-from muddery.server.utils import utils
-from muddery.server.utils.exception import MudderyError, ERR
-from muddery.server.database.storage.memory_storage import MemoryStorage
+import json
+import traceback
+from collections import OrderedDict
+from muddery.common.utils.exception import MudderyError, ERR
+from muddery.server.database.storage.memory_kv_storage import MemoryKVStorage
+from muddery.server.database.gamedata.base_data import BaseData
+from muddery.common.utils.singleton import Singleton
 
 
 def to_string(value):
@@ -56,16 +56,13 @@ def from_string(str_value):
     return value
 
 
-class BaseObjectStorage(object):
+class BaseObjectStorage(BaseData, Singleton):
     """
     The storage of object attributes.
     """
-    # data storage
-    storage_class = None
-    storage = None
 
-    @classmethod
-    def save(cls, obj_id, key, value):
+    # data storage
+    async def save(self, obj_id, key, value):
         """
         Set an attribute.
 
@@ -75,10 +72,9 @@ class BaseObjectStorage(object):
             value: (any) attribute's value.
         """
         to_save = to_string(value)
-        cls.storage.save(obj_id, key, to_save)
+        await self.storage.save(obj_id, key, to_save)
 
-    @classmethod
-    def save_keys(cls, obj_id, value_dict):
+    async def save_keys(self, obj_id, value_dict):
         """
         Set attributes.
 
@@ -87,12 +83,14 @@ class BaseObjectStorage(object):
             value_dict: (dict) a dict of key-values.
         """
         if value_dict:
-            with cls.storage.atomic():
-                for key, value in value_dict.items():
-                    cls.storage.save(obj_id, key, to_string(value))
+            try:
+                with self.storage.transaction():
+                    for key, value in value_dict.items():
+                        await self.storage.save(obj_id, key, to_string(value))
+            except Exception as e:
+                traceback.print_exc()
 
-    @classmethod
-    def has(cls, obj_id, key):
+    async def has(self, obj_id, key):
         """
         Check if the attribute exists.
 
@@ -100,10 +98,9 @@ class BaseObjectStorage(object):
             obj_id: (number) object's id.
             key: (string) attribute's key.
         """
-        return cls.storage.has(obj_id, key)
+        return await self.storage.has(obj_id, key)
 
-    @classmethod
-    def load(cls, obj_id, key, *default):
+    async def load(self, obj_id, key, *default):
         """
         Get the value of an attribute.
 
@@ -117,7 +114,7 @@ class BaseObjectStorage(object):
                 was found matching `key` and no default value set.
         """
         try:
-            value = cls.storage.load(obj_id, key)
+            value = await self.storage.load(obj_id, key)
             return from_string(value)
         except KeyError as e:
             if len(default) > 0:
@@ -125,19 +122,17 @@ class BaseObjectStorage(object):
             else:
                 raise e
 
-    @classmethod
-    def load_obj(cls, obj_id):
+    async def load_obj(self, obj_id):
         """
         Get values of an object.
 
         Args:
             obj_id: (number) object's id.
         """
-        values = cls.storage.load_category(obj_id, {})
+        values = await self.storage.load_category(obj_id, {})
         return {key: from_string(value) for key, value in values.items()}
 
-    @classmethod
-    def delete(cls, obj_id, key):
+    async def delete(self, obj_id, key):
         """
         delete an attribute of an object.
 
@@ -145,39 +140,38 @@ class BaseObjectStorage(object):
             obj_id: (number) object's id.
             key: (string) attribute's key.
         """
-        cls.storage.delete(obj_id, key)
+        await self.storage.delete(obj_id, key)
 
-    @classmethod
-    def remove_obj(cls, obj_id):
+    async def remove_obj(self, obj_id):
         """
         Remove an object's all attributes.
 
         Args:
             obj_id: (number) object's id.
         """
-        cls.storage.delete_category(obj_id)
-
-    @classmethod
-    def atomic(cls):
-        """
-        Guarantee the atomic execution of a given block.
-        """
-        return cls.storage.atomic()
+        await self.storage.delete_category(obj_id)
 
 
-class DBObjectStorage(BaseObjectStorage):
+class CharacterObjectStorage(BaseObjectStorage):
     """
     The storage of object attributes.
     """
-    # data storage
-    storage_class = utils.class_from_path(settings.DATABASE_ACCESS_OBJECT)
-    storage = storage_class("object_states", "obj_id", "key", "value")
+    __table_name = "character_states"
+    __category_name = "obj_id"
+    __key_field = "key"
+    __default_value_field = "value"
+
+    def __init__(self):
+        # data storage
+        super(CharacterObjectStorage, self).__init__()
+        self.storage = self.create_storage(self.__table_name, self.__category_name, self.__key_field, self.__default_value_field)
 
 
 class MemoryObjectStorage(BaseObjectStorage):
     """
     The storage of object attributes.
     """
-    # data storage
-    storage_class = MemoryStorage
-    storage = storage_class()
+    def __init__(self):
+        # data storage
+        super(MemoryObjectStorage, self).__init__()
+        self.storage = MemoryKVStorage()

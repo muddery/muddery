@@ -2,16 +2,10 @@
 from muddery.server.database import gamedata_models as BaseModels
 
 
+Base = BaseModels.Base
+
+
 class system_data(BaseModels.system_data):
-    pass
-
-
-# ------------------------------------------------------------
-#
-# Object's element key.
-#
-# ------------------------------------------------------------
-class object_keys(BaseModels.object_keys):
     pass
 
 
@@ -20,7 +14,25 @@ class object_keys(BaseModels.object_keys):
 # Game object's runtime attributes.
 #
 # ------------------------------------------------------------
-class object_states(BaseModels.object_states):
+class character_states(BaseModels.character_status):
+    pass
+
+
+# ------------------------------------------------------------
+#
+# server bans
+#
+# ------------------------------------------------------------
+class server_bans(BaseModels.server_bans):
+    pass
+
+
+# ------------------------------------------------------------
+#
+# player's accounts
+#
+# ------------------------------------------------------------
+class accounts(BaseModels.accounts):
     pass
 
 
@@ -110,7 +122,7 @@ class character_combat(BaseModels.character_combat):
 
 # ------------------------------------------------------------
 #
-# player character's quests
+# player character's quests that are doing.
 #
 # ------------------------------------------------------------
 class character_quests(BaseModels.character_quests):
@@ -122,13 +134,41 @@ class character_quests(BaseModels.character_quests):
 
 # ------------------------------------------------------------
 #
+# player character's quests that are finished
+#
+# ------------------------------------------------------------
+class character_finished_quests(BaseModels.character_finished_quests):
+    pass
+
+
+# ------------------------------------------------------------
+#
 # player character's quests
 #
 # ------------------------------------------------------------
-class quest_objectives(BaseModels.quest_objectives):
+class character_quest_objectives(BaseModels.character_quest_objectives):
     """
     Quests' objectives.
     """
+    pass
+
+
+# ------------------------------------------------------------
+#
+# Player character's relationship with other elements.
+#
+# ------------------------------------------------------------
+class character_relationships(BaseModels.character_relationships):
+    "Player character's relationship with other elements."
+    pass
+
+
+# ------------------------------------------------------------
+#
+# closed events
+#
+# ------------------------------------------------------------
+class character_closed_events(BaseModels.character_closed_events):
     pass
 
 

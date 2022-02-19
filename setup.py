@@ -9,7 +9,7 @@ OS_WINDOWS = os.name == "nt"
 
 def get_requirements():
     """
-    To update the requirements for Evennia, edit the requirements.txt file.
+    To update the requirements for Muddery, edit the requirements.txt file.
     """
     with open("requirements.txt", "r") as f:
         req_lines = f.readlines()
@@ -69,7 +69,7 @@ setup(
     maintainer = "Lu Yijun",
     maintainer_email = "",
     url = "http://www.muddery.org",
-    description='An online text game framework.',
+    description='An online game framework.',
     packages=find_packages(),
     scripts=get_scripts(),
     install_requires=get_requirements(),

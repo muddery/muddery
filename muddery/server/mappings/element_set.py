@@ -3,11 +3,12 @@ All available requests.
 """
 
 import os, re
+import traceback
 from importlib import import_module
-from django.conf import settings
-from evennia.utils import logger
-from evennia.utils.utils import class_from_module
-from muddery.server.utils.utils import get_module_path
+from muddery.server.settings import SETTINGS
+from muddery.server.utils.logger import logger
+from muddery.common.utils.utils import class_from_path
+from muddery.common.utils.utils import get_module_path
 
 
 class ElementSet(object):
@@ -61,7 +62,7 @@ class ElementSet(object):
                                     module_path += "." + relative_path + "." + name + "." + class_name
 
                                 if key_name in self.module_dict:
-                                    logger.log_infomsg("Element %s is replaced by %s." % (key_name, module_path))
+                                    logger.log_debug("Element %s is replaced by %s." % (key_name, module_path))
 
                                 self.module_dict[key_name] = module_path
                                 class_name = ""
@@ -78,7 +79,7 @@ class ElementSet(object):
         for key in self.module_dict:
             if key in self.class_dict:
                 continue
-            cls = class_from_module(self.module_dict[key])
+            cls = class_from_path(self.module_dict[key])
             self.class_dict[key] = cls
 
         self.all_loaded = True
@@ -90,15 +91,19 @@ class ElementSet(object):
         if key in self.class_dict:
             return self.class_dict[key]
         elif key in self.module_dict:
-            cls = class_from_module(self.module_dict[key])
-            if key in self.class_dict:
-                if self.class_dict[key] != cls:
-                    logger.log_infomsg("Element %s is replaced by %s." % (key, cls))
+            try:
+                cls = class_from_path(self.module_dict[key])
+                if key in self.class_dict:
+                    if self.class_dict[key] != cls:
+                        logger.log_debug("Element %s is replaced by %s." % (key, cls))
+                self.class_dict[key] = cls
+                return cls
+            except Exception as e:
+                logger.log_trace("Load module error: %s" % e)
 
-            self.class_dict[key] = cls
-            return cls
-
-        logger.log_errmsg("Can not find element type: %s." % key)
+        # If can not find the element, return the base element.
+        from muddery.server.elements.base_element import BaseElement
+        return BaseElement
 
     def get_module(self, key):
         """
@@ -112,11 +117,11 @@ class ElementSet(object):
         """
         self.load_classes()
 
-        cls = self.class_dict[group_key]
-        element_types = {group_key: cls}
+        group_class = self.class_dict[group_key]
+        element_types = {group_key: group_class}
 
         for key in self.class_dict:
-            if issubclass(self.class_dict[key], cls):
+            if issubclass(self.class_dict[key], group_class):
                 element_types[key] = self.class_dict[key]
 
         return element_types
@@ -169,5 +174,5 @@ class ElementSet(object):
 
 ELEMENT_SET = ElementSet()
 ELEMENT = ELEMENT_SET.get
-ELEMENT_SET.load_files(settings.PATH_ELEMENTS_BASE)
-ELEMENT_SET.load_files(settings.PATH_ELEMENTS_CUSTOM)
+ELEMENT_SET.load_files(SETTINGS.PATH_ELEMENTS_BASE)
+ELEMENT_SET.load_files(SETTINGS.PATH_ELEMENTS_CUSTOM)

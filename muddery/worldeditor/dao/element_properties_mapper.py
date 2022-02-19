@@ -2,21 +2,16 @@
 Query and deal common tables.
 """
 
-from evennia.utils import logger
-from django.apps import apps
-from django.conf import settings
-from django.core.exceptions import ValidationError
-from muddery.server.utils.exception import MudderyError, ERR
+from muddery.common.utils.singleton import Singleton
+from muddery.worldeditor.dao.common_mapper_base import CommonMapper
 
 
-class ElementPropertiesMapper(object):
+class ElementPropertiesMapper(CommonMapper, Singleton):
     """
     Object's properties.
     """
     def __init__(self):
-        self.model_name = "element_properties"
-        self.model = apps.get_model(settings.WORLD_DATA_APP, self.model_name)
-        self.objects = self.model.objects
+        super(ElementPropertiesMapper, self).__init__("element_properties")
 
     def get_properties(self, element_type, element_key, level):
         """
@@ -27,7 +22,11 @@ class ElementPropertiesMapper(object):
             element_key: (string) element's key.
             level: (number) object's level.
         """
-        return self.objects.filter(element=element_type, key=element_key, level=level)
+        return self.filter({
+            "element": element_type,
+            "key": element_key,
+            "level": level,
+        })
 
     def get_properties_all_levels(self, element_type, element_key):
         """
@@ -37,7 +36,10 @@ class ElementPropertiesMapper(object):
             element_type: (string) the element's type.
             element_key: (string) the element's key.
         """
-        return self.objects.filter(element=element_type, key=element_key).order_by("level")
+        return self.filter({
+            "element": element_type,
+            "key": element_key
+        }, order=["level"])
 
     def add_properties(self, element_type, element_key, level, values):
         """
@@ -51,21 +53,12 @@ class ElementPropertiesMapper(object):
         """
         # import values
         for prop, value in values.items():
-            records = self.objects.filter(element=element_type, key=element_key, level=level, property=prop)
-            if records:
-                # Update.
-                records.update(value=value)
-            else:
-                # Create.
-                record = {
+            self.update_or_add({
                     "element": element_type,
                     "key": element_key,
                     "level": level,
                     "property": prop,
-                    "value": value
-                }
-                data = self.model(**record)
-                data.save()
+            }, {"value": value})
 
     def delete_properties(self, element_type, element_key, level):
         """
@@ -76,7 +69,8 @@ class ElementPropertiesMapper(object):
             element_key: (string) the element's key.
             level: (number) object's level.
         """
-        return self.objects.filter(element=element_type, key=element_key, level=level).delete()
-
-
-ELEMENT_PROPERTIES = ElementPropertiesMapper()
+        return self.delete({
+            "element": element_type,
+            "key": element_key,
+            "level": level,
+        })

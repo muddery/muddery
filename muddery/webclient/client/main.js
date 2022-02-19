@@ -21,11 +21,13 @@ MudderyMain.prototype.loadCore = function() {
 
     core.client = new MudderyClient();
     core.service = new MudderyService();
+    core.command = new MudderyCommand();
     core.text2html = new MudderyText2HTML();
     core.text_escape = new MudderyTextEscape();
     core.map_data = new MudderyMapData();
     core.data_handler = new MudderyDataHandler();
     core.utils = new MudderyUtils();
+    core.crypto = new MudderyCrypto();
     core.local_string = new MudderyLocalString();
     core.local_string.set_dict(MudderyLocalDict);
     core.trans = function(str) {

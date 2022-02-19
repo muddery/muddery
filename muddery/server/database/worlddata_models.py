@@ -1,9 +1,9 @@
 
 import re
-from django.db import models
-from django.core.validators import MaxValueValidator, MinValueValidator
-from django.core.exceptions import ValidationError
-from django.conf import settings
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import Column, Integer, Float, String, Unicode, Text, UnicodeText, DateTime, Boolean
+from sqlalchemy import UniqueConstraint
+Base = declarative_base()
 
 
 KEY_LENGTH = 80
@@ -13,7 +13,25 @@ VALUE_LENGTH = 80
 CONDITION_LENGTH = 255
 TEXT_CONTENT_LENGTH = 255
 
-re_attribute_key = re.compile(r'^[a-zA-Z_][a-zA-Z0-9_]*$')
+
+# ------------------------------------------------------------
+#
+# The base of all data models
+#
+# ------------------------------------------------------------
+class BaseModel(Base):
+    """
+    The game world system's data.
+    """
+    __abstract__ = True
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+
+    def __eq__(self, other):
+        """
+        Define the equal operator. Two records are equal if they have the same id.
+        """
+        return int(self.id) == int(other.id)
 
 
 # ------------------------------------------------------------
@@ -22,17 +40,16 @@ re_attribute_key = re.compile(r'^[a-zA-Z_][a-zA-Z0-9_]*$')
 # Users should not modify it manually.
 #
 # ------------------------------------------------------------
-class system_data(models.Model):
+class system_data(BaseModel):
     """
     The game world system's data.
     """
-    # The automatic index of objects.
-    object_index = models.PositiveIntegerField(blank=True, default=0)
+    __tablename__ = "system_data"
 
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
+    # The last id of accounts.
+    object_index = Column(Integer, default=0, nullable=False)
+
+    test = Column(Integer, default=0, nullable=False)
 
 
 # ------------------------------------------------------------
@@ -40,62 +57,54 @@ class system_data(models.Model):
 # Game's basic settings.
 #
 # ------------------------------------------------------------
-class game_settings(models.Model):
+class game_settings(BaseModel):
     """
     Game's basic settings.
     NOTE: Only uses the first record!
     """
+    __tablename__ = "game_settings"
 
     # The name of your game.
-    game_name = models.CharField(max_length=NAME_LENGTH, blank=True)
+    game_name = Column(Unicode(NAME_LENGTH))
 
     # The screen shows to players who are not loggin.
-    connection_screen = models.TextField(blank=True)
+    connection_screen = Column(UnicodeText)
 
     # In solo mode, a player can not see or affect other players.
-    solo_mode = models.BooleanField(blank=True, default=False)
+    solo_mode = Column(Boolean, default=False)
 
     # Time of global CD.
-    global_cd = models.FloatField(blank=True,
-                                  default=1.5,
-                                  validators=[MinValueValidator(0.0)])
+    global_cd = Column(Float, default=1.0)
 
     # The CD of auto casting a skill. It must be bigger than GLOBAL_CD
     # They can not be equal!
-    auto_cast_skill_cd = models.FloatField(blank=True,
-                                           default=1.0,
-                                           validators=[MinValueValidator(0.0)])
+    auto_cast_skill_cd = Column(Integer, default=1)
 
     # Allow players to give up quests.
-    can_give_up_quests = models.BooleanField(blank=True, default=True)
+    can_give_up_quests = Column(Boolean, default=True)
 
     # can close dialogue box or not.
-    can_close_dialogue = models.BooleanField(blank=True, default=False)
+    can_close_dialogue = Column(Boolean, default=False)
 
     # Can resume unfinished dialogues automatically.
-    auto_resume_dialogues = models.BooleanField(blank=True, default=True)
+    auto_resume_dialogues = Column(Boolean, default=True)
 
     # The key of a world room.
     # The start position for new characters. It is the key of the room.
     # If it is empty, the home will be set to the first room in WORLD_ROOMS.
-    start_location_key = models.CharField(max_length=KEY_LENGTH, blank=True)
+    start_location_key = Column(String(KEY_LENGTH))
 
     # The key of a world room.
     # Player's default home. When a player dies, he will be moved to his home.
-    default_player_home_key = models.CharField(max_length=KEY_LENGTH, blank=True)
+    default_player_home_key = Column(String(KEY_LENGTH))
 
     # The key of a character.
     # Default character of players.
-    default_player_character_key = models.CharField(max_length=KEY_LENGTH, blank=True)
+    default_player_character_key = Column(String(KEY_LENGTH))
 
     # The key of a character.
     # Default character of staffs.
-    default_staff_character_key = models.CharField(max_length=KEY_LENGTH, blank=True)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
+    default_staff_character_key = Column(String(KEY_LENGTH))
 
 
 # ------------------------------------------------------------
@@ -103,320 +112,260 @@ class game_settings(models.Model):
 # Game's basic settings.
 #
 # ------------------------------------------------------------
-class honour_settings(models.Model):
+class honour_settings(BaseModel):
     """
     honour combat's settings.
     NOTE: Only uses the first record!
     """
+    __tablename__ = "honour_settings"
+
     # The minimum level that a player can attend a honour combat.
-    min_honour_level = models.PositiveIntegerField(blank=True, default=1)
+    min_honour_level = Column(Integer, default=1, nullable=False)
 
     # The number of top honour players that a player can see.
-    top_rankings_number = models.PositiveIntegerField(blank=True, default=10)
+    top_rankings_number = Column(Integer, default=10, nullable=False)
 
     # The number of neighbor players on the honour list that a player can see.
-    nearest_rankings_number = models.PositiveIntegerField(blank=True, default=10)
+    nearest_rankings_number = Column(Integer, default=10, nullable=False)
 
     # The number of neighbor players on the honour list that a player can fight.
     # honour_opponents_number = models.PositiveIntegerField(blank=True, default=100)
 
     # The maximum honour difference that the characters can match. 0 means no limits.
-    max_honour_diff = models.PositiveIntegerField(blank=True, default=0)
+    max_honour_diff = Column(Integer, default=0, nullable=False)
 
     # The prepare time before starting a match. In seconds.
-    preparing_time = models.PositiveIntegerField(blank=True, default=10)
+    preparing_time = Column(Integer, default=10, nullable=False)
 
     # The minimum time between two matches.
-    match_interval = models.PositiveIntegerField(blank=True, default=10)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
+    match_interval = Column(Integer, default=10, nullable=False)
 
 
 # ------------------------------------------------------------
-# Object's base
+# Element's basic data.
 # ------------------------------------------------------------
-class BaseObjects(models.Model):
+class BaseElement(BaseModel):
     """
-    The base model of all objects. All objects data are linked with keys.
+    The base model of all elements. All elements data are linked with keys.
     """
+    __abstract__ = True
+
     # object's key
-    key = models.CharField(max_length=KEY_LENGTH, unique=True, blank=True)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
-
-    def __unicode__(self):
-        return self.key
+    key = Column(String(KEY_LENGTH), unique=True, nullable=False)
 
 
-class world_areas(BaseObjects):
+class world_channels(BaseElement):
+    "The communication channels."
+    __tablename__ = "world_channels"
+
+    # channel's element type
+    element_type = Column(String(KEY_LENGTH), default="CHANNEL", nullable=False)
+
+    # channel's name
+    name = Column(Unicode(NAME_LENGTH))
+
+    # channel's description for display
+    desc = Column(UnicodeText)
+
+
+class BaseMatter(BaseElement):
+    """
+    Base class for matter tables.
+    """
+    __abstract__ = True
+
+    # matter's element type
+    element_type = Column(String(KEY_LENGTH), nullable=False)
+
+    # matter's name
+    name = Column(Unicode(NAME_LENGTH))
+
+    # matter's description for display
+    desc = Column(UnicodeText)
+
+    # matter's icon resource
+    icon = Column(String(KEY_LENGTH))
+
+
+# ------------------------------------------------------------
+#
+# Areas
+#
+# ------------------------------------------------------------
+class world_areas(BaseMatter):
     "The game map is composed by areas."
-
-    # area's element type
-    element_type = models.CharField(max_length=KEY_LENGTH, default="AREA")
-
-    # area's name
-    name = models.CharField(max_length=NAME_LENGTH, blank=True)
-
-    # area's description for display
-    desc = models.TextField(blank=True)
-
-    # area's icon resource
-    icon = models.CharField(max_length=KEY_LENGTH, blank=True)
+    __tablename__ = "world_areas"
 
     # area's map background image resource
-    background = models.CharField(max_length=KEY_LENGTH, blank=True)
+    background = Column(String(KEY_LENGTH))
 
     # area's width
-    width = models.PositiveIntegerField(blank=True, default=0)
+    width = Column(Integer, default=0)
 
     # area's height
-    height = models.PositiveIntegerField(blank=True, default=0)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
+    height = Column(Integer, default=0)
 
 
-class world_rooms(BaseObjects):
+# ------------------------------------------------------------
+#
+# Rooms
+#
+# ------------------------------------------------------------
+class world_rooms(BaseMatter):
     "Defines all unique rooms."
-
-    # room's element type
-    element_type = models.CharField(max_length=KEY_LENGTH, default="ROOM")
-
-    # room's name
-    name = models.CharField(max_length=NAME_LENGTH, blank=True)
-
-    # room's description for display
-    desc = models.TextField(blank=True)
-
-    # room's icon resource
-    icon = models.CharField(max_length=KEY_LENGTH, blank=True)
+    __tablename__ = "world_rooms"
 
     # The key of a world area.
     # The room's location, it must be a area.
-    area = models.CharField(max_length=KEY_LENGTH, blank=True, db_index=True)
+    area = Column(String(KEY_LENGTH), index=True)
 
     # players can not fight in peaceful romms
-    peaceful = models.BooleanField(blank=True, default=False)
+    peaceful = Column(Boolean, default=False)
 
     # room's position which is used in maps
-    position = models.CharField(max_length=POSITION_LENGTH, blank=True)
+    position = Column(String(POSITION_LENGTH))
 
     # room's background image resource
-    background = models.CharField(max_length=KEY_LENGTH, blank=True)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
+    background = Column(String(KEY_LENGTH))
 
 
-# ------------------------------------------------------------
-#
-# rooms that can give profits to characters in the room.
-#
-# ------------------------------------------------------------
-class profit_rooms(BaseObjects):
+class profit_rooms(BaseElement):
     """
     The action to trigger other actions at interval.
     """
+    __tablename__ = "profit_rooms"
+
     # Repeat interval in seconds.
-    interval = models.PositiveIntegerField(blank=True, default=0)
+    interval = Column(Integer, default=0, nullable=False)
 
     # Can trigger events when the character is offline.
-    offline = models.BooleanField(blank=True, default=False)
+    offline = Column(Boolean, default=False)
 
     # This message will be sent to the character when the interval begins.
-    begin_message = models.TextField(blank=True)
+    begin_message = Column(UnicodeText)
 
     # This message will be sent to the character when the interval ends.
-    end_message = models.TextField(blank=True)
+    end_message = Column(UnicodeText)
 
     # the condition for getting profits
-    condition = models.CharField(max_length=CONDITION_LENGTH, blank=True)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
+    condition = Column(String(CONDITION_LENGTH))
 
 
-class world_objects(BaseObjects):
+# ------------------------------------------------------------
+#
+# Objects
+#
+# ------------------------------------------------------------
+class common_objects(BaseMatter):
+    "Store all common objects."
+    __tablename__ = "common_objects"
+
+
+class world_objects(BaseElement):
     "Store all unique objects."
+    __tablename__ = "world_objects"
 
     # The key of a world room.
     # object's location, it must be a room
-    location = models.CharField(max_length=KEY_LENGTH, db_index=True)
+    location = Column(String(KEY_LENGTH), index=True)
 
     # Action's name
-    action = models.CharField(max_length=NAME_LENGTH, blank=True)
-
-    # the condition for showing the object
-    condition = models.CharField(max_length=CONDITION_LENGTH, blank=True)
+    action = Column(String(KEY_LENGTH))
 
     # object's icon resource
-    icon = models.CharField(max_length=KEY_LENGTH, blank=True)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
+    icon = Column(String(KEY_LENGTH))
 
 
-class common_objects(BaseObjects):
-    "Store all common objects."
-
-    # object's element type
-    element_type = models.CharField(max_length=KEY_LENGTH, default="COMMON_OBJECT")
-
-    # object's name
-    name = models.CharField(max_length=NAME_LENGTH, blank=True)
-
-    # object's description for display
-    desc = models.TextField(blank=True)
-
-    # object's icon resource
-    icon = models.CharField(max_length=KEY_LENGTH, blank=True)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
-
-
-class pocket_objects(BaseObjects):
+class pocket_objects(BaseElement):
     "Store all pocket objects."
+    __tablename__ = "pocket_objects"
 
     # the max number of this object in one pile, must above 1
-    max_stack = models.PositiveIntegerField(blank=True, default=1)
+    max_stack = Column(Integer, default=1, nullable=False)
 
     # if can have only one pile of this object
-    unique = models.BooleanField(blank=True, default=False)
+    unique = Column(Boolean, default=False)
 
     # if this object can be removed from the inventory when its number is decreased to zero.
-    can_remove = models.BooleanField(blank=True, default=True)
+    can_remove = Column(Boolean, default=True)
 
     # if this object can discard
-    can_discard = models.BooleanField(blank=True, default=True)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
+    can_discard = Column(Boolean, default=True)
 
 
-class foods(BaseObjects):
+class foods(BaseElement):
     "Foods inherit from common objects."
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
+    __tablename__ = "foods"
 
 
-class skill_books(BaseObjects):
+class skill_books(BaseElement):
     "Skill books inherit from common objects."
+    __tablename__ = "skill_books"
 
     # skill's key
-    skill = models.CharField(max_length=KEY_LENGTH)
+    skill = Column(String(KEY_LENGTH))
 
     # skill's level
-    level = models.PositiveIntegerField(blank=True, null=True)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
+    level = Column(Integer)
 
 
-class equipments(BaseObjects):
+class equipments(BaseElement):
     "equipments inherit from common objects."
+    __tablename__ = "equipments"
 
     # The key of an equipment position.
     # equipment's position
-    position = models.CharField(max_length=KEY_LENGTH, db_index=True)
+    position = Column(String(KEY_LENGTH), index=True)
 
     # The key of an equipment type.
     # equipment's type
-    type = models.CharField(max_length=KEY_LENGTH)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
+    type = Column(String(KEY_LENGTH))
 
 
-class characters(BaseObjects):
+class object_creators(BaseElement):
+    "Players can get new objects from an object_creator."
+    __tablename__ = "object_creators"
+
+    # loot's verb
+    loot_verb = Column(Unicode(NAME_LENGTH))
+
+    # loot's condition
+    loot_condition = Column(String(CONDITION_LENGTH))
+
+
+# ------------------------------------------------------------
+#
+# characters
+#
+# ------------------------------------------------------------
+class characters(BaseMatter):
     "Store common characters."
-
-    # object's element type
-    element_type = models.CharField(max_length=KEY_LENGTH, default="CHARACTER")
-
-    # object's name
-    name = models.CharField(max_length=NAME_LENGTH, blank=True)
-
-    # object's description for display
-    desc = models.TextField(blank=True)
-
-    # object's icon resource
-    icon = models.CharField(max_length=KEY_LENGTH, blank=True)
+    __tablename__ = "characters"
 
     # Character's level.
-    level = models.PositiveIntegerField(blank=True, default=1)
+    level = Column(Integer, default=1)
 
     # Reborn time. The time of reborn after this character was killed. 0 means never reborn.
-    reborn_time = models.PositiveIntegerField(blank=True, default=0)
+    reborn_time = Column(Integer, default=0)
 
-    # Friendly of this character.
-    friendly = models.IntegerField(blank=True, default=0)
+    # Default relationship between the character and the player.
+    relationship = Column(Integer, default=0)
 
     # Clone another character's custom properties if this character's data is empty.
-    clone = models.CharField(max_length=KEY_LENGTH, blank=True)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
+    clone = Column(String(KEY_LENGTH))
 
 
-class world_npcs(BaseObjects):
+class world_npcs(BaseElement):
     "Store all NPCs."
+    __tablename__ = "world_npcs"
 
     # NPC's location, it must be a room.
-    location = models.CharField(max_length=KEY_LENGTH, db_index=True)
-
-    # the condition for showing the NPC
-    condition = models.CharField(max_length=CONDITION_LENGTH, blank=True)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
+    location = Column(String(KEY_LENGTH), index=True)
 
 
-class player_characters(BaseObjects):
+class player_characters(BaseElement):
     "Player's character."
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
-
-
-class staff_characters(BaseObjects):
-    "Staff's character."
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
+    __tablename__ = "player_characters"
 
 
 # ------------------------------------------------------------
@@ -424,185 +373,178 @@ class staff_characters(BaseObjects):
 # exits connecting between rooms.
 #
 # ------------------------------------------------------------
-class world_exits(models.Model):
+class world_exits(BaseMatter):
     "Defines all unique exits."
-
-    # object's key
-    key = models.CharField(max_length=KEY_LENGTH, unique=True, blank=True)
-
-    # object's element type
-    element_type = models.CharField(max_length=KEY_LENGTH, default="EXIT")
-
-    # The exit's name.
-    name = models.CharField(max_length=NAME_LENGTH, blank=True)
+    __tablename__ = "world_exits"
 
     # The key of a world room.
     # The exit's location, it must be a room.
     # Players can see and enter an exit from this room.
-    location = models.CharField(max_length=KEY_LENGTH, db_index=True)
+    location = Column(String(KEY_LENGTH), index=True)
 
     # The key of a world room.
     # The exits's destination.
-    destination = models.CharField(max_length=KEY_LENGTH)
+    destination = Column(String(KEY_LENGTH))
 
     # the action verb to enter the exit (optional)
-    verb = models.CharField(max_length=NAME_LENGTH, blank=True)
-
-    # the condition to show the exit
-    condition = models.CharField(max_length=CONDITION_LENGTH, blank=True)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
+    verb = Column(Unicode(NAME_LENGTH))
 
 
-# ------------------------------------------------------------
-#
-# exit lock's additional data
-#
-# ------------------------------------------------------------
-class exit_locks(BaseObjects):
+class exit_locks(BaseElement):
     "Locked exit's additional data"
+    __tablename__ = "exit_locks"
 
     # condition of the lock
-    unlock_condition = models.CharField(max_length=CONDITION_LENGTH, blank=True)
+    unlock_condition = Column(String(CONDITION_LENGTH))
 
     # action to unlock the exit (optional)
-    unlock_verb = models.CharField(max_length=NAME_LENGTH, blank=True)
+    unlock_verb = Column(Unicode(NAME_LENGTH))
 
     # description when locked
-    locked_desc = models.TextField(blank=True)
+    locked_desc = Column(UnicodeText)
 
     # description when unlocked
-    unlocked_desc = models.TextField(blank=True)
+    unlocked_desc = Column(UnicodeText)
 
     # if the exit can be unlocked automatically
-    auto_unlock = models.BooleanField(blank=True, default=False)
+    auto_unlock = Column(Boolean, default=False)
 
     # when a character unlocked an exit, the exit is unlocked for this character forever.
-    unlock_forever = models.BooleanField(blank=True, default=True)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
+    unlock_forever = Column(Boolean, default=True)
 
 
 # ------------------------------------------------------------
 #
-# object creator's additional data
+# Condition desc
 #
 # ------------------------------------------------------------
-class object_creators(BaseObjects):
-    "Players can get new objects from an object_creator."
+class conditional_desc(BaseElement):
+    "Matter's conditional descriptions"
+    __tablename__ = "conditional_desc"
 
-    # loot's verb
-    loot_verb = models.CharField(max_length=NAME_LENGTH, blank=True)
+    __table_args__ = (
+        UniqueConstraint("element", "key", "condition"),
+    )
 
-    # loot's condition
-    loot_condition = models.CharField(max_length=CONDITION_LENGTH, blank=True)
+    __index_together__ = [("element", "key")]
 
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
+    # The element's type.
+    element = Column(String(KEY_LENGTH), nullable=False)
+
+    # The key of an element.
+    key = Column(String(KEY_LENGTH), nullable=False)
+
+    # condition of the description
+    condition = Column(String(CONDITION_LENGTH))
+
+    # description
+    desc = Column(UnicodeText)
 
 
-class skills(models.Model):
+# ------------------------------------------------------------
+#
+# Skills
+#
+# ------------------------------------------------------------
+class skills(BaseElement):
     "Store all skills."
+    __tablename__ = "skills"
 
-    # shop's key
-    key = models.CharField(max_length=KEY_LENGTH, db_index=True)
+    # skill's name
+    name = Column(Unicode(NAME_LENGTH))
 
-    # shop's name
-    name = models.CharField(max_length=NAME_LENGTH, blank=True)
-
-    # shop's description
-    desc = models.TextField(blank=True)
-
-    # skill's message when casting
-    message = models.TextField(blank=True)
-
-    # skill's cd
-    cd = models.FloatField(blank=True, default=0)
-
-    # if it is a passive skill
-    passive = models.BooleanField(blank=True, default=False)
-
-    # skill function's name
-    function = models.CharField(max_length=KEY_LENGTH, blank=True)
+    # skill's description
+    desc = Column(UnicodeText)
 
     # skill's icon resource
-    icon = models.CharField(max_length=KEY_LENGTH, blank=True)
+    icon = Column(String(KEY_LENGTH))
+
+    # skill's message when casting
+    message = Column(UnicodeText)
+
+    # skill's cd
+    cd = Column(Float, default=0)
+
+    # if it is a passive skill
+    passive = Column(Boolean, default=False)
+
+    # skill function's name
+    function = Column(String(KEY_LENGTH))
 
     # skill's main type, used in autocasting skills.
-    main_type = models.CharField(max_length=KEY_LENGTH, blank=True)
+    main_type = Column(String(KEY_LENGTH))
 
     # skill's sub type, used in autocasting skills.
-    sub_type = models.CharField(max_length=KEY_LENGTH, blank=True)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
+    sub_type = Column(String(KEY_LENGTH))
 
 
-class shops(BaseObjects):
+class shops(BaseElement):
     "Store all shops."
+    __tablename__ = "shops"
 
     # object's element type
-    element_type = models.CharField(max_length=KEY_LENGTH, default="SHOP")
+    element_type = Column(String(KEY_LENGTH), default="SHOP", nullable=False)
 
     # shop's name
-    name = models.CharField(max_length=NAME_LENGTH, blank=True)
+    name = Column(Unicode(NAME_LENGTH))
 
     # shop's description
-    desc = models.TextField(blank=True)
+    desc = Column(UnicodeText)
 
     # the verb to open the shop
-    verb = models.CharField(max_length=NAME_LENGTH, blank=True)
+    verb = Column(Unicode(NAME_LENGTH))
 
     # condition of the shop
-    condition = models.CharField(max_length=CONDITION_LENGTH, blank=True)
+    condition = Column(String(CONDITION_LENGTH))
 
     # shop's icon resource
-    icon = models.CharField(max_length=KEY_LENGTH, blank=True)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
+    icon = Column(String(KEY_LENGTH))
 
 
-class shop_goods(models.Model):
+class quests(BaseElement):
+    "Store all quests."
+    __tablename__ = "quests"
+
+    # quest's name
+    name = Column(Unicode(NAME_LENGTH))
+
+    # quest's description for display
+    desc = Column(UnicodeText)
+
+    # experience that the character get
+    exp = Column(Integer, default=0)
+
+    # the condition to accept this quest.
+    condition = Column(String(CONDITION_LENGTH))
+
+    # will do this action after a quest completed
+    action = Column(String(KEY_LENGTH))
+
+
+class shop_goods(BaseModel):
     "All goods that sold in shops."
+    __tablename__ = "shop_goods"
 
     # shop's key
-    shop = models.CharField(max_length=KEY_LENGTH, db_index=True)
+    shop = Column(String(KEY_LENGTH), index=True, nullable=False)
 
     # the key of objects to sell
-    goods = models.CharField(max_length=KEY_LENGTH, db_index=True)
+    goods = Column(String(KEY_LENGTH), index=True, nullable=False)
 
     # goods level
-    level = models.PositiveIntegerField(blank=True, null=True)
+    level = Column(Integer)
 
     # number of shop goods
-    number = models.PositiveIntegerField(blank=True, default=1)
+    number = Column(Integer, default=1)
 
     # the price of the goods
-    price = models.PositiveIntegerField(blank=True, default=1)
+    price = Column(Integer, default=1)
 
     # the unit of the goods price
-    unit = models.CharField(max_length=KEY_LENGTH)
+    unit = Column(String(KEY_LENGTH), nullable=False)
 
     # visible condition of the goods
-    condition = models.CharField(max_length=CONDITION_LENGTH, blank=True)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
+    condition = Column(String(CONDITION_LENGTH))
 
 
 # ------------------------------------------------------------
@@ -610,42 +552,41 @@ class shop_goods(models.Model):
 # store objects loot list
 #
 # ------------------------------------------------------------
-class loot_list(models.Model):
+class loot_list(BaseModel):
     "Loot list. It is used in object_creators and mods."
+    __abstract__ = True
+
+    __table_args__ = (
+        UniqueConstraint("provider", "object"),
+    )
 
     # the provider of the object
-    provider = models.CharField(max_length=KEY_LENGTH, db_index=True)
+    provider = Column(String(KEY_LENGTH), index=True)
 
     # the key of dropped object
-    object = models.CharField(max_length=KEY_LENGTH)
+    object = Column(String(KEY_LENGTH), nullable=False)
 
     # the level of dropped object
-    level = models.PositiveIntegerField(blank=True, null=True)
+    level = Column(Integer)
 
     # number of dropped object
-    number = models.PositiveIntegerField(blank=True, default=0)
+    number = Column(Integer, default=0)
 
     # odds of drop, from 0.0 to 1.0
-    odds = models.FloatField(blank=True, default=0)
+    odds = Column(Float, default=0)
 
     # Can get another object after this one.
-    multiple = models.BooleanField(blank=True, default=True)
+    multiple = Column(Boolean, default=True)
 
     # This message will be sent to the character when get objects.
-    message = models.TextField(blank=True)
+    message = Column(UnicodeText)
 
     # The key of a quest.
     # if it is not empty, the player must have this quest but not accomplish this quest.
-    quest = models.CharField(max_length=KEY_LENGTH, blank=True)
+    quest = Column(String(KEY_LENGTH))
 
     # condition of the drop
-    condition = models.CharField(max_length=CONDITION_LENGTH, blank=True)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
-        unique_together = ("provider", "object")
+    condition = Column(String(CONDITION_LENGTH))
 
 
 # ------------------------------------------------------------
@@ -655,12 +596,7 @@ class loot_list(models.Model):
 # ------------------------------------------------------------
 class creator_loot_list(loot_list):
     "Store character's loot list."
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
-        unique_together = ("provider", "object")
+    __tablename__ = "creator_loot_list"
 
 
 # ------------------------------------------------------------
@@ -670,12 +606,7 @@ class creator_loot_list(loot_list):
 # ------------------------------------------------------------
 class character_loot_list(loot_list):
     "Store character's loot list."
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
-        unique_together = ("provider", "object")
+    __tablename__ = "character_loot_list"
 
 
 # ------------------------------------------------------------
@@ -685,12 +616,7 @@ class character_loot_list(loot_list):
 # ------------------------------------------------------------
 class quest_reward_list(loot_list):
     "Quest's rewards list."
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
-        unique_together = ("provider", "object")
+    __tablename__ = "quest_reward_list"
 
 
 # ------------------------------------------------------------
@@ -700,12 +626,7 @@ class quest_reward_list(loot_list):
 # ------------------------------------------------------------
 class room_profit_list(loot_list):
     "Profit room's rewards list."
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
-        unique_together = ("provider", "object")
+    __tablename__ = "room_profit_list"
 
 
 # ------------------------------------------------------------
@@ -713,25 +634,18 @@ class room_profit_list(loot_list):
 # store all equip_types
 #
 # ------------------------------------------------------------
-class equipment_types(models.Model):
+class equipment_types(BaseModel):
     "Store all equip types."
+    __tablename__ = "equipment_types"
 
     # equipment type's key
-    key = models.CharField(max_length=KEY_LENGTH, unique=True)
+    key = Column(String(KEY_LENGTH), unique=True, nullable=False)
 
     # type's name
-    name = models.CharField(max_length=NAME_LENGTH, unique=True)
+    name = Column(Unicode(NAME_LENGTH), unique=True, nullable=False)
 
     # type's description
-    desc = models.TextField(blank=True)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
-
-    def __unicode__(self):
-        return self.name
+    desc = Column(UnicodeText)
 
 
 # ------------------------------------------------------------
@@ -739,25 +653,18 @@ class equipment_types(models.Model):
 # store all available equipment potisions
 #
 # ------------------------------------------------------------
-class equipment_positions(models.Model):
+class equipment_positions(BaseModel):
     "Store all equip types."
+    __tablename__ = "equipment_positions"
 
     # position's key
-    key = models.CharField(max_length=KEY_LENGTH, unique=True)
+    key = Column(String(KEY_LENGTH), unique=True, nullable=False)
 
     # position's name for display
-    name = models.CharField(max_length=NAME_LENGTH, unique=True)
+    name = Column(Unicode(NAME_LENGTH), unique=True, nullable=False)
 
     # position's description
-    desc = models.TextField(blank=True)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
-
-    def __unicode__(self):
-        return self.name
+    desc = Column(UnicodeText)
 
 
 # ------------------------------------------------------------
@@ -765,30 +672,30 @@ class equipment_positions(models.Model):
 # Object's custom properties.
 #
 # ------------------------------------------------------------
-class properties_dict(models.Model):
+class properties_dict(BaseModel):
     """
     Object's custom properties.
     """
+    __tablename__ = "properties_dict"
+
+    __table_args__ = (
+        UniqueConstraint("element_type", "property"),
+    )
+
     # The key of a element type.
-    element_type = models.CharField(max_length=KEY_LENGTH, db_index=True)
+    element_type = Column(String(KEY_LENGTH), index=True, nullable=False)
 
     # The key of the property.
-    property = models.CharField(max_length=KEY_LENGTH)
+    property = Column(String(KEY_LENGTH), nullable=False)
 
     # The name of the property.
-    name = models.CharField(max_length=NAME_LENGTH)
+    name = Column(Unicode(NAME_LENGTH))
 
     # The description of the property.
-    desc = models.TextField(blank=True)
+    desc = Column(UnicodeText)
 
     # Default value.
-    default = models.CharField(max_length=VALUE_LENGTH, blank=True)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
-        unique_together = ("element_type", "property")
+    default = Column(String(VALUE_LENGTH))
 
 
 # ------------------------------------------------------------
@@ -797,26 +704,23 @@ class properties_dict(models.Model):
 # These states can change in the game.
 #
 # ------------------------------------------------------------
-class character_states_dict(models.Model):
+class character_states_dict(BaseModel):
     """
     Character's mutable states.
     """
+    __tablename__ = "character_states_dict"
+
     # The key of the state.
-    key = models.CharField(max_length=KEY_LENGTH, unique=True)
+    key = Column(String(KEY_LENGTH), unique=True, nullable=False)
 
     # The name of the property.
-    name = models.CharField(max_length=NAME_LENGTH)
+    name = Column(Unicode(NAME_LENGTH), unique=True, nullable=False)
 
     # Default value.
-    default = models.CharField(max_length=VALUE_LENGTH, blank=True)
+    default = Column(String(VALUE_LENGTH))
 
     # The description of the property.
-    desc = models.TextField(blank=True)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
+    desc = Column(UnicodeText)
 
 
 # ------------------------------------------------------------
@@ -824,29 +728,31 @@ class character_states_dict(models.Model):
 # element's custom properties
 #
 # ------------------------------------------------------------
-class element_properties(models.Model):
+class element_properties(BaseModel):
     "Store element's custom properties."
     # The type of an element.
-    element = models.CharField(max_length=KEY_LENGTH, null=True)
+    __tablename__ = "element_properties"
+
+    __table_args__ = (
+        UniqueConstraint("element", "key", "level", "property"),
+    )
+
+    __index_together__ = [("element", "key", "level")]
+
+    # The element's type.
+    element = Column(String(KEY_LENGTH), nullable=False)
 
     # The key of an element.
-    key = models.CharField(max_length=KEY_LENGTH)
+    key = Column(String(KEY_LENGTH), nullable=False)
 
     # The level of the element.
-    level = models.PositiveIntegerField(blank=True, null=True)
+    level = Column(Integer)
 
     # The key of the property.
-    property = models.CharField(max_length=KEY_LENGTH)
+    property = Column(String(KEY_LENGTH), nullable=False)
 
     # The value of the property.
-    value = models.CharField(max_length=VALUE_LENGTH, blank=True)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
-        unique_together = ("element", "key", "level", "property")
-        index_together = [("element", "key", "level")]
+    value = Column(String(VALUE_LENGTH))
 
 
 # ------------------------------------------------------------
@@ -854,27 +760,26 @@ class element_properties(models.Model):
 # character's default objects
 #
 # ------------------------------------------------------------
-class default_objects(models.Model):
+class default_objects(BaseModel):
     "character's default objects"
+    __tablename__ = "default_objects"
+
+    __table_args__ = (
+        UniqueConstraint("character", "object"),
+    )
 
     # Character's key.
-    character = models.CharField(max_length=KEY_LENGTH, db_index=True)
+    character = Column(String(KEY_LENGTH), index=True, nullable=False)
 
     # The key of an object.
     # Object's key.
-    object = models.CharField(max_length=KEY_LENGTH)
+    object = Column(String(KEY_LENGTH), nullable=False)
 
     # Object's level.
-    level = models.PositiveIntegerField(blank=True, null=True)
+    level = Column(Integer)
 
     # Object's number
-    number = models.PositiveIntegerField(blank=True, default=0)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
-        unique_together = ("character", "object")
+    number = Column(Integer, default=0)
 
 
 # ------------------------------------------------------------
@@ -882,22 +787,21 @@ class default_objects(models.Model):
 # store npc's shop
 #
 # ------------------------------------------------------------
-class npc_shops(models.Model):
+class npc_shops(BaseModel):
     "Store npc's shops."
+    __tablename__ = "npc_shops"
+
+    __table_args__ = (
+        UniqueConstraint("npc", "shop"),
+    )
 
     # The key of an NPC.
     # NPC's key
-    npc = models.CharField(max_length=KEY_LENGTH, db_index=True)
+    npc = Column(String(KEY_LENGTH), index=True, nullable=False)
 
     # The key of a shop.
     # shop's key
-    shop = models.CharField(max_length=KEY_LENGTH, db_index=True)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
-        unique_together = ("npc", "shop")
+    shop = Column(String(KEY_LENGTH), index=True, nullable=False)
 
 
 # ------------------------------------------------------------
@@ -905,27 +809,21 @@ class npc_shops(models.Model):
 # skill types
 #
 # ------------------------------------------------------------
-class skill_types(models.Model):
+class skill_types(BaseModel):
     """
     Skill's type, used in skill's main_type and sub_type. The type discribes the usage of a
     skill, which is useful in auto casting skills.
     """
+    __tablename__ = "skill_types"
+
     # type's key
-    key = models.CharField(max_length=KEY_LENGTH, unique=True, blank=True)
+    key = Column(String(KEY_LENGTH), unique=True, nullable=False)
 
     # the readable name of the skill type
-    name = models.CharField(max_length=NAME_LENGTH, unique=True)
+    name = Column(Unicode(NAME_LENGTH), unique=True, nullable=False)
 
     # skill type's description
-    desc = models.TextField(blank=True)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
-
-    def __unicode__(self):
-        return self.name + " (" + self.key + ")"
+    desc = Column(UnicodeText)
 
 
 # ------------------------------------------------------------
@@ -933,50 +831,23 @@ class skill_types(models.Model):
 # character's default skills
 #
 # ------------------------------------------------------------
-class default_skills(models.Model):
+class default_skills(BaseModel):
     "character's default skills"
+    __tablename__ = "default_skills"
+
+    __table_args__ = (
+        UniqueConstraint("character", "skill"),
+    )
 
     # character's key
-    character = models.CharField(max_length=KEY_LENGTH, db_index=True)
+    character = Column(String(KEY_LENGTH), index=True, nullable=False)
 
     # The key of a skill.
     # skill's key
-    skill = models.CharField(max_length=KEY_LENGTH)
+    skill = Column(String(KEY_LENGTH), nullable=False)
 
     # skill's level
-    level = models.PositiveIntegerField(blank=True, null=True)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
-        unique_together = ("character", "skill")
-
-
-class quests(models.Model):
-    "Store all quests."
-    # quest's key
-    key = models.CharField(max_length=KEY_LENGTH, db_index=True)
-
-    # quest's name
-    name = models.CharField(max_length=NAME_LENGTH, blank=True)
-
-    # quest's description for display
-    desc = models.TextField(blank=True)
-
-    # experience that the character get
-    exp = models.PositiveIntegerField(blank=True, default=0)
-
-    # the condition to accept this quest.
-    condition = models.CharField(max_length=CONDITION_LENGTH, blank=True)
-
-    # will do this action after a quest completed
-    action = models.TextField(blank=True)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
+    level = Column(Integer)
 
 
 # ------------------------------------------------------------
@@ -984,31 +855,30 @@ class quests(models.Model):
 # store quest objectives
 #
 # ------------------------------------------------------------
-class quest_objectives(models.Model):
+class quest_objectives(BaseModel):
     "Store all quest objectives."
+    __tablename__ = "quest_objectives"
+
+    __table_args__ = (
+        UniqueConstraint("quest", "type", "object"),
+    )
 
     # The key of a quest.
     # quest's key
-    quest = models.CharField(max_length=KEY_LENGTH, db_index=True)
+    quest = Column(String(KEY_LENGTH), index=True, nullable=False)
 
     # The key of an objetive type.
     # objective's type
-    type = models.CharField(max_length=KEY_LENGTH)
+    type = Column(String(KEY_LENGTH), nullable=False)
 
     # relative object's key
-    object = models.CharField(max_length=KEY_LENGTH, blank=True)
+    object = Column(String(KEY_LENGTH))
 
     # objective's number
-    number = models.IntegerField(blank=True, default=0)
+    number = Column(Integer, default=0)
 
     # objective's discription for display
-    desc = models.TextField(blank=True)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
-        unique_together = ("quest", "type", "object")
+    desc = Column(UnicodeText)
 
 
 # ------------------------------------------------------------
@@ -1016,26 +886,25 @@ class quest_objectives(models.Model):
 # store quest dependencies
 #
 # ------------------------------------------------------------
-class quest_dependencies(models.Model):
+class quest_dependencies(BaseModel):
     "Store quest dependency."
+    __tablename__ = "quest_dependencies"
+
+    __table_args__ = (
+        UniqueConstraint("quest", "dependency", "type"),
+    )
 
     # The key of a quest.
     # quest's key
-    quest = models.CharField(max_length=KEY_LENGTH, db_index=True)
+    quest = Column(String(KEY_LENGTH), index=True, nullable=False)
 
     # The key of a quest.
     # quest that dependends on
-    dependency = models.CharField(max_length=KEY_LENGTH)
+    dependency = Column(String(KEY_LENGTH), nullable=False)
 
     # The key of a quest dependency type.
     # dependency's type
-    type = models.CharField(max_length=KEY_LENGTH)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
-        unique_together = ("quest", "dependency", "type")
+    type = Column(String(KEY_LENGTH), nullable=False)
 
 
 # ------------------------------------------------------------
@@ -1043,41 +912,35 @@ class quest_dependencies(models.Model):
 # store event data
 #
 # ------------------------------------------------------------
-class event_data(models.Model):
+class event_data(BaseModel):
     "Store event data."
+    __tablename__ = "event_data"
+
+    __index_together__ =  [("trigger_obj", "trigger_type")]
 
     # event's key
-    key = models.CharField(max_length=KEY_LENGTH, unique=True, blank=True)
+    key = Column(String(KEY_LENGTH), unique=True, nullable=False)
 
     # trigger's relative object's key
-    trigger_obj = models.CharField(max_length=KEY_LENGTH, db_index=True)
+    trigger_obj = Column(String(KEY_LENGTH), index=True, nullable=False)
 
     # The type of the event trigger.
     # event's trigger
-    trigger_type = models.CharField(max_length=KEY_LENGTH, db_index=True)
+    trigger_type = Column(String(KEY_LENGTH), index=True, nullable=False)
 
     # The type of an event action.
     # event's action
-    action = models.CharField(max_length=KEY_LENGTH)
+    action = Column(String(KEY_LENGTH), nullable=False)
 
     # The odds of this event.
-    odds = models.FloatField(blank=True, default=1.0)
+    odds = Column(Float, default=1.0)
 
     # Can trigger another event after this one.
     # If multiple is False, no more events will be triggered.
-    multiple = models.BooleanField(blank=True, default=True)
+    multiple = Column(Boolean, default=True)
 
     # the condition to enable this event
-    condition = models.CharField(max_length=CONDITION_LENGTH, blank=True)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
-        index_together = [("trigger_obj", "trigger_type")]
-
-    def __unicode__(self):
-        return self.key
+    condition = Column(String(CONDITION_LENGTH))
 
 
 # ------------------------------------------------------------
@@ -1085,28 +948,21 @@ class event_data(models.Model):
 # store all dialogues
 #
 # ------------------------------------------------------------
-class dialogues(models.Model):
+class dialogues(BaseModel):
     "Store all dialogues."
+    __tablename__ = "dialogues"
 
     # dialogue's key
-    key = models.CharField(max_length=KEY_LENGTH, unique=True, blank=True)
+    key = Column(String(KEY_LENGTH), unique=True, nullable=False)
 
     # dialogue's name
-    name = models.CharField(max_length=NAME_LENGTH, default="")
+    name = Column(Unicode(NAME_LENGTH))
 
     # condition to show this dialogue
-    condition = models.CharField(max_length=CONDITION_LENGTH, blank=True)
+    condition = Column(String(CONDITION_LENGTH))
 
     # dialogue's content
-    content = models.TextField(blank=True)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
-
-    def __unicode__(self):
-        return self.name + " (" + self.key + ")"
+    content = Column(UnicodeText)
 
 
 # ------------------------------------------------------------
@@ -1114,26 +970,25 @@ class dialogues(models.Model):
 # store dialogue quest dependencies
 #
 # ------------------------------------------------------------
-class dialogue_quest_dependencies(models.Model):
+class dialogue_quest_dependencies(BaseModel):
     "Store dialogue quest dependencies."
+    __tablename__ = "dialogue_quest_dependencies"
+
+    __table_args__ = (
+        UniqueConstraint("dialogue", "dependency", "type"),
+    )
 
     # The key of a dialogue.
     # dialogue's key
-    dialogue = models.CharField(max_length=KEY_LENGTH, db_index=True)
+    dialogue = Column(String(KEY_LENGTH), index=True, nullable=False)
 
     # The key of a quest.
     # related quest's key
-    dependency = models.CharField(max_length=KEY_LENGTH)
+    dependency = Column(String(KEY_LENGTH), nullable=False)
 
     # The key of a quest dependency type.
     # dependency's type
-    type = models.CharField(max_length=KEY_LENGTH)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
-        unique_together = ("dialogue", "dependency", "type")
+    type = Column(String(KEY_LENGTH), nullable=False)
 
 
 # ------------------------------------------------------------
@@ -1141,22 +996,21 @@ class dialogue_quest_dependencies(models.Model):
 # store dialogue relations
 #
 # ------------------------------------------------------------
-class dialogue_relations(models.Model):
+class dialogue_relations(BaseModel):
     "Store dialogue relations."
+    __tablename__ = "dialogue_relations"
+
+    __table_args__ = (
+        UniqueConstraint("dialogue", "next_dlg"),
+    )
 
     # The key of a dialogue.
     # dialogue's key
-    dialogue = models.CharField(max_length=KEY_LENGTH, db_index=True)
+    dialogue = Column(String(KEY_LENGTH), index=True, nullable=False)
 
     # The key of a dialogue.
     # next dialogue's key
-    next_dlg = models.CharField(max_length=KEY_LENGTH, db_index=True)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
-        unique_together = ("dialogue", "next_dlg")
+    next_dlg = Column(String(KEY_LENGTH), index=True, nullable=False)
 
 
 # ------------------------------------------------------------
@@ -1164,25 +1018,24 @@ class dialogue_relations(models.Model):
 # store npc's dialogue
 #
 # ------------------------------------------------------------
-class npc_dialogues(models.Model):
+class npc_dialogues(BaseModel):
     "Store npc's dialogues."
+    __tablename__ = "npc_dialogues"
+
+    __table_args__ = (
+        UniqueConstraint("npc", "dialogue"),
+    )
 
     # The key of an NPC.
     # NPC's key
-    npc = models.CharField(max_length=KEY_LENGTH, db_index=True)
+    npc = Column(String(KEY_LENGTH), index=True, nullable=False)
 
     # The key of a dialogue.
     # dialogue's key
-    dialogue = models.CharField(max_length=KEY_LENGTH, db_index=True)
+    dialogue = Column(String(KEY_LENGTH), index=True, nullable=False)
 
     # if it is a default dialogue
-    default = models.BooleanField(blank=True, default=False)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
-        unique_together = ("npc", "dialogue")
+    default = Column(Boolean, default=False)
 
 
 # ------------------------------------------------------------
@@ -1190,14 +1043,11 @@ class npc_dialogues(models.Model):
 # event's data
 #
 # ------------------------------------------------------------
-class BaseEventActionData(models.Model):
-    # The key of an event.
-    event_key = models.CharField(max_length=KEY_LENGTH, db_index=True)
+class BaseEventActionData(BaseModel):
+    __abstract__ = True
 
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
+    # The key of an event.
+    event_key = Column(String(KEY_LENGTH), index=True, nullable=False)
 
 
 # ------------------------------------------------------------
@@ -1207,26 +1057,25 @@ class BaseEventActionData(models.Model):
 # ------------------------------------------------------------
 class action_attack(BaseEventActionData):
     "action attack's data"
+    __tablename__ = "action_attack"
+
+    __table_args__ = (
+        UniqueConstraint("event_key", "mob", "level"),
+    )
 
     # The key of a common character.
     # mob's key
-    mob = models.CharField(max_length=KEY_LENGTH)
+    mob = Column(String(KEY_LENGTH), nullable=False)
 
     # mob's level
     # Set the level of the mob.
-    level = models.IntegerField(blank=True, null=True)
+    level = Column(Integer)
 
     # event's odds ([0.0, 1.0])
-    odds = models.FloatField(blank=True, default=0)
+    odds = Column(Float, default=0)
 
     # combat's description
-    desc = models.TextField(blank=True)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
-        unique_together = ("event_key", "mob", "level")
+    desc = Column(UnicodeText)
 
 
 # ------------------------------------------------------------
@@ -1236,23 +1085,22 @@ class action_attack(BaseEventActionData):
 # ------------------------------------------------------------
 class action_dialogue(BaseEventActionData):
     "Store all event dialogues."
+    __tablename__ = "action_dialogue"
+
+    __table_args__ = (
+        UniqueConstraint("event_key", "dialogue", "npc"),
+    )
 
     # The key of a dialogue.
     # dialogue's key
-    dialogue = models.CharField(max_length=KEY_LENGTH)
+    dialogue = Column(String(KEY_LENGTH), nullable=False)
 
     # The key of an NPC.
     # NPC's key
-    npc = models.CharField(max_length=KEY_LENGTH, blank=True)
+    npc = Column(String(KEY_LENGTH))
 
     # event's odds
-    odds = models.FloatField(blank=True, default=0)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
-        unique_together = ("event_key", "dialogue", "npc")
+    odds = Column(Float, default=0)
 
 
 # ------------------------------------------------------------
@@ -1262,19 +1110,18 @@ class action_dialogue(BaseEventActionData):
 # ------------------------------------------------------------
 class action_learn_skill(BaseEventActionData):
     "Store all actions to learn skills."
+    __tablename__ = "action_learn_skill"
+
+    __table_args__ = (
+        UniqueConstraint("event_key", "skill"),
+    )
 
     # The key of a skill.
     # skill's key
-    skill = models.CharField(max_length=KEY_LENGTH)
+    skill = Column(String(KEY_LENGTH), nullable=False)
 
     # skill's level
-    level = models.PositiveIntegerField(blank=True, null=True)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
-        unique_together = ("event_key", "skill")
+    level = Column(Integer)
 
 
 # ------------------------------------------------------------
@@ -1284,16 +1131,15 @@ class action_learn_skill(BaseEventActionData):
 # ------------------------------------------------------------
 class action_accept_quest(BaseEventActionData):
     "Store all actions to accept quests."
+    __tablename__ = "action_accept_quest"
+
+    __table_args__ = (
+        UniqueConstraint("event_key", "quest"),
+    )
 
     # The key of a quest.
     # quest's key
-    quest = models.CharField(max_length=KEY_LENGTH)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
-        unique_together = ("event_key", "quest")
+    quest = Column(String(KEY_LENGTH), nullable=False)
 
 
 # ------------------------------------------------------------
@@ -1303,16 +1149,15 @@ class action_accept_quest(BaseEventActionData):
 # ------------------------------------------------------------
 class action_turn_in_quest(BaseEventActionData):
     "Store all actions to turn in a quest."
+    __tablename__ = "action_turn_in_quest"
+
+    __table_args__ = (
+        UniqueConstraint("event_key", "quest"),
+    )
 
     # The key of a quest.
     # quest's key
-    quest = models.CharField(max_length=KEY_LENGTH)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
-        unique_together = ("event_key", "quest")
+    quest = Column(String(KEY_LENGTH), nullable=False)
 
 
 # ------------------------------------------------------------
@@ -1322,15 +1167,14 @@ class action_turn_in_quest(BaseEventActionData):
 # ------------------------------------------------------------
 class action_close_event(BaseEventActionData):
     "Store all event closes."
+    __tablename__ = "action_close_event"
+
+    __table_args__ = (
+        UniqueConstraint("event_key", "event"),
+    )
 
     # The key of an event to close.
-    event = models.CharField(max_length=KEY_LENGTH)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
-        unique_together = ("event_key", "event")
+    event = Column(String(KEY_LENGTH), nullable=False)
 
 
 # ------------------------------------------------------------
@@ -1342,14 +1186,14 @@ class action_message(BaseEventActionData):
     """
     The Action to send a message to the character.
     """
-    # Messages.
-    message = models.CharField(max_length=TEXT_CONTENT_LENGTH, blank=True)
+    __tablename__ = "action_message"
 
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
-        unique_together = ("event_key", "message")
+    __table_args__ = (
+        UniqueConstraint("event_key", "message"),
+    )
+
+    # Messages.
+    message = Column(String(TEXT_CONTENT_LENGTH))
 
 
 # ------------------------------------------------------------
@@ -1361,29 +1205,79 @@ class action_get_objects(BaseEventActionData):
     """
     The Action to add objects to characters
     """
+    __tablename__ = "action_get_objects"
+
+    __table_args__ = (
+        UniqueConstraint("event_key", "object"),
+    )
+
     # The object's key.
-    object = models.CharField(max_length=KEY_LENGTH)
+    object = Column(String(KEY_LENGTH), nullable=False)
 
     # The object's level.
-    level = models.PositiveIntegerField(blank=True, null=True)
+    level = Column(Integer)
 
     # The object's number.
-    number = models.PositiveIntegerField(blank=True, default=0)
+    number = Column(Integer, default=0)
 
     # The odds to get these objects. ([0.0, 1.0])
-    odds = models.FloatField(blank=True, default=0)
+    odds = Column(Float, default=0)
 
     # Can get another object after this one.
-    multiple = models.BooleanField(blank=True, default=True)
+    multiple = Column(Boolean, default=True)
 
     # This message will be sent to the character when get objects.
-    message = models.TextField(blank=True)
+    message = Column(UnicodeText)
 
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
-        unique_together = ("event_key", "object")
+
+# ------------------------------------------------------------
+#
+# action to set the relationship between a player and an element.
+#
+# ------------------------------------------------------------
+class action_set_relation(BaseEventActionData):
+    """
+    The Action to send a message to the character.
+    """
+    __tablename__ = "action_set_relation"
+
+    __table_args__ = (
+        UniqueConstraint("element_type", "element_key"),
+    )
+
+    # The type of a element type.
+    element_type = Column(String(KEY_LENGTH), index=True, nullable=False)
+
+    # The key of a element type.
+    element_key = Column(String(KEY_LENGTH), index=True, nullable=False)
+
+    # The relationship's value
+    value = Column(Integer)
+
+
+# ------------------------------------------------------------
+#
+# action to add the relationship between a player and an element.
+#
+# ------------------------------------------------------------
+class action_add_relation(BaseEventActionData):
+    """
+    The Action to send a message to the character.
+    """
+    __tablename__ = "action_add_relation"
+
+    __table_args__ = (
+        UniqueConstraint("element_type", "element_key"),
+    )
+
+    # The type of a element type.
+    element_type = Column(String(KEY_LENGTH), index=True, nullable=False)
+
+    # The key of a element type.
+    element_key = Column(String(KEY_LENGTH), index=True, nullable=False)
+
+    # The relationship's value
+    value = Column(Integer)
 
 
 # ------------------------------------------------------------
@@ -1391,26 +1285,25 @@ class action_get_objects(BaseEventActionData):
 # localized strings
 #
 # ------------------------------------------------------------
-class localized_strings(models.Model):
+class localized_strings(BaseModel):
     "Store all localized strings."
+    __tablename__ = "localized_strings"
+
+    __table_args__ = (
+        UniqueConstraint("category", "origin"),
+    )
 
     # is system data or not
-    system_data = models.BooleanField(blank=True, default=False)
+    system_data = Column(Boolean, default=False)
 
     # word's category
-    category = models.CharField(max_length=KEY_LENGTH, blank=True)
+    category = Column(String(KEY_LENGTH), default="", nullable=False)
 
     # the origin words
-    origin = models.CharField(max_length=TEXT_CONTENT_LENGTH, blank=True)
+    origin = Column(String(TEXT_CONTENT_LENGTH), nullable=False)
 
     # translated worlds
-    local = models.TextField(blank=True)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
-        unique_together = ("category", "origin")
+    local = Column(UnicodeText, nullable=False)
 
 
 # ------------------------------------------------------------
@@ -1418,25 +1311,18 @@ class localized_strings(models.Model):
 # set image resources
 #
 # ------------------------------------------------------------
-class image_resources(models.Model):
+class image_resources(BaseModel):
     "Store resource's information."
+    __tablename__ = "image_resources"
 
     # image's path
-    resource = models.CharField(max_length=KEY_LENGTH, unique=True)
+    resource = Column(String(KEY_LENGTH), unique=True, nullable=False)
 
     # image's type
-    type = models.CharField(max_length=KEY_LENGTH)
+    type = Column(String(KEY_LENGTH), nullable=False)
 
     # resource'e width
-    image_width = models.PositiveIntegerField(blank=True, default=0)
+    image_width = Column(Integer, default=0)
 
     # resource'e height
-    image_height = models.PositiveIntegerField(blank=True, default=0)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
-
-    def __unicode__(self):
-        return self.resource
+    image_height = Column(Integer, default=0)

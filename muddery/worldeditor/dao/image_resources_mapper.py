@@ -2,19 +2,16 @@
 Query and deal common tables.
 """
 
-from evennia.utils import logger
-from django.apps import apps
-from django.conf import settings
+from muddery.common.utils.singleton import Singleton
+from muddery.worldeditor.dao.common_mapper_base import CommonMapper
 
 
-class ImageResourcesMapper(object):
+class ImageResourcesMapper(CommonMapper, Singleton):
     """
     Object's image.
     """
     def __init__(self):
-        self.model_name = "image_resources"
-        self.model = apps.get_model(settings.WORLD_DATA_APP, self.model_name)
-        self.objects = self.model.objects
+        super(ImageResourcesMapper, self).__init__("image_resources")
 
     def get(self, resource):
         """
@@ -23,7 +20,9 @@ class ImageResourcesMapper(object):
         Args:
             resource: (string) resource's path.
         """
-        return self.objects.get(resource=resource)
+        return self.get({
+            "resource": resource
+        })
 
     def add(self, path, type, width, height):
         """
@@ -38,17 +37,10 @@ class ImageResourcesMapper(object):
         Return:
             none
         """
-        record = {
+        self.update_or_add({
             "resource": path,
             "type": type,
+        }, {
             "image_width": width,
             "image_height": height,
-        }
-
-        data = self.model(**record)
-        data.full_clean()
-        data.save()
-
-
-IMAGE_RESOURCES = ImageResourcesMapper()
-
+        })

@@ -5,21 +5,20 @@ Areas are compose the whole map. Rooms are belongs to areas.
 
 """
 
-from evennia.utils import logger
-from muddery.server.elements.base_element import BaseElement
+from muddery.common.utils.utils import async_wait
+from muddery.server.utils.logger import logger
 from muddery.server.mappings.element_set import ELEMENT
-from muddery.server.utils.localized_strings_handler import _
 from muddery.server.database.worlddata.image_resource import ImageResource
 from muddery.server.database.worlddata.world_rooms import WorldRooms
 from muddery.server.database.worlddata.worlddata import WorldData
 
 
-class MudderyArea(BaseElement):
+class MudderyArea(ELEMENT("MATTER")):
     """
     Areas are compose the whole map. Rooms are belongs to areas.
     """
     element_type = "AREA"
-    element_name = _("Area", "elements")
+    element_name = "Area"
     model_name = "world_areas"
 
     def __init__(self):
@@ -28,21 +27,14 @@ class MudderyArea(BaseElement):
         """
         super(MudderyArea, self).__init__()
 
-        self.name = None
-        self.desc = None
-        self.icon = None
         self.background = None
         self.all_rooms = {}
 
-    def at_element_setup(self, first_time):
+    async def at_element_setup(self, first_time):
         """
         Init the character.
         """
-        super(MudderyArea, self).at_element_setup(first_time)
-
-        self.set_name(self.const.name)
-        self.set_desc(self.const.desc)
-        self.set_icon(self.const.icon)
+        await super(MudderyArea, self).at_element_setup(first_time)
 
         self.background = None
         resource = self.const.background
@@ -54,76 +46,27 @@ class MudderyArea(BaseElement):
                                    "width": resource_info.image_width,
                                    "height": resource_info.image_height}
             except Exception as e:
-                logger.log_errmsg("Load background %s error: %s" % (resource, e))
+                logger.log_trace("Load background %s error: %s" % (resource, e))
 
         # load rooms in this area
-        self.load_rooms()
+        await self.load_rooms()
 
-    def get_appearance(self, caller):
+    def get_appearance(self):
         """
-        This is a convenient hook for a 'look'
-        command to call.
+        The common appearance for all players.
         """
-        info = {
-            "key": self.get_element_key(),
-            "name": self.get_name(),
-            "desc": self.get_desc(),
-            "icon": self.get_icon(),
-            "background": self.background,
-        }
-        
+        info = super(MudderyArea, self).get_appearance()
+        info["background"] = self.background
         return info
 
-    def set_name(self, name):
+    def get_map_data(self):
         """
-        Set object's name.
-
-        Args:
-        name: (string) Name of the object.
-        """
-        self.name = name
-
-    def get_name(self):
-        """
-        Get player character's name.
-        """
-        return self.name
-
-    def set_desc(self, desc):
-        """
-        Set object's description.
-
-        Args:
-        desc: (string) Description.
-        """
-        self.desc = desc
-
-    def get_desc(self):
-        """
-        Get the element's description.
+        Get the area's map data.
         :return:
         """
-        return self.desc
+        return self.get_appearance()
 
-    def set_icon(self, icon_key):
-        """
-        Set object's icon.
-        Args:
-            icon_key: (String)icon's resource key.
-
-        Returns:
-            None
-        """
-        self.icon = icon_key
-
-    def get_icon(self):
-        """
-        Get object's icon.
-        :return:
-        """
-        return self.icon
-
-    def load_rooms(self):
+    async def load_rooms(self):
         """
         Load all rooms in this area.
 
@@ -138,9 +81,10 @@ class MudderyArea(BaseElement):
             table_data = table_data[0]
 
             new_obj = ELEMENT(table_data.element_type)()
-            new_obj.setup_element(record.key)
+            self.all_rooms[record.key] = new_obj
 
-            self.all_rooms[new_obj.get_element_key()] = new_obj
+        if self.all_rooms:
+            await async_wait([obj.setup_element(key) for key, obj in self.all_rooms.items()])
 
     def get_rooms_key(self):
         """
@@ -156,3 +100,31 @@ class MudderyArea(BaseElement):
         :return:
         """
         return self.all_rooms[room_key]
+
+    def get_map(self):
+        """
+        Get all rooms and exits' positions in this area.
+
+        {
+            area's appearance,
+            "rooms" : {
+                room's key: {
+                    room's appearance,
+                    "exits": {
+                        {
+                            exit's key:
+                                {
+                                    exit's appearance,
+                                    "from": room's key,
+                                    "to": room's key,
+                                },
+                        }
+                },
+            }
+        }
+        """
+        return dict(self.get_map_data(), **{
+            "rooms": {
+                key: room.get_map_data() for key, room in self.all_rooms.items()
+            }
+        })

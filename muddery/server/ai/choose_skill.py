@@ -11,18 +11,18 @@ class ChooseSkill(object):
     """
     Choose a skill and the skill's target.
     """
-    def choose(self, caller):
+    async def choose(self, caller):
         """
         Choose a skill and the skill's target.
         """
         if not caller:
             return
 
-        combat = caller.get_combat()
+        combat = await caller.get_combat()
         if not combat:
             return
 
-        skills = caller.get_available_skills()
+        skills = await caller.get_available_skills()
         if not skills:
             return
 

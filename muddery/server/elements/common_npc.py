@@ -9,7 +9,6 @@ creation commands.
 """
 
 from muddery.server.mappings.element_set import ELEMENT
-from muddery.server.utils.localized_strings_handler import _
 
 
 class MudderyCommonNPC(ELEMENT("BASE_NPC")):
@@ -17,5 +16,5 @@ class MudderyCommonNPC(ELEMENT("BASE_NPC")):
     The character not controlled by players.
     """
     element_type = "COMMON_NPC"
-    element_name = _("Common NPC", "elements")
+    element_name = "Common NPC"
     model_name = ""

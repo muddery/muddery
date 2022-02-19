@@ -2,7 +2,7 @@
 Battle commands. They only can be used when a character is in a combat.
 """
 
-from muddery.worldeditor.utils.response import success_response
+from muddery.common.networks import responses
 
 
 class BaseRequestProcesser(object):
@@ -14,6 +14,5 @@ class BaseRequestProcesser(object):
     login = True
     staff = True
 
-    def func(self, args, request):
-        return success_response("success")
-
+    async def func(self, args, request):
+        return responses.empty_response()

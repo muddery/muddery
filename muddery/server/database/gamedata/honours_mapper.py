@@ -2,29 +2,44 @@
 This model translates default strings into localized strings.
 """
 
-from django.db import transaction
-from django.apps import apps
-from django.conf import settings
+import importlib
+import traceback
+from sqlalchemy import select, update, delete
+from muddery.common.utils.singleton import Singleton
+from muddery.server.settings import SETTINGS
+from muddery.server.database.gamedata_db import GameDataDB
+from muddery.server.utils.logger import logger
 
 
-class HonoursMapper(object):
+class HonoursMapper(Singleton):
     """
     This model stores all character's honours.
     """
     def __init__(self):
-        self.honour_model = apps.get_model(settings.GAME_DATA_APP, "honours")
-        self.objects = self.honour_model.objects
+        self.model_name = "honours"
+        module = importlib.import_module(SETTINGS.GAMEDATA_DB["MODELS"])
+        self.model = getattr(module, self.model_name)
+        self.session = GameDataDB.inst().get_session()
+
         self.honours = {}
         self.rankings = []
 
-    def reload(self):
+    async def init(self):
+        """
+        Init async processes.
+        """
+        await self.load()
+
+    async def load(self):
         """
         Reload all data.
         """
         self.honours = {}
         self.rankings = []
 
-        for record in self.objects.all():
+        stmt = select(self.model)
+        result = self.session.execute(stmt)
+        for record in result.scalars():
             self.honours[record.character] = {
                 "honour": record.honour,
                 "place": 0,
@@ -76,7 +91,7 @@ class HonoursMapper(object):
         try:
             return self.honours[character.id]
         except Exception as e:
-            print("Can not get character's honour: %s" % e)
+            logger.log_err("Can not get character's honour: %s" % e)
 
     def get_honour(self, char_db_id, default=None):
         """
@@ -94,7 +109,7 @@ class HonoursMapper(object):
             if default is not None:
                 return default
             else:
-                print("Can not get character's honour: %s" % e)
+                logger.log_err("Can not get character's honour: %s" % e)
             
     def get_ranking(self, char_db_id):
         """
@@ -109,7 +124,7 @@ class HonoursMapper(object):
         try:
             return self.honours[char_db_id]["ranking"]
         except Exception as e:
-            print("Can not get character's ranking: %s" % e)
+            logger.log_err("Can not get character's ranking: %s" % e)
             
     def get_top_rankings(self, number):
         """
@@ -139,7 +154,7 @@ class HonoursMapper(object):
         else:
             return [id for id in self.rankings[-number:]]
 
-    def create_honour(self, char_id, honour):
+    async def create_honour(self, char_id, honour):
         """
         Add a new character's honour.
 
@@ -148,11 +163,12 @@ class HonoursMapper(object):
             honour: character's honour
         """
         try:
-            record = self.honour_model(
+            record = self.model(
                 character=char_id,
                 honour=honour
             )
-            record.save()
+            self.session.add(record)
+
             self.honours[char_id] = {
                 "honour": honour,
                 "place": 0,
@@ -160,9 +176,9 @@ class HonoursMapper(object):
             }
             self.make_rankings()
         except Exception as e:
-            print("Can not create character's honour: %s" % e)
+            logger.log_err("Can not create character's honour: %s" % e)
 
-    def set_honour(self, char_id, honour):
+    async def set_honour(self, char_id, honour):
         """
         Set a character's honour.
         
@@ -170,19 +186,20 @@ class HonoursMapper(object):
             char_id: character's id
             honour: character's honour
         """
-        try:
-            record = self.objects.filter(character=char_id)
-            if record:
-                record.update(honour=honour)
+        stmt = update(self.model).where(getattr(self.model, "character") == char_id).values(honour=honour)
+        result = self.session.execute(stmt)
+        if result.rowcount > 0:
+            try:
                 self.honours[char_id]["honour"] = honour
-            else:
-                self.create_honour(char_id, honour)
+            except Exception as e:
+                logger.log_err("Can not set character's honour: %s" % e)
+        else:
+            # Add a new honour record.
+            await self.create_honour(char_id, honour)
 
-            self.make_rankings()
-        except Exception as e:
-            print("Can not set character's honour: %s" % e)
+        self.make_rankings()
 
-    def set_honours(self, new_honours):
+    async def set_honours(self, new_honours):
         """
         Set a set of characters' honours.
         
@@ -191,12 +208,13 @@ class HonoursMapper(object):
         """
         for key in new_honours:
             if key not in self.honours:
-                self.create_honour(key, 0)
+                await self.create_honour(key, 0)
 
         success = False
-        with transaction.atomic():
+        with self.session.begin():
             for key, value in new_honours.items():
-                self.objects.filter(character=key).update(honour=value)
+                stmt = update(self.model).where(getattr(self.model, "character") == key).values(honour=value)
+                result = self.session.execute(stmt)
             success = True
         
         if success:
@@ -204,21 +222,23 @@ class HonoursMapper(object):
                 self.honours[key]["honour"] = value
             self.make_rankings()
         else:
-            print("Can not set character's honours")
+            logger.log_err("Can not set character's honours")
             
-    def remove_character(self, char_db_id):
+    async def remove_character(self, char_db_id):
         """
         Remove a character's honour.
         """
         try:
-            self.objects.get(character=char_db_id).delete()
-            del self.honours[char_db_id]
+            stmt = delete(self.model).where(getattr(self.model, "character") == char_db_id)
+            self.session.execute(stmt)
+
+            if char_db_id in self.honours:
+                del self.honours[char_db_id]
+
             self.make_rankings()
-        except self.honour_model.DoesNotExist:
-            pass
         except Exception as e:
-            print("Can not remove character's honour: %s" % e)
-            
+            logger.log_err("Can not remove character's honour: %s" % e)
+
     def get_characters(self, character, number):
         """
         Get opponents whose ranking is in the given number.
@@ -238,7 +258,3 @@ class HonoursMapper(object):
             return [id for id in self.rankings[begin:end] if id != character_id]
         else:
             return [id for id in self.rankings[-number:]]
-        
-
-# main honour handler
-HONOURS_MAPPER = HonoursMapper()

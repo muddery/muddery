@@ -3,23 +3,26 @@
 World location's field. Group rooms by areas.
 """
 
-from django.contrib.admin.forms import forms
+from wtforms import widgets, fields
 
 
-class ImageField(forms.CharField):
+class ImageInput(widgets.TextInput):
+    pass
+
+
+class ImageField(fields.StringField):
     """
     Image's field.
     """
     def __init__(self, image_type="image", *args, **kwargs):
         """
-
         Args:
             image_type: (string) image's type, could be "icon" or "image".
         """
-        super(ImageField, self).__init__(*args, **kwargs)
+        super(ImageField, self).__init__(widget=ImageInput(), *args, **kwargs)
         self.image_type = image_type
 
-    def get_type(self):
+    def image_type(self):
         """
         Get image type.
 
@@ -27,4 +30,3 @@ class ImageField(forms.CharField):
              (string) image type.
         """
         return self.image_type
-

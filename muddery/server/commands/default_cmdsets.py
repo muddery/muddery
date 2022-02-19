@@ -1,143 +1,109 @@
 """
 Command sets
 
-All commands in the game must be grouped in a cmdset.  A given command
-can be part of any number of cmdsets and cmdsets can be added/removed
-and merged onto entities at runtime.
-
-To create new commands to populate the cmdset, see
-`commands/command.py`.
-
+All commands in the game must be grouped in a cmdset.
 """
 
-from evennia import CmdSet
-from evennia import default_cmds
+from muddery.server.commands.command_set import CommandSet
 from muddery.server.commands import combat
 from muddery.server.commands import general
 from muddery.server.commands import player
 from muddery.server.commands import unloggedin
 
 
-class CharacterCmdSet(default_cmds.CharacterCmdSet):
+class CharacterCmdSet(CommandSet):
     """
     The `CharacterCmdSet` contains general in-game commands like `look`,
     `goto`, etc available on in-game Character objects. It is merged with
     the `PlayerCmdSet` when a Player puppets a Character.
     """
-    key = "DefaultCharacter"
-
-    def at_cmdset_creation(self):
+    @classmethod
+    def create(cls):
         """
         Populates the cmdset
         """
-        super(CharacterCmdSet, self).at_cmdset_creation()
+        super(CharacterCmdSet, cls).create()
         #
         # any commands you add below will overload the default ones.
         #
 
-        self.add(general.CmdLook())
-        self.add(general.CmdInventoryObject())
-        self.add(general.CmdEquipmentsObject())
-        self.add(general.CmdLookRoomObj())
-        self.add(general.CmdLookRoomChar())
-        self.add(general.CmdTraverse())
-        self.add(general.CmdInventory())
-        self.add(general.CmdTalk())
-        self.add(general.CmdDialogue())
-        self.add(general.CmdLoot())
-        self.add(general.CmdUse())
-        self.add(general.CmdDiscard())
-        self.add(general.CmdEquip())
-        self.add(general.CmdTakeOff())
-        self.add(general.CmdCastSkill())
-        self.add(general.CmdAttack())
-        self.add(general.CmdUnlockExit())
-        self.add(general.CmdGiveUpQuest())
-        self.add(general.CmdShopping())
-        self.add(general.CmdBuy())
-        self.add(general.CmdSay())
-        self.add(general.CmdQueueUpCombat())
-        self.add(general.CmdQuitCombatQueue())
-        self.add(general.CmdConfirmCombat())
-        self.add(general.CmdRejectCombat())
-        self.add(general.CmdGetRankings())
-        self.add(general.CmdQueryQuest())
-        self.add(general.CmdQuerySkill())
+        cls.add(general.CmdInventoryObject())
+        cls.add(general.CmdEquipmentsObject())
+        cls.add(general.CmdLookRoomObj())
+        cls.add(general.CmdLookRoomChar())
+        cls.add(general.CmdTraverse())
+        cls.add(general.CmdInventory())
+        cls.add(general.CmdTalk())
+        cls.add(general.CmdDialogue())
+        cls.add(general.CmdLoot())
+        cls.add(general.CmdUse())
+        cls.add(general.CmdDiscard())
+        cls.add(general.CmdEquip())
+        cls.add(general.CmdTakeOff())
+        cls.add(general.CmdCastSkill())
+        cls.add(general.CmdAttack())
+        cls.add(general.CmdUnlockExit())
+        cls.add(general.CmdGiveUpQuest())
+        cls.add(general.CmdShopping())
+        cls.add(general.CmdBuy())
+        cls.add(general.CmdSay())
+        cls.add(general.CmdQueueUpCombat())
+        cls.add(general.CmdQuitCombatQueue())
+        cls.add(general.CmdConfirmCombat())
+        cls.add(general.CmdRejectCombat())
+        cls.add(general.CmdGetRankings())
+        cls.add(general.CmdQueryQuest())
+        cls.add(general.CmdQuerySkill())
+        cls.add(general.CmdQueryMaps())
 
-        self.add(combat.CmdCastCombatSkill())
-        self.add(combat.CmdCombatInfo())
-        self.add(combat.CmdLeaveCombat())
-
-        # Add empty login commands to the normal cmdset to
-        # avoid showing wrong cmd messages.
-        self.add(general.CmdConnect())
-        self.add(general.CmdCreate())
-        self.add(general.CmdCreateConnect())
+        cls.add(combat.CmdCastCombatSkill())
+        cls.add(combat.CmdCombatInfo())
+        cls.add(combat.CmdLeaveCombat())
 
         # Command for test.
-        self.add(general.CmdTest())
+        cls.add(general.CmdTest())
 
-class AccountCmdSet(default_cmds.AccountCmdSet):
+
+class AccountCmdSet(CommandSet):
     """
     This is the cmdset available to the Player at all times. It is
     combined with the `CharacterCmdSet` when the Player puppets a
     Character. It holds game-account-specific commands, channel
     commands, etc.
     """
-    key = "DefaultAccount"
-
-    def at_cmdset_creation(self):
+    @classmethod
+    def create(cls):
         """
         Populates the cmdset
         """
-        super(AccountCmdSet, self).at_cmdset_creation()
+        super(AccountCmdSet, cls).create()
         #
         # any commands you add below will overload the default ones.
         #
-        self.add(player.CmdQuit())
-        self.add(player.CmdChangePassword())
-        self.add(player.CmdPuppet())
-        self.add(player.CmdUnpuppet())
-        self.add(player.CmdCharCreate())
-        self.add(player.CmdCharDelete())
-        self.add(player.CmdCharAll())
+        cls.add(player.CmdQuit())
+        cls.add(player.CmdChangePassword())
+        cls.add(player.CmdPuppet())
+        cls.add(player.CmdPuppetName())
+        cls.add(player.CmdUnpuppet())
+        cls.add(player.CmdCharCreate())
+        cls.add(player.CmdCharDelete())
+        cls.add(player.CmdCharAll())
+        cls.add(player.CmdDeleteAccount())
 
 
-class UnloggedinCmdSet(default_cmds.UnloggedinCmdSet):
+class SessionCmdSet(CommandSet):
     """
     Command set available to the Session before being logged in.  This
     holds commands like creating a new account, logging in, etc.
     """
-    key = "DefaultUnloggedin"
-
-    def at_cmdset_creation(self):
+    @classmethod
+    def create(cls):
         """
         Populates the cmdset.
         """
-        self.add(unloggedin.CmdUnconnectedLoginStart())
-        self.add(unloggedin.CmdUnconnectedCreate())
-        self.add(unloggedin.CmdUnconnectedConnect())
-        self.add(unloggedin.CmdUnconnectedQuit())
-        self.add(unloggedin.CmdQuickLogin())
-        self.add(unloggedin.CmdUnconnectedConnectT())
+        super(SessionCmdSet, cls).create()
 
-
-class SessionCmdSet(default_cmds.SessionCmdSet):
-    """
-    This cmdset is made available on Session level once logged in. It
-    is empty by default.
-    """
-    key = "DefaultSession"
-
-    def at_cmdset_creation(self):
-        """
-        This is the only method defined in a cmdset, called during
-        its creation. It should populate the set with command instances.
-
-        As and example we just add the empty base `Command` object.
-        It prints some info.
-        """
-        super(SessionCmdSet, self).at_cmdset_creation()
-        #
-        # any commands you add below will overload the default ones.
-        #
+        cls.add(unloggedin.CmdUnloginLook())
+        cls.add(unloggedin.CmdCreateAccount())
+        cls.add(unloggedin.CmdConnectAccount())
+        cls.add(unloggedin.CmdQuitAccount())

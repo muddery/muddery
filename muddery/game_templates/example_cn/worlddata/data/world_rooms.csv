@@ -9,5 +9,5 @@ room_colorfulworld_gift_shop,礼品店,ROOM,礼品店里空无一人，橱窗全
 room_colorfulworld_photo_studio,照相馆,ROOM,原本照相馆里有很多人排队和卡通人偶合影，现在里面已是没有了人影，卡通人偶都倒落在地上，已经残破不全，暗淡的光线从窗口斜射进来，照在它们扭曲的身体上，显得狰狞可怖。,0,area_park,"(525,195)",image/icon/room.png,
 room_colorfulworld_printing_room,冲印室,PROFIT_ROOM,冲印室里摆放着两台冲印机，一旁的柜子里放着各种不知名的药水。,0,area_park,"(600,195)",image/icon/room.png,
 room_colorfulworld_to_gate,通向大门,ROOM,这一条丁字路，西面是游乐园大门，东面是“缤纷天地”，南面是度假村。原本熙熙攘攘的街道现在连一点声音都没有。道路旁的灌木丛里似乎有几个黑影，看不清到底是什么东西，但感觉他们好像在偷偷地窥视着你。,0,area_park,"(525,270)",image/icon/room.png,
-room_gate_fountain,喷泉,ROOM,喷泉已经不再流动了，在水池中漂浮着一个人，他面朝下躺着，应该已经死了。在喷泉顶上有两只乌鸦在呱呱地叫着，发觉你走近之后它们突然停止了声响，一起转过头看着你，不知道在盘算着些什么。,,,,
+room_gate_fountain,喷泉,ROOM,喷泉已经不再流动了，在水池中漂浮着一个人，他面朝下躺着，应该已经死了。在喷泉顶上有两只乌鸦在呱呱地叫着，发觉你走近之后它们突然停止了声响，一起转过头看着你，不知道在盘算着些什么。,0,area_park,"(600,270)",image/icon/room.png,
 room_gate_gate,游乐园大门,ROOM,从喷泉旁绕过，远远地就能看到大门已经被路障堵死了，还有不少机器人守卫着。这太危险了！趁还没有被发现，赶快回去吧！,,,,

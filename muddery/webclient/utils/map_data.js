@@ -3,6 +3,12 @@ MudderyMapData = function() {
 }
 
 MudderyMapData.prototype = {
+    _map_areas: {},     // area's key: {
+                        //     "name": area's name,
+                        //     "icon": area's icon,
+                        //     "desc": area's description,
+                        //     "background": area's background,
+                        // }
 
     _map_rooms: {},     // room's key: {"name": room's name,
                         //              "icon": room's icon,
@@ -19,54 +25,69 @@ MudderyMapData.prototype = {
     _current_location: null,
 
     clearData: function() {
+        this._map_areas = {};
         this._map_rooms = {};
         this._map_exits = {};
         this._map_paths = {};
    	 	_current_location: null;
     },
 
-    setData: function(data) {
-        // set map data
-        this._map_rooms = data.rooms;
-        this._map_exits = data.exits;
-
-        for (var exit in data.exits) {
-            var location = data.exits[exit]["from"];
-            var destination = data.exits[exit]["to"];
-            if (location in this._map_paths) {
-                this._map_paths[location].push(destination);
-            }
-            else {
-                this._map_paths[location] = [destination];
-            }
-        }
-    },
-
     setCurrentLocation: function(location) {
         this._current_location = location;
     },
 
-    revealMap: function(data) {
-        // add data to map
-        if (!data) {
+    getCurrentLocation: function(location) {
+        return this._current_location;
+    },
+
+    getCurrentRoomMap: function() {
+        if (!this._current_location) {
             return;
         }
 
-        if ("rooms" in data) {
-            // add rooms
-            for (var room in data.rooms) {
-                this._map_rooms[room] = data.rooms[room];
-            }
+        if (!(this._current_location["room"] in this._map_rooms)) {
+            return;
         }
 
-        if ("exits" in data) {
-            for (var exit in data.exits) {
-                // add exits
-                this._map_exits[exit] = data.exits[exit];
+        return this._map_rooms[this._current_location["room"]];
+    },
 
-                // add paths
-                var location = data.exits[exit]["from"];
-                var destination = data.exits[exit]["to"];
+    revealMaps: function(data) {
+        // save map data
+        var new_map = false;
+        for (var area_key in data) {
+            if (area_key in this._map_areas) {
+                continue;
+            }
+
+            new_map = true;
+            var area_map = data[area_key];
+
+            this._map_areas[area_key] = area_map;
+            var rooms = area_map["rooms"];
+
+            // Add room.
+            for (var room_key in rooms) {
+                rooms[room_key]["area"] = area_key;
+            }
+            this._map_rooms = Object.assign(this._map_rooms, rooms);
+
+            // Add exits.
+            var new_exits = {};
+            for (var room_key in rooms) {
+                var exits = rooms[room_key]["exits"];
+                for (var i = 0; i < exits.length; i++) {
+                    var exit_key = exits[i]["key"];
+                    if (!(exit_key in this._map_exits)) {
+                        this._map_exits[exit_key] = exits[i];
+                        new_exits[exit_key] = exits[i];
+                    }
+                }
+            }
+
+            for (var exit_key in new_exits) {
+                var location = new_exits[exit_key]["from"];
+                var destination = new_exits[exit_key]["to"];
                 if (location in this._map_paths) {
                     this._map_paths[location].push(destination);
                 }
@@ -74,6 +95,45 @@ MudderyMapData.prototype = {
                     this._map_paths[location] = [destination];
                 }
             }
+        }
+
+        if (new_map && this._current_location) {
+            this.checkNeighbourRooms(this._current_location.room);
+        }
+    },
+
+    checkNeighbourRooms: function () {
+        if (!this._current_location) {
+            return;
+        }
+
+        var room_key = this._current_location["room"];
+
+        // Check if has the room's map, else query the map.
+        if (!(room_key in this._map_rooms)) {
+            core.command.queryMaps([room_key]);
+            return;
+        }
+
+        var room_list = [];
+        for (var exit_key in this._map_rooms[room_key].exits) {
+            var dest = this._map_rooms[room_key].exits[exit_key]["to"];
+            if (!(dest in this._map_rooms)) {
+                room_list.push(dest);
+            }
+            else {
+                // Check neighbour's neighbour
+                for (var dest_exit_key in this._map_rooms[dest].exits) {
+                    var dest2 = this._map_rooms[dest].exits[dest_exit_key]["to"];
+                    if (!(dest2 in this._map_rooms)) {
+                        room_list.push(dest2);
+                    }
+                }
+            }
+        }
+
+        if (room_list.length > 0) {
+            core.command.queryMaps(room_list);
         }
     },
 
@@ -84,24 +144,24 @@ MudderyMapData.prototype = {
             return;
         }
 
-        var location = this._map_exits[exit]["from"];
-        if (!location in this._map_rooms) {
+        var location_key = this._map_exits[exit]["from"];
+        if (!location_key in this._map_rooms) {
             return;
         }
 
-        var destination = this._map_exits[exit]["to"];
-        if (!destination in this._map_rooms) {
+        var destination_key = this._map_exits[exit]["to"];
+        if (!destination_key in this._map_rooms) {
             return;
         }
 
-        var from_area = this._map_rooms[location]["area"];
-        var to_area = this._map_rooms[destination]["area"];
+        var from_area = this._map_rooms[location_key]["area"];
+        var to_area = this._map_rooms[destination_key]["area"];
         if (from_area !== to_area) {
             return;
         }
 
-        var from = this._map_rooms[location]["pos"];
-        var to = this._map_rooms[destination]["pos"];
+        var from = this._map_rooms[location_key]["pos"];
+        var to = this._map_rooms[destination_key]["pos"];
         if (!from || !to) {
             return;
         }

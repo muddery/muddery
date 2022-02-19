@@ -1,8 +1,8 @@
-key,element_type,name,desc,icon,level,reborn_time,friendly,clone
+key,element_type,name,desc,icon,level,reborn_time,relationship,clone
 player,PLAYER_CHARACTER,玩家,"这是玩家",image/icon/player.png,1,10,0,
 staff,STAFF_CHARACTER,管理员,"这是管理员。",image/icon/player.png,1,10,0,
+tester,TESTER_CHARACTER,测试员,"这是测试员。",image/icon/player.png,1,10,0,player
 robot_mob_A,COMMON_NPC,机器人A,"这是个A型机器人。",image/icon/robot.png,2,0,-100,
 robot_mob_B,COMMON_NPC,机器人B,"这是个B型机器人。",image/icon/robot.png,3,0,-100,
-npc_wu,WORLD_NPC,保安,"这个人身材高大，但身上受了伤，活动有些不灵活。",image/icon/guard.png,1,0,100,
-npc_stranger,WORLD_NPC,陌生人,"这个人身材高大，体格强健，双手紧握着拳头，眼睛紧紧地盯着你，时刻会向你扑过来。",image/icon/guard.png,1,1,-100,
+npc_wu,WORLD_NPC,保安,"这个人身材高大，但身上受了伤，活动有些不灵活。",image/icon/guard.png,1,0,-100,
 npc_doll,WORLD_NPC,人偶,"这个人偶斜靠在墙上，一双大眼睛好像正在盯着你看。你越瞧它越不爽，真想打它一顿！",image/icon/model.png,1,1,-100,

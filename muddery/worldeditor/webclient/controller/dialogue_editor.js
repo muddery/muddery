@@ -122,7 +122,7 @@ DialogueEditor.prototype.onDeleteEvent = function(e) {
 DialogueEditor.prototype.confirmDeleteEvent = function(e) {
     window.parent.controller.hideWaiting();
 
-    var record_id = e.data.record;
+    var record_id = parseInt(e.data.record);
     service.deleteRecord(controller.event_table, record_id, controller.deleteEventSuccess, controller.failedCallback);
 }
 

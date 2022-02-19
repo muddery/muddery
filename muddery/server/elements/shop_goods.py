@@ -3,7 +3,7 @@ Shop goods is the object in shops. They have some special attributes to record g
 
 """
 
-from evennia.utils import logger
+from muddery.server.utils.logger import logger
 from muddery.server.database.worlddata.worlddata import WorldData
 from muddery.server.utils.localized_strings_handler import _
 from muddery.server.mappings.element_set import ELEMENT, ELEMENT_SET
@@ -17,7 +17,7 @@ class MudderyShopGoods(BaseElement):
     to sell and additional shop information.
     """
     element_type = "SHOP_GOODS"
-    element_name = _("Goods", "elements")
+    element_name = "Goods"
     model_name = "shop_goods"
 
     def set_data(self, data):
@@ -36,7 +36,7 @@ class MudderyShopGoods(BaseElement):
             table_data = WorldData.get_tables_data(common_models, key=data.goods)
             table_data = table_data[0]
         except Exception as e:
-            logger.log_errmsg("Can not find goods %s." % data.goods)
+            logger.log_err("Can not find goods %s." % data.goods)
             return
 
         self.obj_key = data.goods
@@ -50,7 +50,7 @@ class MudderyShopGoods(BaseElement):
             unit_record = WorldData.get_tables_data(common_models, key=data.unit)
             unit_record = unit_record[0]
         except Exception as e:
-            logger.log_errmsg("Can not find price unit %s." % data.unit)
+            logger.log_err("Can not find price unit %s." % data.unit)
             return
 
         self.unit_key = data.unit
@@ -63,7 +63,7 @@ class MudderyShopGoods(BaseElement):
 
         self.available = True
 
-    def is_available(self, caller):
+    async def is_available(self, caller):
         """
         Is it available to the customer.
 
@@ -73,9 +73,9 @@ class MudderyShopGoods(BaseElement):
         if not self.available:
             return False
 
-        return STATEMENT_HANDLER.match_condition(self.condition, caller, None)
+        return await STATEMENT_HANDLER.match_condition(self.condition, caller, None)
 
-    def get_info(self, caller):
+    async def get_info(self, caller):
         """
         Get the goods' info.
 
@@ -95,7 +95,7 @@ class MudderyShopGoods(BaseElement):
 
         return info
 
-    def sell_to(self, caller):
+    async def sell_to(self, caller):
         """
         Buy this goods.
 
@@ -108,12 +108,12 @@ class MudderyShopGoods(BaseElement):
         # check price
         unit_number = caller.total_object_number(self.unit_key)
         if unit_number < self.price:
-            caller.msg({"alert": _("Sorry, %s is not enough.") % self.unit_name})
+            await caller.msg({"alert": _("Sorry, %s is not enough.") % self.unit_name})
             return
 
         # check if can get these objects
         if not caller.can_get_object(self.obj_key, self.number):
-            caller.msg({"alert": _("Sorry, you can not take more %s.") % self.obj_name})
+            await caller.msg({"alert": _("Sorry, you can not take more %s.") % self.obj_name})
             return
 
         remove_list = [
@@ -131,7 +131,7 @@ class MudderyShopGoods(BaseElement):
         ]
 
         # Reduce price units and give goods.
-        caller.exchange_objects(remove_list, receive_list, show=True)
-        caller.msg({"alert": _("Purchase successful!")})
+        await caller.exchange_objects(remove_list, receive_list, show=True)
+        await caller.msg({"alert": _("Purchase successful!")})
 
         return

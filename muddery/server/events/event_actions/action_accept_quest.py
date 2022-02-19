@@ -4,7 +4,7 @@ Event action.
 
 from muddery.server.events.base_event_action import BaseEventAction
 from muddery.server.database.worlddata.worlddata import WorldData
-from muddery.server.utils.localized_strings_handler import _
+from muddery.common.utils.utils import async_wait
 
 
 class ActionAcceptQuest(BaseEventAction):
@@ -12,11 +12,11 @@ class ActionAcceptQuest(BaseEventAction):
     Accept a quest.
     """
     key = "ACTION_ACCEPT_QUEST"
-    name = _("Accept a Quest", category="event_actions")
+    name = "Accept a Quest"
     model_name = "action_accept_quest"
     repeatedly = False
 
-    def func(self, event_key, character, obj):
+    async def func(self, event_key, character, obj):
         """
         Accept a quest.
 
@@ -29,9 +29,8 @@ class ActionAcceptQuest(BaseEventAction):
         records = WorldData.get_table_data(self.model_name, event_key=event_key)
 
         # Accept quests.
-        for record in records:
-            quest_key = record.quest
-            character.quest_handler.accept(quest_key)
+        if records:
+            await async_wait([character.quest_handler.accept(r.quest) for r in records])
 
     def get_quests(self, event_key):
         """

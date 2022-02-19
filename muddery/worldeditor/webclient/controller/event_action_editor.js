@@ -26,7 +26,7 @@ EventActionEditor.prototype.setFields = function() {
 
         // Users can not set the event's key and trigger object.
         if (field.name == "event_key") {
-            field.type = "Hidden";
+            field.type = "HiddenInput";
             field.value = this.event_key;
         }
 

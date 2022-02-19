@@ -1,16 +1,8 @@
 """
-Muddery text game creation system
-
-This is the main top-level API for Muddery. You can also explore the
-muddery library by accessing muddery.<subpackage> directly.
-
-For full functionality you need to explore this module via a django-
-aware shell. Go to your game directory and use the command 'muddery.py shell'
-to launch such a shell (using python or ipython depending on your install).
-
+Muddery online game creation system
 See www.muddery.org for full documentation.
-
 """
+import traceback
 
 
 def _create_version():
@@ -26,8 +18,10 @@ def _create_version():
         with open(os.path.join(root, "VERSION.txt"), 'r') as f:
             version = f.read().strip()
     except IOError as err:
+        traceback.print_exc()
         print(err)
     return version
+
 
 __version__ = _create_version()
 del _create_version

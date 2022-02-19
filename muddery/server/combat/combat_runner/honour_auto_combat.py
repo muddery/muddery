@@ -20,7 +20,7 @@ class HonourAutoCombat(HonourCombat):
             character = char["char"]
             character.start_auto_combat_skill()
 
-    def finish(self):
+    async def finish(self):
         """
         Finish a combat. Send results to players, and kill all failed characters.
         """
@@ -28,4 +28,4 @@ class HonourAutoCombat(HonourCombat):
             character = char["char"]
             character.stop_auto_combat_skill()
 
-        super(HonourAutoCombat, self).finish()
+        await super(HonourAutoCombat, self).finish()

@@ -31,12 +31,6 @@ WORLD_NPC,npc_wu,1,max_exp,0
 WORLD_NPC,npc_wu,1,give_exp,5
 WORLD_NPC,npc_wu,1,attack,5
 WORLD_NPC,npc_wu,1,defence,5
-WORLD_NPC,npc_stranger,1,max_hp,25
-WORLD_NPC,npc_stranger,1,max_mp,100
-WORLD_NPC,npc_stranger,1,max_exp,0
-WORLD_NPC,npc_stranger,1,give_exp,5
-WORLD_NPC,npc_stranger,1,attack,5
-WORLD_NPC,npc_stranger,1,defence,5
 WORLD_NPC,npc_doll,1,max_hp,10
 WORLD_NPC,npc_doll,1,max_mp,100
 WORLD_NPC,npc_doll,1,max_exp,0

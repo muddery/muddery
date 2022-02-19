@@ -3,69 +3,16 @@ This model handle statements.
 """
 
 import re, ast, traceback
-from django.conf import settings
-from evennia.utils import logger
-from evennia.utils.utils import class_from_module
+from muddery.server.settings import SETTINGS
+from muddery.server.utils.logger import logger
+from muddery.common.utils.utils import class_from_path
+from muddery.common.utils.utils import async_gather, async_wait
 
 
-#re_words = re.compile(r'([a-zA-Z_][a-zA-Z0-9_]*)|("(.*)")')
 re_function = re.compile(r'[a-zA-Z_][a-zA-Z0-9_\.]*\(.*?\)')
-def exec_condition(func_set, condition, caller, obj, **kwargs):
-    """
-    Execute the statements.
-
-    Args:
-        func_set: (object) condition function set
-        condition: (string) condition statement
-        caller: (object) statement's caller
-        obj: (object) caller's target
-
-    Returns:
-        result
-    """
-    func = get_condition_func(func_set, caller, obj, **kwargs)
-    return re_function.sub(func, condition)
 
 
-def get_condition_func(func_set, caller, obj, **kwargs):
-    """
-    Get a function used in re's sub.
-
-    Args:
-        func_set: (object) condition function set
-        caller: (object) statement's caller
-        obj: (object) caller's target
-
-    Returns:
-        function
-    """
-    def function(word):
-        """
-        Do function.
-
-        Args:
-            word: (string) condition function
-
-        Returns:
-            (string) "True" or "False"
-        """
-        func_word = word.group()
-
-        try:
-            result = exec_function(func_set, func_word, caller, obj, **kwargs)
-            if result:
-                return "True"
-            else:
-                return "False"
-        except Exception as e:
-            logger.log_errmsg("Exec function error: %s %s" % (function, repr(e)))
-            traceback.print_exc()
-            return "None"
-
-    return function
-
-
-def exec_function(func_set, func_word, caller, obj, **kwargs):
+async def exec_function(func_set, func_word, caller, obj, **kwargs):
     """
     Do function.
 
@@ -92,12 +39,69 @@ def exec_function(func_set, func_word, caller, obj, **kwargs):
 
     func_class = func_set.get_func_class(func_key)
     if not func_class:
-        logger.log_errmsg("Statement error: Can not find function: %s of %s." % (func_key, func_word))
+        logger.log_err("Statement error: Can not find function: %s of %s." % (func_key, func_word))
         return
 
     func_obj = func_class()
     func_obj.set(caller, obj, func_args, **kwargs)
-    return func_obj.func()
+    try:
+        return await func_obj.func()
+    except Exception as e:
+        logger.log_err("Exec function error: %s %s" % (func_word, repr(e)))
+        return
+
+
+async def exec_condition(func_set, condition, caller, obj, **kwargs):
+    """
+    Execute the statements.
+
+    Args:
+        func_set: (object) condition function set
+        condition: (string) condition statement
+        caller: (object) statement's caller
+        obj: (object) caller's target
+
+    Returns:
+        result
+    """
+    matches = re_function.findall(condition)
+    if matches:
+        results = await async_gather([exec_function(func_set, match, caller, obj, **kwargs) for match in matches])
+        values = {
+            match: "None" if results[i] is None else "True" if results[i] else "False" for i, match in enumerate(matches)
+        }
+    else:
+        values = {}
+
+    func = get_condition_func(values)
+    return re_function.sub(func, condition)
+
+
+def get_condition_func(values):
+    """
+    Get a function used in re's sub.
+
+    Returns:
+        function
+    """
+    def function(word):
+        """
+        Do function.
+
+        Args:
+            word: (string) condition function
+
+        Returns:
+            (string) "True" or "False"
+        """
+        func_word = word.group()
+
+        if func_word in values:
+            return values[func_word]
+        else:
+            return "None"
+
+    return function
 
 
 class StatementHandler(object):
@@ -109,16 +113,16 @@ class StatementHandler(object):
         Creates a statement handler instance. Loads statements.
         """
         # load function sets
-        action_func_set_class = class_from_module(settings.ACTION_FUNC_SET)
+        action_func_set_class = class_from_path(SETTINGS.ACTION_FUNC_SET)
         self.action_func_set = action_func_set_class()
 
-        condition_func_set_class = class_from_module(settings.CONDITION_FUNC_SET)
+        condition_func_set_class = class_from_path(SETTINGS.CONDITION_FUNC_SET)
         self.condition_func_set = condition_func_set_class()
 
-        skill_func_set_class = class_from_module(settings.SKILL_FUNC_SET)
+        skill_func_set_class = class_from_path(SETTINGS.SKILL_FUNC_SET)
         self.skill_func_set = skill_func_set_class()
 
-    def do_action(self, action, caller, obj, **kwargs):
+    async def do_action(self, action, caller, obj, **kwargs):
         """
         Do a function.
 
@@ -135,16 +139,12 @@ class StatementHandler(object):
 
         # execute the statement
         functions = action.split(";")
-        for function in functions:
-            try:
-                exec_function(self.action_func_set, function, caller, obj, **kwargs)
-            except Exception as e:
-                logger.log_errmsg("Exec function error: %s %s" % (function, repr(e)))
-                traceback.print_exc()
+        if functions:
+            await async_wait([exec_function(self.action_func_set, f, caller, obj, **kwargs) for f in functions])
 
         return
 
-    def do_skill(self, action, caller, obj, **kwargs):
+    async def do_skill(self, action, caller, obj, **kwargs):
         """
         Do a function.
 
@@ -161,19 +161,14 @@ class StatementHandler(object):
 
         # execute the statement
         functions = action.split(";")
-        results = []
-        for function in functions:
-            try:
-                result = exec_function(self.skill_func_set, function, caller, obj, **kwargs)
-                if result:
-                    results.append(result)
-            except Exception as e:
-                logger.log_errmsg("Exec function error: %s %s" % (function, repr(e)))
-                traceback.print_exc()
+        if functions:
+            results = await async_gather([exec_function(self.skill_func_set, f, caller, obj, **kwargs) for f in functions])
+        else:
+            results = []
 
-        return results
+        return [r for r in results if r]
 
-    def match_condition(self, condition, caller, obj, **kwargs):
+    async def match_condition(self, condition, caller, obj, **kwargs):
         """
         Check a condition.
 
@@ -189,14 +184,13 @@ class StatementHandler(object):
             return True
 
         # calculate functions first
-        exec_string = exec_condition(self.condition_func_set, condition, caller, obj, **kwargs)
+        exec_string = await exec_condition(self.condition_func_set, condition, caller, obj, **kwargs)
 
         try:
             # do condition
             result = eval(exec_string)
         except Exception as e:
-            logger.log_errmsg("Exec condition error: %s %s" % (condition, repr(e)))
-            traceback.print_exc()
+            logger.log_err("Exec condition error: %s %s" % (condition, repr(e)))
             return False
 
         return result

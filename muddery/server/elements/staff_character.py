@@ -5,10 +5,7 @@ Staff Characters are Objects setup to be puppeted by Staffs.
 They can not be seen in game.
 """
 
-from django.conf import settings
-from muddery.server.utils.localized_strings_handler import _
 from muddery.server.mappings.element_set import ELEMENT
-from muddery.server.utils.game_settings import GAME_SETTINGS
 
 
 class MudderyStaffCharacter(ELEMENT("PLAYER_CHARACTER")):
@@ -31,8 +28,7 @@ class MudderyStaffCharacter(ELEMENT("PLAYER_CHARACTER")):
 
     """
     element_type = "STAFF_CHARACTER"
-    element_name = _("Staff Character", "elements")
-    model_name = "staff_characters"
+    element_name = "Staff Character"
 
     def is_staff(self):
         """
@@ -42,53 +38,18 @@ class MudderyStaffCharacter(ELEMENT("PLAYER_CHARACTER")):
         """
         return True
 
-    def is_visible(self, caller):
+    def bypass_events(self):
         """
-        If this object is not visible.
+        Check if this is a staff character.
 
-        Return:
-            boolean: visible
+        :return:
         """
-        return False
+        return True
 
-    def at_post_puppet(self):
+    def get_appearance(self):
         """
-        Called just after puppeting has been completed and all
-        Player<->Object links have been established.
-
+        he common appearance for all players.
         """
-        self.available_channels = self.get_available_channels()
-
-        # Send puppet info to the client first.
-        output = {
-            "id": self.get_id(),
-            "name": self.get_name(),
-            "is_staff": self.is_staff(),
-            "icon": getattr(self, "icon", None),
-            "allow_commands": True,
-        }
-
-        self.msg({"puppet": output})
-
-        # send character's data to player
-        message = {
-            "status": self.return_status(),
-            "equipments": self.return_equipments(),
-            "inventory": self.get_inventory_appearance(),
-            "skills": self.return_skills(),
-            "quests": self.quest_handler.return_quests(),
-            "revealed_map": self.get_revealed_map(),
-            "channels": self.available_channels
-        }
-        self.msg(message)
-
-        self.show_location()
-
-    def get_appearance(self, caller):
-        """
-        This is a convenient hook for a 'look'
-        command to call.
-        """
-        info = super(MudderyStaffCharacter, self).get_appearance(caller)
+        info = super(MudderyStaffCharacter, self).get_appearance()
         info["is_staff"] = True
         return info

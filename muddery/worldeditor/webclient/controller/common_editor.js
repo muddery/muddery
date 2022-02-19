@@ -20,7 +20,7 @@ prototype = function(base, el) {
  */
 CommonEditor = function() {
     this.table_name = "";
-    this.record_id = "";
+    this.record_id = null;
     this.fields = [];
     this.areas = {};
     this.file_fields = [];
@@ -29,7 +29,7 @@ CommonEditor = function() {
 
 CommonEditor.prototype.init = function() {
     this.table_name = utils.getQueryString("table");
-    this.record_id = utils.getQueryString("record");
+    this.record_id = parseInt(utils.getQueryString("record"));
     if (sessionStorage.page_param) {
         this.field_values = JSON.parse(sessionStorage.page_param);
     }
@@ -163,10 +163,10 @@ CommonEditor.prototype.createFieldController = function(field, readonly) {
     if (type == "Location") {
         controller = field_creator.createAreaSelect(name, label, value, help_text, this.areas, readonly);
     }
-    else if (type == "Image") {
+    else if (type == "ImageInput") {
         controller = field_creator.createImageInput(field.image_type, name, label, value, help_text, readonly);
     }
-    else if (type == "Hidden") {
+    else if (type == "HiddenInput") {
         controller = field_creator.createHiddenInput(name, label, value, help_text, readonly);
     }
     else if (type == "TextInput") {
@@ -175,7 +175,7 @@ CommonEditor.prototype.createFieldController = function(field, readonly) {
     else if (type == "NumberInput") {
         controller = field_creator.createNumberInput(name, label, value, help_text, readonly);
     }
-    else if (type == "Textarea") {
+    else if (type == "TextArea") {
         controller = field_creator.createTextArea(name, label, value, help_text, readonly);
     }
     else if (type == "CheckboxInput") {
@@ -188,6 +188,11 @@ CommonEditor.prototype.createFieldController = function(field, readonly) {
     }
     else if (type == "Select") {
         controller = field_creator.createSelect(name, label, value, help_text, field.choices, readonly);
+    }
+    else {
+        // default controller
+        controller = field_creator.createTextInput(name, label, value, help_text, readonly);
+        console.error("Field " + name + "'s type is unknown: " + type + ".");
     }
 
     // Add controller name.
@@ -214,6 +219,9 @@ CommonEditor.prototype.saveForm = function(callback_success, callback_failed, co
         if (control.length > 0) {
             if (control.attr("type") == "checkbox") {
                 values[name] = control.prop("checked");
+            }
+            else if (control.prop("tagName") == "SELECT") {
+                values[name] = control.val();
             }
             else {
                 // Leave the value blank if it is an empty string.

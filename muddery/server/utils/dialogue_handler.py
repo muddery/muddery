@@ -5,12 +5,14 @@ The DialogueHandler maintains a pool of dialogues.
 
 """
 
-from muddery.server.utils import defines
-from muddery.server.utils.game_settings import GAME_SETTINGS
+from muddery.common.utils import defines
+from muddery.server.utils.game_settings import GameSettings
 from muddery.server.mappings.element_set import ELEMENT
+from muddery.common.utils.singleton import Singleton
+from muddery.common.utils.utils import async_gather
 
 
-class DialogueHandler(object):
+class DialogueHandler(Singleton):
     """
     The DialogueHandler maintains a pool of dialogues.
     """
@@ -18,10 +20,12 @@ class DialogueHandler(object):
         """
         Initialize the handler.
         """
-        self.can_close_dialogue = GAME_SETTINGS.get("can_close_dialogue")
+        super(DialogueHandler, self).__init__()
+
+        self.can_close_dialogue = GameSettings.inst().get("can_close_dialogue")
         self.dialogue_storage = {}
     
-    def load_cache(self, dlg_key):
+    async def load_cache(self, dlg_key):
         """
         To reduce database accesses, add a cache.
 
@@ -37,11 +41,10 @@ class DialogueHandler(object):
 
         # Add cache of the whole dialogue.
         dlg = ELEMENT("DIALOGUE")()
-        dlg.setup_element(dlg_key)
+        await dlg.setup_element(dlg_key)
         self.dialogue_storage[dlg_key] = dlg
 
-
-    def get_dialogue(self, dlg_key):
+    async def get_dialogue(self, dlg_key):
         """
         Get specified dialogue.
 
@@ -52,7 +55,7 @@ class DialogueHandler(object):
             return
 
         # Load cache.
-        self.load_cache(dlg_key)
+        await self.load_cache(dlg_key)
 
         if dlg_key not in self.dialogue_storage:
             # Can not find dialogue.
@@ -60,7 +63,7 @@ class DialogueHandler(object):
 
         return self.dialogue_storage[dlg_key]
 
-    def get_npc_dialogues(self, caller, npc):
+    async def get_npc_dialogues(self, caller, npc):
         """
         Get NPC's dialogues that can show to the caller.
 
@@ -80,36 +83,24 @@ class DialogueHandler(object):
         dialogues = []
 
         # Get npc's dialogues.
-        for dlg_key in npc.dialogues:
-            # Get all dialogues.
-            npc_dlg = self.get_dialogue(dlg_key)
-            if not npc_dlg:
-                continue
+        if npc.dialogues:
+            dialogues = await async_gather([self.get_dialogue(dlg_key) for dlg_key in npc.dialogues])
+            dialogues = [d for d in dialogues if d]
+            if dialogues:
+                matches = await async_gather([d.match_condition(caller, npc) for d in dialogues])
+                dialogues = [d for index, d in enumerate(dialogues) if matches[index]]
+                if dialogues:
+                    matches = await async_gather([d.match_dependencies(caller) for d in dialogues])
+                    dialogues = [d for index, d in enumerate(dialogues) if matches[index]]
 
-            # Match conditions.
-            if not npc_dlg.match_condition(caller, npc):
-                continue
-
-            # Match dependencies.
-            if not npc_dlg.match_dependencies(caller):
-                continue
-
-            dialogues.append({
-                "key": dlg_key,
-                "content": npc_dlg.get_content(),
-            })
-
-        if not dialogues:
+        if not dialogues and npc.default_dialogues:
             # Use default sentences.
             # Default sentences should not have condition and dependencies.
-            for dlg_key in npc.default_dialogues:
-                npc_dlg = self.get_dialogue(dlg_key)
-                if npc_dlg:
-                    dialogues.append({
-                        "key": dlg_key,
-                        "content": npc_dlg.get_content(),
-                    })
-            
+            dialogues = await async_gather([self.get_dialogue(dlg_key) for dlg_key in npc.default_dialogues])
+            dialogues = [d for d in dialogues if d]
+
+        dialogues = [{"key": d.get_element_key(), "content": d.get_content()} for d in dialogues]
+
         return {
             "target": {
                 "id": npc.get_id(),
@@ -119,7 +110,7 @@ class DialogueHandler(object):
             "dialogues": dialogues,
         }
 
-    def get_dialogues_by_key(self, dlg_key):
+    async def get_dialogues_by_key(self, dlg_key):
         """
         Get a dialogue by its key.
 
@@ -130,7 +121,7 @@ class DialogueHandler(object):
             sentences: (list) a list of available sentences.
         """
         # Get current dialogue.
-        dialogue = self.get_dialogue(dlg_key)
+        dialogue = await self.get_dialogue(dlg_key)
         if not dialogue:
             return
 
@@ -141,7 +132,7 @@ class DialogueHandler(object):
             }],
         }
 
-    def get_next_dialogues(self, dlg_key, caller, npc):
+    async def get_next_dialogues(self, dlg_key, caller, npc):
         """
         Get dialogues next to this dialogue.
 
@@ -154,7 +145,7 @@ class DialogueHandler(object):
             sentences: (list) a list of available sentences.
         """
         # Get current dialogue.
-        dlg = self.get_dialogue(dlg_key)
+        dlg = await self.get_dialogue(dlg_key)
         if not dlg:
             return
 
@@ -167,31 +158,25 @@ class DialogueHandler(object):
             }
 
         dialogues = []
-        for next_dlg_key in dlg.get_next_dialogues():
-            # Get next dialogue.
-            next_dlg = self.get_dialogue(next_dlg_key)
-            if not next_dlg:
-                continue
+        dialogues_keys = dlg.get_next_dialogues()
+        if dialogues_keys:
+            dialogues = await async_gather([self.get_dialogue(dlg_key) for dlg_key in dialogues_keys])
+            dialogues = [d for d in dialogues if d]
+            if dialogues:
+                matches = await async_gather([d.match_condition(caller, npc) for d in dialogues])
+                dialogues = [d for index, d in enumerate(dialogues) if matches[index]]
+                if dialogues:
+                    matches = await async_gather([d.match_dependencies(caller) for d in dialogues if d])
+                    dialogues = [d for index, d in enumerate(dialogues) if matches[index]]
 
-            # Match conditions.
-            if not next_dlg.match_condition(caller, npc):
-                continue
-
-            # Match dependencies.
-            if not next_dlg.match_dependencies(caller):
-                continue
-
-            dialogues.append({
-                "key": next_dlg_key,
-                "content": next_dlg.get_content(),
-            })
+        dialogues = [{"key": d.get_element_key(), "content": d.get_content()} for d in dialogues]
 
         return {
             "target": target,
             "dialogues": dialogues,
         }
 
-    def get_dialogue_speaker_name(self, caller, npc, speaker_model):
+    async def get_dialogue_speaker_name(self, caller, npc, speaker_model):
         """
         Get the speaker's text.
         'p' means player.
@@ -233,7 +218,7 @@ class DialogueHandler(object):
 
         return icon
 
-    def finish_dialogue(self, dlg_key, caller, npc):
+    async def finish_dialogue(self, dlg_key, caller, npc):
         """
         A dialogue finished, do it's action.
         args:
@@ -244,14 +229,13 @@ class DialogueHandler(object):
         if not caller:
             return
 
-        dlg = self.get_dialogue(dlg_key)
+        dlg = await self.get_dialogue(dlg_key)
         if not dlg:
             return
 
         # do dialogue's event
-        caller.event.at_dialogue(dlg_key)
-
-        caller.quest_handler.at_objective(defines.OBJECTIVE_TALK, dlg_key)
+        await caller.event.at_dialogue(dlg_key)
+        await caller.quest_handler.at_objective(defines.OBJECTIVE_TALK, dlg_key)
 
     def clear(self):
         """
@@ -259,7 +243,7 @@ class DialogueHandler(object):
         """
         self.dialogue_storage = {}
 
-    def have_quest(self, caller, npc):
+    async def have_quest(self, caller, npc):
         """
         Check if the npc can provide or finish quests.
         Completing is higher than providing.
@@ -276,7 +260,7 @@ class DialogueHandler(object):
         # get npc's default dialogues
         for dlg_key in npc.dialogues:
             # find quests by recursion
-            provide, finish = self.dialogue_have_quest(caller, npc, dlg_key)
+            provide, finish = await self.dialogue_have_quest(caller, npc, dlg_key)
                 
             provide_quest = (provide_quest or provide)
             finish_quest = (finish_quest or finish)
@@ -286,7 +270,7 @@ class DialogueHandler(object):
 
         return provide_quest, finish_quest
 
-    def dialogue_have_quest(self, caller, npc, dlg_key):
+    async def dialogue_have_quest(self, caller, npc, dlg_key):
         """
         Find quests by recursion.
         """
@@ -294,28 +278,28 @@ class DialogueHandler(object):
         finish_quest = False
 
         # check if the dialogue is available
-        npc_dlg = self.get_dialogue(dlg_key)
+        npc_dlg = await self.get_dialogue(dlg_key)
         if not npc_dlg:
             return provide_quest, finish_quest
 
-        if not npc_dlg.match_condition(caller, npc):
+        if not await npc_dlg.match_condition(caller, npc):
             return provide_quest, finish_quest
 
-        if not npc_dlg.match_dependencies(caller):
+        if not await npc_dlg.match_dependencies(caller):
             return provide_quest, finish_quest
 
         # find quests in its sentences
-        if npc_dlg.can_finish_quest(caller):
+        if await npc_dlg.can_finish_quest(caller):
             finish_quest = True
             return provide_quest, finish_quest
 
-        if npc_dlg.can_provide_quest(caller):
+        if await npc_dlg.can_provide_quest(caller):
             provide_quest = True
             return provide_quest, finish_quest
 
         for dlg_key in npc_dlg.get_next_dialogues():
             # get next dialogue
-            provide, finish = self.dialogue_have_quest(caller, npc, dlg_key)
+            provide, finish = await self.dialogue_have_quest(caller, npc, dlg_key)
                 
             provide_quest = (provide_quest or provide)
             finish_quest = (finish_quest or finish)
@@ -324,7 +308,3 @@ class DialogueHandler(object):
                 break
 
         return provide_quest, finish_quest
-
-
-# main dialogue handler
-DIALOGUE_HANDLER = DialogueHandler()

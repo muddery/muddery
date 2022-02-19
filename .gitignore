@@ -48,8 +48,6 @@ nosetests.xml
 
 # Windows files generated during setup
 muddery.bat
-evennia.bat
-twistd.bat
 
 # node.js modules
 node_modules/

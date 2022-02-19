@@ -2,7 +2,7 @@ character,skill
 player,skill_normal_hp
 player,skill_normal_hit
 player,skill_escape
-npc_stranger,skill_normal_hit
+npc_wu,skill_normal_hit
 npc_doll,skill_normal_hit
 robot_mob_A,skill_normal_hit
 robot_mob_B,skill_normal_hit

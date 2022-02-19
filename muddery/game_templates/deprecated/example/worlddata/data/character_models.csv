@@ -1,9 +1,0 @@
-key,name,level,max_hp,max_exp,give_exp,attr_1,attr_2,attr_3,attr_4,attr_5,attr_6,attr_7,attr_8,attr_9,attr_10
-MODEL_PLAYER,Player,1,50,50,0,10,10,,,,,,,,
-MODEL_PLAYER,Player,2,70,100,0,12,12,,,,,,,,
-MODEL_PLAYER,Player,3,100,0,0,15,15,,,,,,,,
-MODEL_NPC_COMMON,Common NPC,1,25,50,10,5,5,,,,,,,,
-MODEL_MOB_DOLL,Doll,1,10,50,10,5,5,,,,,,,,
-MODEL_MOB_ROBOT_A,Robot A,1,20,20,10,5,5,,,,,,,,
-MODEL_MOB_ROBOT_A,Robot A,2,30,30,15,10,10,,,,,,,,
-MODEL_MOB_ROBOT_A,Robot A,3,40,40,20,15,15,,,,,,,,

@@ -2,10 +2,12 @@
 This model translates default strings into localized strings.
 """
 
-from django.conf import settings
-from django.contrib.admin.forms import forms
-from evennia.utils import logger
-from muddery.server.utils.utils import classes_in_path
+import importlib, inspect
+from wtforms_alchemy import ModelForm
+from sqlalchemy.ext.declarative import declarative_base
+from muddery.worldeditor.utils.logger import logger
+from muddery.worldeditor.settings import SETTINGS
+Base = declarative_base()
 
 
 class FormSet(object):
@@ -21,24 +23,26 @@ class FormSet(object):
         Add all forms from the form path.
         """
         # load classes
-        for cls in classes_in_path(settings.PATH_DATA_FORMS_BASE, forms.ModelForm):
-            if hasattr(cls, "Meta") and hasattr(cls.Meta, "model"):
-                model = cls.Meta.model
-                model_name = model.__name__
+        base_class = ModelForm
+        module = importlib.import_module(SETTINGS.PATH_DATA_FORMS_BASE)
+        for name, obj in vars(module).items():
+            if inspect.isclass(obj) and issubclass(obj, base_class) and obj is not base_class:
+                form_class = obj
+                if form_class.Meta and form_class.Meta.model:
+                    model_name = form_class.Meta.model.__name__
+                    if model_name and model_name in self.dict:
+                        logger.log_debug("Form %s is replaced by %s." % (model_name, form_class))
 
-                if model_name in self.dict:
-                    logger.log_infomsg("Form %s is replaced by %s." % (model_name, cls))
+                    self.dict[model_name] = form_class
 
-                self.dict[model_name] = cls
-
-    def get(self, model_name):
+    def get(self, table_name):
         """
         Get a form.
 
         Args:
-            model_name: (string) model's name
+            table_name: (string) table's name
         """
-        return self.dict[model_name]
+        return self.dict[table_name]
 
 
 FORM_SET = FormSet()

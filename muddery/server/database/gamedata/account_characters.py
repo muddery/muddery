@@ -3,23 +3,25 @@
 Store object's element key data in memory.
 """
 
-from django.apps import apps
-from django.conf import settings
-from django.core.exceptions import ObjectDoesNotExist
-from evennia.utils import logger
-from muddery.server.utils import utils
+from muddery.server.database.gamedata.base_data import BaseData
+from muddery.common.utils.singleton import Singleton
 
 
-class AccountCharacters(object):
+class AccountCharacters(BaseData, Singleton):
     """
     The storage of account's characters.
     """
-    # data storage
-    storage_class = utils.class_from_path(settings.DATABASE_ACCESS_OBJECT)
-    storage = storage_class("account_characters", "account_id", "char_id")
+    __table_name = "account_characters"
+    __category_name = "account_id"
+    __key_field = "char_id"
+    __default_value_field = None
 
-    @classmethod
-    def add(cls, account_id, char_id):
+    def __init__(self):
+        # data storage
+        super(AccountCharacters, self).__init__()
+        self.storage = self.create_storage(self.__table_name, self.__category_name, self.__key_field, self.__default_value_field)
+
+    async def add(self, account_id, char_id):
         """
         Add a new player character.
 
@@ -27,10 +29,9 @@ class AccountCharacters(object):
         :param char_id: character's db id
         :return:
         """
-        cls.storage.add(account_id, char_id)
+        await self.storage.add(account_id, char_id)
 
-    @classmethod
-    def remove_character(cls, account_id, char_id):
+    async def remove_character(self, account_id, char_id):
         """
         Remove an character.
 
@@ -38,13 +39,12 @@ class AccountCharacters(object):
         :param char_id: character's db id
         :return:
         """
-        cls.storage.delete(account_id, char_id)
+        await self.storage.delete(account_id, char_id)
 
-    @classmethod
-    def get_account_characters(cls, account_id):
+    async def get_account_characters(self, account_id):
         """
         Get all characters of an account.
         :param account_id:
         :return:
         """
-        return cls.storage.load_category(account_id, {})
+        return await self.storage.load_category(account_id, {})

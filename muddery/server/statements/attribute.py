@@ -20,7 +20,7 @@ class FuncSetAttr(StatementFunction):
     key = "set_attr"
     const = False
 
-    def func(self):
+    async def func(self):
         """
         Implement the function.
         """
@@ -51,7 +51,7 @@ class FuncGetAttr(StatementFunction):
     key = "get_attr"
     const = True
 
-    def func(self):
+    async def func(self):
         """
         Implement the function.
         """
@@ -80,7 +80,7 @@ class FuncRemoveAttr(StatementFunction):
     key = "remove_attr"
     const = False
 
-    def func(self):
+    async def func(self):
         """
         Implement the function.
         """
@@ -105,7 +105,7 @@ class FuncHasAttr(StatementFunction):
     key = "has_attr"
     const = True
 
-    def func(self):
+    async def func(self):
         """
         Implement the function.
         """
@@ -133,7 +133,7 @@ class FuncCheckAttr(StatementFunction):
     key = "check_attr"
     const = True
 
-    def func(self):
+    async def func(self):
         """
         Implement the function.
         """

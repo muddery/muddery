@@ -2,9 +2,9 @@
 All available event actions.
 """
 
-from django.conf import settings
-from evennia.utils import logger
-from muddery.server.utils.utils import classes_in_path
+from muddery.server.settings import SETTINGS
+from muddery.server.utils.logger import logger
+from muddery.common.utils.utils import classes_in_path
 from muddery.server.events.base_event_action import BaseEventAction
 
 
@@ -20,11 +20,11 @@ class EventActionSet(object):
         Add all event actions from the path.
         """
         # load classes
-        for cls in classes_in_path(settings.PATH_EVENT_ACTION_BASE, BaseEventAction):
+        for cls in classes_in_path(SETTINGS.PATH_EVENT_ACTION_BASE, BaseEventAction):
             key = cls.key
             if key:
                 if key in self.dict:
-                    logger.log_infomsg("Event action %s is replaced by %s." % (key, cls))
+                    logger.log_debug("Event action %s is replaced by %s." % (key, cls))
                 self.dict[key] = cls()
 
     def get(self, key):

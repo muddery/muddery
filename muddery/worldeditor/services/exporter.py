@@ -5,29 +5,18 @@ This module imports data from files to db.
 import os
 import tempfile
 import zipfile
-from django.conf import settings
-from evennia.settings_default import GAME_DIR
 from muddery.launcher import configs
-from muddery.server.utils.exception import MudderyError, ERR
-from muddery.worldeditor.utils import writers
-from muddery.worldeditor.dao import general_query_mapper, model_mapper
+from muddery.common.utils.exception import MudderyError, ERR
+from muddery.common.utils import writers
+from muddery.server.database.worlddata_db import WorldDataDB
+from muddery.worldeditor.settings import SETTINGS
+from muddery.worldeditor.dao import general_querys
 
 
 def export_file(filename, table_name, file_type=None):
     """
     Export a table to a csv file.
     """
-    def to_str(value):
-        """
-        Transform a value to a string.
-        :param value:
-        :return:
-        """
-        if value is None:
-            return ""
-        else:
-            return str(value)
-
     if not file_type:
         # Get file's extension name.
         file_type = os.path.splitext(filename)[1].lower()
@@ -42,13 +31,12 @@ def export_file(filename, table_name, file_type=None):
     if not writer:
         raise(MudderyError(ERR.export_data_error, "Can not export table %s" % table_name))
 
-    fields = general_query_mapper.get_all_fields(table_name)
-    header = [field.name for field in fields]
-    writer.writeln(header)
+    fields = general_querys.get_field_names(table_name)
+    writer.writeln(fields)
 
-    records = general_query_mapper.get_all_records(table_name)
+    records = general_querys.get_all_records(table_name)
     for record in records:
-        line = [to_str(record.serializable_value(field.get_attname())) for field in fields]
+        line = [str(getattr(record, field)) if getattr(record, field) is not None else "" for field in fields]
         writer.writeln(line)
 
     writer.save()
@@ -74,15 +62,14 @@ def export_zip_all(file_obj, file_type=None):
         archive = zipfile.ZipFile(file_obj, 'w', zipfile.ZIP_DEFLATED)
 
         # get model names
-        models = model_mapper.get_all_models()
-        for model in models:
-            model_name = model._meta.object_name
-            export_file(temp_filename, model_name, file_type)
-            filename = model_name + "." + file_ext
+        table_names = WorldDataDB.inst().get_tables()
+        for table_name in table_names:
+            export_file(temp_filename, table_name, file_type)
+            filename = table_name + "." + file_ext
             archive.write(temp_filename, filename)
 
         # add version file
-        version_file = os.path.join(GAME_DIR, configs.CONFIG_FILE)
+        version_file = os.path.join(configs.GAME_DIR, configs.CONFIG_FILE)
         archive.write(version_file, configs.CONFIG_FILE)
     finally:
         try:
@@ -95,7 +82,7 @@ def export_resources(file_obj):
     """
     Export all resource files to a zip file.
     """
-    dir_name = settings.MEDIA_ROOT
+    dir_name = SETTINGS.MEDIA_ROOT
     dir_length = len(dir_name)
 
     archive = zipfile.ZipFile(file_obj, 'w', zipfile.ZIP_DEFLATED)   

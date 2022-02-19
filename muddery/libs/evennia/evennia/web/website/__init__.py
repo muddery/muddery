@@ -1,1 +1,0 @@
-# The Evennia default website.

@@ -138,7 +138,7 @@ ElementEditor.prototype.onDeleteEvent = function(e) {
 ElementEditor.prototype.confirmDeleteEvent = function(e) {
     window.parent.controller.hideWaiting();
 
-    var record_id = e.data.record;
+    var record_id = parseInt(e.data.record);
     service.deleteRecord(controller.event_table, record_id, controller.deleteEventSuccess, controller.failedCallback);
 }
 
@@ -431,7 +431,7 @@ ElementEditor.prototype.setFields = function() {
 
             if (t != 0 && field.name == "key") {
                 // If it is a key field, only add the first table's key.
-                field.type = "Hidden";
+                field.type = "HiddenInput";
             }
 
             var controller = this.createFieldController(field);
@@ -469,6 +469,9 @@ ElementEditor.prototype.saveForm = function(callback_success, callback_failed, c
             if (control.length > 0) {
                 if (control.attr("type") == "checkbox") {
                     values[name] = control.prop("checked");
+                }
+                else if (control.prop("tagName") == "SELECT") {
+                    values[name] = control.val();
                 }
                 else {
                     // Leave the value blank if it is an empty string.

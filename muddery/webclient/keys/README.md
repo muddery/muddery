@@ -1,0 +1,1 @@
+This directory holds files of the game client's encrypt keys.

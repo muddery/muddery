@@ -22,12 +22,12 @@ class ObjectStatesHandler(object):
     """
     Handler for adding Attributes to the object.
     """
-    def __init__(self, obj_id, storage):
+    def __init__(self, obj_id, storage_class):
         """Initialize handler."""
         self.obj_id = obj_id
-        self.storage = storage
+        self.storage = storage_class()
 
-    def has(self, key):
+    async def has(self, key):
         """
         Checks if the given Attribute exists on the object.
 
@@ -37,9 +37,9 @@ class ObjectStatesHandler(object):
         Returns:
             has_attribute (bool): If the Attribute exists on this object or not.
         """
-        return self.storage.has(self.obj_id, key=key)
+        return await self.storage.has(self.obj_id, key=key)
 
-    def load(self, key, default=None):
+    async def load(self, key, default=None):
         """
         Get the Attribute.
 
@@ -55,9 +55,9 @@ class ObjectStatesHandler(object):
                 was found matching `key` and no default value set.
 
         """
-        return self.storage.load(self.obj_id, key, default)
+        return await self.storage.load(self.obj_id, key, default)
 
-    def save(self, key, value):
+    async def save(self, key, value):
         """
         Add attribute to object.
 
@@ -66,15 +66,15 @@ class ObjectStatesHandler(object):
             value (any or str): The value of the Attribute. If
                 `strattr` keyword is set, this *must* be a string.
         """
-        self.storage.save(self.obj_id, key, value)
+        await self.storage.save(self.obj_id, key, value)
 
-    def saves(self, value_dict):
+    async def saves(self, value_dict):
         """
         Set attributes.
         """
-        self.storage.save_keys(self.obj_id, value_dict)
+        await self.storage.save_keys(self.obj_id, value_dict)
 
-    def delete(self, key):
+    async def delete(self, key):
         """
         Remove an attribute from object.
 
@@ -89,22 +89,22 @@ class ObjectStatesHandler(object):
             If neither key nor category is given, this acts as clear().
 
         """
-        self.storage.delete(self.obj_id, key)
+        await self.storage.delete(self.obj_id, key)
 
-    def clear(self):
+    async def clear(self):
         """
         Remove all Attributes on this object.
         """
-        self.storage.remove_obj(self.obj_id)
+        await self.storage.remove_obj(self.obj_id)
 
-    def all(self):
+    async def all(self):
         """
         Get all attributes from an object.
         """
-        return self.storage.load_obj(self.obj_id)
+        return await self.storage.load_obj(self.obj_id)
 
-    def atomic(self):
+    def transaction(self):
         """
         Begin a transaction.
         """
-        return self.storage.atomic()
+        return self.storage.transaction()

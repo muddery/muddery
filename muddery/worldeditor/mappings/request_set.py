@@ -2,10 +2,9 @@
 All available requests.
 """
 
-from django.conf import settings
-from evennia.utils import logger
-from muddery.server.utils.exception import MudderyError
-from muddery.server.utils.utils import classes_in_path
+from muddery.common.utils.utils import classes_in_path
+from muddery.worldeditor.utils.logger import logger
+from muddery.worldeditor.settings import SETTINGS
 from muddery.worldeditor.controllers.base_request_processer import BaseRequestProcesser
 
 
@@ -22,22 +21,19 @@ class RequestSet(object):
         Add all forms from the form path.
         """
         # load classes
-        for cls in classes_in_path(settings.PATH_REQUEST_PROCESSERS_BASE, BaseRequestProcesser):
+        for cls in classes_in_path(SETTINGS.PATH_REQUEST_PROCESSERS_BASE, BaseRequestProcesser):
             path = cls.path
             name = cls.name
 
             if not path and not name:
-                logger.log_errmsg("Missing request's path and name.")
+                logger.log_err("Missing request's path and name.")
                 continue
-
-            if path[0] != "/":
-                path = "/" + path
 
             if name is None:
                 name = ""
 
             if (path, name,) in self.dict:
-                logger.log_infomsg("Request %s-%s is replaced by %s." % (path, name, cls))
+                logger.log_debug("Request %s-%s is replaced by %s." % (path, name, cls))
 
             self.dict[(path, name,)] = cls()
 
@@ -46,7 +42,3 @@ class RequestSet(object):
         Get the processer responds to the request.
         """
         return self.dict.get((path, name,), None)
-
-
-REQUEST_SET = RequestSet()
-

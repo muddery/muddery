@@ -5,7 +5,6 @@ Event action.
 import random
 from muddery.server.events.base_event_action import BaseEventAction
 from muddery.server.database.worlddata.worlddata import WorldData
-from muddery.server.utils.localized_strings_handler import _
 
 
 class ActionDialogue(BaseEventAction):
@@ -13,11 +12,11 @@ class ActionDialogue(BaseEventAction):
     Begin a dialogue.
     """
     key = "ACTION_DIALOGUE"
-    name = _("Dialogue", category="event_actions")
+    name = "Dialogue"
     model_name = "action_dialogue"
     repeatedly = False
 
-    def func(self, event_key, character, obj):
+    async def func(self, event_key, character, obj):
         """
         Start a dialogue.
 
@@ -37,7 +36,7 @@ class ActionDialogue(BaseEventAction):
         for record in records:
             if rand <= record.odds:
                 # Make dialogue.
-                character.show_dialogue(record.dialogue)
+                await character.show_dialogue(record.dialogue)
                 return
 
             rand -= record.odds
