@@ -106,15 +106,15 @@ class MudderyArea(ELEMENT("MATTER")):
         Get all rooms and exits' positions in this area.
 
         {
-            "area": area's appearance,
+            area's appearance,
             "rooms" : {
                 room's key: {
-                    "room": room's appearance,
+                    room's appearance,
                     "exits": {
                         {
                             exit's key:
                                 {
-                                    "exit": exit's appearance,
+                                    exit's appearance,
                                     "from": room's key,
                                     "to": room's key,
                                 },
@@ -123,7 +123,8 @@ class MudderyArea(ELEMENT("MATTER")):
             }
         }
         """
-        return {
-            "area": self.get_map_data(),
-            "rooms": {key: room.get_map_data() for key, room in self.all_rooms.items()}
-        }
+        return dict(self.get_map_data(), **{
+            "rooms": {
+                key: room.get_map_data() for key, room in self.all_rooms.items()
+            }
+        })

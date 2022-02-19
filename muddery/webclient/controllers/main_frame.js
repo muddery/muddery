@@ -2162,8 +2162,7 @@ MudderyScene.prototype.setSurroundings = function(surroundings) {
     var has_objects = false;
 
     // get current room's data
-    var room_map = core.map_data.getCurrentRoomMap();
-    var room_data = room_map["room"];
+    var room_data = core.map_data.getCurrentRoomMap();
     if (room_data) {
         // add room's name
         var room_name = core.text2html.parseHtml(room_data["name"]);
@@ -2203,7 +2202,7 @@ MudderyScene.prototype.setSurroundings = function(surroundings) {
     }
 
     // set room objects
-    var objects_data = room_map["objects"];
+    var objects_data = room_data["objects"];
     var objects = this.select(".scene-objects");
     if (objects_data.length > 0) {
         for (var i = 0; i < objects_data.length; i++) {
@@ -2271,7 +2270,7 @@ MudderyScene.prototype.setSurroundings = function(surroundings) {
     }
 
     // add exits
-    var exits_data = room_map["exits"];
+    var exits_data = room_data["exits"];
     if (exits_data.length > 0) {
         this.setExitsMap(exits_data, room_name);
     }
@@ -3757,19 +3756,18 @@ MudderyMap.prototype.clear = function() {
 MudderyMap.prototype.showMap = function(location) {
 	this.clear();
 
-	if (!(location && location["room"] in core.map_data._map_rooms)){
+    if (!location) {
+        return;
+    }
+
+    var current_area_key = location["area"];
+    var current_room_key = location["room"];
+
+	if (!(current_room_key in core.map_data._map_rooms)){
 		// does not have current location, can not show map.
 		return;
 	}
-
-	if (location["area"] && location["area"] in core.map_data._map_areas){
-		var area_name = core.text2html.parseHtml(core.map_data._map_areas[location["area"]]["name"]);
-		if (area_name) {
-			this.select(".header-text").html(area_name);
-		}
-	}
-
-	var current_room = core.map_data._map_rooms[location["room"]];
+	var current_room = core.map_data._map_rooms[current_room_key];
 
 	var map_width = this.select("#map-svg").width();
 	var map_height = this.select("#map-svg").height();
@@ -3778,24 +3776,26 @@ MudderyMap.prototype.showMap = function(location) {
 	var room_size = this.room_size;
 	var origin_x = map_width / 2;
 	var origin_y = map_height / 2;
-	var current_area_key = "";		// Only show rooms and exits in the same area.
 
 	var svg = document.getElementById("map-svg");
 	var namespace = "http://www.w3.org/2000/svg";
 
-	if (current_room["room"]["pos"]) {
+	if (current_room["pos"]) {
 		// set origin point
 		//origin_x -= current_room["pos"][0] * scale;
 		//origin_y -= -current_room["pos"][1] * scale;
-		origin_x -= current_room["room"]["pos"][0];
-		origin_y -= current_room["room"]["pos"][1];
-
-		current_area_key = current_room["area"];
+		origin_x -= current_room["pos"][0];
+		origin_y -= current_room["pos"][1];
 	}
 
-	// background
-	if (location["area"] && location["area"] in core.map_data._map_areas) {
-	    var area_background = core.map_data._map_areas[location["area"]]["background"];
+    // title and background
+	if (current_area_key in core.map_data._map_areas){
+		var area_name = core.text2html.parseHtml(core.map_data._map_areas[current_area_key]["name"]);
+		if (area_name) {
+			this.select(".header-text").html(area_name);
+		}
+
+	    var area_background = core.map_data._map_areas[current_area_key]["background"];
 	    if (area_background) {
             /*
             if (origin_x < map_width - location["area"]["background"]["width"]) {
@@ -3838,37 +3838,38 @@ MudderyMap.prototype.showMap = function(location) {
         }
 	}
 
-	if (current_room["room"]["pos"] && core.map_data._map_paths) {
+    // draw path
+	if (current_room["pos"] && core.map_data._map_paths) {
 		// get path positions
 		var path_data = [];
-		for (var begin in core.map_data._map_paths) {
-			if (!(begin in core.map_data._map_rooms)) {
+		for (var from_room_key in core.map_data._map_paths) {
+			if (!(from_room_key in core.map_data._map_rooms)) {
 			    continue;
 			}
 
-            var from_room = core.map_data._map_rooms[begin];
+            var from_room = core.map_data._map_rooms[from_room_key];
             var from_area_key = from_room["area"];
             if (from_area_key != current_area_key) {
                 continue;
             }
 
-            var from = from_room["room"]["pos"];
+            var from = from_room["pos"];
             if (!from) {
                 continue;
             }
 
-            for (var end in core.map_data._map_paths[begin]) {
-                if (!(core.map_data._map_paths[begin][end] in core.map_data._map_rooms)) {
+            for (var to_room_key in core.map_data._map_paths[from_room_key]) {
+                if (!(core.map_data._map_paths[from_room_key][to_room_key] in core.map_data._map_rooms)) {
                     continue;
                 }
 
-                var to_room = core.map_data._map_rooms[core.map_data._map_paths[begin][end]];
+                var to_room = core.map_data._map_rooms[core.map_data._map_paths[from_room_key][to_room_key]];
                 var to_area_key = to_room["area"];
                 if (to_area_key != current_area_key) {
                     continue;
                 }
 
-                var to = to_room["room"]["pos"];
+                var to = to_room["pos"];
                 if (!to) {
                     continue;
                 }
@@ -3893,26 +3894,27 @@ MudderyMap.prototype.showMap = function(location) {
 		}
 	}
 
+    // draw room
 	if (core.map_data._map_rooms) {
 		// get room positions
 		var room_data = [];
 		var current_room_index = -1;
 
-		if (current_room["room"]["pos"]) {
+		if (current_room["pos"]) {
 			var count = 0;
-			for (var key in core.map_data._map_rooms) {
-				var room = core.map_data._map_rooms[key];
-				if (room["room"]["pos"]) {
+			for (var room_key in core.map_data._map_rooms) {
+				var room = core.map_data._map_rooms[room_key];
+				if (room["pos"]) {
 					var area_key = room["area"];
 					if (area_key != current_area_key) {
 						continue;
 					}
 
-					room_data.push({"name": core.utils.truncate_string(room["room"]["name"], 10, true),
-									"icon": room["room"]["icon"]? settings.resource_url + room["room"]["icon"]: null,
+					room_data.push({"name": core.utils.truncate_string(room["name"], 10, true),
+									"icon": room["icon"]? settings.resource_url + room["icon"]: null,
 									"area": room["area"],
-									"pos": room["room"]["pos"]});
-					if (key == location["room"]) {
+									"pos": room["pos"]});
+					if (room_key == current_room_key) {
 						current_room_index = count;
 					}
 					count++;
@@ -3921,8 +3923,8 @@ MudderyMap.prototype.showMap = function(location) {
 		}
 		else {
 			// does not have current position, only show current room at center.
-			room_data.push({"name": core.utils.truncate_string(current_room["room"]["name"], 10, true),
-							"icon": current_room["room"]["icon"]? settings.resource_url + current_room["room"]["icon"]: null,
+			room_data.push({"name": core.utils.truncate_string(current_room["name"], 10, true),
+							"icon": current_room["icon"]? settings.resource_url + current_room["icon"]: null,
 							"area": current_room["area"],
 							"pos": [0, 0]});
 			current_room_index = 0;

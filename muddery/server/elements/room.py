@@ -324,11 +324,10 @@ class MudderyRoom(ELEMENT("MATTER")):
             }) for item in self.all_exits.values()
         ]
 
-        return {
-            "room": appearance,
+        return dict(appearance, **{
             "objects": objects,
             "exits": exits,
-        }
+        })
 
     def get_surroundings(self, caller):
         """

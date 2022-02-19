@@ -63,7 +63,7 @@ MudderyMapData.prototype = {
             new_map = true;
             var area_map = data[area_key];
 
-            this._map_areas[area_key] = area_map["area"];
+            this._map_areas[area_key] = area_map;
             var rooms = area_map["rooms"];
 
             // Add room.
@@ -144,24 +144,24 @@ MudderyMapData.prototype = {
             return;
         }
 
-        var location = this._map_exits[exit]["from"];
-        if (!location in this._map_rooms) {
+        var location_key = this._map_exits[exit]["from"];
+        if (!location_key in this._map_rooms) {
             return;
         }
 
-        var destination = this._map_exits[exit]["to"];
-        if (!destination in this._map_rooms) {
+        var destination_key = this._map_exits[exit]["to"];
+        if (!destination_key in this._map_rooms) {
             return;
         }
 
-        var from_area = this._map_rooms[location]["area"];
-        var to_area = this._map_rooms[destination]["area"];
+        var from_area = this._map_rooms[location_key]["area"];
+        var to_area = this._map_rooms[destination_key]["area"];
         if (from_area !== to_area) {
             return;
         }
 
-        var from = this._map_rooms[location]["room"]["pos"];
-        var to = this._map_rooms[destination]["room"]["pos"];
+        var from = this._map_rooms[location_key]["pos"];
+        var to = this._map_rooms[destination_key]["pos"];
         if (!from || !to) {
             return;
         }
