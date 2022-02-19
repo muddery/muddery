@@ -380,6 +380,7 @@ async def show_server_state(gameserver: bool = False, webclient: bool = False, e
             print("%s is running at port %s." % (item["name"], item["port"]))
         else:
             print("%s is not running at port %s." % (item["name"], item["port"]))
+    print("")
 
 
 async def run_servers(server: bool = False, webclient: bool = False, editor: bool = False, restart: bool = False):

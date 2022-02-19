@@ -100,7 +100,7 @@ class Settings(object):
     WORLDEDITOR_DB = {
         'MODELS': 'worldeditor.models',
         'ENGINE': 'sqlite3',
-        'NAME': os.path.join(GAME_DIR, "server", "worldeditor.db3"),
+        'NAME': os.path.join(GAME_DIR, "worldeditor", "worldeditor.db3"),
         'USER': '',
         'PASSWORD': '',
         'HOST': '',

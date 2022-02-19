@@ -5,7 +5,7 @@ MudderyService = function() {
 MudderyService.prototype = {
 
     getData: function(path, callback_success, callback_failed) {
-        var url = window.location.origin + "/"+ path;
+        var url = "../" + path;
         $.ajax({
             url: url,
             type: "GET",
