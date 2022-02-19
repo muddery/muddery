@@ -63,6 +63,11 @@ CREATED_NEW_GAMEDIR = \
 
     """
 
+ERROR_NO_GAMEDIR = \
+    """
+    You must run this command inside a valid game directory.
+    """
+
 NO_GAME_TABLES = \
     """
     You must run this command inside a valid game directory first
@@ -101,7 +106,7 @@ NEED_UPGRADE = \
     """
     Your game's version is too old. Please run:
 
-        muddery --upgrade
+        muddery upgrade
 
     to upgrade your game.
     """

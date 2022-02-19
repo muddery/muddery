@@ -395,6 +395,10 @@ async def run_servers(server: bool = False, webclient: bool = False, editor: boo
     gamedir = os.path.abspath(configs.CURRENT_DIR)
     utils.init_game_env(gamedir)
 
+    if not utils.check_version():
+        print(configs.NEED_UPGRADE)
+        return
+
     # Load settings.
     try:
         from muddery.server.settings import SETTINGS
@@ -450,6 +454,7 @@ async def run_servers(server: bool = False, webclient: bool = False, editor: boo
         worldeditor_process = subprocess.Popen(command, **options)
 
     await show_server_state(server, webclient, editor, 5, 20)
+
 
 def kill_servers(server: bool = True, webclient: bool = True, editor: bool = True):
     """

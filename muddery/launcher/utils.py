@@ -227,7 +227,7 @@ def check_gamedir(path):
     """
     Check if the path is a game dir.
     """
-    settings_path = os.path.join(path, "server", "conf", "settings.py")
+    settings_path = os.path.join(path, "server", "settings.py")
     if os.path.isfile(settings_path):
         return True
 

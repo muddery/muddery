@@ -210,14 +210,14 @@ class CmdLookRoomChar(BaseCommand):
 #------------------------------------------------------------
 class CmdTraverse(BaseCommand):
     """
-    tranvese an exit
+    tranverse an exit
 
     Usage: {
         "cmd": "traverse",
         "args": <exit's key>
     }
 
-    Tranvese an exit, go to the destination of the exit.
+    Tranverse an exit, go to the destination of the exit.
     """
     key = "traverse"
 
@@ -870,7 +870,7 @@ class CmdUnlockExit(BaseCommand):
         {"cmd":"unlock_exit",
          "args":<object's id>
         }
-    A character must unlock a LockedExit before tranvese it.
+    A character must unlock a LockedExit before tranverse it.
     """
     key = "unlock_exit"
 
