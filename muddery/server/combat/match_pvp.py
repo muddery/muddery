@@ -94,9 +94,10 @@ class MatchPVPHandler(Singleton):
         self.remove_all()
 
         honour_settings = HonourSettings.get_first_data()
-        self.max_honour_diff = honour_settings.max_honour_diff
-        self.preparing_time = honour_settings.preparing_time
-        self.match_interval = honour_settings.match_interval
+        if honour_settings:
+            self.max_honour_diff = honour_settings.max_honour_diff
+            self.preparing_time = honour_settings.preparing_time
+            self.match_interval = honour_settings.match_interval
 
         # add the loot job
         if self.scheduler.get_job(self.key) is None:
