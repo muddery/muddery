@@ -21,7 +21,7 @@ class GameSettings(Singleton):
             "connection_screen": "",
             "solo_mode": False,
             "global_cd": 1.0,
-            "auto_cast_skill_cd": 1.5,
+            "auto_cast_skill_cd": 1,
             "can_give_up_quests": True,
             "can_close_dialogue": False,
             "auto_resume_dialogues": True,

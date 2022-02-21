@@ -330,7 +330,7 @@ CommonEditor.prototype.parseFields = function(fields) {
 
     cols.push({
         field: "operate",
-        title: "Operate",
+        title: "",
         formatter: this.operateButton,
     });
 

@@ -272,9 +272,6 @@ class world_objects(BaseElement):
     # Action's name
     action = Column(String(KEY_LENGTH))
 
-    # object's icon resource
-    icon = Column(String(KEY_LENGTH))
-
 
 class pocket_objects(BaseElement):
     "Store all pocket objects."

@@ -3,12 +3,7 @@ This module parse data files to lines.
 """
 
 import csv
-import codecs
-
-try:
-    import xlrd
-except ImportError:
-    xlrd = None
+import xlrd
 
 
 class DataReader(object):
@@ -27,6 +22,9 @@ class DataReader(object):
         """
         self.filename = filename
 
+    def __del__(self):
+        self.close()
+
     def __iter__(self):
         return self
 
@@ -42,6 +40,12 @@ class DataReader(object):
         """
         # No data.
         raise StopIteration
+
+    def close(self):
+        """
+        Close the file.
+        """
+        pass
 
 
 class CSVReader(DataReader):
@@ -71,10 +75,6 @@ class CSVReader(DataReader):
 
             self.reader = csv.reader(self.csvfile)
 
-    def __del__(self):
-        if self.csvfile:
-            self.csvfile.close()
-
     def readln(self):
         """
         Read data line.
@@ -87,6 +87,13 @@ class CSVReader(DataReader):
 
         # Read line.
         return next(self.reader)
+
+    def close(self):
+        """
+        Close the file.
+        """
+        if self.csvfile:
+            self.csvfile.close()
 
 
 class XLSReader(DataReader):
@@ -105,19 +112,15 @@ class XLSReader(DataReader):
         """
         super(XLSReader, self).__init__(filename)
 
-        if not xlrd:
-            print('**********************************************************')
-            print('You need to install "xlrd" first to import xls/xlsx files!')
-            print('You can use "pip install xlrd" to install it!             ')
-            print('**********************************************************')
-            return
-
         # load file
         self.sheet = None
         self.row_pos = 0
+        self.book = None
+        self.sheet = None
+
         if filename:
-            book = xlrd.open_workbook(filename)
-            self.sheet = book.sheet_by_index(0)
+            self.book = xlrd.open_workbook(filename)
+            self.sheet = self.book.sheet_by_index(0)
 
     def readln(self):
         """

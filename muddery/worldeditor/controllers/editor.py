@@ -868,7 +868,7 @@ class ApplyChanges(BaseRequestProcesser):
     async def func(self, args, request):
         try:
             # restart the server
-            await manager.run(server=True, restart=True)
+            await manager.run_servers(server=True, editor=True, restart=True)
         except Exception as e:
             message = "Can not build the world: %s" % e
             logger.log_trace(message)

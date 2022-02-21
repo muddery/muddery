@@ -131,6 +131,9 @@ class Settings(object):
     # Media files root dir
     MEDIA_ROOT = os.path.join(GAME_DIR, "web", "media")
 
+    # resource's location
+    IMAGE_PATH = "image"
+
     # Encrypt secret messages in transporting messages.
     ENABLE_ENCRYPT = True
 

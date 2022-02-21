@@ -14,6 +14,19 @@ from muddery.worldeditor.forms.base_form import BaseForm
 from muddery.worldeditor.utils.localized_strings import LocalizedStrings
 
 
+def generate_choices(records, add_empty=False):
+    """
+    Generate a list of choices from a list of records.
+
+    Args:
+        records: records with key and name fields.
+        add_empty: add an empty choice.
+    """
+    choices = [("", "---------")] if add_empty else []
+    choices.extend([(r.key, (r.name + " (" + r.key + ")") if r.name else r.key) for r in records])
+    return choices
+
+
 def get_model(table_name):
     """
     Get a form of a table.
@@ -26,24 +39,21 @@ def get_all_pocketable_objects():
     Get all objects that can be put in player's pockets.
     """
     records = CM.COMMON_OBJECTS.all_with_base()
-    return [(r.key, r.name + " (" + r.key + ")") for r in records]
+    return generate_choices(records)
 
 
 class GameSettingsForm(BaseForm):
-    choices = [("", "---------")]
     records = get_element_base_data("ROOM")
-    choices.extend([(record.key, record.name + " (" + record.key + ")") for record in records])
+    choices = generate_choices(records, add_empty=True)
     start_location_key = LocationField(choices=choices)
     default_player_home_key = LocationField(choices=choices)
 
-    choices = [("", "---------")]
     records = get_element_base_data("PLAYER_CHARACTER")
-    choices.extend([(record.key, record.name + " (" + record.key + ")") for record in records])
+    choices = generate_choices(records, add_empty=True)
     default_player_character_key = SelectField(choices=choices)
 
-    choices = [("", "---------")]
     records = get_element_base_data("STAFF_CHARACTER")
-    choices.extend([(record.key, record.name + " (" + record.key + ")") for record in records])
+    choices = generate_choices(records, add_empty=True)
     default_staff_character_key = SelectField(choices=choices)
 
     class Meta:
@@ -73,9 +83,8 @@ class WorldAreasForm(BaseForm):
 
 
 class WorldRoomsForm(BaseForm):
-    choices = [("", "---------")]
-    objects = CM.WORLD_AREAS.all_with_base()
-    choices.extend([(obj.key, obj.name + " (" + obj.key + ")") for obj in objects])
+    records = CM.WORLD_AREAS.all_with_base()
+    choices = generate_choices(records, add_empty=True)
     area = SelectField(choices=choices)
 
     icon = ImageField(image_type="icon")
@@ -87,8 +96,8 @@ class WorldRoomsForm(BaseForm):
 
 
 class WorldExitsForm(BaseForm):
-    rooms = CM.WORLD_ROOMS.all_with_base()
-    choices = [(r.key, r.name + " (" + r.key + ")") for r in rooms]
+    records = CM.WORLD_ROOMS.all_with_base()
+    choices = generate_choices(records)
     location = LocationField(choices=choices)
     destination = LocationField(choices=choices)
 
@@ -102,8 +111,8 @@ class ExitLocks(BaseForm):
 
 
 class WorldObjectsForm(BaseForm):
-    rooms = CM.WORLD_ROOMS.all_with_base()
-    choices = [(r.key, r.name + " (" + r.key + ")") for r in rooms]
+    records = CM.WORLD_ROOMS.all_with_base()
+    choices = generate_choices(records)
     location = LocationField(choices=choices)
 
     icon = ImageField(image_type="icon")
@@ -114,8 +123,8 @@ class WorldObjectsForm(BaseForm):
 
 class WorldNPCsForm(BaseForm):
     # NPC's location
-    rooms = CM.WORLD_ROOMS.all_with_base()
-    choices = [(r.key, r.name + " (" + r.key + ")") for r in rooms]
+    records = CM.WORLD_ROOMS.all_with_base()
+    choices = generate_choices(records)
     location = LocationField(choices=choices)
 
     class Meta:
@@ -134,8 +143,8 @@ class ObjectCreatorsForm(BaseForm):
 
 class CreatorLootListForm(BaseForm):
     # providers must be object_creators
-    objects = CM.OBJECT_CREATORS.all_with_base()
-    choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]
+    records = CM.OBJECT_CREATORS.all_with_base()
+    choices = generate_choices(records)
     provider = SelectField(choices=choices)
 
     # available objects
@@ -143,9 +152,8 @@ class CreatorLootListForm(BaseForm):
     object = SelectField(choices=choices)
 
     # depends on quest
-    choices = [("", "---------")]
-    objects = CM.QUESTS.all_with_base()
-    choices.extend([(obj.key, obj.name + " (" + obj.key + ")") for obj in objects])
+    records = CM.QUESTS.all_with_base()
+    choices = generate_choices(records, add_empty=True)
     quest = SelectField(choices=choices)
 
     class Meta:
@@ -155,10 +163,10 @@ class CreatorLootListForm(BaseForm):
 class CharacterLootListForm(BaseForm):
     # providers can be world_npc or common_character
     npcs = CM.WORLD_NPCS.all_with_base()
-    choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in npcs]
+    choices = generate_choices(npcs)
 
     characters = CM.CHARACTERS.all_with_base()
-    choices.extend([(obj.key, obj.name + " (" + obj.key + ")") for obj in characters])
+    choices.extend(generate_choices(characters))
 
     provider = SelectField(choices=choices)
 
@@ -167,9 +175,8 @@ class CharacterLootListForm(BaseForm):
     object = SelectField(choices=choices)
 
     # depends on quest
-    choices = [("", "---------")]
     objects = CM.QUESTS.all_with_base()
-    choices.extend([(obj.key, obj.name + " (" + obj.key + ")") for obj in objects])
+    choices = generate_choices(objects, add_empty=True)
     quest = SelectField(choices=choices)
 
     class Meta:
@@ -178,8 +185,8 @@ class CharacterLootListForm(BaseForm):
 
 class QuestRewardListForm(BaseForm):
     # providers must be object_creators
-    objects = CM.QUESTS.all_with_base()
-    choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]
+    records = CM.QUESTS.all_with_base()
+    choices = generate_choices(records)
     provider = SelectField(choices=choices)
 
     # available objects
@@ -187,13 +194,12 @@ class QuestRewardListForm(BaseForm):
     object = SelectField(choices=choices)
 
     # depends on quest
-    choices = [("", "---------")]
-    objects = CM.QUESTS.all_with_base()
-    choices.extend([(obj.key, obj.name + " (" + obj.key + ")") for obj in objects])
+    records = CM.QUESTS.all_with_base()
+    choices = generate_choices(records, add_empty=True)
     quest = SelectField(choices=choices)
 
     class Meta:
-        model = get_model("character_loot_list")
+        model = get_model("quest_reward_list")
 
 
 class CommonObjectsForm(BaseForm):
@@ -215,8 +221,8 @@ class FoodsForm(BaseForm):
 
 class SkillBooksForm(BaseForm):
     # skills
-    objects = CM.SKILLS.all_with_base()
-    choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]
+    records = CM.SKILLS.all_with_base()
+    choices = generate_choices(records)
     skill = SelectField(choices=choices)
 
     class Meta:
@@ -232,8 +238,9 @@ class CharactersForm(BaseForm):
     icon = ImageField(image_type="icon")
 
     choices = [("", "---------")]
-    characters = CM.CHARACTERS.all_with_base()
-    choices.extend([(obj.key, obj.name + " (" + obj.element_type + " - " + obj.key + ")") for obj in characters])
+    records = CM.CHARACTERS.all_with_base()
+    choices.extend([(r.key, (r.name + " (" + r.element_type + " - " + r.key + ")") if r.name else
+                    r.element_type + " - " + r.key) for r in records])
     clone = SelectField(choices=choices)
 
     class Meta:
@@ -247,8 +254,8 @@ class PlayerCharactersForm(BaseForm):
 
 class DefaultObjectsForm(BaseForm):
     # all character's
-    objects = CM.CHARACTERS.all_with_base()
-    choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]
+    records = CM.CHARACTERS.all_with_base()
+    choices = generate_choices(records)
     character = SelectField(choices=choices)
 
     # available objects
@@ -268,8 +275,8 @@ class ShopsForm(BaseForm):
 
 class ShopGoodsForm(BaseForm):
     # all shops
-    objects = CM.SHOPS.all_with_base()
-    choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]
+    records = CM.SHOPS.all_with_base()
+    choices = generate_choices(records)
     shop = SelectField(choices=choices)
 
     # available objects
@@ -277,8 +284,8 @@ class ShopGoodsForm(BaseForm):
     goods = SelectField(choices=choices)
 
     # available units are common objects
-    objects = CM.COMMON_OBJECTS.all_with_base()
-    choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]
+    records = CM.COMMON_OBJECTS.all_with_base()
+    choices = generate_choices(records)
     unit = SelectField(choices=choices)
 
     class Meta:
@@ -287,13 +294,13 @@ class ShopGoodsForm(BaseForm):
 
 class NPCShopsForm(BaseForm):
     # All NPCs.
-    objects = CM.WORLD_NPCS.all_with_base()
-    choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]
+    records = CM.WORLD_NPCS.all_with_base()
+    choices = generate_choices(records)
     npc = SelectField(choices=choices)
 
     # All shops.
-    objects = CM.SHOPS.all_with_base()
-    choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]
+    records = CM.SHOPS.all_with_base()
+    choices = generate_choices(records)
     shop = SelectField(choices=choices)
 
     class Meta:
@@ -303,9 +310,8 @@ class NPCShopsForm(BaseForm):
 class SkillsForm(BaseForm):
     icon = ImageField(image_type="icon")
 
-    choices = [("", "---------")]
-    objects = CM.SKILL_TYPES.all()
-    choices.extend([(obj.key, obj.name + " (" + obj.key + ")") for obj in objects])
+    records = CM.SKILL_TYPES.all()
+    choices = generate_choices(records, add_empty=True)
     main_type = SelectField(choices=choices)
     sub_type = SelectField(choices=choices)
 
@@ -320,12 +326,12 @@ class SkillTypesForm(BaseForm):
 
 class DefaultSkillsForm(BaseForm):
     # all character's models
-    objects = CM.CHARACTERS.all_with_base()
-    choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]
+    records = CM.CHARACTERS.all_with_base()
+    choices = generate_choices(records)
     character = SelectField(choices=choices)
 
-    objects = CM.SKILLS.all_with_base()
-    choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]
+    records = CM.SKILLS.all_with_base()
+    choices = generate_choices(records)
     skill = SelectField(choices=choices)
 
     class Meta:
@@ -334,12 +340,12 @@ class DefaultSkillsForm(BaseForm):
 
 class NPCDialoguesForm(BaseForm):
     # All NPCs.
-    objects = CM.WORLD_NPCS.all_with_base()
-    choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]
+    records = CM.WORLD_NPCS.all_with_base()
+    choices = generate_choices(records)
     npc = SelectField(choices=choices)
 
-    objects = CM.DIALOGUES.all()
-    choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]
+    records = CM.DIALOGUES.all()
+    choices = generate_choices(records)
     dialogue = SelectField(choices=choices)
 
     class Meta:
@@ -352,8 +358,8 @@ class QuestsForm(BaseForm):
 
 
 class QuestObjectivesForm(BaseForm):
-    objects = CM.QUESTS.all_with_base()
-    choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]
+    records = CM.QUESTS.all_with_base()
+    choices = generate_choices(records)
     quest = SelectField(choices=choices)
 
     objectives = QUEST_OBJECTIVE_SET.all()
@@ -366,8 +372,8 @@ class QuestObjectivesForm(BaseForm):
 
 
 class QuestDependenciesForm(BaseForm):
-    objects = CM.QUESTS.all_with_base()
-    choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]
+    records = CM.QUESTS.all_with_base()
+    choices = generate_choices(records)
     quest = SelectField(choices=choices)
     dependency = SelectField(choices=choices)
 
@@ -379,12 +385,12 @@ class QuestDependenciesForm(BaseForm):
 
 
 class DialogueQuestDependenciesForm(BaseForm):
-    objects = CM.DIALOGUES.all()
-    choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]
+    records = CM.DIALOGUES.all()
+    choices = generate_choices(records)
     dialogue = SelectField(choices=choices)
 
-    objects = CM.QUESTS.all_with_base()
-    choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]
+    records = CM.QUESTS.all_with_base()
+    choices = generate_choices(records)
     dependency = SelectField(choices=choices)
 
     choices = QUEST_STATUS_SET.choice_all()
@@ -395,12 +401,12 @@ class DialogueQuestDependenciesForm(BaseForm):
 
 
 class EquipmentsForm(BaseForm):
-    objects = CM.EQUIPMENT_POSITIONS.all()
-    choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]
+    records = CM.EQUIPMENT_POSITIONS.all()
+    choices = generate_choices(records)
     position = SelectField(choices=choices)
 
-    objects = CM.EQUIPMENT_TYPES.all()
-    choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]
+    records = CM.EQUIPMENT_TYPES.all()
+    choices = generate_choices(records)
     type = SelectField(choices=choices)
 
     class Meta:
@@ -419,12 +425,12 @@ class EventDataForm(BaseForm):
 
 
 class ActionAttackForm(BaseForm):
-    objects = CM.EVENT_DATA.filter({"action": "ACTION_ATTACK"})
-    choices = [(obj.key, obj.key + " (" + obj.key + ")") for obj in objects]
+    records = CM.EVENT_DATA.filter({"action": "ACTION_ATTACK"})
+    choices = [(r.key, r.key) for r in records]
     event_key = SelectField(choices=choices)
 
-    objects = CM.CHARACTERS.all_with_base()
-    choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]
+    records = CM.CHARACTERS.all_with_base()
+    choices = generate_choices(records)
     mob = SelectField(choices=choices)
 
     class Meta:
@@ -432,18 +438,17 @@ class ActionAttackForm(BaseForm):
 
 
 class ActionDialogueForm(BaseForm):
-    objects = CM.EVENT_DATA.filter({"action": "ACTION_DIALOGUE"})
-    choices = [(obj.key, obj.key + " (" + obj.key + ")") for obj in objects]
+    records = CM.EVENT_DATA.filter({"action": "ACTION_DIALOGUE"})
+    choices = [(r.key, r.key) for r in records]
     event_key = SelectField(choices=choices)
 
-    objects = CM.DIALOGUES.all()
-    choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]
+    records = CM.DIALOGUES.all()
+    choices = generate_choices(records)
     dialogue = SelectField(choices=choices)
 
     # NPCs
-    choices = [("", "---------")]
-    objects = CM.WORLD_NPCS.all_with_base()
-    choices.extend([(obj.key, obj.name + " (" + obj.key + ")") for obj in objects])
+    records = CM.WORLD_NPCS.all_with_base()
+    choices = generate_choices(records, add_empty=True)
     npc = SelectField(choices=choices)
 
     class Meta:
@@ -451,12 +456,12 @@ class ActionDialogueForm(BaseForm):
 
 
 class ActionLearnSkillForm(BaseForm):
-    objects = CM.EVENT_DATA.filter({"action": "ACTION_LEARN_SKILL"})
-    choices = [(obj.key, obj.key + " (" + obj.key + ")") for obj in objects]
+    records = CM.EVENT_DATA.filter({"action": "ACTION_LEARN_SKILL"})
+    choices = [(r.key, r.key) for r in records]
     event_key = SelectField(choices=choices)
 
-    objects = CM.SKILLS.all_with_base()
-    choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]
+    records = CM.SKILLS.all_with_base()
+    choices = generate_choices(records)
     skill = SelectField(choices=choices)
 
     class Meta:
@@ -464,12 +469,12 @@ class ActionLearnSkillForm(BaseForm):
 
 
 class ActionAcceptQuestForm(BaseForm):
-    objects = CM.EVENT_DATA.filter({"action": "ACTION_ACCEPT_QUEST"})
-    choices = [(obj.key, obj.key + " (" + obj.key + ")") for obj in objects]
+    records = CM.EVENT_DATA.filter({"action": "ACTION_ACCEPT_QUEST"})
+    choices = [(r.key, r.key) for r in records]
     event_key = SelectField(choices=choices)
 
-    objects = CM.QUESTS.all_with_base()
-    choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]
+    records = CM.QUESTS.all_with_base()
+    choices = generate_choices(records)
     quest = SelectField(choices=choices)
 
     class Meta:
@@ -477,12 +482,12 @@ class ActionAcceptQuestForm(BaseForm):
 
         
 class ActionTurnInQuestForm(BaseForm):
-    objects = CM.EVENT_DATA.filter({"action": "ACTION_TURN_IN_QUEST"})
-    choices = [(obj.key, obj.key + " (" + obj.key + ")") for obj in objects]
+    records = CM.EVENT_DATA.filter({"action": "ACTION_TURN_IN_QUEST"})
+    choices = [(r.key, r.key) for r in records]
     event_key = SelectField(choices=choices)
 
-    objects = CM.QUESTS.all_with_base()
-    choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]
+    records = CM.QUESTS.all_with_base()
+    choices = generate_choices(records)
     quest = SelectField(choices=choices)
 
     class Meta:
@@ -490,12 +495,12 @@ class ActionTurnInQuestForm(BaseForm):
 
         
 class ActionCloseEventForm(BaseForm):
-    objects = CM.EVENT_DATA.filter({"action": "ACTION_CLOSE_EVENT"})
-    choices = [(obj.key, obj.key + " (" + obj.key + ")") for obj in objects]
+    records = CM.EVENT_DATA.filter({"action": "ACTION_CLOSE_EVENT"})
+    choices = [(r.key, r.key) for r in records]
     event_key = SelectField(choices=choices)
 
-    objects = CM.EVENT_DATA.all()
-    choices = [(obj.key, obj.key) for obj in objects]
+    records = CM.EVENT_DATA.all()
+    choices = [(r.key, r.key) for r in records]
     event = SelectField(choices=choices)
 
     class Meta:
@@ -522,8 +527,8 @@ class DialoguesForm(BaseForm):
 
 
 class DialogueRelationsForm(BaseForm):
-    objects = CM.DIALOGUES.all()
-    choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]
+    records = CM.DIALOGUES.all()
+    choices = generate_choices(records)
     dialogue = SelectField(choices=choices)
     next_dlg = SelectField(choices=choices)
 

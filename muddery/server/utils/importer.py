@@ -2,17 +2,13 @@
 This module imports data from files to db.
 """
 
-import os, glob, tempfile, zipfile, shutil
+import os, glob
 import traceback
 from sqlalchemy import delete
-from muddery.launcher.upgrader.upgrade_handler import UPGRADE_HANDLER
-from muddery.launcher import configs
-from muddery.launcher.utils import copy_tree
-from muddery.server.settings import SETTINGS
-from muddery.server.database.worlddata_db import WorldDataDB
-from muddery.server.utils.logger import logger
 from muddery.common.utils.exception import MudderyError, ERR
 from muddery.common.utils import readers
+from muddery.server.database.worlddata_db import WorldDataDB
+from muddery.server.utils.logger import logger
 
 
 def import_file(fullname, file_type=None, table_name=None, clear=True, except_errors=False, **kwargs):
@@ -103,7 +99,7 @@ def import_file(fullname, file_type=None, table_name=None, clear=True, except_er
                     if value:
                         record[field_name] = float(value)
             except Exception as e:
-                raise Exception({field_name: "value error: '%s'" % value})
+                raise Exception("%s '%s' error: %s" % (field_name, value, e))
 
         return record
 
@@ -138,50 +134,24 @@ def import_file(fullname, file_type=None, table_name=None, clear=True, except_er
                         line += 1
                         continue
 
-                    data = parse_record(titles, field_types, values)
-                    record = model(**data)
-                    session.add(record)
+                    try:
+                        data = parse_record(titles, field_types, values)
+                        record = model(**data)
+                        session.add(record)
+                    except Exception as e:
+                        msg = "Import %s line %s error: %s" % (model.__tablename__, line, e)
+                        if except_errors:
+                            print(msg)
+                            logger.log_warn(msg)
+                        else:
+                            logger.log_err(msg)
+                            raise MudderyError(ERR.import_data_error, msg)
+
                     line += 1
 
         except StopIteration:
             # reach the end of file, pass this exception
             pass
-        #except ValidationError as e:
-        #    traceback.print_exc()
-        #    raise MudderyError(ERR.import_data_error, parse_error(e, model_obj.__name__, line))
-        except Exception as e:
-            traceback.print_exc()
-            raise MudderyError(ERR.import_data_error, "%s (model: %s, line: %s)" % (e, model.__tablename__, line))
-
-    def parse_error(error, model_name, line):
-        """
-        Parse validation error to string message.
-
-        Args:
-            error: (ValidationError) a ValidationError.
-            line: (number) the line number where the error occurs.
-        Returns:
-            (string) output string.
-        """
-        err_message = ""
-
-        if hasattr(error, "error_dict"):
-            error_dict = error.error_dict
-        else:
-            error_dict = {"": error.error_list}
-
-        count = 1
-        for field, error_list in error_dict.items():
-            err_message += str(count) + ". "
-            if field:
-                err_message += "[" + field + "] "
-            for item in error_list:
-                if item.params:
-                    err_message += item.message % item.params + "  "
-                else:
-                    err_message += item.message + "  "
-            count += 1
-        return "%s (model: %s, line: %s)" % (err_message, model_name, line)
 
     # separate name and ext name
     try:
@@ -213,87 +183,10 @@ def import_file(fullname, file_type=None, table_name=None, clear=True, except_er
         raise(MudderyError(ERR.import_data_error, "Does not support this file type."))
 
     logger.log_debug("Importing %s" % table_name)
-    import_data(session, model, reader)
-
-
-def unzip_data_all(fp):
-    """
-    Import all data files from a zip file.
-    """
-    temp_path = tempfile.mkdtemp()
-
     try:
-        archive = zipfile.ZipFile(fp, 'r')
-        archive.extractall(temp_path)
-        source_path = temp_path
-        
-        # if the zip file contains a root dir
-        file_list = os.listdir(temp_path)
-        if len(file_list) == 1:
-            path = os.path.join(temp_path, file_list[0])
-            if os.path.isdir(path):
-                source_path = path
-
-        # Upgrade game data.
-        UPGRADE_HANDLER.upgrade_data(source_path, None, configs.MUDDERY_LIB)
-
-        # import data from path
-        import_data_path(source_path)
-
-        # load system localized strings
-        # system data file's path
-        system_data_path = os.path.join(SETTINGS.MUDDERY_DIR, SETTINGS.WORLD_DATA_FOLDER)
-
-        # localized string file's path
-        system_localized_string_path = os.path.join(system_data_path,
-                                                    SETTINGS.LOCALIZED_STRINGS_FOLDER,
-                                                    SETTINGS.LANGUAGE_CODE)
-
-        # load data
-        import_table_path(system_localized_string_path, SETTINGS.LOCALIZED_STRINGS_MODEL)
-
-        # load custom localized strings
-        # custom data file's path
-        custom_localized_string_path = os.path.join(source_path, SETTINGS.LOCALIZED_STRINGS_MODEL)
-
-        file_names = glob.glob(custom_localized_string_path + ".*")
-        if file_names:
-            print("Importing %s" % file_names[0])
-            try:
-                import_file(file_names[0], table_name=SETTINGS.LOCALIZED_STRINGS_MODEL, clear=False)
-            except Exception as e:
-                print("Import error: %s" % e)
-
+        import_data(session, model, reader)
     finally:
-        shutil.rmtree(temp_path)
-
-
-def unzip_resources_all(fp):
-    """
-    Import all resource files from a zip file.
-    """
-    media_dir = os.path.join(SETTINGS.MEDIA_ROOT, SETTINGS.IMAGE_PATH)
-    if not os.path.exists(media_dir):
-        os.makedirs(media_dir)
-
-    temp_path = tempfile.mkdtemp()
-
-    try:
-        archive = zipfile.ZipFile(fp, 'r')
-        archive.extractall(temp_path)
-        source_path = temp_path
-        
-        # if the zip file contains a root dir
-        file_list = os.listdir(temp_path)
-        if len(file_list) == 1:
-            path = os.path.join(temp_path, file_list[0])
-            if os.path.isdir(path):
-                source_path = path
-
-        copy_tree(source_path, media_dir)
-
-    finally:
-        shutil.rmtree(temp_path)
+        reader.close()
 
 
 def import_data_path(path, clear=True, except_errors=False):
@@ -312,11 +205,7 @@ def import_data_path(path, clear=True, except_errors=False):
 
         if file_names:
             print("Importing %s" % file_names[0])
-            try:
-                import_file(file_names[0], table_name=table_name, clear=clear, except_errors=except_errors)
-            except Exception as e:
-                traceback.print_exc()
-                print("Import error: %s" % e)
+            import_file(file_names[0], table_name=table_name, clear=clear, except_errors=except_errors)
 
 
 def import_table_path(path, table_name, clear=True, except_errors=False):
@@ -327,7 +216,6 @@ def import_table_path(path, table_name, clear=True, except_errors=False):
         path: (string) data path.
         table_name: (string) table's name.
         clear: (boolean) clear old data.
-        except_errors: (boolean) except error records and load other records.
     """
     if clear:
         WorldDataDB.inst().clear_table(table_name)

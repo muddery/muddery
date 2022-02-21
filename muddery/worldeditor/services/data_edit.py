@@ -48,7 +48,7 @@ def query_form(table_name, condition=None):
         field = form[field_name]
         info = {
             "name": field.id,
-            "label": field.name,
+            "label": LocalizedStrings.inst().trans(field.name, category="field_" + table_name),
             "default": field.default,
             "disabled": (field.name == "id"),
             "help_text": field.description,

@@ -108,6 +108,7 @@ category,origin,local
 ,"LEVEL","等级"
 ,"EXP","经验"
 ,"HP","生命"
+,"Level","等级"
 ,"Incorrect password.","密码错误。"
 ,"Password is too simple.","密码太简单。"
 ,"Password changed.","密码已修改。",

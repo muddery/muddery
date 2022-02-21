@@ -32,7 +32,7 @@ def query_fields_info(table_name):
         field = form[field_name]
         info = {
             "name": field.id,
-            "label": field.name,
+            "label": LocalizedStrings.inst().trans(field.name, category="field_" + table_name),
             "default": field.default,
             "disabled": (field.name == "id"),
             "help_text": field.description,
@@ -350,7 +350,7 @@ def query_element_table(element_type):
         # add other tables
         for table in tables[1:]:
             table_fields = query_fields_info(table)
-            fields.extend([field for field in table_fields if field["name"] != "name" and field["name"] != "key"])
+            fields.extend([field for field in table_fields if field["name"] != "id" and field["name"] != "key"])
 
         # get all tables' data
         records = general_querys.get_all_from_tables(tables)

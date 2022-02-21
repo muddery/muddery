@@ -525,7 +525,7 @@ ElementEditor.prototype.propertiesFields = function(fields) {
 
     cols.push({
         field: "operate",
-        title: "Operate",
+        title: "",
         formatter: this.propertiesButton,
     });
 
