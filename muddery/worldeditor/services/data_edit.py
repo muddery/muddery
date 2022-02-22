@@ -110,8 +110,8 @@ def save_form(values, table_name, record_id=None):
             session.add(record)
         else:
             session.merge(record)
+        session.flush()
     except Exception as e:
-        session.rollback()
         logger.log_trace("Can not save form %s" % e)
         raise
 
@@ -273,13 +273,13 @@ def save_element_form(tables, element_type, element_key):
     # Save data.
     session = WorldDataDB.inst().get_session()
     try:
-        for item in forms_to_save:
-            if item["is_new"]:
-                session.add(record)
-            else:
-                session.merge(record)
+        with session.begin():
+            for item in forms_to_save:
+                if item["is_new"]:
+                    session.add(record)
+                else:
+                    session.merge(record)
     except Exception as e:
-        session.rollback()
         logger.log_trace("Can not save form %s" % e)
         raise
 

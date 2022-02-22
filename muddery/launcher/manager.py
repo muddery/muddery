@@ -146,13 +146,18 @@ def load_game_data():
         traceback.print_exc()
         raise
 
-    # connect the db
+    # check tables
     try:
         from muddery.server.database.worlddata_db import WorldDataDB
         WorldDataDB.inst().connect()
+        has_tables = WorldDataDB.inst().check_tables()
     except Exception as e:
         traceback.print_exc()
         raise
+
+    if not has_tables:
+        print(configs.NO_GAME_TABLES)
+        return
 
     # load local data
     try:
@@ -171,8 +176,27 @@ def load_system_data():
     """
     print("Importing system data.")
 
+    # Set game environment
     gamedir = os.path.abspath(configs.CURRENT_DIR)
     utils.init_game_env(gamedir)
+
+    # Load settings.
+    from muddery.server.settings import SETTINGS as SERVER_SETTINGS
+    from server.settings import ServerSettings
+    SERVER_SETTINGS.update(ServerSettings())
+
+    # check tables
+    try:
+        from muddery.server.database.worlddata_db import WorldDataDB
+        WorldDataDB.inst().connect()
+        has_tables = WorldDataDB.inst().check_tables()
+    except Exception as e:
+        traceback.print_exc()
+        raise
+
+    if not has_tables:
+        print(configs.NO_GAME_TABLES)
+        return
 
     # load system data
     try:

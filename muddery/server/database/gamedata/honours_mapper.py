@@ -168,6 +168,7 @@ class HonoursMapper(Singleton):
                 honour=honour
             )
             self.session.add(record)
+            self.session.flush()
 
             self.honours[char_id] = {
                 "honour": honour,

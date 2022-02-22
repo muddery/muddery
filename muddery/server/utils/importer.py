@@ -84,10 +84,12 @@ def import_file(fullname, file_type=None, table_name=None, clear=True, except_er
                 elif field_type == 1:
                     # boolean value
                     if value:
-                        if value == 'True':
-                            record[field_name] = True
-                        elif value == 'False':
-                            record[field_name] = False
+                        if type(value) == str:
+                            upper = value.upper()
+                            if upper == 'TRUE' or 'T':
+                                record[field_name] = True
+                            elif upper == 'FALSE' or 'F':
+                                record[field_name] = False
                         else:
                             record[field_name] = (int(value) != 0)
                 elif field_type == 2:
@@ -114,41 +116,31 @@ def import_file(fullname, file_type=None, table_name=None, clear=True, except_er
         Returns:
             None
         """
-        line = 1
         try:
             # read title
             titles = next(data_iterator)
             field_types = get_field_types(model, titles)
-            line += 1
 
             # import values
             with session.begin():
-                for values in data_iterator:
+                for index, values in enumerate(data_iterator):
                     # skip blank lines
-                    blank_line = True
-                    for value in values:
-                        if value:
-                            blank_line = False
-                            break
-                    if blank_line:
-                        line += 1
+                    if not "".join(values):
                         continue
 
                     try:
                         data = parse_record(titles, field_types, values)
                         record = model(**data)
                         session.add(record)
+                        session.flush()
                     except Exception as e:
-                        msg = "Import %s line %s error: %s" % (model.__tablename__, line, e)
+                        msg = "Import %s line %s error: %s" % (model.__tablename__, index + 2, e)
                         if except_errors:
                             print(msg)
                             logger.log_warn(msg)
                         else:
                             logger.log_err(msg)
                             raise MudderyError(ERR.import_data_error, msg)
-
-                    line += 1
-
         except StopIteration:
             # reach the end of file, pass this exception
             pass

@@ -68,6 +68,7 @@ class CommonMapper(object):
         """
         record = self.model(**values)
         self.session.add(record)
+        self.session.flush()
 
     def update_or_add(self, condition, values):
         """
@@ -84,7 +85,7 @@ class CommonMapper(object):
             data = dict(condition, **values)
             record = self.model(**data)
             self.session.add(record)
-
+            self.session.flush()
 
     def delete(self, condition):
         stmt = delete(self.model)

@@ -196,6 +196,13 @@ class world_areas(BaseMatter):
     "The game map is composed by areas."
     __tablename__ = "world_areas"
 
+    __table_args__ = {
+        "extend_existing": True,
+    }
+
+    # matter's element type
+    element_type = Column(String(KEY_LENGTH), nullable=False, default="AREA")
+
     # area's map background image resource
     background = Column(String(KEY_LENGTH))
 
@@ -214,6 +221,13 @@ class world_areas(BaseMatter):
 class world_rooms(BaseMatter):
     "Defines all unique rooms."
     __tablename__ = "world_rooms"
+
+    __table_args__ = {
+        "extend_existing": True,
+    }
+
+    # matter's element type
+    element_type = Column(String(KEY_LENGTH), nullable=False, default="ROOM")
 
     # The key of a world area.
     # The room's location, it must be a area.
@@ -234,6 +248,13 @@ class profit_rooms(BaseElement):
     The action to trigger other actions at interval.
     """
     __tablename__ = "profit_rooms"
+
+    __table_args__ = {
+        "extend_existing": True,
+    }
+
+    # matter's element type
+    element_type = Column(String(KEY_LENGTH), nullable=False, default="PROFIT_ROOM")
 
     # Repeat interval in seconds.
     interval = Column(Integer, default=0, nullable=False)
@@ -259,6 +280,13 @@ class profit_rooms(BaseElement):
 class common_objects(BaseMatter):
     "Store all common objects."
     __tablename__ = "common_objects"
+
+    __table_args__ = {
+        "extend_existing": True,
+    }
+
+    # matter's element type
+    element_type = Column(String(KEY_LENGTH), nullable=False, default="COMMON_OBJECT")
 
 
 class world_objects(BaseElement):
@@ -339,6 +367,13 @@ class characters(BaseMatter):
     "Store common characters."
     __tablename__ = "characters"
 
+    __table_args__ = {
+        "extend_existing": True,
+    }
+
+    # matter's element type
+    element_type = Column(String(KEY_LENGTH), nullable=False, default="CHARACTER")
+
     # Character's level.
     level = Column(Integer, default=1)
 
@@ -373,6 +408,13 @@ class player_characters(BaseElement):
 class world_exits(BaseMatter):
     "Defines all unique exits."
     __tablename__ = "world_exits"
+
+    __table_args__ = {
+        "extend_existing": True,
+    }
+
+    # matter's element type
+    element_type = Column(String(KEY_LENGTH), nullable=False, default="EXIT")
 
     # The key of a world room.
     # The exit's location, it must be a room.

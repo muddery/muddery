@@ -39,6 +39,7 @@ class Accounts(Singleton):
 
         record = accounts(**data)
         self.session.add(record)
+        self.session.flush()
 
     def remove(self, username):
         """

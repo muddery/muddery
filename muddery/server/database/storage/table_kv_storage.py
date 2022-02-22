@@ -76,6 +76,7 @@ class TableKVStorage(BaseKeyValueStorage):
 
         record = self.model(**data)
         self.session.add(record)
+        self.session.flush()
 
     async def save(self, category, key, value=None):
         """
@@ -112,6 +113,7 @@ class TableKVStorage(BaseKeyValueStorage):
 
             record = self.model(**data)
             self.session.add(record)
+            self.session.flush()
 
     async def has(self, category: str, key: str, check_category: bool = False) -> bool:
         """

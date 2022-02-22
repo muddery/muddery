@@ -8,12 +8,13 @@ from PIL import Image
 from muddery.common.utils.exception import MudderyError, ERR
 from muddery.common.networks.responses import success_response, file_response
 from muddery.common.utils import writers
+from muddery.server.utils.importer import import_file
 from muddery.worldeditor.controllers.base_request_processer import BaseRequestProcesser
 from muddery.worldeditor.dao.image_resources_mapper import ImageResourcesMapper
 from muddery.worldeditor.utils.logger import logger
 from muddery.worldeditor.settings import SETTINGS
 from muddery.worldeditor.services import exporter
-from muddery.worldeditor.services import importer
+from muddery.worldeditor.services.importer import unzip_data_all, unzip_resources_all
 from muddery.worldeditor.networks.request_parser import parse_file
 
 
@@ -34,7 +35,7 @@ class UploadZip(BaseRequestProcesser):
             raise MudderyError(ERR.missing_args, 'Missing zip files.')
 
         try:
-            importer.unzip_data_all(BytesIO(file_data))
+            unzip_data_all(BytesIO(file_data))
         except Exception as e:
             logger.log_trace("Upload error: %s" % e)
             raise MudderyError(ERR.upload_error, str(e))
@@ -59,7 +60,7 @@ class UuploadResources(BaseRequestProcesser):
             raise MudderyError(ERR.missing_args, 'Missing zip files.')
 
         try:
-            importer.unzip_resources_all(BytesIO(file_data))
+            unzip_resources_all(BytesIO(file_data))
         except Exception as e:
             logger.log_trace("Upload error: %s" % e)
             raise MudderyError(ERR.upload_error, str(e))
@@ -102,7 +103,7 @@ class UploadSingleData(BaseRequestProcesser):
                 fp.flush()
 
                 # Import the template file.
-                importer.import_file(temp_filename, table_name=table_name, file_type=file_type, clear=True)
+                import_file(temp_filename, table_name=table_name, file_type=file_type, clear=True)
 
                 try:
                     os.remove(temp_filename)

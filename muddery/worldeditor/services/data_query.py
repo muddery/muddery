@@ -389,7 +389,7 @@ def query_map(area_key):
         try:
             position = ast.literal_eval(record.position)
         except SyntaxError as e:
-            logger.log_err("Parse map %s's position error: %s" % (record["key"], e))
+            logger.log_err("Parse map %s's position error: %s" % (record.key, e))
             position = ()
 
         info = {
