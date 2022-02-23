@@ -279,6 +279,7 @@ def save_element_form(tables, element_type, element_key):
                     session.add(record)
                 else:
                     session.merge(record)
+            session.flush()
     except Exception as e:
         logger.log_trace("Can not save form %s" % e)
         raise
@@ -319,16 +320,30 @@ def save_map_positions(area, rooms):
             })
 
 
-def delete_element(element_key, base_element_type=None):
+def delete_elements(elements):
     """
-    Delete an element from all tables under the base element type.
-    """
-    elements = ELEMENT_SET.get_group(base_element_type)
-    tables = set()
-    for key, value in elements.items():
-        tables.update(value.get_models())
+    Delete a list of elements.
 
-    general_querys.delete_tables_record_by_key(tables, element_key)
+    Args:
+        elements: (dict) {
+            element's type: element's key or [element's keys],
+        }
+    """
+    session = WorldDataDB.inst().get_session()
+
+    with session.begin():
+        for element_type, element_keys in elements.items():
+            if type(element_keys) == str:
+                element_keys = [element_keys]
+
+            for element_key in element_keys:
+                # Get element's tables.
+                elements = ELEMENT_SET.get_group(element_type)
+                tables = set()
+                for value in elements.values():
+                    tables.update(value.get_models())
+
+                general_querys.delete_tables_record_by_key(tables, element_key)
 
 
 def query_event_action_forms(action_type, event_key):

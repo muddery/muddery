@@ -42,7 +42,9 @@ class FormSet(object):
         Args:
             table_name: (string) table's name
         """
-        return self.dict[table_name]
+        form = self.dict[table_name]
+        form.refresh()
+        return form
 
 
 FORM_SET = FormSet()

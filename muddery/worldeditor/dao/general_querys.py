@@ -269,15 +269,12 @@ def delete_tables_record_by_key(tables, key):
     """
     session = WorldDataDB.inst().get_session()
 
-    with session.begin():
-        for table_name in tables:
-            model = WorldDataDB.inst().get_model(table_name)
+    for table_name in tables:
+        model = WorldDataDB.inst().get_model(table_name)
 
-            # set conditions
-            stmt = delete(model).where(model.key==key)
-            session.execute(stmt)
-
-    return
+        # set conditions
+        stmt = delete(model).where(model.key==key)
+        session.execute(stmt)
 
 
 def update_records(table_name, values, condition=None):

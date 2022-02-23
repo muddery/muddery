@@ -667,7 +667,9 @@ class DeleteElements(BaseRequestProcesser):
     Delete a list of objects
 
     Args:
-        objects: (list) a list of exit keys.
+        elements: (dict) {
+            element's type: element's key or [element's keys],
+        }
     """
     path = "delete_elements"
     name = ""
@@ -681,8 +683,7 @@ class DeleteElements(BaseRequestProcesser):
 
         elements = args["elements"]
 
-        for element_key in elements:
-            data_edit.delete_element(element_key)
+        data_edit.delete_elements(elements)
 
         return success_response("success")
 
@@ -813,13 +814,13 @@ class DeleteElement(BaseRequestProcesser):
         if 'element_key' not in args:
             raise MudderyError(ERR.missing_args, 'Missing the argument: "element_key".')
 
-        if 'base_element_type' not in args:
-            raise MudderyError(ERR.missing_args, 'Missing the argument: "base_element_type".')
+        if 'element_type' not in args:
+            raise MudderyError(ERR.missing_args, 'Missing the argument: "element_type".')
 
+        element_type = args["element_type"]
         element_key = args["element_key"]
-        base_element_type = args.get("base_element_type", None)
 
-        data_edit.delete_element(element_key, base_element_type)
+        data_edit.delete_elements({element_type: [element_key]})
         data = {"element_key": element_key}
 
         return success_response(data)

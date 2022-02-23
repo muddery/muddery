@@ -43,18 +43,20 @@ def get_all_pocketable_objects():
 
 
 class GameSettingsForm(BaseForm):
-    records = get_element_base_data("ROOM")
-    choices = generate_choices(records, add_empty=True)
-    start_location_key = LocationField(choices=choices)
-    default_player_home_key = LocationField(choices=choices)
+    @classmethod
+    def refresh(cls):
+        records = get_element_base_data("ROOM")
+        choices = generate_choices(records, add_empty=True)
+        cls.start_location_key = LocationField(choices=choices)
+        cls.default_player_home_key = LocationField(choices=choices)
 
-    records = get_element_base_data("PLAYER_CHARACTER")
-    choices = generate_choices(records, add_empty=True)
-    default_player_character_key = SelectField(choices=choices)
+        records = get_element_base_data("PLAYER_CHARACTER")
+        choices = generate_choices(records, add_empty=True)
+        cls.default_player_character_key = SelectField(choices=choices)
 
-    records = get_element_base_data("STAFF_CHARACTER")
-    choices = generate_choices(records, add_empty=True)
-    default_staff_character_key = SelectField(choices=choices)
+        records = get_element_base_data("STAFF_CHARACTER")
+        choices = generate_choices(records, add_empty=True)
+        cls.default_staff_character_key = SelectField(choices=choices)
 
     class Meta:
         model = get_model("game_settings")
@@ -76,30 +78,36 @@ class EquipmentPositionsForm(BaseForm):
 
 
 class WorldAreasForm(BaseForm):
-    background = ImageField(image_type="background")
+    @classmethod
+    def refresh(cls):
+        cls.background = ImageField(image_type="background")
 
     class Meta:
         model = get_model("world_areas")
 
 
 class WorldRoomsForm(BaseForm):
-    records = CM.WORLD_AREAS.all_with_base()
-    choices = generate_choices(records, add_empty=True)
-    area = SelectField(choices=choices)
+    @classmethod
+    def refresh(cls):
+        records = CM.WORLD_AREAS.all_with_base()
+        choices = generate_choices(records, add_empty=True)
+        cls.area = SelectField(choices=choices)
 
-    icon = ImageField(image_type="icon")
+        cls.icon = ImageField(image_type="icon")
 
-    background = ImageField(image_type="background")
+        cls.background = ImageField(image_type="background")
 
     class Meta:
         model = get_model("world_rooms")
 
 
 class WorldExitsForm(BaseForm):
-    records = CM.WORLD_ROOMS.all_with_base()
-    choices = generate_choices(records)
-    location = LocationField(choices=choices)
-    destination = LocationField(choices=choices)
+    @classmethod
+    def refresh(cls):
+        records = CM.WORLD_ROOMS.all_with_base()
+        choices = generate_choices(records)
+        cls.location = LocationField(choices=choices)
+        cls.destination = LocationField(choices=choices)
 
     class Meta:
         model = get_model("world_exits")
@@ -111,21 +119,25 @@ class ExitLocks(BaseForm):
 
 
 class WorldObjectsForm(BaseForm):
-    records = CM.WORLD_ROOMS.all_with_base()
-    choices = generate_choices(records)
-    location = LocationField(choices=choices)
+    @classmethod
+    def refresh(cls):
+        records = CM.WORLD_ROOMS.all_with_base()
+        choices = generate_choices(records)
+        cls.location = LocationField(choices=choices)
 
-    icon = ImageField(image_type="icon")
+        cls.icon = ImageField(image_type="icon")
 
     class Meta:
         model = get_model("world_objects")
 
 
 class WorldNPCsForm(BaseForm):
-    # NPC's location
-    records = CM.WORLD_ROOMS.all_with_base()
-    choices = generate_choices(records)
-    location = LocationField(choices=choices)
+    @classmethod
+    def refresh(cls):
+        # NPC's location
+        records = CM.WORLD_ROOMS.all_with_base()
+        choices = generate_choices(records)
+        cls.location = LocationField(choices=choices)
 
     class Meta:
         model = get_model("world_npcs")
@@ -142,68 +154,76 @@ class ObjectCreatorsForm(BaseForm):
 
 
 class CreatorLootListForm(BaseForm):
-    # providers must be object_creators
-    records = CM.OBJECT_CREATORS.all_with_base()
-    choices = generate_choices(records)
-    provider = SelectField(choices=choices)
+    @classmethod
+    def refresh(cls):
+        # providers must be object_creators
+        records = CM.OBJECT_CREATORS.all_with_base()
+        choices = generate_choices(records)
+        cls.provider = SelectField(choices=choices)
 
-    # available objects
-    choices = get_all_pocketable_objects()
-    object = SelectField(choices=choices)
+        # available objects
+        choices = get_all_pocketable_objects()
+        cls.object = SelectField(choices=choices)
 
-    # depends on quest
-    records = CM.QUESTS.all_with_base()
-    choices = generate_choices(records, add_empty=True)
-    quest = SelectField(choices=choices)
+        # depends on quest
+        records = CM.QUESTS.all_with_base()
+        choices = generate_choices(records, add_empty=True)
+        cls.quest = SelectField(choices=choices)
 
     class Meta:
         model = get_model("creator_loot_list")
 
 
 class CharacterLootListForm(BaseForm):
-    # providers can be world_npc or common_character
-    npcs = CM.WORLD_NPCS.all_with_base()
-    choices = generate_choices(npcs)
+    @classmethod
+    def refresh(cls):
+        # providers can be world_npc or common_character
+        npcs = CM.WORLD_NPCS.all_with_base()
+        choices = generate_choices(npcs)
 
-    characters = CM.CHARACTERS.all_with_base()
-    choices.extend(generate_choices(characters))
+        characters = CM.CHARACTERS.all_with_base()
+        choices.extend(generate_choices(characters))
 
-    provider = SelectField(choices=choices)
+        cls.provider = SelectField(choices=choices)
 
-    # available objects
-    choices = get_all_pocketable_objects()
-    object = SelectField(choices=choices)
+        # available objects
+        choices = get_all_pocketable_objects()
+        cls.object = SelectField(choices=choices)
 
-    # depends on quest
-    objects = CM.QUESTS.all_with_base()
-    choices = generate_choices(objects, add_empty=True)
-    quest = SelectField(choices=choices)
+        # depends on quest
+        objects = CM.QUESTS.all_with_base()
+        choices = generate_choices(objects, add_empty=True)
+        cls.quest = SelectField(choices=choices)
 
     class Meta:
         model = get_model("character_loot_list")
 
 
 class QuestRewardListForm(BaseForm):
-    # providers must be object_creators
-    records = CM.QUESTS.all_with_base()
-    choices = generate_choices(records)
-    provider = SelectField(choices=choices)
+    @classmethod
+    def refresh(cls):
+        # providers must be object_creators
+        records = CM.QUESTS.all_with_base()
+        choices = generate_choices(records)
+        cls.provider = SelectField(choices=choices)
 
-    # available objects
-    choices = get_all_pocketable_objects()
-    object = SelectField(choices=choices)
+        # available objects
+        choices = get_all_pocketable_objects()
+        cls.object = SelectField(choices=choices)
 
-    # depends on quest
-    records = CM.QUESTS.all_with_base()
-    choices = generate_choices(records, add_empty=True)
-    quest = SelectField(choices=choices)
+        # depends on quest
+        records = CM.QUESTS.all_with_base()
+        choices = generate_choices(records, add_empty=True)
+        cls.quest = SelectField(choices=choices)
 
     class Meta:
         model = get_model("quest_reward_list")
 
 
 class CommonObjectsForm(BaseForm):
-    icon = ImageField(image_type="icon")
+    @classmethod
+    def refresh(cls):
+        cls.icon = ImageField(image_type="icon")
 
     class Meta:
         model = get_model("common_objects")
@@ -220,10 +240,12 @@ class FoodsForm(BaseForm):
         
 
 class SkillBooksForm(BaseForm):
-    # skills
-    records = CM.SKILLS.all_with_base()
-    choices = generate_choices(records)
-    skill = SelectField(choices=choices)
+    @classmethod
+    def refresh(cls):
+        # skills
+        records = CM.SKILLS.all_with_base()
+        choices = generate_choices(records)
+        cls.skill = SelectField(choices=choices)
 
     class Meta:
         model = get_model("skill_books")
@@ -235,13 +257,15 @@ class PropertiesDictForm(BaseForm):
 
 
 class CharactersForm(BaseForm):
-    icon = ImageField(image_type="icon")
+    @classmethod
+    def refresh(cls):
+        cls.icon = ImageField(image_type="icon")
 
-    choices = [("", "---------")]
-    records = CM.CHARACTERS.all_with_base()
-    choices.extend([(r.key, (r.name + " (" + r.element_type + " - " + r.key + ")") if r.name else
-                    r.element_type + " - " + r.key) for r in records])
-    clone = SelectField(choices=choices)
+        choices = [("", "---------")]
+        records = CM.CHARACTERS.all_with_base()
+        choices.extend([(r.key, (r.name + " (" + r.element_type + " - " + r.key + ")") if r.name else
+                        r.element_type + " - " + r.key) for r in records])
+        cls.clone = SelectField(choices=choices)
 
     class Meta:
         model = get_model("characters")
@@ -253,67 +277,77 @@ class PlayerCharactersForm(BaseForm):
 
 
 class DefaultObjectsForm(BaseForm):
-    # all character's
-    records = CM.CHARACTERS.all_with_base()
-    choices = generate_choices(records)
-    character = SelectField(choices=choices)
+    @classmethod
+    def refresh(cls):
+        # all character's
+        records = CM.CHARACTERS.all_with_base()
+        choices = generate_choices(records)
+        cls.character = SelectField(choices=choices)
 
-    # available objects
-    choices = get_all_pocketable_objects()
-    object = SelectField(choices=choices)
+        # available objects
+        choices = get_all_pocketable_objects()
+        cls.object = SelectField(choices=choices)
 
     class Meta:
         model = get_model("default_objects")
 
 
 class ShopsForm(BaseForm):
-    icon = ImageField(image_type="icon")
+    @classmethod
+    def refresh(cls):
+        cls.icon = ImageField(image_type="icon")
 
     class Meta:
         model = get_model("shops")
 
 
 class ShopGoodsForm(BaseForm):
-    # all shops
-    records = CM.SHOPS.all_with_base()
-    choices = generate_choices(records)
-    shop = SelectField(choices=choices)
+    @classmethod
+    def refresh(cls):
+        # all shops
+        records = CM.SHOPS.all_with_base()
+        choices = generate_choices(records)
+        cls.shop = SelectField(choices=choices)
 
-    # available objects
-    choices = get_all_pocketable_objects()
-    goods = SelectField(choices=choices)
+        # available objects
+        choices = get_all_pocketable_objects()
+        cls.goods = SelectField(choices=choices)
 
-    # available units are common objects
-    records = CM.COMMON_OBJECTS.all_with_base()
-    choices = generate_choices(records)
-    unit = SelectField(choices=choices)
+        # available units are common objects
+        records = CM.COMMON_OBJECTS.all_with_base()
+        choices = generate_choices(records)
+        cls.unit = SelectField(choices=choices)
 
     class Meta:
         model = get_model("shop_goods")
 
 
 class NPCShopsForm(BaseForm):
-    # All NPCs.
-    records = CM.WORLD_NPCS.all_with_base()
-    choices = generate_choices(records)
-    npc = SelectField(choices=choices)
+    @classmethod
+    def refresh(cls):
+        # All NPCs.
+        records = CM.WORLD_NPCS.all_with_base()
+        choices = generate_choices(records)
+        cls.npc = SelectField(choices=choices)
 
-    # All shops.
-    records = CM.SHOPS.all_with_base()
-    choices = generate_choices(records)
-    shop = SelectField(choices=choices)
+        # All shops.
+        records = CM.SHOPS.all_with_base()
+        choices = generate_choices(records)
+        cls.shop = SelectField(choices=choices)
 
     class Meta:
         model = get_model("npc_shops")
 
 
 class SkillsForm(BaseForm):
-    icon = ImageField(image_type="icon")
+    @classmethod
+    def refresh(cls):
+        cls.icon = ImageField(image_type="icon")
 
-    records = CM.SKILL_TYPES.all()
-    choices = generate_choices(records, add_empty=True)
-    main_type = SelectField(choices=choices)
-    sub_type = SelectField(choices=choices)
+        records = CM.SKILL_TYPES.all()
+        choices = generate_choices(records, add_empty=True)
+        cls.main_type = SelectField(choices=choices)
+        cls.sub_type = SelectField(choices=choices)
 
     class Meta:
         model = get_model("skills")
@@ -325,28 +359,32 @@ class SkillTypesForm(BaseForm):
 
 
 class DefaultSkillsForm(BaseForm):
-    # all character's models
-    records = CM.CHARACTERS.all_with_base()
-    choices = generate_choices(records)
-    character = SelectField(choices=choices)
+    @classmethod
+    def refresh(cls):
+        # all character's models
+        records = CM.CHARACTERS.all_with_base()
+        choices = generate_choices(records)
+        cls.character = SelectField(choices=choices)
 
-    records = CM.SKILLS.all_with_base()
-    choices = generate_choices(records)
-    skill = SelectField(choices=choices)
+        records = CM.SKILLS.all_with_base()
+        choices = generate_choices(records)
+        cls.skill = SelectField(choices=choices)
 
     class Meta:
         model = get_model("default_skills")
 
 
 class NPCDialoguesForm(BaseForm):
-    # All NPCs.
-    records = CM.WORLD_NPCS.all_with_base()
-    choices = generate_choices(records)
-    npc = SelectField(choices=choices)
+    @classmethod
+    def refresh(cls):
+        # All NPCs.
+        records = CM.WORLD_NPCS.all_with_base()
+        choices = generate_choices(records)
+        cls.npc = SelectField(choices=choices)
 
-    records = CM.DIALOGUES.all()
-    choices = generate_choices(records)
-    dialogue = SelectField(choices=choices)
+        records = CM.DIALOGUES.all()
+        choices = generate_choices(records)
+        cls.dialogue = SelectField(choices=choices)
 
     class Meta:
         model = get_model("npc_dialogues")
@@ -358,150 +396,172 @@ class QuestsForm(BaseForm):
 
 
 class QuestObjectivesForm(BaseForm):
-    records = CM.QUESTS.all_with_base()
-    choices = generate_choices(records)
-    quest = SelectField(choices=choices)
+    @classmethod
+    def refresh(cls):
+        records = CM.QUESTS.all_with_base()
+        choices = generate_choices(records)
+        cls.quest = SelectField(choices=choices)
 
-    objectives = QUEST_OBJECTIVE_SET.all()
-    choices = [(key, "%s (%s)" % (LocalizedStrings.inst().trans(key, category = "quest_objective"), key))
-               for key in objectives]
-    type = SelectField(choices=choices)
+        objectives = QUEST_OBJECTIVE_SET.all()
+        choices = [(key, "%s (%s)" % (LocalizedStrings.inst().trans(key, category = "quest_objective"), key))
+                   for key in objectives]
+        cls.type = SelectField(choices=choices)
 
     class Meta:
         model = get_model("quest_objectives")
 
 
 class QuestDependenciesForm(BaseForm):
-    records = CM.QUESTS.all_with_base()
-    choices = generate_choices(records)
-    quest = SelectField(choices=choices)
-    dependency = SelectField(choices=choices)
+    @classmethod
+    def refresh(cls):
+        records = CM.QUESTS.all_with_base()
+        choices = generate_choices(records)
+        cls.quest = SelectField(choices=choices)
+        cls.dependency = SelectField(choices=choices)
 
-    choices = QUEST_STATUS_SET.choice_all()
-    type = SelectField(choices=choices)
+        choices = QUEST_STATUS_SET.choice_all()
+        cls.type = SelectField(choices=choices)
 
     class Meta:
         model = get_model("quest_dependencies")
 
 
 class DialogueQuestDependenciesForm(BaseForm):
-    records = CM.DIALOGUES.all()
-    choices = generate_choices(records)
-    dialogue = SelectField(choices=choices)
+    @classmethod
+    def refresh(cls):
+        records = CM.DIALOGUES.all()
+        choices = generate_choices(records)
+        cls.dialogue = SelectField(choices=choices)
 
-    records = CM.QUESTS.all_with_base()
-    choices = generate_choices(records)
-    dependency = SelectField(choices=choices)
+        records = CM.QUESTS.all_with_base()
+        choices = generate_choices(records)
+        cls.dependency = SelectField(choices=choices)
 
-    choices = QUEST_STATUS_SET.choice_all()
-    type = SelectField(choices=choices)
+        choices = QUEST_STATUS_SET.choice_all()
+        cls.type = SelectField(choices=choices)
 
     class Meta:
         model = get_model("dialogue_quest_dependencies")
 
 
 class EquipmentsForm(BaseForm):
-    records = CM.EQUIPMENT_POSITIONS.all()
-    choices = generate_choices(records)
-    position = SelectField(choices=choices)
+    @classmethod
+    def refresh(cls):
+        records = CM.EQUIPMENT_POSITIONS.all()
+        choices = generate_choices(records)
+        cls.position = SelectField(choices=choices)
 
-    records = CM.EQUIPMENT_TYPES.all()
-    choices = generate_choices(records)
-    type = SelectField(choices=choices)
+        records = CM.EQUIPMENT_TYPES.all()
+        choices = generate_choices(records)
+        cls.type = SelectField(choices=choices)
 
     class Meta:
         model = get_model("equipments")
 
 
 class EventDataForm(BaseForm):
-    choices = EVENT_ACTION_SET.choice_all()
-    action = SelectField(choices=choices)
+    @classmethod
+    def refresh(cls):
+        choices = EVENT_ACTION_SET.choice_all()
+        cls.action = SelectField(choices=choices)
 
-    choices = EVENT_TRIGGER_SET.choice_all()
-    trigger_type = SelectField(choices=choices)
+        choices = EVENT_TRIGGER_SET.choice_all()
+        cls.trigger_type = SelectField(choices=choices)
 
     class Meta:
         model = get_model("event_data")
 
 
 class ActionAttackForm(BaseForm):
-    records = CM.EVENT_DATA.filter({"action": "ACTION_ATTACK"})
-    choices = [(r.key, r.key) for r in records]
-    event_key = SelectField(choices=choices)
+    @classmethod
+    def refresh(cls):
+        records = CM.EVENT_DATA.filter({"action": "ACTION_ATTACK"})
+        choices = [(r.key, r.key) for r in records]
+        cls.event_key = SelectField(choices=choices)
 
-    records = CM.CHARACTERS.all_with_base()
-    choices = generate_choices(records)
-    mob = SelectField(choices=choices)
+        records = CM.CHARACTERS.all_with_base()
+        choices = generate_choices(records)
+        cls.mob = SelectField(choices=choices)
 
     class Meta:
         model = get_model("action_attack")
 
 
 class ActionDialogueForm(BaseForm):
-    records = CM.EVENT_DATA.filter({"action": "ACTION_DIALOGUE"})
-    choices = [(r.key, r.key) for r in records]
-    event_key = SelectField(choices=choices)
+    @classmethod
+    def refresh(cls):
+        records = CM.EVENT_DATA.filter({"action": "ACTION_DIALOGUE"})
+        choices = [(r.key, r.key) for r in records]
+        cls.event_key = SelectField(choices=choices)
 
-    records = CM.DIALOGUES.all()
-    choices = generate_choices(records)
-    dialogue = SelectField(choices=choices)
+        records = CM.DIALOGUES.all()
+        choices = generate_choices(records)
+        cls.dialogue = SelectField(choices=choices)
 
-    # NPCs
-    records = CM.WORLD_NPCS.all_with_base()
-    choices = generate_choices(records, add_empty=True)
-    npc = SelectField(choices=choices)
+        # NPCs
+        records = CM.WORLD_NPCS.all_with_base()
+        choices = generate_choices(records, add_empty=True)
+        cls.npc = SelectField(choices=choices)
 
     class Meta:
         model = get_model("action_dialogue")
 
 
 class ActionLearnSkillForm(BaseForm):
-    records = CM.EVENT_DATA.filter({"action": "ACTION_LEARN_SKILL"})
-    choices = [(r.key, r.key) for r in records]
-    event_key = SelectField(choices=choices)
+    @classmethod
+    def refresh(cls):
+        records = CM.EVENT_DATA.filter({"action": "ACTION_LEARN_SKILL"})
+        choices = [(r.key, r.key) for r in records]
+        cls.event_key = SelectField(choices=choices)
 
-    records = CM.SKILLS.all_with_base()
-    choices = generate_choices(records)
-    skill = SelectField(choices=choices)
+        records = CM.SKILLS.all_with_base()
+        choices = generate_choices(records)
+        cls.skill = SelectField(choices=choices)
 
     class Meta:
         model = get_model("action_learn_skill")
 
 
 class ActionAcceptQuestForm(BaseForm):
-    records = CM.EVENT_DATA.filter({"action": "ACTION_ACCEPT_QUEST"})
-    choices = [(r.key, r.key) for r in records]
-    event_key = SelectField(choices=choices)
+    @classmethod
+    def refresh(cls):
+        records = CM.EVENT_DATA.filter({"action": "ACTION_ACCEPT_QUEST"})
+        choices = [(r.key, r.key) for r in records]
+        cls.event_key = SelectField(choices=choices)
 
-    records = CM.QUESTS.all_with_base()
-    choices = generate_choices(records)
-    quest = SelectField(choices=choices)
+        records = CM.QUESTS.all_with_base()
+        choices = generate_choices(records)
+        cls.quest = SelectField(choices=choices)
 
     class Meta:
         model = get_model("action_accept_quest")
 
         
 class ActionTurnInQuestForm(BaseForm):
-    records = CM.EVENT_DATA.filter({"action": "ACTION_TURN_IN_QUEST"})
-    choices = [(r.key, r.key) for r in records]
-    event_key = SelectField(choices=choices)
+    @classmethod
+    def refresh(cls):
+        records = CM.EVENT_DATA.filter({"action": "ACTION_TURN_IN_QUEST"})
+        choices = [(r.key, r.key) for r in records]
+        cls.event_key = SelectField(choices=choices)
 
-    records = CM.QUESTS.all_with_base()
-    choices = generate_choices(records)
-    quest = SelectField(choices=choices)
+        records = CM.QUESTS.all_with_base()
+        choices = generate_choices(records)
+        cls.quest = SelectField(choices=choices)
 
     class Meta:
         model = get_model("action_turn_in_quest")
 
         
 class ActionCloseEventForm(BaseForm):
-    records = CM.EVENT_DATA.filter({"action": "ACTION_CLOSE_EVENT"})
-    choices = [(r.key, r.key) for r in records]
-    event_key = SelectField(choices=choices)
+    @classmethod
+    def refresh(cls):
+        records = CM.EVENT_DATA.filter({"action": "ACTION_CLOSE_EVENT"})
+        choices = [(r.key, r.key) for r in records]
+        cls.event_key = SelectField(choices=choices)
 
-    records = CM.EVENT_DATA.all()
-    choices = [(r.key, r.key) for r in records]
-    event = SelectField(choices=choices)
+        records = CM.EVENT_DATA.all()
+        choices = [(r.key, r.key) for r in records]
+        cls.event = SelectField(choices=choices)
 
     class Meta:
         model = get_model("action_close_event")
@@ -513,9 +573,11 @@ class ActionMessageForm(BaseForm):
 
 
 class ActionGetObjectsForm(BaseForm):
-    # available objects
-    choices = get_all_pocketable_objects()
-    object = SelectField(choices=choices)
+    @classmethod
+    def refresh(cls):
+        # available objects
+        cls.choices = get_all_pocketable_objects()
+        cls.object = SelectField(choices=choices)
 
     class Meta:
         model = get_model("action_get_objects")
@@ -527,10 +589,12 @@ class DialoguesForm(BaseForm):
 
 
 class DialogueRelationsForm(BaseForm):
-    records = CM.DIALOGUES.all()
-    choices = generate_choices(records)
-    dialogue = SelectField(choices=choices)
-    next_dlg = SelectField(choices=choices)
+    @classmethod
+    def refresh(cls):
+        records = CM.DIALOGUES.all()
+        choices = generate_choices(records)
+        cls.dialogue = SelectField(choices=choices)
+        cls.next_dlg = SelectField(choices=choices)
 
     class Meta:
         model = get_model("dialogue_relations")
@@ -542,11 +606,13 @@ class LocalizedStringsForm(BaseForm):
 
 
 class ImageResourcesForm(BaseForm):
-    choices = [
-        ("background", "background"),
-        ("icon", "icon"),
-    ]
-    type = SelectField(choices=choices)
+    @classmethod
+    def refresh(cls):
+        choices = [
+            ("background", "background"),
+            ("icon", "icon"),
+        ]
+        cls.type = SelectField(choices=choices)
 
     class Meta:
         model = get_model("image_resources")

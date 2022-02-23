@@ -353,10 +353,10 @@ service = {
         this.sendRequest("delete_record", "", args, callback_success, callback_failed);
     },
 
-    deleteElement: function(element_key, base_element_type, callback_success, callback_failed) {
+    deleteElement: function(element_key, element_type, callback_success, callback_failed) {
         var args = {
             element_key: element_key,
-            base_element_type: base_element_type
+            element_type: element_type
         };
         this.sendRequest("delete_element", "", args, callback_success, callback_failed);
     },

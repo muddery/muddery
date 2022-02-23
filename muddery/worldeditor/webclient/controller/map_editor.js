@@ -118,17 +118,20 @@ MapEditor.prototype.onDelete = function() {
 MapEditor.prototype.confirmDelete = function(e) {
     window.parent.controller.hideWaiting();
 
-    var objects = [controller.area_key];
+    var to_delete = {};
+    to_delete[controller.area_element_type] = controller.area_key;
 
     // Get all rooms.
-    objects = objects.concat(Object.keys(controller.rooms));
+    to_delete[controller.room_element_type] = Object.keys(controller.rooms);
 
     // Get all exits.
+    var exits = []
     for (var key in controller.paths) {
-        objects = objects.concat(Object.keys(controller.paths[key].exits));
+        exits = exits.concat(Object.keys(controller.paths[key].exits));
     }
+    to_delete[controller.room_element_type] = exits;
 
-    service.deleteObjects(objects, controller.deleteAreaSuccess, controller.failedCallback);
+    service.deleteElements(to_delete, controller.deleteAreaSuccess, controller.failedCallback);
 }
 
 
@@ -1293,33 +1296,30 @@ MapEditor.prototype.confirmDeleteRoom = function(e) {
     window.parent.controller.hideWaiting();
 
     var room_key = e.data.key;
-    var objects = [room_key];
+    var to_delete = {};
+    to_delete[controller.room_element_type] = room_key;
 
     // Get all relative exits.
     var exits = [];
     for (var path_id in controller.rooms[room_key].paths) {
         exits = exits.concat(Object.keys(controller.paths[path_id].exits));
     }
-    objects = objects.concat(exits);
+    to_delete[controller.exit_element_type] = exits;
 
-    var context = {
-        room: room_key,
-        exits: exits
-    }
-    service.deleteObjects(objects, controller.deleteRoomSuccess, controller.failedCallback, context);
+    service.deleteElements(to_delete, function(data) {
+        controller.deleteRoomSuccess(data, room_key);
+    }, controller.failedCallback);
 }
 
 
 /*
  * Delete the room success..
  */
-MapEditor.prototype.deleteRoomSuccess = function(data, context) {
+MapEditor.prototype.deleteRoomSuccess = function(data, room_key) {
     controller.changed = true;
 
     // Remove popup menus.
     $(".room-menu").remove();
-
-    var room_key = context.room;
 
     // Remove relative paths.
     for (var path_id in controller.rooms[room_key].paths) {
@@ -1796,7 +1796,7 @@ MapEditor.prototype.confirmDiscard = function(e) {
     window.parent.controller.hideWaiting();
 
     // Remove added objects.
-    var objects = []
+    var to_delete = []
 
     // rooms
     var origin_rooms = [];
@@ -1807,11 +1807,13 @@ MapEditor.prototype.confirmDiscard = function(e) {
         }
     }
 
+    var rooms_to_delete = [];
     for (var room_key in controller.rooms) {
         if (!(room_key in origin_rooms)) {
-            objects.push(room_key);
+            rooms_to_delete.push(room_key);
         }
     }
+    to_delete[controller.room_element_type] = rooms_to_delete;
 
     // exits
     var origin_exits = [];
@@ -1822,21 +1824,23 @@ MapEditor.prototype.confirmDiscard = function(e) {
         }
     }
 
+    var exits_to_delete = [];
     for (var path_id in controller.paths) {
         for (var exit_key in controller.paths[path_id].exits) {
             if (!(exit_key in origin_exits)) {
-                objects.push(exit_key);
+                exits_to_delete.push(exit_key);
             }
         }
     }
+    to_delete[controller.exit_element_type] = exits_to_delete;
 
     // area
     if (!controller.origin_map) {
         // It's a new map. Delete the area.
-        objects.push(controller.area_key);
+        to_delete[controller.area_element_type] = controller.area_key;
     }
 
-    service.deleteObjects(objects, controller.removeAddedObjectsSuccess, controller.failedCallback);
+    service.deleteElements(to_delete, controller.removeAddedObjectsSuccess, controller.failedCallback);
 }
 
 

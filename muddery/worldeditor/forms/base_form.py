@@ -35,6 +35,10 @@ class BaseForm(ModelForm):
     The base of all forms.
     """
     @classmethod
+    def refresh(cls):
+        pass
+
+    @classmethod
     def get_session(cls):
         # this method should return sqlalchemy session
         return WorldDataDB.inst().get_session()

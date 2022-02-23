@@ -113,7 +113,7 @@ class ElementSet(object):
 
     def get_group(self, group_key):
         """
-        Get a element_type and its all children.
+        Get an element_type and all its children.
         """
         self.load_classes()
 
