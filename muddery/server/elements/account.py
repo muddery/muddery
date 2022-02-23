@@ -243,7 +243,7 @@ class MudderyAccount(BaseElement):
         current_obj = self.puppet_obj
         if current_obj and current_obj.get_db_id() == char_db_id:
             # already puppeting this object
-            await self.msg("You are already puppeting this object.")
+            await self.msg({"msg": _("You have already puppet this object.")})
             return
 
         self.puppet_obj = None

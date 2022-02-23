@@ -2506,15 +2506,20 @@ MudderyScene.prototype.drawExitPaths = function(exits) {
     }
 
     for (var i = 0; i < exits.length; i++) {
-        var exit_dom = this.select(".exit-" + i);
-        if (exit_dom) {
-            var x2 = exit_dom.position().left + exit_dom.outerWidth(true) / 2;
-            var y2 = exit_dom.position().top + exit_dom.outerHeight(true) / 2;
-            var path = document.createElementNS(namespace, "path");
-            path.setAttribute("stroke", this.path_color);
-            path.setAttribute("stroke-width", this.path_width);
-            path.setAttribute("d", "M " + x1 + " " + y1 + " L " + x2 + " " + y2);
-            svg.appendChild(path);
+        try {
+            var exit_dom = this.select(".exit-" + i);
+            if (exit_dom) {
+                var x2 = exit_dom.position().left + exit_dom.outerWidth(true) / 2;
+                var y2 = exit_dom.position().top + exit_dom.outerHeight(true) / 2;
+                var path = document.createElementNS(namespace, "path");
+                path.setAttribute("stroke", this.path_color);
+                path.setAttribute("stroke-width", this.path_width);
+                path.setAttribute("d", "M " + x1 + " " + y1 + " L " + x2 + " " + y2);
+                svg.appendChild(path);
+            }
+        }
+        catch (error) {
+            console.error(error.message);
         }
     }
 }
