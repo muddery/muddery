@@ -1274,7 +1274,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         unlocked_exits.remove(exit_key)
         await self.states.save("unlocked_exits", unlocked_exits)
 
-    async def unlock_exit(self, exit_key):
+    async def unlock_exit(self, exit_key, auto_unlock):
         """
         Unlock an exit. Add the exit's key to the character's unlock list.
         """
@@ -1289,10 +1289,11 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         unlocked_exits.add(exit_key)
         await self.states.save("unlocked_exits", unlocked_exits)
 
-        # The exit may have different appearance after unlocking.
-        # Send the lastest appearance to the caller.
-        detail_appearance = await self.location.get_exit_appearance(self, exit_key)
-        await self.msg({"look_obj": detail_appearance})
+        if not auto_unlock:
+            # The exit may have different appearance after unlocking.
+            # Send the lastest appearance to the caller.
+            detail_appearance = await self.location.get_exit_appearance(self, exit_key)
+            await self.msg({"look_obj": detail_appearance})
 
         return True
 

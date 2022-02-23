@@ -235,7 +235,7 @@ class CmdTraverse(BaseCommand):
         try:
             room = caller.get_location()
             exit = room.get_exit(args)
-        except:
+        except Exception as e:
             await caller.msg({"alert": _("Can not find the exit.")})
             return
 
@@ -885,7 +885,7 @@ class CmdUnlockExit(BaseCommand):
 
         try:
             # Unlock the exit.
-            if not await caller.unlock_exit(exit_key):
+            if not await caller.unlock_exit(exit_key, False):
                 await caller.msg({"alert": _("Can not open this exit.")})
                 return
         except Exception as e:

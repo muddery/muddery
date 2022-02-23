@@ -29,7 +29,7 @@ MudderyMapData.prototype = {
         this._map_rooms = {};
         this._map_exits = {};
         this._map_paths = {};
-   	 	_current_location: null;
+   	 	this._current_location = null;
     },
 
     setCurrentLocation: function(location) {

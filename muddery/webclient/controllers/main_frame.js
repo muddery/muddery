@@ -477,12 +477,14 @@ MudderyMainFrame.prototype.isWindowShow = function(win_controller) {
 MudderyMainFrame.prototype.showLoginWindow = function() {
 	// show unlogin UI
 	this.gotoWindow(mud.login_window);
+	core.map_data.clearData();
 }
     
 /*
  * Show the layout when players logged in and going to select a character.
  */
 MudderyMainFrame.prototype.showSelectChar = function() {
+	core.map_data.clearData();
 	this.gotoWindow(mud.select_char_window);
 }
 

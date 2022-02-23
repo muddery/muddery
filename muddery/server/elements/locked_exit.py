@@ -51,7 +51,7 @@ class MudderyLockedExit(ELEMENT("EXIT")):
             # Can unlock the exit automatically.
             if self.const.unlock_forever:
                 # Unlock it.
-                await character.unlock_exit(self.get_element_key())
+                await character.unlock_exit(self.get_element_key(), True)
             return True
 
         if character.bypass_events():

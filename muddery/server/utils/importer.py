@@ -84,12 +84,11 @@ def import_file(fullname, file_type=None, table_name=None, clear=True, except_er
                 elif field_type == 1:
                     # boolean value
                     if value:
-                        if type(value) == str:
-                            upper = value.upper()
-                            if upper == 'TRUE' or 'T':
-                                record[field_name] = True
-                            elif upper == 'FALSE' or 'F':
-                                record[field_name] = False
+                        upper = value.upper()
+                        if upper == 'TRUE' or upper == 'T':
+                            record[field_name] = True
+                        elif upper == 'FALSE' or upper == 'F':
+                            record[field_name] = False
                         else:
                             record[field_name] = (int(value) != 0)
                 elif field_type == 2:
