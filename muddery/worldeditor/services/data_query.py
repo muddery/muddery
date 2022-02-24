@@ -102,12 +102,12 @@ def query_areas():
         raise MudderyError(ERR.no_table, "Can not find the element AREA")
 
     records = general_querys.get_all_records(area_class.model_name)
-    areas = {r.key: {"name": r.name + "(" + r.key + ")", "rooms": []} for r in records}
+    areas = {r.key: {"name": (r.name + "(" + r.key + ")") if r.name else r.key, "rooms": []} for r in records}
 
     records = general_querys.get_all_records(room_class.model_name)
     for r in records:
         key = r.area
-        choice = (r.key, r.name + " (" + r.key + ")")
+        choice = (r.key, (r.name + " (" + r.key + ")") if r.name else r.key)
         if key in areas:
             areas[key]["rooms"].append(choice)
         elif key:

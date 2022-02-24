@@ -817,12 +817,15 @@ MapEditor.prototype.dropPathOnRoom = function(event) {
         location: source_key,
         destination: target_key
     };
-    service.addExit(this.exit_element_type,
-                        source_key,
-                        target_key,
-                        this.addExitSuccess,
-                        this.addExitFailed,
-                        exit_info);
+    service.addExit(
+        this.exit_element_type,
+        source_key,
+        target_key,
+        function(data) {
+            this.addExitSuccess(data, exit_info);
+        },
+        this.addExitFailed
+    );
 
     if (new_path) {
         // Add a reverse exit.
@@ -835,18 +838,17 @@ MapEditor.prototype.dropPathOnRoom = function(event) {
             this.exit_element_type,
             target_key,
             source_key,
-            this.addExitSuccess,
-            this.addExitFailed,
-            exit_info,
+            function(data) {
+                this.addExitSuccess(data, exit_info);
+            },
+            this.addExitFailed
         );
     }
 }
 
 
-MapEditor.prototype.addExitSuccess = function(data, context) {
+MapEditor.prototype.addExitSuccess = function(data, exit_info) {
     controller.changed = true;
-
-    var exit_info = context;
     exit_info["key"] = data.key;
 
     controller.createPath(exit_info);
@@ -1534,11 +1536,15 @@ MapEditor.prototype.onDeleteExit = function(event) {
 
     var path_id = $(this).data("path");
     var exit_key = $(this).data("exit");
-    window.parent.controller.confirm("",
-                                     "Delete this exit?",
-                                     controller.confirmDeleteExit,
-                                     {path: path_id,
-                                      exit: exit_key});
+    window.parent.controller.confirm(
+        "",
+        "Delete this exit?",
+        controller.confirmDeleteExit,
+        {
+            path: path_id,
+            exit: exit_key,
+        }
+    );
 }
 
 
@@ -1548,13 +1554,14 @@ MapEditor.prototype.onDeleteExit = function(event) {
 MapEditor.prototype.confirmDeleteExit = function(e) {
     window.parent.controller.hideWaiting();
 
-    var context = e.data;
+    var exit_info = e.data;
     service.deleteObject(
         e.data.exit,
         controller.exit_element_type,
-        controller.deleteExitSuccess,
-        controller.failedCallback,
-        context,
+        function(data) {
+            controller.deleteExitSuccess(data, exit_info);
+        },
+        controller.failedCallback
     );
 }
 
@@ -1563,11 +1570,11 @@ MapEditor.prototype.confirmDeleteExit = function(e) {
  * Delete the exit success.
  * Used by both room menu's delete exit and exit menu's delete exit.
  */
-MapEditor.prototype.deleteExitSuccess = function(data, context) {
+MapEditor.prototype.deleteExitSuccess = function(data, exit_info) {
     controller.changed = true;
 
-    var path_id = context.path;
-    var exit_key = context.exit;
+    var path_id = exit_info.path;
+    var exit_key = exit_info.exit;
     delete controller.paths[path_id].exits[exit_key];
 
     // Unselect all rooms.
@@ -1785,7 +1792,14 @@ MapEditor.prototype.saveMapPositions = function(successCallback, context) {
         });
     }
 
-    service.saveMapPositions(area, rooms, successCallback, this.failedCallback, context);
+    service.saveMapPositions(
+        area,
+        rooms,
+        function(data) {
+            successCallback(data, context);
+        },
+        this.failedCallback
+    );
 }
 
 
