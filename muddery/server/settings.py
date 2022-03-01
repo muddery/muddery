@@ -81,8 +81,9 @@ class Settings(object):
     # Logging settings
     ######################################################################
     # Place to put log files
-    LOG_NAME = "muddery_gameserver"
-    LOG_FILE = os.path.join(GAME_DIR, "server", "logs", "server.log")
+    LOG_NAME = None
+    LOG_FILE = None
+    LOG_PATH = os.path.join(GAME_DIR, "logs")
     LOG_LEVEL = logging.WARNING
 
     # Also print logs to the console.

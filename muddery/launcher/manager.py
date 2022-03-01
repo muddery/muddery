@@ -126,6 +126,62 @@ def create_worldeditor_tables():
         raise
 
 
+def create_editor_admin():
+    """
+    Create a new account.
+    """
+    check_editor_admin(True)
+
+
+def check_editor_admin(force_create=False):
+    """
+    Check if there is an admin account in the world editor. If not, create a new account.
+    """
+    gamedir = os.path.abspath(configs.CURRENT_DIR)
+    utils.init_game_env(gamedir)
+
+    # Load settings.
+    try:
+        from muddery.worldeditor.settings import SETTINGS
+        from worldeditor.settings import ServerSettings
+        SETTINGS.update(ServerSettings())
+    except Exception as e:
+        traceback.print_exc()
+        raise
+
+    # Check accounts.
+    try:
+        from muddery.worldeditor.database.worldeditor_db import WorldEditorDB
+        from muddery.worldeditor.dao.accounts import Accounts
+
+        WorldEditorDB.inst().connect()
+
+        # Check admin accounts.
+        if force_create or (Accounts.inst().count() == 0):
+            # Create a new account.
+            import getpass
+            print("\nCreating the administrator account.")
+            username = input("Please input your username: ")
+            password = getpass.getpass("Please input your password: ")
+
+            if Accounts.inst().has(username):
+                print("Username already exists.")
+                return
+
+            try:
+                from muddery.common.utils.password import hash_password, make_salt
+                salt = make_salt()
+                password = hash_password(password, salt)
+                Accounts.inst().add(username, password, salt, "ADMIN")
+                print("Account created.\n")
+            except Exception as e:
+                print("Got error: %s" % e)
+
+    except Exception as e:
+        traceback.print_exc()
+        raise
+
+
 def load_game_data():
     """
     Reload the game's default data.
@@ -341,8 +397,8 @@ async def get_server_state(gameserver:bool=False, webclient:bool=False, editor:b
     return servers
 
 
-async def wait_server_state(gameserver: bool = False, webclient: bool = False, editor: bool = False, req_timeout: float = 0,
-                            total_wait_time: float = 0) -> dict:
+async def wait_server_run(gameserver: bool = False, webclient: bool = False, editor: bool = False,
+                          req_timeout: float = 0, total_wait_time: float = 0) -> dict:
     """
     Check server's state until all servers are running.
     
@@ -365,13 +421,6 @@ async def wait_server_state(gameserver: bool = False, webclient: bool = False, e
     while wait_time < total_wait_time:
         time_begin = time.time()
         states = await get_server_state(gameserver, webclient, editor, req_timeout)
-        time_end = time.time()
-
-        time_spend = time_end - time_begin
-        if time_spend < req_timeout:
-            # wait until the request time finished.
-            await asyncio.sleep(req_timeout - time_spend)
-        wait_time += req_timeout
 
         all_running = True
         for item in states.values():
@@ -381,6 +430,13 @@ async def wait_server_state(gameserver: bool = False, webclient: bool = False, e
 
         if all_running:
             break
+
+        time_end = time.time()
+        time_spend = time_end - time_begin
+        if time_spend < req_timeout:
+            # wait until the request time finished.
+            await asyncio.sleep(req_timeout - time_spend)
+        wait_time += req_timeout
 
     return states
 
@@ -398,13 +454,14 @@ async def show_server_state(gameserver: bool = False, webclient: bool = False, e
         total_wait_time: total time for waiting server states
     :return:
     """
-    states = await wait_server_state(gameserver, webclient, editor, req_timeout, total_wait_time)
+    states = await wait_server_run(gameserver, webclient, editor, req_timeout, total_wait_time)
+    print()
     for item in states.values():
         if item["running"]:
             print("%s is running at port %s." % (item["name"], item["port"]))
         else:
             print("%s is not running at port %s." % (item["name"], item["port"]))
-    print("")
+    print()
 
 
 async def run_servers(server: bool = False, webclient: bool = False, editor: bool = False, restart: bool = False):
@@ -481,7 +538,51 @@ async def run_servers(server: bool = False, webclient: bool = False, editor: boo
     await show_server_state(server, webclient, editor, 5, 20)
 
 
-def kill_servers(server: bool = True, webclient: bool = True, editor: bool = True):
+async def wait_server_stop(gameserver: bool = False, webclient: bool = False, editor: bool = False,
+                           req_timeout: float = 0, total_wait_time: float = 0) -> dict:
+    """
+    Check server's state until all servers are running.
+
+    :param
+        gameserver: check the game server
+        webclient: check the webclient
+        editor: check the world editor
+        req_timeout: timeout for waiting state request
+        total_wait_time: total time for waiting server states
+    :return:
+    """
+    if req_timeout < 1:
+        req_timeout = 1
+
+    if total_wait_time < req_timeout:
+        total_wait_time = req_timeout
+
+    wait_time = 0
+    states = {}
+    while wait_time < total_wait_time:
+        time_begin = time.time()
+        states = await get_server_state(gameserver, webclient, editor, req_timeout)
+
+        all_stopped = True
+        for item in states.values():
+            if item["running"]:
+                all_stopped = False
+                break
+
+        if all_stopped:
+            break
+
+        time_end = time.time()
+        time_spend = time_end - time_begin
+        if time_spend < req_timeout:
+            # wait until the request time finished.
+            await asyncio.sleep(req_timeout - time_spend)
+        wait_time += req_timeout
+
+    return states
+
+
+async def kill_servers(server: bool = True, webclient: bool = True, editor: bool = True):
     """
     kill servers.
 
@@ -524,14 +625,14 @@ def kill_servers(server: bool = True, webclient: bool = True, editor: bool = Tru
         command = template % "run_worldeditor.py stop"
         worldeditor_process = subprocess.Popen(command, **options)
 
-    if server_process:
-        server_process.wait()
-
-    if webclient_process:
-        webclient_process.wait()
-
-    if worldeditor_process:
-        worldeditor_process.wait()
+    states = await wait_server_stop(server, webclient, editor, 3, 10)
+    print()
+    for item in states.values():
+        if not item["running"]:
+            print("%s is stopped at port %s." % (item["name"], item["port"]))
+        else:
+            print("%s is not stopped at port %s." % (item["name"], item["port"]))
+    print()
 
 
 def run_server_command(run_func, stop_func, default_port):

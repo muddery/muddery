@@ -21,7 +21,6 @@ class Server(Singleton):
 
     def init(self):
         self.connect_db()
-        self.check_admin()
         self.processor = Processor()
 
     def connect_db(self):
@@ -45,11 +44,19 @@ class Server(Singleton):
         """
         Create an administrator account.
         """
-        if Accounts.inst().count() == 0:
-            # Add a default ADMIN account
-            salt = make_salt()
-            password = hash_password(SETTINGS.ADMIN_PASSWORD, salt)
-            Accounts.inst().add(SETTINGS.ADMIN_NAME, password, salt, "ADMIN")
+        return Accounts.inst().count() == 0
+
+    def create_admin(self, username, password):
+        """
+        Create an administrator account.
+        """
+        # Add a default ADMIN account
+        salt = make_salt()
+        password = hash_password(password, salt)
+        try:
+            Accounts.inst().add(username, password, salt, "ADMIN")
+        except Exception as e:
+            print(e)
 
     async def handle_request(self, method, path, data, request, token=None):
         return await self.processor.process(method, path, data, request, token)

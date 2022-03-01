@@ -63,8 +63,18 @@ def main():
             manager.load_game_data()
             manager.collect_webclient_static()
             manager.collect_worldeditor_static()
+            manager.check_editor_admin(False)
         except Exception as e:
             traceback.print_exc()
+            sys.exit(-1)
+        sys.exit(0)
+
+    elif sys_argv[1] == "createadmin":
+        # Create an administrator account.
+        from muddery.launcher import manager
+        try:
+            manager.check_editor_admin(True)
+        except Exception as e:
             sys.exit(-1)
         sys.exit(0)
 
@@ -144,13 +154,13 @@ def main():
         from muddery.launcher import manager
         try:
             if not args.server and not args.client and not args.editor:
-                manager.kill_servers()
+                asyncio.run(manager.kill_servers())
             else:
-                manager.kill_servers(
+                asyncio.run(manager.kill_servers(
                     server=args.server,
                     webclient=args.client,
                     editor=args.editor
-                )
+                ))
         except Exception as e:
             traceback.print_exc()
             sys.exit(-1)

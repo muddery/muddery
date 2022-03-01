@@ -19,7 +19,6 @@ SETTINGS_PATH = os.path.join(CONF_DIR, SETTING_FILE)
 SETTINGS_DOTPATH = "server.conf.settings"
 CURRENT_DIR = os.getcwd()
 GAME_DIR = CURRENT_DIR
-LOG_FILE = os.path.join(GAME_DIR, "server", "logs", "launcher.log")
 
 DEFAULT_TEMPLATE = "default"
 
@@ -155,6 +154,7 @@ operations:
       -e, --editor          Stop the world editor only.
 
   muddery state             Check servers running states.
+  muddery createadmin       Create an administrator account in the world editor.
   muddery upgrade           Upgrade a game directory to the latest version.
   muddery migrate           Migrate databases to new version.
   muddery loaddata          Load game data from the worlddata folder.

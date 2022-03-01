@@ -37,11 +37,6 @@ class Settings(object):
     # This is the name of your server.
     GAME_SERVERNAME = "Muddery"
 
-    # Administrator's name and password.
-    ADMIN_NAME = "admin"
-
-    ADMIN_PASSWORD = "administrator"
-
 
     ######################################################################
     # Network settings
@@ -74,8 +69,9 @@ class Settings(object):
     # Logging settings
     ######################################################################
     # Place to put log files
-    LOG_NAME = 'muddery_worldeditor'
-    LOG_FILE = os.path.join(GAME_DIR, "worldeditor", "logs", "editor.log")
+    LOG_NAME = None
+    LOG_FILE = None
+    LOG_PATH = os.path.join(GAME_DIR, "logs")
     LOG_LEVEL = logging.WARNING
 
     # Also print logs to the console.

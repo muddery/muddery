@@ -17,13 +17,13 @@ class Logger(object):
     """
     The logger object.
     """
-    def __init__(self, log_name, log_file, log_level, log_to_console):
+    def __init__(self, log_name, log_level, log_file=None, log_to_console=False):
         """
         Init the logger.
         """
-        self.logger = self.setup_log(log_name, log_file, log_level, log_to_console)
+        self.logger = self.setup_log(log_name, log_level, log_file, log_to_console)
 
-    def setup_log(self, log_name, log_file, log_level, log_to_console):
+    def setup_log(self, log_name, log_level, log_file=None, log_to_console=False):
         """
         Create a logger.
         """
@@ -35,13 +35,17 @@ class Logger(object):
         logging.getLogger('apscheduler.executors.default').setLevel(log_level)
 
         # Divide logs by date.
-        file_handler = TimedRotatingFileHandler(filename=log_file, when="MIDNIGHT", interval=1)
-        file_handler.suffix = "%Y-%m-%d.log"
+        if log_file:
+            file_handler = TimedRotatingFileHandler(filename=log_file, when="MIDNIGHT", interval=1)
+            file_handler.suffix = "%Y-%m-%d.log"
 
-        # Set output format.
-        file_handler.setFormatter(logging.Formatter("[%(asctime)s] - %(message)s"))
+            # Set output format.
+            file_handler.setFormatter(logging.Formatter("[%(asctime)s] - %(message)s"))
 
-        logger.addHandler(file_handler)
+            logger.addHandler(file_handler)
+        else:
+            # If log's filename is not set, display logs on the console.
+            log_to_console = True
 
         if log_to_console:
             console_handler = logging.StreamHandler(sys.stdout)
