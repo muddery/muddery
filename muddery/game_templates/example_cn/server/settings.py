@@ -43,3 +43,26 @@ class ServerSettings(object):
     # AI modules
     ###################################
     AI_CHOOSE_SKILL = "ai.choose_skill.ChooseSkill"
+
+
+    ######################################################################
+    # Command settings
+    ######################################################################
+
+    # Determine how many commands per second a given Session is allowed
+    # to send. Too high rate will drop the command and echo a warning.
+    # To turn the limiter off, set to <= 0.
+    MAX_COMMAND_RATE = 20
+
+    # The warning to echo back to users if they send commands too fast
+    COMMAND_RATE_WARNING = "您的操作太快了，请稍后重试。"
+
+    # Determine how many specified commands per second a given Session is allowed
+    # to send. Too high rate will drop the specified command and echo a warning.
+    # To turn the limiter off, set to <= 0.
+    SPECIAL_COMMAND_RATE = {{
+        "traverse": {{
+            "max_rate": 4,
+            "message": "你太久没有锻炼了，走这点路就把你累得气喘吁吁，休息一下再走吧。",
+        }}
+    }}

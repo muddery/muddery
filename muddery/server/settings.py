@@ -62,7 +62,6 @@ class Settings(object):
     # Server-side websocket port to open for the webclient.
     WEBSERVER_PORT = 8001
 
-
     ######################################################################
     # Folders and files settings
     ######################################################################
@@ -219,7 +218,7 @@ class Settings(object):
 
 
     ######################################################################
-    # Default command sets
+    # Command settings
     ######################################################################
     # Command set used on the logged-in session
     SESSION_CMDSET = "muddery.server.commands.default_cmdsets.SessionCmdSet"
@@ -230,6 +229,23 @@ class Settings(object):
     # Default set for logged in player with characters (fallback)
     CHARACTER_CMDSET = "muddery.server.commands.default_cmdsets.CharacterCmdSet"
 
+    # Determine how many commands per second a given Session is allowed
+    # to send. Too high rate will drop the command and echo a warning.
+    # To turn the limiter off, set to <= 0.
+    MAX_COMMAND_RATE = 20
+
+    # The warning to echo back to users if they send commands too fast
+    COMMAND_RATE_WARNING = "You operated too fast. Wait a moment and try again."
+
+    # Determine how many specified commands per second a given Session is allowed
+    # to send. Too high rate will drop the specified command and echo a warning.
+    # To turn the limiter off, set to <= 0.
+    SPECIAL_COMMAND_RATE = {
+        "traverse": {
+            "max_rate": 5,
+            "message": "You moved too fast. Wait a moment and try again.",
+        }
+    }
 
     ######################################################################
     # World data features

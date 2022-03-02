@@ -16,20 +16,20 @@ class CommandHandler(object):
         self.account_cmdset = account_cmdset
         self.character_cmdset = character_cmdset
 
-    async def handler_command(self, session, raw_string):
-        logger.log_debug("[Receive command][%s]%s" % (session, raw_string))
-
-        # Parse JSON formated command.
+    def parse_command(self, raw_string):
+        """
+        Parse JSON formatted command.
+        """
         try:
             data = json.loads(raw_string)
         except Exception:
             # Command is not in JSON.
-            logger.log_err("Can not parse command, %s: %s" % (session, raw_string))
+            logger.log_err("Can not parse command, %s: %s" % (raw_string))
             return
 
-        command_key = data["cmd"]
-        args = data["args"]
+        return data["cmd"], data["args"]
 
+    async def handler_command(self, session, command_key, args):
         # Find the matching command in cmdset.
         # session commands
         command = self.session_cmdset.get(command_key)
@@ -51,9 +51,9 @@ class CommandHandler(object):
             try:
                 await command.func(caller, args)
             except Exception as e:
-                logger.log_err("Run command error, %s: %s %s" % (session, raw_string, e))
-                await session.msg({"alert": "Command error: %s %s" % (raw_string, e)})
+                logger.log_err("Run command error, %s: %s" % (session, e))
+                await session.msg({"alert": "Command error: %s" % e})
             return
         else:
-            logger.log_err("Can not find command, %s: %s" % (session, raw_string))
-            await session.msg({"alert": "Can not find command: %s" % raw_string})
+            logger.log_err("Can not find command, %s: %s" % (session, command_key))
+            await session.msg({"alert": "Can not find command: %s" % command_key})

@@ -159,9 +159,12 @@ def check_editor_admin(force_create=False):
         # Check admin accounts.
         if force_create or (Accounts.inst().count() == 0):
             # Create a new account.
-            import getpass
-            print("\nCreating the administrator account.")
+            print("\nCreating the world editor account. Enter empty username to skip.")
             username = input("Please input your username: ")
+            if not username:
+                return
+
+            import getpass
             password = getpass.getpass("Please input your password: ")
 
             if Accounts.inst().has(username):

@@ -90,8 +90,14 @@ class Server(Singleton):
         character_cmdset = class_from_path(SETTINGS.CHARACTER_CMDSET)
         self._command_handler = CommandHandler(session_cmdset, account_cmdset, character_cmdset)
 
-    async def handler_message(self, session, message):
+    def parse_command(self, raw_string):
         """
-        Get a message from a session.
+        Parse JSON formatted command.
         """
-        await self._command_handler.handler_command(session, message)
+        return self._command_handler.parse_command(raw_string)
+
+    async def handler_command(self, session, key, args):
+        """
+        Get a command from a session.
+        """
+        await self._command_handler.handler_command(session, key, args)

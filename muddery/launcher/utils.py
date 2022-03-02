@@ -78,13 +78,13 @@ def create_server_settings_file(gamedir, setting_dict):
         setting_dict: (dict)preset settings.
     """
     settings_path = os.path.join(gamedir, "server", "settings.py")
-    with open(settings_path, 'r') as f:
+    with open(settings_path, 'r', encoding="utf-8") as f:
         settings_string = f.read()
 
     # modify the settings
     settings_string = settings_string.format(**setting_dict)
 
-    with open(settings_path, 'w') as f:
+    with open(settings_path, 'w', encoding="utf-8") as f:
         f.write(settings_string)
 
 
@@ -98,13 +98,13 @@ def create_editor_settings_file(gamedir, setting_dict):
         setting_dict: (dict)preset settings.
     """
     settings_path = os.path.join(gamedir, "worldeditor", "settings.py")
-    with open(settings_path, 'r') as f:
+    with open(settings_path, 'r', encoding="utf-8") as f:
         settings_string = f.read()
 
     # modify the settings
     settings_string = settings_string.format(**setting_dict)
 
-    with open(settings_path, 'w') as f:
+    with open(settings_path, 'w', encoding="utf-8") as f:
         f.write(settings_string)
 
 

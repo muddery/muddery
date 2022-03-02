@@ -1,7 +1,10 @@
 
 import json, traceback
+import time
+from collections import deque
 from muddery.server.server import Server
 from muddery.server.utils.logger import logger
+from muddery.server.settings import SETTINGS
 
 
 class Channel(object):
@@ -20,6 +23,11 @@ class Channel(object):
         self.address = None
         self.account = None
         self.authed = False
+
+        self.command_history = deque()
+        self.special_command_history = None
+        if SETTINGS.SPECIAL_COMMAND_RATE:
+            self.special_command_history = {key: deque() for key in SETTINGS.SPECIAL_COMMAND_RATE}
 
         self.msg_list = []
         self.delay_msg = False
@@ -48,11 +56,37 @@ class Channel(object):
         :param bytes_data:
         :return:
         """
+        if SETTINGS.MAX_COMMAND_RATE:
+            now = time.time()
+            if len(self.command_history) >= SETTINGS.MAX_COMMAND_RATE:
+                command_time = self.command_history.popleft()
+                if now - command_time <= 1.0:
+                    await self.msg({"alert": SETTINGS.COMMAND_RATE_WARNING}, False)
+                    return
+
+            self.command_history.append(now)
+
         # Gather all messages send to the client and send them out together.
         self.delay_msg = True
 
         # Pass messages to the muddery server.
-        await Server.inst().handler_message(self, text_data)
+        logger.log_debug("[Receive command][%s]%s" % (self, text_data))
+
+        command_key, args = Server.inst().parse_command(text_data)
+        if SETTINGS.SPECIAL_COMMAND_RATE and command_key in SETTINGS.SPECIAL_COMMAND_RATE:
+            now = time.time()
+            cmd_queue = self.special_command_history[command_key]
+            max_rate = SETTINGS.SPECIAL_COMMAND_RATE[command_key]["max_rate"]
+            if len(cmd_queue) >= max_rate:
+                command_time = cmd_queue.popleft()
+                if now - command_time <= 1.0:
+                    message = SETTINGS.SPECIAL_COMMAND_RATE[command_key]["message"]
+                    await self.msg({"alert": message}, False)
+                    return
+
+            cmd_queue.append(now)
+
+        await Server.inst().handler_command(self, command_key, args)
         await self.msg_all()
         self.delay_msg = False
 
