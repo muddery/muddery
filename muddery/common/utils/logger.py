@@ -43,9 +43,6 @@ class Logger(object):
             file_handler.setFormatter(logging.Formatter("[%(asctime)s] - %(message)s"))
 
             logger.addHandler(file_handler)
-        else:
-            # If log's filename is not set, display logs on the console.
-            log_to_console = True
 
         if log_to_console:
             console_handler = logging.StreamHandler(sys.stdout)

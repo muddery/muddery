@@ -276,9 +276,9 @@ def save_element_form(tables, element_type, element_key):
         with session.begin():
             for item in forms_to_save:
                 if item["is_new"]:
-                    session.add(record)
+                    session.add(item["record"])
                 else:
-                    session.merge(record)
+                    session.merge(item["record"])
             session.flush()
     except Exception as e:
         logger.log_trace("Can not save form %s" % e)
