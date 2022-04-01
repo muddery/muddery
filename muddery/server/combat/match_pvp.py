@@ -77,7 +77,7 @@ class MatchPVPHandler(Singleton):
         for char_db_id in self.waiting_queue:
             try:
                 character = Server.world.get_character(char_db_id)
-                character.msg({"left_combat_queue": ""})
+                character.msg({"left_combat_queue": True})
             except Exception:
                 pass
 
@@ -114,7 +114,7 @@ class MatchPVPHandler(Singleton):
             return
         
         self.waiting_queue.append(char_db_id)
-        await character.msg({"in_combat_queue": ""})
+        await character.msg({"in_combat_queue": True})
 
     async def remove(self, character):
         """
@@ -136,7 +136,7 @@ class MatchPVPHandler(Singleton):
             pass
 
         if in_queue:
-            await character.msg({"left_combat_queue": ""})
+            await character.msg({"left_combat_queue": True})
 
     async def match(self):
         """
@@ -273,7 +273,7 @@ class MatchPVPHandler(Singleton):
                 character0 = Server.world.get_character(char_id_A)
                 awaits.append(character0.msg({
                     "match_rejected": char_id_A,
-                    "left_combat_queue": "",
+                    "left_combat_queue": True,
                 }))
             except KeyError:
                 pass
@@ -282,7 +282,7 @@ class MatchPVPHandler(Singleton):
                 character1 = Server.world.get_character(char_id_B)
                 awaits.append(character1.msg({
                     "match_rejected": char_id_B,
-                    "left_combat_queue": "",
+                    "left_combat_queue": True,
                 }))
             except KeyError:
                 pass
@@ -301,7 +301,7 @@ class MatchPVPHandler(Singleton):
                 character0 = Server.world.get_character(char_id_A)
                 awaits.append(character0.msg({
                     "match_rejected": char_id_A,
-                    "left_combat_queue": "",
+                    "left_combat_queue": True,
                 }))
             except KeyError:
                 pass
@@ -334,7 +334,7 @@ class MatchPVPHandler(Singleton):
                 character0 = Server.world.get_character(char_id_B)
                 awaits.append(character0.msg({
                     "match_rejected": char_id_B,
-                    "left_combat_queue": "",
+                    "left_combat_queue": True,
                 }))
             except KeyError:
                 pass
@@ -372,6 +372,6 @@ class MatchPVPHandler(Singleton):
             remove_by_id(char_id_B)
 
             await async_wait([
-                opponent0.msg({"left_combat_queue": ""}),
-                opponent1.msg({"left_combat_queue": ""}),
+                opponent0.msg({"left_combat_queue": True}),
+                opponent1.msg({"left_combat_queue": True}),
             ])

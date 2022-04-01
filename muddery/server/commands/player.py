@@ -93,7 +93,7 @@ class CmdQuit(BaseCommand):
         # we are quitting the last available session
         await account.msg({
             "msg": "{RQuitting{n. Hope to see you again, soon.",
-            "logout": ""
+            "logout": True,
         })
         await account.disconnect()
 

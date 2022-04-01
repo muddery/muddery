@@ -205,24 +205,6 @@ MudderyMainFrame.prototype.matchRejected = function(character_id) {
 //////////////////////////////////////////
 
 /*
- * Notify a player has been online.
- */
-MudderyMainFrame.prototype.playerOnline = function(player) {
-    var obj = player;
-    obj["type"] = "players";
-	this.objMovedIn(obj);
-}
-    
-/*
- * Notify a player has been offline.
- */
-MudderyMainFrame.prototype.playerOffline = function(player) {
-    var obj = player;
-    obj["type"] = "players";
-	this.objMovedOut(obj);
-}
-
-/*
  * Notify an object has moved to the player's current place.
  */
 MudderyMainFrame.prototype.objMovedIn = function(obj) {
