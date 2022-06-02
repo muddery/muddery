@@ -8,6 +8,7 @@ Rooms are simple containers that has no location of their own.
 import time
 import pytz
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from muddery.common.utils.utils import async_wait
 from muddery.server.utils.loot_handler import LootHandler
 from muddery.server.database.worlddata.loot_list import RoomProfitList
 from muddery.server.statements.statement_handler import STATEMENT_HANDLER
@@ -85,6 +86,7 @@ class MudderyProfitRoom(ELEMENT("ROOM")):
         :return:
         """
         current_time = time.time()
+        to_send = []
         for char_id, last_time in self.last_trigger_time.items():
             if current_time - last_time >= self.const.interval:
                 char = self.all_characters[char_id]
@@ -113,4 +115,7 @@ class MudderyProfitRoom(ELEMENT("ROOM")):
                     else:
                         message += _("Get") + " " + item["name"] + " " + str(item["number"])
 
-                char.msg({"msg": message})
+                to_send.append(char.msg({"msg": message}))
+
+        if to_send:
+            await async_wait(to_send)
