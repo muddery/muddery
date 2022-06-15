@@ -128,13 +128,14 @@ class MudderyBaseNPC(ELEMENT("CHARACTER")):
                 # Use the default relationship.
                 relationship = self.default_relationship
 
+            if self.dialogues or self.default_dialogues:
+                # If the character have something to talk, add talk command.
+                commands.append({"name": _("Talk"), "cmd": "talk", "args": self.get_id()})
+
             if relationship <= 0:
                 commands.append({"name": _("Attack"), "cmd": "attack", "args": self.get_id()})
-            else:
-                if self.dialogues or self.default_dialogues:
-                    # If the character have something to talk, add talk command.
-                    commands.append({"name": _("Talk"), "cmd": "talk", "args": self.get_id()})
 
+            if relationship >= 0:
                 # Add shops.
                 if self.shops:
                     available_shops = await async_gather([obj.is_available(caller) for obj in self.shops.values()])

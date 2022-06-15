@@ -17,7 +17,15 @@ class MudderyError(Exception):
         if len(args) == 0:
             super(MudderyError, self).__init__()
         elif len(args) == 1:
-            super(MudderyError, self).__init__(args[0])
+            arg = args[0]
+            if type(arg) == int:
+                super(MudderyError, self).__init__()
+                self.code = arg
+            elif type(arg) == str:
+                super(MudderyError, self).__init__(args[0])
+            else:
+                super(MudderyError, self).__init__()
+                self.data = arg
         else:
             super(MudderyError, self).__init__(args[1])
             self.code = args[0]
@@ -71,3 +79,7 @@ class ERR(object):
     duplicate_key = 10018
 
     no_cache = 10019
+
+    account_not_available = 10020
+
+    password_too_simple = 10021
