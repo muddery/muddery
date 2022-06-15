@@ -299,6 +299,33 @@ MudderyMainFrame.prototype.onConnectionClose = function() {
 	// show message
 	self.popupAlert(core.trans("Error"), core.trans("The client connection was closed cleanly."));
 }
+
+/*
+ * The result of creating an account.
+ */
+MudderyMainFrame.prototype.onCreateAccount = function(data) {
+    if (data.code === 0) {
+        // Account created. Do nothing.
+    }
+    else if (data.code === ERR.missing_args || data.code === ERR.invalid_input) {
+        this.popupMessage(core.trans("Alert"), core.trans("Incorrect username or password."));
+    }
+    else if (data.code === ERR.account_not_available) {
+        this.popupMessage(core.trans("Alert"), core.trans("This username is not available."));
+    }
+    else if (data.code === ERR.password_too_simple) {
+        this.popupMessage(core.trans("Alert"), core.trans("Your password is too simple."));
+    }
+    else if (data.code === ERR.no_authentication) {
+        this.popupMessage(core.trans("Alert"), core.trans("Incorrect username or password."));
+    }
+    else if (data.code === ERR.no_permission) {
+        this.popupMessage(core.trans("Alert"), core.trans("Your account have been banned."));
+    }
+    else {
+        this.popupMessage(core.trans("Alert"), core.trans("Can not create this account."));
+    }
+}
     
 /*
  * Event when the player logins.
@@ -318,6 +345,14 @@ MudderyMainFrame.prototype.onLogout = function(data) {
 	this.showLoginWindow();
 
 	mud.select_char_window.clear();
+}
+
+/*
+ * Event when the player's password changed.
+ */
+MudderyMainFrame.prototype.onPasswordChanged = function(data) {
+    this.popWindow(mud.password_window);
+    this.popupMessage(core.trans("Alert"), core.trans("Password changed."));
 }
 
 /*

@@ -73,29 +73,7 @@ class CmdDeleteAccount(BaseCommand):
         await account.delete_all_characters()
         await account.delete_user(username, password)
 
-
-class CmdQuit(BaseCommand):
-    """
-    Quit the game.
-
-    Usage:
-        {"cmd":"quit",
-         "args":""
-        }
-
-    Gracefully disconnect your current session from the
-    game. Use the /all switch to disconnect from all sessions.
-    """
-    key = "quit"
-
-    @classmethod
-    async def func(cls, account, args):
-        # we are quitting the last available session
-        await account.msg({
-            "msg": "{RQuitting{n. Hope to see you again, soon.",
-            "logout": True,
-        })
-        await account.disconnect()
+        await account.msg({"account_deleted": {"name": username}})
 
 
 class CmdChangePassword(BaseCommand):

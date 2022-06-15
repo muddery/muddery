@@ -3,6 +3,7 @@ import json
 import traceback
 
 from muddery.server.utils.logger import logger
+from muddery.server.commands.commands import Session, Account, Character
 
 
 class CommandHandler(object):
@@ -31,29 +32,34 @@ class CommandHandler(object):
 
     async def handler_command(self, session, command_key, args):
         # Find the matching command in cmdset.
+
+        caller = None
+
         # session commands
-        command = self.session_cmdset.get(command_key)
-        caller = session
-
-        if not command:
-            account = session.account
-            if account:
-                command = self.account_cmdset.get(command_key)
-                caller = account
-
-                if not command:
-                    character = session.account.get_puppet_obj()
-                    if character:
-                        command = self.character_cmdset.get(command_key)
-                        caller = character
-
-        if command:
-            try:
-                await command.func(caller, args)
-            except Exception as e:
-                logger.log_err("Run command error, %s: %s" % (session, e))
-                await session.msg({"alert": "Command error: %s" % e})
-            return
+        func = Session.get(command_key)
+        if func:
+            caller = session
+            await func(caller, args)
         else:
-            logger.log_err("Can not find command, %s: %s" % (session, command_key))
-            await session.msg({"alert": "Can not find command: %s" % command_key})
+            command = self.session_cmdset.get(command_key)
+
+            if command:
+                caller = session
+            else:
+                account = session.account
+                if account:
+                    command = self.account_cmdset.get(command_key)
+
+                    if command:
+                        caller = account
+                    else:
+                        character = session.account.get_puppet_obj()
+                        if character:
+                            command = self.character_cmdset.get(command_key)
+                            caller = character
+
+            if command:
+                await command.process(caller, args)
+            else:
+                logger.log_err("Can not find command, %s: %s" % (session, command_key))
+                await session.msg({"error": "Can not find command: %s" % command_key})

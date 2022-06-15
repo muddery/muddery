@@ -12,11 +12,12 @@ from muddery.server.settings import SETTINGS
 from muddery.server.mappings.element_set import ELEMENT
 from muddery.server.utils.logger import logger
 from muddery.server.utils.crypto import RSA
-from muddery.server.commands.base_command import BaseCommand
+from muddery.server.commands.base_command import BaseCommand, BaseRequest
 from muddery.server.utils.localized_strings_handler import _
 from muddery.server.utils.game_settings import GameSettings
 from muddery.server.database.worlddata.equipment_positions import EquipmentPositions
 from muddery.server.database.worlddata.honour_settings import HonourSettings
+from muddery.server.commands.command_set import SessionCmd
 
 
 # Helper function to throttle failed connection attempts.
@@ -24,7 +25,10 @@ from muddery.server.database.worlddata.honour_settings import HonourSettings
 # (just supply a different storage dictionary), but this
 # would also block dummyrunner, so it's not added as default.
 
+
 _LATEST_FAILED_LOGINS = defaultdict(list)
+
+
 def _throttle(session, maxlim=None, timeout=None, storage=_LATEST_FAILED_LOGINS):
     """
     This will check the session's address against the
@@ -68,7 +72,7 @@ def _throttle(session, maxlim=None, timeout=None, storage=_LATEST_FAILED_LOGINS)
         return False
 
 
-class CmdConnectAccount(BaseCommand):
+class CmdConnectAccount(BaseRequest):
     """
     connect to the game
 
@@ -144,77 +148,56 @@ class CmdConnectAccount(BaseCommand):
         await session.login(account)
 
 
-class CmdCreateAccount(BaseCommand):
+@SessionCmd.request("create_account")
+async def func(session, args):
     """
-    create a new player account and login
+    Respond the request of creating a new player account.
 
     Usage:
         {
-            "cmd":"create",
+            "cmd":"create_account",
             "args":{
                 "playername":<playername>,
                 "password":<password>,
-                "connect":<connect>
             }
         }
 
     args:
         connect: (boolean)connect after created
     """
-    key = "create"
+    if not args:
+        raise MudderyError(ERR.missing_args, "Syntax error!")
 
-    @classmethod
-    async def func(cls, session, args):
-        "Do checks, create account and login."
-        if not args:
-            await session.msg({"alert": _("Syntax error!")})
-            return
+    if "username" not in args:
+        raise MudderyError(ERR.missing_args, "Need a username.")
 
-        if "username" not in args:
-            await session.msg({"alert": _("You should appoint a username.")})
-            return
+    if "password" not in args:
+        raise MudderyError(ERR.missing_args, "Need a password.")
 
-        if "password" not in args:
-            await session.msg({"alert": _("You should appoint a password.")})
-            return
+    username = args["username"]
+    username = re.sub(r"\s+", " ", username).strip()
 
-        username = args["username"]
-        username = re.sub(r"\s+", " ", username).strip()
+    if SETTINGS.ENABLE_ENCRYPT:
+        encrypted = base64.b64decode(args["password"])
+        decrypted = RSA.inst().decrypt(encrypted)
+        password = decrypted.decode("utf-8")
+    else:
+        password = args["password"]
 
-        if SETTINGS.ENABLE_ENCRYPT:
-            encrypted = base64.b64decode(args["password"])
-            decrypted = RSA.inst().decrypt(encrypted)
-            password = decrypted.decode("utf-8")
-        else:
-            password = args["password"]
+    if not password:
+        raise MudderyError(ERR.invalid_input, "Need a password.")
 
-        if not password:
-            await session.msg({"alert": _("You should input a password.")})
-            return
+    # Create an account.
+    element_type = SETTINGS.ACCOUNT_ELEMENT_TYPE
+    account = ELEMENT(element_type)()
 
-        connect = True
-        if "connect" in args:
-            connect = args["connect"]
+    # Set the account with username and password.
+    await account.new_user(username, password, "")
 
-        # Create an account.
-        element_type = SETTINGS.ACCOUNT_ELEMENT_TYPE
-        account = ELEMENT(element_type)()
-
-        # Set the account with username and password.
-        try:
-            await account.new_user(username, password, "")
-        except MudderyError as e:
-            if e.code == ERR.no_authentication:
-                # Wrong username or password.
-                await session.msg({"alert": str(e)})
-            else:
-                await session.msg({"alert": _("There was an error creating the Player: %s" % e)})
-            return None
-
-        if connect:
-            await session.login(account)
-        else:
-            await session.msg({"created":{"name": session, "id": account.get_id()}})
+    return {
+        "name": username,
+        "id": account.get_id()
+    }
 
 
 class CmdQuitAccount(BaseCommand):

@@ -72,7 +72,7 @@ class MudderyAccount(BaseElement):
     async def new_user(self, username, raw_password, type):
         # Create a new account with the username and password.
         if await Accounts.inst().has(username):
-            raise MudderyError(ERR.invalid_input, _("Sorry, there is already a player with the name '%s'.") % username)
+            raise MudderyError(ERR.account_not_available)
 
         # Check name bans
         current_time = datetime.datetime.now()
@@ -80,12 +80,12 @@ class MudderyAccount(BaseElement):
             finish_time = await ServerBans.inst().get_ban_time("USERNAME", username)
             if current_time <= finish_time:
                 # This username is banned.
-                raise MudderyError(ERR.no_authentication, _("You have been banned."))
+                raise MudderyError(ERR.no_permission)
         except KeyError:
             pass
 
         if len(raw_password) < 6:
-            raise MudderyError(ERR.invalid_input, _("The password is too simple."))
+            raise MudderyError(ERR.password_too_simple)
 
         salt = make_salt()
         password = hash_password(raw_password, salt)
@@ -109,7 +109,7 @@ class MudderyAccount(BaseElement):
         """
         if not await self.check_password(username, raw_password):
             # Password not match.
-            raise MudderyError(ERR.no_authentication, _("Incorrect username or password."))
+            raise MudderyError(ERR.no_authentication)
 
         await Accounts.inst().remove(username)
 
@@ -117,7 +117,7 @@ class MudderyAccount(BaseElement):
         # Match account name and check password
         if not await self.check_password(username, raw_password):
             # Password not match.
-            raise MudderyError(ERR.no_authentication, _("Incorrect username or password."))
+            raise MudderyError(ERR.no_authentication)
 
         # Check name bans
         try:
@@ -125,7 +125,7 @@ class MudderyAccount(BaseElement):
             current_time = datetime.datetime.now()
             if current_time <= finish_time:
                 # This username is banned.
-                raise MudderyError(ERR.no_authentication, _("You have been banned."))
+                raise MudderyError(ERR.no_permission)
         except KeyError:
             pass
 
@@ -426,10 +426,7 @@ class MudderyAccount(BaseElement):
         password = hash_password(new_password, salt)
         await Accounts.inst().set_password(self.username, password, salt)
 
-        await self.msg({
-            "alert":_("Password changed."),
-            "pw_changed": True
-        })
+        await self.msg({"pw_changed": True})
 
     async def disconnect(self, reason):
         """

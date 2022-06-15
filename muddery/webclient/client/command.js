@@ -67,7 +67,7 @@ MudderyCommand.prototype = {
             "password": settings.enable_encrypt? core.crypto.encrypt(password): password,
             "connect": connect
         };
-        this.sendCommand("create", args);
+        this.sendCommand("create_account", args);
     },
 
     // change password

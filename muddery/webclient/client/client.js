@@ -154,12 +154,16 @@ MudderyClient.prototype = {
                     } else if (key == "get_exp") {
                         var get_exp = data[key];
                         mud.main_frame.showGetExp(get_exp["exp"]);
+                    } else if (key == "create_account") {
+                        mud.main_frame.onCreateAccount(data[key]);
+                    } else if (key == "account_delete") {
+                        mud.main_frame.onAccount(data[key]);
                     } else if (key == "login") {
                         mud.main_frame.onLogin(data[key]);
                     } else if (key == "logout") {
                         mud.main_frame.onLogout(data[key]);
                     } else if (key == "pw_changed") {
-                        mud.main_frame.popWindow(mud.password_window);
+                        mud.main_frame.onPasswordChanged();
                     } else if (key == "unpuppet") {
                         mud.main_frame.onUnpuppet(data[key]);
                     } else if (key == "char_all") {

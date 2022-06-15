@@ -80,7 +80,6 @@ class AccountCmdSet(CommandSet):
         #
         # any commands you add below will overload the default ones.
         #
-        cls.add(player.CmdQuit())
         cls.add(player.CmdChangePassword())
         cls.add(player.CmdPuppet())
         cls.add(player.CmdPuppetName())
@@ -104,6 +103,5 @@ class SessionCmdSet(CommandSet):
         super(SessionCmdSet, cls).create()
 
         cls.add(unloggedin.CmdUnloginLook())
-        cls.add(unloggedin.CmdCreateAccount())
         cls.add(unloggedin.CmdConnectAccount())
         cls.add(unloggedin.CmdQuitAccount())
