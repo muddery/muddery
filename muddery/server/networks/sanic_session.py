@@ -1,15 +1,15 @@
 
 import json, traceback
-from muddery.server.service.channel import Channel
+from muddery.server.service.session import Session
 
 
-class SanicChannel(Channel):
+class SanicSession(Session):
     """
-    Sanic's websocket channel.
+    Sanic uses websocket's channel as session.
     """
     def __init__(self, *args, **kwargs):
         """
-        Init the channel.
+        Init the session.
 
         :param args:
         :param kwargs:

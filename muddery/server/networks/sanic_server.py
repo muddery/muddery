@@ -8,7 +8,7 @@ from sanic import Sanic
 from asyncio import CancelledError
 from muddery.common.utils.utils import write_pid_file, read_pid_file
 from muddery.common.networks import responses
-from muddery.server.networks.sanic_channel import SanicChannel
+from muddery.server.networks.sanic_session import SanicSession
 from muddery.server.settings import SETTINGS
 from muddery.server.server import Server
 from muddery.server.utils.logger import logger
@@ -53,18 +53,18 @@ def run(port):
     # set websocket interface
     @app.websocket("/")
     async def handler(request, ws):
-        channel = SanicChannel()
+        session = SanicSession()
         logger.log_info("[Connection created] %s:%s" % (request.ip, request.port))
         try:
-            channel.connect(request, ws)
+            session.connect(request, ws)
             while True:
                 data = await ws.recv()
-                await channel.receive(data)
+                await session.receive(data)
         except CancelledError as e:
-            await channel.disconnect(0)
+            await session.disconnect(0)
         except Exception as e:
             logger.log_trace("Connection Exception: %s" % e)
-            await channel.disconnect(-1)
+            await session.disconnect(-1)
 
         logger.log_info("[Connection closed] %s:%s" % (request.ip, request.port))
         await ws.close()

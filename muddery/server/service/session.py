@@ -7,13 +7,13 @@ from muddery.server.utils.logger import logger
 from muddery.server.settings import SETTINGS
 
 
-class Channel(object):
+class Session(object):
     """
-    Websocket channel.
+    Communicate session.
     """
     def __init__(self, *args, **kwargs):
         """
-        Init the channel.
+        Init the session.
 
         :param args:
         :param kwargs:
@@ -86,7 +86,11 @@ class Channel(object):
 
             cmd_queue.append(now)
 
-        await Server.inst().handler_command(self, command_key, args)
+        try:
+            await Server.inst().handler_command(self, command_key, args)
+        except Exception as e:
+            logger.log_err("[Receive command][%s]%s error: %s" % (self, text_data, e))
+
         await self.msg_all()
         self.delay_msg = False
 
@@ -117,7 +121,7 @@ class Channel(object):
 
     async def send_out(self, data: dict or list) -> None:
         """
-        Send out a message. To be implemented by a network channel.
+        Send out a message. To be implemented by the network.
         """
         pass
 
@@ -150,3 +154,25 @@ class Channel(object):
         """
         await self.msg(self.msg_list, delay=False)
         self.msg_list = []
+
+    async def respond_data(self, key: str, data: dict or None = None, delay: bool = True) -> None:
+        """
+        Respond a request with data.
+        """
+        await self.msg({
+            key: {
+                "code": 0,
+                "data": data
+            }
+        }, delay)
+
+    async def respond_err(self, key: str, error_code: int, error_msg: str = "", delay: bool = True) -> None:
+        """
+        Respond a request with an error message.
+        """
+        await self.msg({
+            key: {
+                "code": error_code,
+                "msg": error_msg
+            }
+        }, delay)
