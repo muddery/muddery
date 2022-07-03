@@ -56,7 +56,6 @@ class MudderyWorld(BaseElement):
             self.load_channels(),
             self.load_areas(),
         ])
-        self.load_commands()
 
     async def load_channels(self):
         """
@@ -101,19 +100,6 @@ class MudderyWorld(BaseElement):
         self.room_dict = {
             room_key: area_key for area_key, area in self.all_areas.items() for room_key in area.get_rooms_key()
         }
-
-    def load_commands(self):
-        """
-        Load all client commands.
-        """
-        session_cmdset = class_from_path(SETTINGS.SESSION_CMDSET)
-        session_cmdset.create()
-
-        account_cmdset = class_from_path(SETTINGS.ACCOUNT_CMDSET)
-        account_cmdset.create()
-
-        character_cmdset = class_from_path(SETTINGS.CHARACTER_CMDSET)
-        character_cmdset.create()
 
     def get_area(self, area_key):
         """

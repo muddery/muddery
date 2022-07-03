@@ -178,6 +178,7 @@ MudderyLocalDict = {
     "ME": "我",
     "LOCAL": "本地",
     "ADMIN": "管理员",
+    "Server error!": "服务器错误！",
     "An error occurred while setting up the client!": "设置客户端时发生错误！",
     "Syntax error!": "格式错误！",
     "You should appoint a username.": "请输入用户名。",
@@ -186,4 +187,5 @@ MudderyLocalDict = {
     "Incorrect username or password.": "错误的用户名或密码。",
     "Your account have been banned.": "您的账号被禁止了。",
     "Can not create this account.": "无法创建这个账号",
+    "This username is not available.": "该用户名不可用。",
 };

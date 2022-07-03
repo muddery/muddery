@@ -3,12 +3,32 @@ MudderyCommand = function() {
 }
 
 MudderyCommand.prototype = {
+    // unique request id
+    request_id: 0,
 
-    // commands
-    sendCommand : function(command, args) {
+    // callback functions
+    callbacks: {},
+
+    // send a command to the server
+    sendCommand: function(command, args) {
         var data = {
-            "cmd" : command,
-            "args" : args || "",
+            "cmd": command,
+            "args": args || "",
+        };
+        Connection.send(JSON.stringify(data));
+    },
+
+    // send a request to the server
+    sendRequest: function(key, args, callback) {
+        var req = request_id++;
+        if (callback && typeof(callback) == "function") {
+            callbacks[req] = callback;
+        }
+
+        var data = {
+            "cmd": command,
+            "args": args || "",
+            "req": req,
         };
         Connection.send(JSON.stringify(data));
     },
@@ -24,10 +44,30 @@ MudderyCommand.prototype = {
     },
 
     // query the unloggedin message
-    queryUnloggedIn: function () {
-        this.sendCommand("unloggedin_look");
+    requestFirstConnect: function(callback) {
+        this.sendCommand("first_connect", {}, callback);
     },
-    
+
+    // register
+    register: function(username, password, connect) {
+        var args = {
+            "username": username,
+            "password": settings.enable_encrypt? core.crypto.encrypt(password): password,
+            "connect": connect
+        };
+        this.sendCommand("create_account", args);
+    },
+
+    // login
+    login: function(username, password) {
+        var args = {
+            "username" : username,
+            "password" : settings.enable_encrypt? core.crypto.encrypt(password): password,
+        };
+
+        this.sendCommand("login", args);
+    },
+
     castSkill: function(skill, target) {
         var cmd = "cast_skill";
         var args = {
@@ -48,26 +88,6 @@ MudderyCommand.prototype = {
 
     leaveCombat: function() {
         this.sendCommand("leave_combat");
-    },
-
-    // login
-    login: function(username, password) {
-        var args = {
-            "username" : username,
-            "password" : settings.enable_encrypt? core.crypto.encrypt(password): password,
-        };
-        
-        this.sendCommand("connect", args);
-    },
-
-    // register
-    register: function(username, password, connect) {
-        var args = {
-            "username": username,
-            "password": settings.enable_encrypt? core.crypto.encrypt(password): password,
-            "connect": connect
-        };
-        this.sendCommand("create_account", args);
     },
 
     // change password
@@ -150,7 +170,7 @@ MudderyCommand.prototype = {
     
     // logout
     logout : function() {
-        this.sendCommand("quit");
+        this.sendCommand("logout");
     },
     
     // send command from command box

@@ -88,12 +88,14 @@ MudderyClient.prototype = {
                         mud.scene_window.displayMessage(data[key], "debug");
                     } else if (key == "prompt") {
                         mud.scene_window.displayMessage(data[key], "prompt");
-                    } else if (key == "game_name") {
-                        mud.login_window.setGameName(data[key]);
-                    } else if (key == "conn_screen") {
-                        mud.login_window.setConnScreen(data[key]);
-                    } else if (key == "min_honour_level") {
-                        mud.honour_window.setMinHonourLevel(data[key]);
+                    } else if (key == "first_connect") {
+                        mud.login_window.onRespondFirstConnect(data[key]);
+                    } else if (key == "create_account") {
+                        mud.main_frame.onRespondCreateAccount(data[key]);
+                    } else if (key == "login") {
+                        mud.main_frame.onRespondLogin(data[key]);
+                    } else if (key == "logout") {
+                        mud.main_frame.onRespondLogout(data[key]);
                     } else if (key == "look_around") {
                         mud.scene_window.setSurroundings(data[key]);
                     } else if (key == "obj_moved_in") {
@@ -119,8 +121,6 @@ MudderyClient.prototype = {
                     } else if (key == "status") {
                         var status = data[key];
                         mud.main_frame.setStatus(status);
-                    } else if (key == "equipment_pos") {
-                        mud.char_data_window.setEquipmentPos(data[key]);
                     } else if (key == "equipments") {
                         mud.char_data_window.setEquipments(data[key]);
                     } else if (key == "inventory") {
@@ -154,14 +154,8 @@ MudderyClient.prototype = {
                     } else if (key == "get_exp") {
                         var get_exp = data[key];
                         mud.main_frame.showGetExp(get_exp["exp"]);
-                    } else if (key == "create_account") {
-                        mud.main_frame.onCreateAccount(data[key]);
                     } else if (key == "account_delete") {
                         mud.main_frame.onAccount(data[key]);
-                    } else if (key == "login") {
-                        mud.main_frame.onLogin(data[key]);
-                    } else if (key == "logout") {
-                        mud.main_frame.onLogout(data[key]);
                     } else if (key == "pw_changed") {
                         mud.main_frame.onPasswordChanged();
                     } else if (key == "unpuppet") {

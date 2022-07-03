@@ -278,7 +278,7 @@ MudderyMainFrame.prototype.onConnectionOpen = function() {
 	self.showLoginWindow();
 	if (self.first_connection) {
 	    self.first_connection = false;
-	    core.command.queryUnloggedIn();
+	    core.command.first_connect();
 	    mud.login_window.checkAutoLogin();
 	}
 }
@@ -303,23 +303,23 @@ MudderyMainFrame.prototype.onConnectionClose = function() {
 /*
  * The result of creating an account.
  */
-MudderyMainFrame.prototype.onCreateAccount = function(data) {
-    if (data.code === 0) {
+MudderyMainFrame.prototype.onCreateAccount = function(respond) {
+    if (respond.code === 0) {
         // Account created. Do nothing.
     }
-    else if (data.code === ERR.missing_args || data.code === ERR.invalid_input) {
+    else if (respond.code === ERR.missing_args || respond.code === ERR.invalid_input) {
         this.popupMessage(core.trans("Alert"), core.trans("Incorrect username or password."));
     }
-    else if (data.code === ERR.account_not_available) {
+    else if (respond.code === ERR.account_not_available) {
         this.popupMessage(core.trans("Alert"), core.trans("This username is not available."));
     }
-    else if (data.code === ERR.password_too_simple) {
+    else if (respond.code === ERR.password_too_simple) {
         this.popupMessage(core.trans("Alert"), core.trans("Your password is too simple."));
     }
-    else if (data.code === ERR.no_authentication) {
+    else if (respond.code === ERR.no_authentication) {
         this.popupMessage(core.trans("Alert"), core.trans("Incorrect username or password."));
     }
-    else if (data.code === ERR.no_permission) {
+    else if (respond.code === ERR.no_permission) {
         this.popupMessage(core.trans("Alert"), core.trans("Your account have been banned."));
     }
     else {
@@ -1378,6 +1378,33 @@ MudderyLogin.prototype.clearValues = function() {
     this.select(".reg-password").val("");
     this.select(".reg-password-verify").val("");
     this.select(".checkbox-auto-login").removeClass("checked");
+}
+
+/*
+ * Receive the game's first connection messages.
+ */
+MudderyLogin.prototype.onRespondFirstConnect = function(respond) {
+    if (respond.code != 0) {
+        this.popupMessage(core.trans("Alert"), core.trans("Server error!"));
+        return;
+    }
+
+    var data = respond.data;
+    if ("game_name" in data) {
+        mud.login_window.setGameName(data["game_name"]);
+    }
+
+    if ("conn_screen" in data) {
+        mud.login_window.setConnScreen(data["conn_screen"]);
+    }
+
+    if ("min_honour_level" in data) {
+        mud.honour_window.setMinHonourLevel(data["min_honour_level"]);
+    }
+
+    if ("equipment_pos" in data) {
+        mud.char_data_window.setEquipmentPos(data["equipment_pos"]);
+    }
 }
 
 /*

@@ -72,84 +72,41 @@ def _throttle(session, maxlim=None, timeout=None, storage=_LATEST_FAILED_LOGINS)
         return False
 
 
-class CmdConnectAccount(BaseRequest):
+@SessionCmd.request("first_connect")
+async def first_connect(session, args):
     """
-    connect to the game
+    Get the game's information for the first time connected to the server.
 
     Usage:
         {
-            "cmd":"connect",
-            "args":{
-                "playername":<playername>,
-                "password":<password>
-            }
+            "cmd": "connect"
         }
 
+    This is an unconnected version of the look command for simplicity.
+
+    This is called by the server and kicks everything in gear.
+    All it does is display the connect screen.
     """
-    key = "connect"
+    game_name = GameSettings.inst().get("game_name")
+    connection_screen = GameSettings.inst().get("connection_screen")
+    honour_settings = HonourSettings.get_first_data()
+    records = EquipmentPositions.all()
+    equipment_pos = [{
+        "key": r.key,
+        "name": r.name,
+        "desc": r.desc,
+    } for r in records]
 
-    @classmethod
-    async def func(cls, session, args):
-        """
-        Login the game server.
-        """
-        # check for too many login errors too quick.
-        if _throttle(session, maxlim=5, timeout=5*60, storage=_LATEST_FAILED_LOGINS):
-            # timeout is 5 minutes.
-            await session.msg({"alert": _("{RYou made too many connection attempts. Try again in a few minutes.{n")})
-            return
-
-        if "username" not in args:
-            await session.msg({"alert": _("You should input a username.")})
-            return
-
-        if "password" not in args:
-            await session.msg({"alert": _("You should input a password.")})
-            return
-
-        username = args["username"]
-        username = re.sub(r"\s+", " ", username).strip()
-
-        if SETTINGS.ENABLE_ENCRYPT:
-            encrypted = base64.b64decode(args["password"])
-            decrypted = RSA.inst().decrypt(encrypted)
-            password = decrypted.decode("utf-8")
-        else:
-            password = args["password"]
-
-        if not password:
-            await session.msg({"alert": _("You should input a password.")})
-            return
-
-        # Get the account.
-        element_type = SETTINGS.ACCOUNT_ELEMENT_TYPE
-        account = ELEMENT(element_type)()
-
-        # Set the account with username and password.
-        try:
-            await account.set_user(username, password)
-        except MudderyError as e:
-            if e.code == ERR.no_authentication:
-                # Wrong username or password.
-                await session.msg({"alert": str(e)})
-            else:
-                await session.msg({"alert": _("You can not login.")})
-
-            # this just updates the throttle
-            _throttle(session)
-            return None
-
-        # actually do the login. This will call all other hooks:
-        #   session.at_login()
-        #   player.at_init()  # always called when object is loaded from disk
-        #   player.at_first_login()  # only once, for player-centric setup
-        #   player.at_pre_login()
-        #   player.at_post_login(session=session)
-        await session.login(account)
+    return {
+        "game_name": game_name,
+        "conn_screen": connection_screen,
+        "equipment_pos": equipment_pos,
+        "min_honour_level": honour_settings.min_honour_level,
+    }
 
 
 @SessionCmd.request("create_account")
-async def func(session, args):
+async def create_account(session, args):
     """
     Respond the request of creating a new player account.
 
@@ -200,7 +157,78 @@ async def func(session, args):
     }
 
 
-class CmdQuitAccount(BaseCommand):
+@SessionCmd.request("login")
+async def login(session, args):
+    """
+    Login the game server.
+
+    Usage:
+        {
+            "cmd":"connect",
+            "args":{
+                "playername":<playername>,
+                "password":<password>
+            }
+        }
+
+    """
+    # check for too many login errors too quick.
+    if _throttle(session, maxlim=5, timeout=5*60, storage=_LATEST_FAILED_LOGINS):
+        # timeout is 5 minutes.
+        await session.msg({"alert": _("{RYou made too many connection attempts. Try again in a few minutes.{n")})
+        return
+
+    if "username" not in args:
+        await session.msg({"alert": _("You should input a username.")})
+        return
+
+    if "password" not in args:
+        await session.msg({"alert": _("You should input a password.")})
+        return
+
+    username = args["username"]
+    username = re.sub(r"\s+", " ", username).strip()
+
+    if SETTINGS.ENABLE_ENCRYPT:
+        encrypted = base64.b64decode(args["password"])
+        decrypted = RSA.inst().decrypt(encrypted)
+        password = decrypted.decode("utf-8")
+    else:
+        password = args["password"]
+
+    if not password:
+        await session.msg({"alert": _("You should input a password.")})
+        return
+
+    # Get the account.
+    element_type = SETTINGS.ACCOUNT_ELEMENT_TYPE
+    account = ELEMENT(element_type)()
+
+    # Set the account with username and password.
+    try:
+        await account.set_user(username, password)
+    except MudderyError as e:
+        if e.code == ERR.no_authentication:
+            # Wrong username or password.
+            await session.msg({"alert": str(e)})
+        else:
+            await session.msg({"alert": _("You can not login.")})
+
+        # this just updates the throttle
+        _throttle(session)
+        return None
+
+    # actually do the login. This will call all other hooks:
+    #   session.at_login()
+    #   player.at_init()  # always called when object is loaded from disk
+    #   player.at_first_login()  # only once, for player-centric setup
+    #   player.at_pre_login()
+    #   player.at_post_login(session=session)
+    await session.login(account)
+
+
+@SessionCmd.request("logout")
+async def logout(session, args):
     """
     quit when in unlogged-in state
 
@@ -214,45 +242,5 @@ class CmdQuitAccount(BaseCommand):
     here for unconnected players for the sake of simplicity. The logged in
     version is a bit more complicated.
     """
-    key = "quit"
+    await session.logout()
 
-    @classmethod
-    async def func(cls, session, args):
-        await session.logout()
-
-
-class CmdUnloginLook(BaseCommand):
-    """
-    login started unlogged-in state
-
-    Usage:
-        {
-            "cmd": "unloggedin_look"
-        }
-
-    This is an unconnected version of the look command for simplicity.
-
-    This is called by the server and kicks everything in gear.
-    All it does is display the connect screen.
-    """
-    key = "unloggedin_look"
-
-    @classmethod
-    async def func(cls, session, args):
-        "Show the connect screen."
-        game_name = GameSettings.inst().get("game_name")
-        connection_screen = GameSettings.inst().get("connection_screen")
-        honour_settings = HonourSettings.get_first_data()
-        records = EquipmentPositions.all()
-        equipment_pos = [{
-            "key": r.key,
-            "name": r.name,
-            "desc": r.desc,
-        } for r in records]
-
-        await session.msg({
-            "game_name": game_name,
-            "conn_screen": connection_screen,
-            "equipment_pos": equipment_pos,
-            "min_honour_level": honour_settings.min_honour_level,
-        })
