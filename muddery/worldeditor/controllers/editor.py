@@ -868,8 +868,11 @@ class ApplyChanges(BaseRequestProcesser):
 
     async def func(self, args, request):
         try:
-            # restart the server
-            await manager.run_servers(server=True, editor=True, restart=True)
+            # restart the game server
+            import subprocess
+            subprocess.Popen("muddery restart", shell=True)
+
+            # await manager.restart_servers(server=True, webclient=False, editor=False)
         except Exception as e:
             message = "Can not build the world: %s" % e
             logger.log_trace(message)

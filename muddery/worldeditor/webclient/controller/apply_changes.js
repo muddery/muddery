@@ -21,8 +21,18 @@ controller = {
     },
 
     applySuccess: function(data) {
+        controller.status_interval_id = window.setInterval("controller.checkStatus()", 5000);
+    },
+
+    checkStatus: function() {
+        service.checkStatus(controller.checkStatusSuccess);
+    },
+
+    checkStatusSuccess: function(data) {
+        window.clearInterval(controller.status_interval_id);
+
         window.parent.controller.hideWaiting();
-        window.parent.controller.notify("", "Apply success.");
+        window.parent.controller.notify("", "The server restarted.");
     },
 
     applyFailed: function(code, message, data) {
