@@ -266,8 +266,8 @@ controller = {
         controller.pushPage(name, url, null);
     },
 
-    editElement: function(element_type, element_key, no_delete) {
-        var url = "element_editor.html?element_type=" + element_type;
+    editElement: function(base_element_type, element_type, element_key, no_delete) {
+        var url = "matter_editor.html?base_element_type=" + base_element_type + "&element_type=" + element_type;
 
         var name = "";
         if (element_key) {
@@ -284,8 +284,8 @@ controller = {
         controller.pushPage(name, url, null);
     },
 
-    editMatter: function(element_type, element_key, no_delete) {
-        var url = "matter_editor.html?element_type=" + element_type;
+    editMatter: function(base_element_type, element_type, element_key, no_delete) {
+        var url = "matter_editor.html?base_element_type=" + base_element_type + "&element_type=" + element_type;
 
         var name = "";
         if (element_key) {

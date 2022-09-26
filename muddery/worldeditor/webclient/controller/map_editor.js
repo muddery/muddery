@@ -152,7 +152,7 @@ MapEditor.prototype.onEditArea = function() {
 
 MapEditor.prototype.saveForEditArea = function(data) {
     controller.changed = true;
-    window.parent.controller.editElement(controller.area_element_type, controller.area_key, true);
+    window.parent.controller.editMatter(controller.area_element_type, controller.area_key, true);
 }
 
 
@@ -1273,7 +1273,7 @@ MapEditor.prototype.saveForEditRoom = function(data, context) {
     $(".room-menu").remove();
 
     var room_key = context.key;
-    window.parent.controller.editElement(controller.room_element_type, room_key);
+    window.parent.controller.editMatter(controller.room_element_type, room_key);
 }
 
 /*
@@ -1510,7 +1510,7 @@ MapEditor.prototype.saveForEditExit = function(data, context) {
     controller.changed = true;
 
     var exit_key = context.key;
-    window.parent.controller.editElement(controller.exit_element_type, exit_key);
+    window.parent.controller.editMatter(controller.exit_element_type, exit_key);
 
     // Unselect all rooms.
     $(".element-room").removeClass("element-selected");

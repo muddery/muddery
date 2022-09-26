@@ -24,14 +24,15 @@ ElementTable.prototype.refresh = function() {
 
 ElementTable.prototype.onAdd = function(e) {
     var element_type = controller.element_type;
-    window.parent.controller.editElement(element_type, "");
+    window.parent.controller.editElement(element_type, element_type, "");
 }
 
 ElementTable.prototype.onEdit = function(e) {
     var element_key = $(this).attr("data-element-key");
     if (element_key) {
-        var element_type = controller.element_type;
-        window.parent.controller.editElement(element_type, element_key);
+        var base_element_type = controller.element_type;
+        var element_type = $(this).attr("data-element-type") || base_element_type;
+        window.parent.controller.editElement(base_element_type, element_type, element_key);
     }
 }
 
@@ -77,6 +78,7 @@ ElementTable.prototype.operateButton = function(value, row, index) {
         .addClass("btn-xs edit-row")
         .attr("type", "button")
         .attr("data-element-key", row["key"])
+        .attr("data-element-type", row["element_type"])
         .text("Edit")
         .appendTo(block);
 
