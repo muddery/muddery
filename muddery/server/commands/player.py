@@ -308,11 +308,11 @@ class CmdCharCreate(BaseCommand):
         nickname = re.sub(r"\s+", " ", name).strip()
 
         try:
-            await CharacterInfo.inst().get_char_id(nickname)
+            CharacterInfo.inst().get_char_id(nickname)
             # check if this name already exists.
             await account.msg({"alert":_("{RA character named '{r%s{R' already exists.{n") % name})
             return
-        except:
+        except KeyError:
             pass
 
         try:
