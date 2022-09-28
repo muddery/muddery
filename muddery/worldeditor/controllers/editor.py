@@ -11,6 +11,7 @@ from muddery.worldeditor.services import data_query, data_edit
 from muddery.worldeditor.utils.logger import logger
 from muddery.worldeditor.controllers.base_request_processer import BaseRequestProcesser
 from muddery.worldeditor.dao import general_querys
+from muddery.server.database.worlddata.worlddata import WorldData
 
 
 class QueryAllElements(BaseRequestProcesser):
@@ -429,6 +430,10 @@ class SaveForm(BaseRequestProcesser):
 
         record_id = data_edit.save_form(values, table_name, record_id)
         data = data_edit.query_form(table_name, {"id": record_id})
+
+        # Refresh the game world's data.
+        WorldData.refresh(table_name)
+
         return success_response(data)
 
 
@@ -795,6 +800,10 @@ class DeleteRecord(BaseRequestProcesser):
 
         data_edit.delete_record(table_name, record_id)
         data = {"record": record_id}
+
+        # Refresh the game world's data.
+        WorldData.refresh(table_name)
+
         return success_response(data)
 
 
