@@ -2143,8 +2143,6 @@ MudderyScene.prototype.setSurroundings = function(surroundings) {
     this.clearScene();
     this.surroundings = surroundings;
 
-    var has_objects = false;
-
     // get current room's data
     var room_data = core.map_data.getCurrentRoomMap();
     if (room_data) {
@@ -2186,6 +2184,7 @@ MudderyScene.prototype.setSurroundings = function(surroundings) {
     }
 
     // set room objects
+    var has_objects = false;
     var objects_data = room_data["objects"];
     var objects = this.select(".scene-objects");
     if (objects_data.length > 0) {

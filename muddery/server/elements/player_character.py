@@ -1626,7 +1626,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
                     await async_wait(event_kill + quest_kill)
             elif status == defines.COMBAT_LOSE:
                 await self.die(opponents)
-                self.event.at_character_die()
+                await self.event.at_character_die()
         elif combat_type == CombatType.HONOUR:
             if status == defines.COMBAT_WIN:
                 await self.honour_win()
@@ -1677,6 +1677,10 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         """
         Reborn after being killed.
         """
+        # Recover properties.
+        await self.recover()
+        self.is_alive = True
+
         # Reborn at its home.
         home = None
         default_home_key = GameSettings.inst().get("default_player_home_key")
@@ -1688,10 +1692,6 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
 
         if home:
             await self.move_to(home)
-
-        # Recover properties.
-        await self.recover()
-        self.is_alive = True
 
         await self.show_status()
 

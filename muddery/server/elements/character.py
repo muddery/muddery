@@ -8,7 +8,8 @@ creation commands.
 
 """
 
-import time, datetime, traceback, ast
+import time, traceback, ast
+from datetime import datetime
 import pytz
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from muddery.server.settings import SETTINGS
@@ -692,7 +693,7 @@ class MudderyCharacter(ELEMENT("MATTER")):
 
         if not self.is_temp and self.reborn_time > 0:
             # Set reborn timer.
-            reborn_time = datetime.datetime.fromtimestamp(time.time() + self.reborn_time)
+            reborn_time = datetime.utcfromtimestamp(time.time() + self.reborn_time)
             scheduler = self.get_scheduler()
             scheduler.add_job(self.reborn, "date", run_date=reborn_time, id=self.reborn_scheduler_id)
 
