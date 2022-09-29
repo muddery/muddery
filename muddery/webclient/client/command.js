@@ -129,12 +129,20 @@ MudderyCommand.prototype = {
         this.sendCommand("unpuppet", {}, callback);
     },
 
-    inventoryObject: function(position) {
-        this.sendCommand("inventory_obj", position);
+    queryInventory: function(callback) {
+        this.sendCommand("inventory", {}, callback);
     },
 
-    equipmentsObject: function(obj_id) {
-        this.sendCommand("equipments_obj", obj_id);
+    inventoryObject: function(position, callback) {
+        this.sendCommand("inventory_obj", position, callback);
+    },
+
+    queryEquipments: function(callback) {
+        this.sendCommand("equipments", {}, callback);
+    },
+
+    equipmentsObject: function(obj_id, callback) {
+        this.sendCommand("equipments_obj", obj_id, callback);
     },
 
     // look at an object in the room
@@ -151,8 +159,8 @@ MudderyCommand.prototype = {
     },
 
     // go to
-    traverse : function(exit_key) {
-        this.sendCommand("traverse", exit_key);
+    traverse: function(exit_key, callback) {
+        this.sendCommand("traverse", exit_key, callback);
     },
     
     // talk
@@ -190,13 +198,13 @@ MudderyCommand.prototype = {
     },
     
     // send out a speech
-    say: function(type, target, message) {
+    say: function(type, target, message, callback) {
         var args = {
             "type": type,
             "target": target,
             "message": message,
         }
-        this.sendCommand("say", args);
+        this.sendCommand("say", args, callback);
     },
     
     // make a match
@@ -244,8 +252,8 @@ MudderyCommand.prototype = {
     },
 
     // query area maps by a list of room keys
-    queryMaps: function (room_list) {
-        this.sendCommand("query_maps", {rooms: room_list});
+    queryMaps: function (room_list, callback) {
+        this.sendCommand("query_maps", {rooms: room_list}, callback);
     },
 
     // do test

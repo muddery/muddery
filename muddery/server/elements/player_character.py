@@ -13,7 +13,7 @@ from muddery.server.utils.logger import logger
 from muddery.server.server import Server
 from muddery.server.utils.quest_handler import QuestHandler
 from muddery.server.utils.statement_attribute_handler import StatementAttributeHandler
-from muddery.common.utils.exception import MudderyError
+from muddery.common.utils.exception import MudderyError, ERR
 from muddery.server.utils.localized_strings_handler import _
 from muddery.server.utils.game_settings import GameSettings
 from muddery.server.utils.dialogue_handler import DialogueHandler
@@ -329,7 +329,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         # send character's data to player
         message = {
             "status": status,
-            "equipments": self.return_equipments(),
+            "equipments": self.get_equipments(),
             "inventory": self.get_inventory_appearance(),
             "skills": skills,
             "quests": quests,
@@ -1068,42 +1068,49 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         """
         Get inventory's data.
         """
-        if position in self.inventory:
+        try:
             item = self.inventory[position]
-            item_obj = await self.get_inventory_obj_by_pos(position)
+        except KeyError:
+            raise MudderyError(ERR.invalid_input, _("Can not find it in your inventory."))
 
-            appearance = await item_obj.get_detail_appearance(self)
-            appearance["number"] = item["number"]
-            appearance["position"] = position
+        item_obj = await self.get_inventory_obj_by_pos(position)
 
-            # add a discard command
-            if item_obj.can_discard():
-                appearance["cmds"].append({
-                    "name": _("Discard"),
-                    "cmd": "discard",
-                    "confirm": _("Discard this object?"),
-                })
-            return appearance
+        appearance = await item_obj.get_detail_appearance(self)
+        appearance["number"] = item["number"]
+        appearance["position"] = position
+
+        # add a discard command
+        if item_obj.can_discard():
+            appearance["cmds"].append({
+                "name": _("Discard"),
+                "cmd": "discard",
+                "confirm": _("Discard this object?"),
+            })
+        return appearance
 
     async def return_equipments_object(self, position):
         """
         Get equipments data.
         """
-        if position in self.equipments:
-            appearance = await self.equipments[position]["obj"].get_detail_appearance(self)
+        try:
+            item = self.equipments[position]
+        except KeyError:
+            raise MudderyError(ERR.invalid_input, _("Can not find it in your equipments."))
 
-            # add a take off command, remove equip command
-            commands = [c for c in appearance["cmds"] if c["cmd"] != "equip"]
-            commands.append({
-                "name": _("Take Off"),
-                "cmd": "takeoff",
-                "args": {
-                    "position": position
-                },
-            })
-            appearance["cmds"] = commands
+        appearance = await item["obj"].get_detail_appearance(self)
 
-            return appearance
+        # add a take off command, remove equip command
+        commands = [c for c in appearance["cmds"] if c["cmd"] != "equip"]
+        commands.append({
+            "name": _("Take Off"),
+            "cmd": "takeoff",
+            "args": {
+                "position": position
+            },
+        })
+        appearance["cmds"] = commands
+
+        return appearance
 
     async def show_status(self):
         """
@@ -1188,15 +1195,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         if take_off:
             await async_wait([self.take_off_equipment(pos, mute=True, refresh=False) for pos in take_off])
 
-    async def show_equipments(self):
-        """
-        Send equipments to player.
-        """
-        await self.msg({
-            "equipments": self.return_equipments()
-        })
-
-    def return_equipments(self):
+    def get_equipments(self):
         """
         Get equipments' data.
         """
@@ -1257,7 +1256,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
 
         message = {
             "status": await self.return_status(),
-            "equipments": self.return_equipments(),
+            "equipments": self.get_equipments(),
             "inventory": self.get_inventory_appearance()
         }
         await self.msg(message)
@@ -1314,7 +1313,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         if not mute:
             message = {
                 "status": await self.return_status(),
-                "equipments": self.return_equipments(),
+                "equipments": self.get_equipments(),
                 "inventory": self.get_inventory_appearance()
             }
             await self.msg(message)

@@ -8,7 +8,6 @@ from muddery.common.utils.exception import MudderyError, ERR
 from muddery.server.settings import SETTINGS
 from muddery.server.utils.logger import logger
 from muddery.server.utils.crypto import RSA
-from muddery.server.commands.base_command import BaseCommand
 from muddery.server.utils.localized_strings_handler import _
 from muddery.server.utils.builder import create_character
 from muddery.server.database.gamedata.character_info import CharacterInfo
@@ -21,7 +20,7 @@ from muddery.server.commands.command_set import AccountCmd
 
 
 @AccountCmd.request("delete_account")
-async def delete_account(account, args) -> dict:
+async def delete_account(account, args) -> dict or None:
     """
     Delete a player's account.
 

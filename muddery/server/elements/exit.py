@@ -9,12 +9,10 @@ for allowing Characters to traverse the exit to its destination.
 
 import traceback
 import weakref
-import asyncio
+from muddery.common.utils.exception import MudderyError, ERR
 from muddery.server.utils.logger import logger
 from muddery.server.utils.localized_strings_handler import _
 from muddery.server.mappings.element_set import ELEMENT
-from muddery.server.elements.base_element import BaseElement
-from muddery.server.statements.statement_handler import STATEMENT_HANDLER
 from muddery.server.server import Server
 
 
@@ -52,8 +50,7 @@ class MudderyExit(ELEMENT("MATTER")):
         :return:
         """
         if not await self.can_traverse(character):
-            await character.msg({"msg": _("You can not pass.")})
-            return
+            raise MudderyError(ERR.can_not_pass, _("You can not pass."))
 
         if not self.destination_obj:
             self.destination_obj = weakref.ref(Server.world.get_room(self.const.destination))
@@ -62,7 +59,7 @@ class MudderyExit(ELEMENT("MATTER")):
             await character.move_to(self.destination_obj())
         except Exception as e:
             logger.log_err("%s cannot set location: (%s)%s." % (character.get_id(), type(e).__name__, e))
-            await character.msg({"msg": _("You can not go there.")})
+            raise MudderyError(ERR.unknown, _("You can not go there."))
 
     async def can_traverse(self, character):
         """

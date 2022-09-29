@@ -2127,7 +2127,18 @@ MudderyScene.prototype.onExit = function(element) {
 
     var room_map = core.map_data.getCurrentRoomMap();
     var exit_key = room_map["exits"][index]["key"];
-    core.command.traverse(exit_key);
+    core.command.traverse(exit_key, function(code, data, msg) {
+        if (code == 0) {
+            core.map_data.setCurrentLocation(data["location"]);
+            mud.scene_window.setSurroundings(data["look_around"]);
+        }
+        else if (code == ERR.can_not_pass) {
+            mud.main_frame.popupAlert(core.trans("Alert"), core.trans(msg));
+        }
+        else {
+            mud.main_frame.popupAlert(core.trans("Error"), core.trans(msg));
+        }
+    });
 }
 
 /*
@@ -2803,6 +2814,20 @@ MudderyCharData.prototype.bindEvents = function() {
 }
 
 /*
+ * On the character window show.
+ */
+MudderyCharData.prototype.onShow = function() {
+    core.command.queryEquipments(function(code, data, msg) {
+        if (code == 0) {
+            mud.char_data_window.setEquipments(data);
+        }
+        else {
+            mud.main_frame.popupAlert(core.trans("Error"), core.trans(msg));
+        }
+    });
+}
+
+/*
  * Event when clicks the object link.
  */
 MudderyCharData.prototype.onClickBody = function(element) {
@@ -2995,7 +3020,14 @@ MudderyCharData.prototype.setEquipments = function(equipments) {
     }
 
     if (has_selected_item) {
-        core.command.equipmentsObject(this.item_selected);
+        core.command.equipmentsObject(this.item_selected, function(code, data, msg) {
+            if (code == 0) {
+                mud.char_data_window.showEquipment(data);
+            }
+            else {
+                mud.main_frame.popupAlert(core.trans("Alert"), core.trans(msg));
+            }
+        });
     }
     else {
         this.item_selected = null;
@@ -3013,7 +3045,14 @@ MudderyCharData.prototype.onClickEquipment = function(target, event) {
     var position = $(target).data("position");
     if (position && position in this.equipments) {
         mud.char_data_window.item_selected = position;
-        core.command.equipmentsObject(position);
+        core.command.equipmentsObject(position, function(code, data, msg) {
+            if (code == 0) {
+                mud.char_data_window.showEquipment(data);
+            }
+            else {
+                mud.main_frame.popupAlert(core.trans("Alert"), core.trans(msg));
+            }
+        });
     }
     else {
         this.showStatus();
@@ -3132,6 +3171,21 @@ MudderyInventory.prototype.reset = function() {
 }
 
 /*
+ * On the inventory window show.
+ */
+MudderyInventory.prototype.onShow = function() {
+    this.reset();
+    core.command.queryInventory(function(code, data, msg) {
+        if (code == 0) {
+            mud.inventory_window.setInventory(data);
+        }
+        else {
+            mud.main_frame.popupAlert(core.trans("Error"), core.trans(msg));
+        }
+    });
+}
+
+/*
  * Event when clicks a command button.
  */
 MudderyInventory.prototype.onCommand = function(element) {
@@ -3201,7 +3255,14 @@ MudderyInventory.prototype.resetSize = function() {
 MudderyInventory.prototype.onSelect = function(element) {
     var index = $(element).data("index");
     if (index < this.inventory.length) {
-        core.command.inventoryObject(this.inventory[index]["position"], "inventory");
+        core.command.inventoryObject(this.inventory[index]["position"], function(code, data, msg) {
+            if (code == 0) {
+                mud.inventory_window.showObject(data);
+            }
+            else {
+                mud.main_frame.popupAlert(core.trans("Error"), core.trans(msg));
+            }
+        });
     }
 }
 
@@ -4983,16 +5044,20 @@ MudderyConversation.prototype.onSend = function() {
 		return;
 	}
 
+    var target = this.target;
     if (this.conversation_type == "LOCAL") {
         var location = core.map_data.getCurrentLocation();
-	    core.command.say(this.conversation_type, location["room"], message);
-	}
-	else if (this.conversation_type == "CHANNEL") {
-	    core.command.say(this.conversation_type, this.target, message);
-	}
-	else {
-		core.command.say(this.conversation_type, this.target, message);
-	}
+        target = location["room"];
+    }
+    else if (this.conversation_type == "CHANNEL") {
+        target = this.target;
+    }
+
+	core.command.say(this.conversation_type, target, message, function(code, data, msg) {
+	    if (code != 0) {
+	        self.popupAlert(core.trans("Error"), core.trans(msg));
+	    }
+	});
 }
 
 /*

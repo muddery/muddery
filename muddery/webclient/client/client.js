@@ -105,10 +105,6 @@ MudderyClient.prototype = {
                         mud.skills_window.showSkill(data[key]);
                     } else if (key == "quest_info") {
                         mud.quests_window.showQuest(data[key]);
-                    } else if (key == "inventory_obj") {
-                        mud.inventory_window.showObject(data[key]);
-                    } else if (key == "equipments_obj") {
-                        mud.char_data_window.showEquipment(data[key]);
                     } else if (key == "dialogue") {
                         mud.popup_dialogue.setDialogue(data[key]);
                         if (mud.popup_dialogue.hasDialogue() && !mud.main_frame.isWindowShow(mud.combat_window)) {
@@ -117,10 +113,6 @@ MudderyClient.prototype = {
                     } else if (key == "status") {
                         var status = data[key];
                         mud.main_frame.setStatus(status);
-                    } else if (key == "equipments") {
-                        mud.char_data_window.setEquipments(data[key]);
-                    } else if (key == "inventory") {
-                        mud.inventory_window.setInventory(data[key]);
                     } else if (key == "skills") {
                         core.data_handler.setSkills(data[key]);
                         mud.skills_window.setSkills(data[key]);
@@ -158,8 +150,6 @@ MudderyClient.prototype = {
                         mud.conversation_window.getMessage(data[key]);
                     } else if (key == "current_location") {
                         core.map_data.setCurrentLocation(data[key]);
-                    } else if (key == "reveal_maps") {
-                        core.map_data.revealMaps(data[key]);
                     } else if (key == "shop") {
                         mud.game_window.showShop(data[key]);
                     } else if (key == "rankings") {

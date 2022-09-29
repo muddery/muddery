@@ -85,3 +85,5 @@ class ERR(object):
     password_too_simple = 10021
 
     can_not_find_command = 10022
+
+    can_not_pass = 10023

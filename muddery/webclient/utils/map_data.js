@@ -111,7 +111,14 @@ MudderyMapData.prototype = {
 
         // Check if has the room's map, else query the map.
         if (!(room_key in this._map_rooms)) {
-            core.command.queryMaps([room_key]);
+            core.command.queryMaps([room_key], function(code, data, msg) {
+                if (code == 0) {
+                    core.map_data.revealMaps(data);
+                }
+                else {
+                    mud.main_frame.popupAlert(core.trans("Error"), core.trans(msg));
+                }
+            });
             return;
         }
 
@@ -133,7 +140,14 @@ MudderyMapData.prototype = {
         }
 
         if (room_list.length > 0) {
-            core.command.queryMaps(room_list);
+            core.command.queryMaps(room_list, function(code, data, msg) {
+                if (code == 0) {
+                    core.map_data.revealMaps(data);
+                }
+                else {
+                    mud.main_frame.popupAlert(core.trans("Error"), core.trans(msg));
+                }
+            });
         }
     },
 

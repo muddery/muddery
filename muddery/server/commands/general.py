@@ -7,35 +7,33 @@ from muddery.server.utils.logger import logger
 from muddery.common.utils.utils import async_wait
 from muddery.server.commands.base_command import BaseCommand
 from muddery.server.utils.localized_strings_handler import _
-from muddery.common.utils.exception import MudderyError
+from muddery.common.utils.exception import MudderyError, ERR
 from muddery.common.utils.defines import CombatType
 from muddery.server.combat.combat_handler import COMBAT_HANDLER
 from muddery.server.combat.match_pvp import MatchPVPHandler
 from muddery.server.database.worlddata.honour_settings import HonourSettings
 from muddery.server.server import Server
+from muddery.server.commands.command_set import CharacterCmd
 
 
-class CmdInventory(BaseCommand):
+@CharacterCmd.request("inventory")
+async def inventory(character, args) -> dict or None:
     """
     observe inventory
 
     Usage:
-        {"cmd":"inventory",
-         "args":""
+        {
+            "cmd": "inventory",
+            "args": ""
         }
       
     Show everything in your inventory.
     """
-    key = "inventory"
-
-    @classmethod
-    async def func(cls, caller, args):
-        "check inventory"
-        inv = caller.get_inventory_appearance()
-        await caller.msg({"inventory":inv})
+    return character.get_inventory_appearance()
 
 
-class CmdInventoryObject(BaseCommand):
+@CharacterCmd.request("inventory_obj")
+async def inventory_obj(character, args) -> dict or None:
     """
     look at an object in the inventory
 
@@ -47,25 +45,30 @@ class CmdInventoryObject(BaseCommand):
 
     Observes your location or objects in your vicinity.
     """
-    key = "inventory_obj"
+    if not args:
+        raise MudderyError(ERR.missing_args, _("You should select something in your inventory."))
 
-    @classmethod
-    async def func(cls, caller, args):
-        """
-        Handle the looking.
-        """
-        if not args:
-            await caller.msg({"alert": _("You should select something in your inventory.")})
-            return
-
-        appearance = await caller.get_inventory_object_appearance(args)
-        if appearance:
-            await caller.msg({"inventory_obj": appearance})
-        else:
-            await caller.msg({"alert": _("Can not find it in your inventory.")})
+    return await character.get_inventory_object_appearance(args)
 
 
-class CmdEquipmentsObject(BaseCommand):
+@CharacterCmd.request("equipments")
+async def equipments(character, args) -> dict or None:
+    """
+    observe equipments
+
+    Usage:
+        {
+            "cmd": "equipments",
+            "args": ""
+        }
+
+    Show everything in your equipments.
+    """
+    return character.get_equipments()
+
+
+@CharacterCmd.request("equipments_obj")
+async def equipments_obj(character, args) -> dict or None:
     """
     look at an object in the equipments
 
@@ -77,28 +80,14 @@ class CmdEquipmentsObject(BaseCommand):
 
     Observes your location or objects in your vicinity.
     """
-    key = "equipments_obj"
+    if not args:
+        raise MudderyError(ERR.missing_args, _("You should select something in your equipments."))
 
-    @classmethod
-    async def func(cls, caller, args):
-        """
-        Handle the looking.
-        """
-        if not args:
-            await caller.msg({"alert": _("You should select something in your equipments.")})
-            return
-
-        appearance = await caller.return_equipments_object(args)
-        if appearance:
-            await caller.msg({"equipments_obj": appearance})
-        else:
-            await caller.msg({"alert": _("Can not find it in your equipments.")})
+    return await character.return_equipments_object(args)
 
 
-#------------------------------------------------------------
-# Say something in the room.
-#------------------------------------------------------------
-class CmdSay(BaseCommand):
+@CharacterCmd.request("say")
+async def say(character, args) -> dict or None:
     """
     speak as your character
 
@@ -110,28 +99,22 @@ class CmdSay(BaseCommand):
 
     Talk to those in your current location.
     """
+    if not args:
+        raise MudderyError(ERR.missing_args, _("You should say something."))
 
-    key = "say"
+    if "target" not in args:
+        raise MudderyError(ERR.missing_args, _("You should choose a target to say."))
 
-    @classmethod
-    async def func(cls, caller, args):
-        "Run the say command"
-        if not args:
-            return
+    if "message" not in args:
+        raise MudderyError(ERR.missing_args, _("You should say something."))
 
-        if "target" not in args:
-            await caller.msg({"alert": _("You should choose a target to say.")})
-            return
+    target_type = args["type"]
+    target = args["target"]
+    message = args["message"]
 
-        if "message" not in args:
-            await caller.msg({"alert": _("You should say something.")})
-            return
+    await Server.world.send_message(character, target_type, target, message)
 
-        target_type = args["type"]
-        target = args["target"]
-        message = args["message"]
-
-        await Server.world.send_message(caller, target_type, target, message)
+    return
 
 
 #------------------------------------------------------------
@@ -205,10 +188,8 @@ class CmdLookRoomChar(BaseCommand):
         await caller.msg({"look_obj": detail_appearance})
 
 
-#------------------------------------------------------------
-# traverse an exit
-#------------------------------------------------------------
-class CmdTraverse(BaseCommand):
+@CharacterCmd.request("traverse")
+async def traverse(character, args) -> dict or None:
     """
     tranverse an exit
 
@@ -219,27 +200,24 @@ class CmdTraverse(BaseCommand):
 
     Tranverse an exit, go to the destination of the exit.
     """
-    key = "traverse"
+    if not character.is_alive:
+        raise MudderyError(ERR.can_not_pass, _("You are died."))
 
-    @classmethod
-    async def func(cls, caller, args):
-        "Move caller to the exit."
-        if not caller.is_alive:
-            await caller.msg({"alert": _("You are died.")})
-            return
+    if not args:
+        raise MudderyError(ERR.missing_args, _("Should appoint an exit to go."))
 
-        if not args:
-            await caller.msg({"alert": _("Should appoint an exit to go.")})
-            return
+    try:
+        room = character.get_location()
+        exit_obj = room.get_exit(args)
+    except Exception as e:
+        raise MudderyError(ERR.invalid_input, _("Can not find the exit."))
 
-        try:
-            room = caller.get_location()
-            exit = room.get_exit(args)
-        except Exception as e:
-            await caller.msg({"alert": _("Can not find the exit.")})
-            return
+    await exit_obj.traverse(character)
 
-        await exit.traverse(caller)
+    return {
+        "location": character.get_location_info(),
+        "look_around": character.look_around()
+    }
 
 
 #------------------------------------------------------------
@@ -1042,7 +1020,8 @@ class CmdQuerySkill(BaseCommand):
             return
 
 
-class CmdQueryMaps(BaseCommand):
+@CharacterCmd.request("query_maps")
+async def query_maps(character, args) -> dict or None:
     """
     Query area's maps by a list of room keys.
 
@@ -1054,19 +1033,11 @@ class CmdQueryMaps(BaseCommand):
             }
         }
     """
-    key = "query_maps"
+    if not args or "rooms" not in args:
+        raise MudderyError(ERR.missing_args, _("Can not find it."))
 
-    @classmethod
-    async def func(cls, caller, args):
-        """
-        Handle the looking.
-        """
-        if not args or "rooms" not in args:
-            await caller.msg({"alert": _("Can not find it.")})
-            return
-
-        room_list = args["rooms"]
-        await caller.msg({"reveal_maps": caller.get_maps(room_list)})
+    room_list = args["rooms"]
+    return character.get_maps(room_list)
 
 
 #------------------------------------------------------------
