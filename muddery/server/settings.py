@@ -148,6 +148,9 @@ class Settings(object):
     # resource's location
     IMAGE_PATH = "image"
 
+    # The game server API's url path.
+    GAME_SERVER_API_PATH = "/api"
+
     # Encrypt secret messages in transporting messages.
     ENABLE_ENCRYPT = True
 

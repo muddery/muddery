@@ -2,9 +2,10 @@
 import json, traceback
 import time
 from collections import deque
-from muddery.server.server import Server
+from muddery.common.utils.exception import MudderyError, ERR
 from muddery.server.utils.logger import logger
 from muddery.server.settings import SETTINGS
+from muddery.server.commands.command_set import SessionCmd, AccountCmd, CharacterCmd
 
 
 class Session(object):
@@ -66,35 +67,59 @@ class Session(object):
 
             self.command_history.append(now)
 
-        # Gather all messages send to the client and send them out together.
-        self.delay_msg = True
-
         # Pass messages to the muddery server.
         logger.log_debug("[Receive command][%s]%s" % (self, text_data))
 
-        command_key, args = Server.inst().parse_command(text_data)
-        if SETTINGS.SPECIAL_COMMAND_RATE and command_key in SETTINGS.SPECIAL_COMMAND_RATE:
-            now = time.time()
-            cmd_queue = self.special_command_history[command_key]
-            max_rate = SETTINGS.SPECIAL_COMMAND_RATE[command_key]["max_rate"]
-            if len(cmd_queue) >= max_rate:
-                command_time = cmd_queue.popleft()
-                if now - command_time <= 1.0:
-                    message = SETTINGS.SPECIAL_COMMAND_RATE[command_key]["message"]
-                    await self.msg({"alert": message}, False)
-                    return
+        data = json.loads(text_data)
+        command = data["cmd"] if "cmd" in data else None
+        args = data["args"] if "args" in data else None
+        serial_number = data["sn"] if "sn" in data else None
 
-            cmd_queue.append(now)
+        if not command:
+            logger.log_err("Can not find command.")
+            if serial_number:
+                await self.msg({
+                    "response": {
+                        "sn": serial_number,
+                        "code": ERR.can_not_find_command,
+                        "msg": "Can not find command: %s" % command
+                    }
+                }, False)
+            return
 
-        try:
-            await Server.inst().handler_command(self, command_key, args)
-        except Exception as e:
-            logger.log_err("[Receive command][%s]%s error: %s" % (self, text_data, e))
+        # get session commands
+        caller = self
+        func = SessionCmd.get(command)
+        if not func:
+            caller = self.account
+            if caller:
+                # get account command
+                func = AccountCmd.get(command)
+                if not func:
+                    caller = self.account.get_puppet_obj()
+                    if caller:
+                        # get character command
+                        func = CharacterCmd.get(command)
 
-        await self.msg_all()
-        self.delay_msg = False
+        if not func:
+            logger.log_err("Can not find command, %s: %s" % (self, command))
+            if serial_number:
+                await self.msg({
+                    "response": {
+                        "sn": serial_number,
+                        "code": ERR.can_not_find_command,
+                        "msg": "Can not find command: %s" % command
+                    }
+                }, False)
+            return
 
-    async def login(self, account):
+        await func(caller, args, sn=serial_number)
+
+        if self.msg_list:
+            await self.msg(self.msg_list, False)
+            self.msg_list = []
+
+    async def login(self, account) -> dict:
         """
         Login an account.
         """
@@ -106,7 +131,7 @@ class Session(object):
         self.account = account
 
         # call hook
-        await self.account.at_post_login(self)
+        return await self.account.login(self)
 
     async def logout(self):
         """
@@ -147,32 +172,3 @@ class Session(object):
                 await self.send_out(data)
             except Exception as e:
                 logger.log_err("[Send message error][%s]%s" % (self, e))
-
-    async def msg_all(self):
-        """
-        Send out all messages in the msg_list.
-        """
-        await self.msg(self.msg_list, delay=False)
-        self.msg_list = []
-
-    async def respond_data(self, key: str, data: dict or None = None, delay: bool = True) -> None:
-        """
-        Respond a request with data.
-        """
-        await self.msg({
-            key: {
-                "code": 0,
-                "data": data
-            }
-        }, delay)
-
-    async def respond_err(self, key: str, error_code: int, error_msg: str = "", delay: bool = True) -> None:
-        """
-        Respond a request with an error message.
-        """
-        await self.msg({
-            key: {
-                "code": error_code,
-                "msg": error_msg
-            }
-        }, delay)

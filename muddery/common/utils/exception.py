@@ -83,3 +83,5 @@ class ERR(object):
     account_not_available = 10020
 
     password_too_simple = 10021
+
+    can_not_find_command = 10022

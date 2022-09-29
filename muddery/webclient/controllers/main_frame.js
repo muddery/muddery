@@ -278,8 +278,36 @@ MudderyMainFrame.prototype.onConnectionOpen = function() {
 	self.showLoginWindow();
 	if (self.first_connection) {
 	    self.first_connection = false;
-	    core.command.first_connect();
-	    mud.login_window.checkAutoLogin();
+
+	    // Get the game's first connection data.
+	    core.command.firstConnect(function(code, data, msg) {
+	        if (code == 0) {
+                if ("game_name" in data) {
+                    mud.login_window.setGameName(data["game_name"]);
+                }
+
+                if ("conn_screen" in data) {
+                    mud.login_window.setConnScreen(data["conn_screen"]);
+                }
+
+                if ("min_honour_level" in data) {
+                    mud.honour_window.setMinHonourLevel(data["min_honour_level"]);
+                }
+
+                if ("equipment_pos" in data) {
+                    mud.char_data_window.setEquipmentPos(data["equipment_pos"]);
+                }
+
+                if ("max_char" in data) {
+                    mud.select_char_window.setMaxNumber(data["max_char"]);
+                }
+
+                mud.login_window.checkAutoLogin();
+            }
+            else {
+                self.popupAlert(core.trans("Error"), core.trans(msg));
+            }
+	    });
 	}
 }
 
@@ -301,41 +329,6 @@ MudderyMainFrame.prototype.onConnectionClose = function() {
 }
 
 /*
- * The result of creating an account.
- */
-MudderyMainFrame.prototype.onCreateAccount = function(respond) {
-    if (respond.code === 0) {
-        // Account created. Do nothing.
-    }
-    else if (respond.code === ERR.missing_args || respond.code === ERR.invalid_input) {
-        this.popupMessage(core.trans("Alert"), core.trans("Incorrect username or password."));
-    }
-    else if (respond.code === ERR.account_not_available) {
-        this.popupMessage(core.trans("Alert"), core.trans("This username is not available."));
-    }
-    else if (respond.code === ERR.password_too_simple) {
-        this.popupMessage(core.trans("Alert"), core.trans("Your password is too simple."));
-    }
-    else if (respond.code === ERR.no_authentication) {
-        this.popupMessage(core.trans("Alert"), core.trans("Incorrect username or password."));
-    }
-    else if (respond.code === ERR.no_permission) {
-        this.popupMessage(core.trans("Alert"), core.trans("Your account have been banned."));
-    }
-    else {
-        this.popupMessage(core.trans("Alert"), core.trans("Can not create this account."));
-    }
-}
-    
-/*
- * Event when the player logins.
- */
-MudderyMainFrame.prototype.onLogin = function(data) {
-    mud.login_window.onLogin();
-	this.showSelectChar();
-}
-    
-/*
  * Event when the player logs out.
  */
 MudderyMainFrame.prototype.onLogout = function(data) {
@@ -345,44 +338,6 @@ MudderyMainFrame.prototype.onLogout = function(data) {
 	this.showLoginWindow();
 
 	mud.select_char_window.clear();
-}
-
-/*
- * Event when the player's password changed.
- */
-MudderyMainFrame.prototype.onPasswordChanged = function(data) {
-    this.popWindow(mud.password_window);
-    this.popupMessage(core.trans("Alert"), core.trans("Password changed."));
-}
-
-/*
- * Event when the player puppets a character.
- */
-MudderyMainFrame.prototype.onPuppet = function(data) {
-    core.data_handler.character_id = data["id"];
-    core.data_handler.character_icon = data["icon"];
-
-    var name = data["name"];
-    if (data["is_staff"]) {
-        name += "[" + core.trans("ADMIN") + "]";
-    }
-    core.data_handler.character_name = name;
-
-    mud.scene_window.clear();
-    mud.scene_window.setInfo(name, data["icon"]);
-    mud.char_data_window.setInfo(name, data["icon"]);
-    mud.combat_window.setInfo(name, data["icon"]);
-
-    if ("allow_commands" in data && data["allow_commands"]) {
-        // show command button
-        this.select(".tab-bar .block-button-command").removeClass("hidden");
-    }
-    else {
-        this.select(".tab-bar .block-button-command").addClass("hidden");
-    }
-
-    this.puppet = true;
-	this.showPuppet();
 }
 
 /*
@@ -420,6 +375,7 @@ MudderyMainFrame.prototype.hideAllWindows = function() {
  */
 MudderyMainFrame.prototype.showPuppet = function() {
 	// show login UI
+    this.puppet = true;
 	this.gotoWindow(mud.game_window);
 	mud.game_window.onScene();
 }
@@ -487,6 +443,19 @@ MudderyMainFrame.prototype.isWindowShow = function(win_controller) {
 	return true;
 }
 
+
+/*
+ * Show the button that can input commands.
+ */
+MudderyMainFrame.prototype.showCommandButton = function(show) {
+    if (show) {
+        // show command button
+        this.select(".tab-bar .block-button-command").removeClass("hidden");
+    }
+    else {
+        this.select(".tab-bar .block-button-command").addClass("hidden");
+    }
+}
 
 /*
  * Show the layout when players unlogin.
@@ -1338,11 +1307,33 @@ MudderyLogin.prototype.onClickRegister = function(element) {
     var password_verify = this.select(".reg-password-verify").val();
 
     if (password != password_verify) {
-        this.popupMessage(core.trans("Error"), core.trans("Password does not match."));
+        mud.main_frame.popupMessage(core.trans("Error"), core.trans("Password does not match."));
         return;
     }
 
-    core.command.register(username, password, true);
+    core.command.register(username, password, true, function(code, data, msg) {
+        if (code == 0) {
+            mud.login_window.loginSuccess();
+        }
+        else if (code === ERR.missing_args || code === ERR.invalid_input) {
+            mud.main_frame.popupMessage(core.trans("Alert"), core.trans("Incorrect username or password."));
+        }
+        else if (code === ERR.account_not_available) {
+            mud.main_frame.popupMessage(core.trans("Alert"), core.trans("This username is not available."));
+        }
+        else if (code === ERR.password_too_simple) {
+            mud.main_frame.popupMessage(core.trans("Alert"), core.trans("Your password is too simple."));
+        }
+        else if (code === ERR.no_authentication) {
+            mud.main_frame.popupMessage(core.trans("Alert"), core.trans("Incorrect username or password."));
+        }
+        else if (code === ERR.no_permission) {
+            mud.main_frame.popupMessage(core.trans("Alert"), core.trans("Your account have been banned."));
+        }
+        else {
+            mud.main_frame.popupMessage(core.trans("Alert"), core.trans("Can not create this account."));
+        }
+    });
     this.clearValues();
 }
 
@@ -1353,7 +1344,17 @@ MudderyLogin.prototype.onClickLogin = function(element) {
     var name = this.select(".login-name").val();
     var password = this.select(".login-password").val();
 
-    core.command.login(name, password);
+    core.command.login(name, password, function(code, data, msg) {
+        if (code == 0) {
+            mud.login_window.loginSuccess();
+        }
+        else if (code === ERR.no_authentication || code === ERR.missing_args || code === ERR.invalid_input) {
+            mud.main_frame.popupMessage(core.trans("Alert"), core.trans("Incorrect username or password."));
+        }
+        else {
+            mud.main_frame.popupAlert(core.trans("Error"), core.trans(msg));
+        }
+    });
 }
 
 /*
@@ -1378,33 +1379,6 @@ MudderyLogin.prototype.clearValues = function() {
     this.select(".reg-password").val("");
     this.select(".reg-password-verify").val("");
     this.select(".checkbox-auto-login").removeClass("checked");
-}
-
-/*
- * Receive the game's first connection messages.
- */
-MudderyLogin.prototype.onRespondFirstConnect = function(respond) {
-    if (respond.code != 0) {
-        this.popupMessage(core.trans("Alert"), core.trans("Server error!"));
-        return;
-    }
-
-    var data = respond.data;
-    if ("game_name" in data) {
-        mud.login_window.setGameName(data["game_name"]);
-    }
-
-    if ("conn_screen" in data) {
-        mud.login_window.setConnScreen(data["conn_screen"]);
-    }
-
-    if ("min_honour_level" in data) {
-        mud.honour_window.setMinHonourLevel(data["min_honour_level"]);
-    }
-
-    if ("equipment_pos" in data) {
-        mud.char_data_window.setEquipmentPos(data["equipment_pos"]);
-    }
 }
 
 /*
@@ -1460,9 +1434,9 @@ MudderyLogin.prototype.checkAutoLogin = function() {
 /*
  * On user login.
  */
-MudderyLogin.prototype.onLogin = function() {
+MudderyLogin.prototype.loginSuccess = function() {
+    // Save the password.
     var auto_login = this.select(".checkbox-auto-login").hasClass("checked");
-
     if (auto_login) {
         var name = this.select(".login-name").val();
         var password = this.select(".login-password").val();
@@ -1472,6 +1446,8 @@ MudderyLogin.prototype.onLogin = function() {
         localStorage.login_password = password;
         localStorage.is_auto_login = "1";
     }
+
+    mud.main_frame.showSelectChar();
 }
 
 
@@ -1511,6 +1487,16 @@ MudderySelectChar.prototype.bindEvents = function() {
  * Reset the controller.
  */
 MudderySelectChar.prototype.reset = function() {
+    core.command.queryAllCharacters(function(code, data, msg) {
+        if (code == 0) {
+            if ("char_all" in data) {
+                mud.select_char_window.setCharacters(data["char_all"]);
+            }
+        }
+        else {
+            mud.main_frame.popupAlert(core.trans("Error"), core.trans(msg));
+        }
+    });
 }
 
 
@@ -1549,7 +1535,51 @@ MudderySelectChar.prototype.onLogout = function(element) {
  */
 MudderySelectChar.prototype.onSelectCharacter = function(element) {
     var index = this.select(element).data("index");
-    core.command.puppetCharacter(this.characters[index]["id"]);
+    core.command.puppetCharacter(this.characters[index]["id"], function(code, data, msg) {
+        if (code == 0) {
+            core.data_handler.character_id = data["id"];
+            core.data_handler.character_icon = data["icon"];
+
+            var name = data["name"];
+            if (data["is_staff"]) {
+                name += "[" + core.trans("ADMIN") + "]";
+            }
+            core.data_handler.character_name = name;
+
+            mud.scene_window.clear();
+            mud.scene_window.setInfo(name, data["icon"]);
+            mud.char_data_window.setInfo(name, data["icon"]);
+            mud.combat_window.setInfo(name, data["icon"]);
+
+            mud.main_frame.setStatus(data["status"]);
+            mud.conversation_window.setChannels(data["channels"]);
+
+            if ("allow_commands" in data && data["allow_commands"]) {
+                // show command button
+                mud.main_frame.showCommandButton(true);
+            }
+            else {
+                mud.main_frame.showCommandButton(false);
+            }
+
+            if ("reveal_maps" in data) {
+                core.map_data.revealMaps(data["reveal_maps"]);
+            }
+
+            if ("location" in data) {
+                core.map_data.setCurrentLocation(data["location"]);
+            }
+
+            if ("look_around" in data) {
+                mud.scene_window.setSurroundings(data["look_around"]);
+            }
+
+            mud.main_frame.showPuppet();
+        }
+        else {
+            mud.main_frame.popupAlert(core.trans("Error"), core.trans(msg));
+        }
+    });
 }
 
 /*
@@ -1580,7 +1610,14 @@ MudderySelectChar.prototype.onDeleteCharacter = function(element, event) {
  */
 MudderySelectChar.prototype.confirmDelete = function(data) {
 	var obj_id = data;
-    core.command.deleteCharacter(obj_id);
+    core.command.deleteCharacter(obj_id, function(code, data, msg) {
+        if (code == 0) {
+            mud.select_char_window.reset();
+        }
+        else {
+            mud.main_frame.popupAlert(core.trans("Error"), core.trans(msg));
+        }
+    });
 }
 
 /*
@@ -1682,8 +1719,17 @@ MudderyNewChar.prototype.onClickBack = function(element) {
  */
 MudderyNewChar.prototype.onCreate = function(element) {
 	var char_name = this.select(".new-char-name").val();
-	core.command.createCharacter(char_name);
-	this.reset();
+	core.command.createCharacter(char_name, function(code, data, msg) {
+	    if (code == 0) {
+            // close popup windows
+            mud.new_char_window.reset();
+            mud.select_char_window.reset();
+            mud.main_frame.popWindow(mud.new_char_window);
+        }
+        else {
+            mud.main_frame.popupAlert(core.trans("Alert"), core.trans(msg));
+        }
+	});
 }
 
 /*
@@ -1691,14 +1737,6 @@ MudderyNewChar.prototype.onCreate = function(element) {
  */
 MudderyNewChar.prototype.reset = function() {
     this.select(".new-char-name").val("");
-}
-
-/*
- * Event when the player created a new character.
- */
-MudderyNewChar.prototype.onCharacterCreated = function(data) {
-	// close popup windows
-	mud.main_frame.popWindow(this);
 }
 
 
@@ -1747,7 +1785,11 @@ MudderyPassword.prototype.onConfirm = function(element) {
         return;
     }
 
-    core.command.changePassword(current, password);
+    core.command.changePassword(current, password, function() {
+        mud.main_frame.popWindow(mud.password_window);
+        mud.main_frame.popupMessage(core.trans("Alert"), core.trans("Password changed."));
+    });
+
     this.clearValues();
 }
 

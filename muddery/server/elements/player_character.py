@@ -113,7 +113,6 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         self.event = None
 
         self.solo_mode = None
-        self.available_channels = {}
         self.current_dialogues = set()
 
         self.combat_id = None
@@ -239,7 +238,6 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         self.event = EventTrigger(self)
 
         self.solo_mode = GameSettings.inst().get("solo_mode")
-        self.available_channels = {}
         self.current_dialogues = set()
 
     async def after_element_setup(self, first_time):
@@ -306,11 +304,6 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
 
         self.set_location(location)
 
-        # Send new location's data to the character.
-        location_name = self.location.name if location else ""
-        await self.msg({"msg": _("Moved to %s ...") % location_name})
-        await self.show_location()
-
         if self.location:
             await async_wait([
                 self.location.at_character_arrive(self),
@@ -332,7 +325,6 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
             self.return_skills(),
             self.quest_handler.get_quests_info(),
         ])
-        self.available_channels = channels
 
         # send character's data to player
         message = {
@@ -341,13 +333,13 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
             "inventory": self.get_inventory_appearance(),
             "skills": skills,
             "quests": quests,
-            "channels": self.available_channels
+            "channels": channels
         }
-        await self.msg(message)
+        # await self.msg(message)
 
-        await self.resume_last_dialogue()
+        # await self.resume_last_dialogue()
 
-        await self.resume_combat()
+        # await self.resume_combat()
 
     async def at_pre_unpuppet(self):
         """
@@ -428,7 +420,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
             commands.append({"name": _("Attack"), "cmd": "attack", "args": self.get_id()})
         return commands
 
-    async def get_available_channels(self):
+    def get_available_channels(self):
         """
         Get available channel's info.
 
@@ -488,6 +480,28 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         ]
 
         await self.msg(msg)
+
+    def get_location_info(self):
+        """
+        Show characters and objects in this location.
+        """
+        if not self.location:
+            return
+
+        room_key = self.location.get_element_key()
+        return {
+            "area": Server.world.get_area_key_by_room(room_key),
+            "room": room_key,
+        }
+
+    def look_around(self):
+        """
+        Show characters and objects in this location.
+        """
+        if not self.location:
+            return
+
+        return self.location.get_surroundings(self)
 
     ################################################
     #
@@ -1236,7 +1250,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
                     await CharacterInventory.inst().set_dict(self.get_db_id(), position, {"number": 0})
                     item["number"] = 0
 
-            self.equipments[body_position] = item
+        self.equipments[body_position] = item
 
         # reset character's attributes
         await self.refresh_states(True)
@@ -1290,8 +1304,8 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
                 "can_remove": object_record.can_remove,
             }
 
-            # remove from body
-            del self.equipments[body_position]
+        # remove from body
+        del self.equipments[body_position]
 
         if refresh:
             # reset character's attributes
@@ -1723,7 +1737,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         await self.states.save("current_dialogue", current_dialogue if current_dialogue else None)
         return
 
-    async def resume_last_dialogue(self):
+    async def get_last_dialogue(self):
         """
         Restore player's dialogues when he return to game.
 
@@ -1734,12 +1748,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
             # Can not auto resume dialogues.
             return
 
-        current_dialogue = await self.states.load("current_dialogue")
-        if not current_dialogue:
-            return
-
-        await self.msg({"dialogue": current_dialogue})
-        return
+        return await self.states.load("current_dialogue")
 
     async def talk_to_npc(self, npc):
         """

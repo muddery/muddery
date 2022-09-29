@@ -31,7 +31,7 @@ class SanicSession(Session):
 
         :param data: data to send
         """
-        out_text = json.dumps({"data": data}, ensure_ascii=False)
+        out_text = json.dumps(data, ensure_ascii=False)
 
         # send message
         await self.connection.send(out_text)

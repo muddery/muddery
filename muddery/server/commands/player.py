@@ -4,6 +4,7 @@ General account commands usually availabe to all players.
 
 import re, traceback
 import base64
+from muddery.common.utils.exception import MudderyError, ERR
 from muddery.server.settings import SETTINGS
 from muddery.server.utils.logger import logger
 from muddery.server.utils.crypto import RSA
@@ -11,6 +12,7 @@ from muddery.server.commands.base_command import BaseCommand
 from muddery.server.utils.localized_strings_handler import _
 from muddery.server.utils.builder import create_character
 from muddery.server.database.gamedata.character_info import CharacterInfo
+from muddery.server.commands.command_set import AccountCmd
 
 
 # Obs - these are all intended to be stored on the Player, and as such,
@@ -18,7 +20,8 @@ from muddery.server.database.gamedata.character_info import CharacterInfo
 # is used to make sure returns go to the right session
 
 
-class CmdDeleteAccount(BaseCommand):
+@AccountCmd.request("delete_account")
+async def delete_account(account, args) -> dict:
     """
     Delete a player's account.
 
@@ -34,290 +37,231 @@ class CmdDeleteAccount(BaseCommand):
     args:
         connect: (boolean)connect after created
     """
-    key = "delete_account"
+    if not args:
+        raise MudderyError(ERR.missing_args, "Syntax error!")
 
-    @classmethod
-    async def func(cls, account, args):
-        "Do checks, create account and login."
-        if not args:
-            await account.msg({"alert": _("Syntax error!")})
-            return
+    if "username" not in args:
+        raise MudderyError(ERR.missing_args, _("You should input a username."))
 
-        if "username" not in args:
-            await account.msg({"alert": _("You should input a username.")})
-            return
+    if "password" not in args:
+        raise MudderyError(ERR.missing_args, _("You should input a password."))
 
-        if "password" not in args:
-            await account.msg({"alert": _("You should input a password.")})
-            return
+    username = args["username"]
+    username = re.sub(r"\s+", " ", username).strip()
 
-        username = args["username"]
-        username = re.sub(r"\s+", " ", username).strip()
+    if SETTINGS.ENABLE_ENCRYPT:
+        encrypted = base64.b64decode(args["password"])
+        decrypted = RSA.inst().decrypt(encrypted)
+        password = decrypted.decode("utf-8")
+    else:
+        password = args["password"]
 
-        if SETTINGS.ENABLE_ENCRYPT:
-            encrypted = base64.b64decode(args["password"])
-            decrypted = RSA.inst().decrypt(encrypted)
-            password = decrypted.decode("utf-8")
-        else:
-            password = args["password"]
+    if not password:
+        raise MudderyError(ERR.no_authentication, _("Incorrect password."))
 
-        if not password:
-            await account.msg({"alert": _("You should input a password.")})
-            return
+    # Set the account with username and password.
+    if not await account.check_password(username, password):
+        raise MudderyError(ERR.no_authentication, _("Incorrect password."))
 
-        # Set the account with username and password.
-        if not await account.check_password(username, password):
-            await account.msg({"alert": _("Incorrect password.")})
-            return
+    await account.delete_all_characters()
+    await account.delete_user(username, password)
 
-        await account.delete_all_characters()
-        await account.delete_user(username, password)
-
-        await account.msg({"account_deleted": {"name": username}})
+    return {
+        "name": username
+    }
 
 
-class CmdChangePassword(BaseCommand):
+@AccountCmd.request("change_pw")
+async def delete_account(account, args) -> dict or None:
     """
-    Quit the game.
+    Change the account's password.
 
     Usage:
-        {"cmd":"change_pw",
-         "args":{"current": <current password>,
-                 "new": <new password>
-                }
+        {
+            "cmd":"change_pw",
+            "args":{
+                "current": <current password>,
+                "new": <new password>
+            }
         }
 
     Change player's password.
     """
-    key = "change_pw"
+    if "current" not in args:
+        raise MudderyError(ERR.missing_args, _("You should input your current password."))
 
-    @classmethod
-    async def func(cls, account, args):
-        "hook function"
-        if "current" not in args:
-            await account.msg({"alert": _("You should input your current password.")})
-            return
+    if "new" not in args:
+        raise MudderyError(ERR.missing_args, _("You should input a new password."))
 
-        if "new" not in args:
-            await account.msg({"alert": _("You should input a new password.")})
-            return
+    if SETTINGS.ENABLE_ENCRYPT:
+        encrypted = base64.b64decode(args["current"])
+        decrypted = RSA.inst().decrypt(encrypted)
+        current_password = decrypted.decode("utf-8")
+    else:
+        current_password = args["current"]
 
-        if SETTINGS.ENABLE_ENCRYPT:
-            encrypted = base64.b64decode(args["current"])
-            decrypted = RSA.inst().decrypt(encrypted)
-            current_password = decrypted.decode("utf-8")
-        else:
-            current_password = args["current"]
+    if not current_password:
+        raise MudderyError(ERR.no_authentication, _("Incorrect password."))
 
-        if not current_password:
-            await account.msg({"alert": _("You should input your current password.")})
-            return
+    if SETTINGS.ENABLE_ENCRYPT:
+        encrypted = base64.b64decode(args["new"])
+        decrypted = RSA.inst().decrypt(encrypted)
+        new_password = decrypted.decode("utf-8")
+    else:
+        new_password = args["new"]
 
-        if SETTINGS.ENABLE_ENCRYPT:
-            encrypted = base64.b64decode(args["new"])
-            decrypted = RSA.inst().decrypt(encrypted)
-            new_password = decrypted.decode("utf-8")
-        else:
-            new_password = args["new"]
+    if not new_password:
+        raise MudderyError(ERR.missing_args, _("You should input a new password."))
 
-        if not new_password:
-            await account.msg({"alert": _("You should input a new password.")})
-            return
+    await account.change_password(new_password)
 
-        await account.change_password(current_password, new_password)
+    return
 
 
-class CmdPuppet(BaseCommand):
-    """
-    Control an object you have permission to puppet
-
-    Usage:
-        {"cmd":"puppet",
-         "args":<object's id>
-        }
-
-    Puppet a given Character.
-
-    This will attempt to "become" a different character assuming you have
-    the right to do so. Note that it's the PLAYER character that puppets
-    characters/objects and which needs to have the correct permission!
-
-    """
-    key = "puppet"
-
-    @classmethod
-    async def func(cls, account, args):
-        """
-        Main puppet method
-        """
-        if not args:
-            await account.msg({"alert": _("That is not a valid character choice.")})
-            return
-
-        puppet_id = args
-        char_all = await account.get_all_characters()
-        if puppet_id not in char_all:
-            await account.msg({"alert": _("That is not a valid character choice.")})
-            return
-
-        try:
-            await account.puppet_character(puppet_id)
-        except Exception as e:
-            await account.msg({"alert": _("That is not a valid character choice.")})
-            return
-
-
-class CmdPuppetName(BaseCommand):
+@AccountCmd.request("puppet")
+async def puppet(account, args) -> dict:
     """
     Control an object you have permission to puppet
 
     Usage:
         {
             "cmd":"puppet",
-            "args":<character's name>
+            "args":<object's id>
         }
 
     Puppet a given Character.
-
-    This will attempt to "become" a different character assuming you have
-    the right to do so. Note that it's the PLAYER character that puppets
-    characters/objects and which needs to have the correct permission!
-
     """
-    key = "puppet_name"
+    if not args:
+        raise MudderyError(ERR.invalid_input, _("That is not a valid character choice."))
 
-    @classmethod
-    async def func(cls, account, args):
-        """
-        Main puppet method
-        """
-        if not args:
-            await account.msg({"alert": _("That is not a valid character choice.")})
-            return
+    puppet_id = args
+    char_all = await account.get_all_characters()
+    if puppet_id not in char_all:
+        raise MudderyError(ERR.invalid_input, _("That is not a valid character choice."))
 
-        puppet_name = args
-        char_all = await account.get_all_nicknames()
-        puppet_id = None
-        for char_info in char_all:
-            if puppet_name == char_info["name"]:
-                puppet_id = char_info["id"]
-                break
-
-        if puppet_id is None:
-            await account.msg({"alert": _("That is not a valid character choice.")})
-            return
-
-        try:
-            await account.puppet_character(puppet_id)
-        except Exception as e:
-            await account.msg({"alert": _("That is not a valid character choice.")})
-            return
+    try:
+        return await account.puppet_character(puppet_id)
+    except Exception as e:
+        raise MudderyError(ERR.invalid_input, _("That is not a valid character choice."))
 
 
-class CmdUnpuppet(BaseCommand):
+@AccountCmd.request("puppet_name")
+async def puppet_name(account, args) -> dict or None:
     """
-    stop puppeting
+    Control an object you have permission to puppet
 
     Usage:
-        {"cmd":"unpuppet",
-         "args":""
+        {
+            "cmd": "puppet_name",
+            "args": <character's name>
         }
 
-    Go out-of-character (OOC).
-
-    This will leave your current character and put you in a incorporeal OOC state.
+    Puppet a given Character.
     """
+    if not args:
+        raise MudderyError(ERR.invalid_input, _("That is not a valid character choice."))
 
-    key = "unpuppet"
+    puppet_name = args
+    char_all = await account.get_all_nicknames()
+    puppet_id = None
+    for char_info in char_all:
+        if puppet_name == char_info["name"]:
+            puppet_id = char_info["id"]
+            break
 
-    @classmethod
-    async def func(cls, account, args):
-        # disconnect
-        try:
-            await account.unpuppet_character()
-            await account.msg({"unpuppet": True})
-        except RuntimeError as e:
-            await account.msg({"alert":_("Could not unpuppet: %s" % e)})
-            return
-        except Exception as e:
-            logger.log_err("Could not unpuppet: %s" % e)
-            return
+    if puppet_id is None:
+        raise MudderyError(ERR.invalid_input, _("That is not a valid character choice."))
+
+    try:
+        return await account.puppet_character(puppet_id)
+    except Exception as e:
+        raise MudderyError(ERR.invalid_input, _("That is not a valid character choice."))
 
 
-class CmdCharCreate(BaseCommand):
+@AccountCmd.request("unpuppet")
+async def unpuppet(account, args) -> dict or None:
+    """
+    Stop puppeting the character.
+
+    Usage:
+        {
+            "cmd": "unpuppet",
+            "args": ""
+        }
+    """
+    try:
+        await account.unpuppet_character()
+    except Exception as e:
+        logger.log_err("Unpuppet error: %s" % e)
+
+    return
+
+
+@AccountCmd.request("char_create")
+async def char_create(account, args) -> dict or None:
     """
     Create a new character
 
     Usage:
-        {"cmd":"char_create",
-         "args":{"name": <character's name>}
+        {
+            "cmd":"char_create",
+            "args": {
+                "name": <character's name>
+            }
         }
 
     Create a new character with a name.
     """
-    key = "char_create"
+    if not args:
+        raise MudderyError(ERR.missing_args, _("You should give the character a name."))
 
-    @classmethod
-    async def func(cls, account, args):
-        "create the new character"
-        if not args:
-            await account.msg({"alert":_("You should give the character a name.")})
-            return
-        
-        name = args["name"]
-        if not name:
-            await account.msg({"alert":_("Name should not be empty.")})
-            return
+    name = args["name"]
+    if not name:
+        raise MudderyError(ERR.invalid_input, _("Name should not be empty."))
 
-        # sanity checks
-        if not (0 < len(name) <= 30):
-            # Nickname's length
-            string = "\n\r Name can max be 30 characters or fewer."
-            await account.msg({"alert":string})
-            return
+    # sanity checks
+    if not (0 < len(name) <= 30):
+        # Nickname's length
+        raise MudderyError(ERR.invalid_input, _("\n\r Name can max be 30 characters or fewer."))
 
-        # check total characters number
-        char_all = await account.get_all_characters()
-        if len(char_all) >= SETTINGS.MAX_PLAYER_CHARACTERS:
-            await account.msg({"alert": _("You may only create a maximum of %i characters.") % SETTINGS.MAX_PLAYER_CHARACTERS})
-            return
+    # check total characters number
+    char_all = await account.get_all_characters()
+    if len(char_all) >= SETTINGS.MAX_PLAYER_CHARACTERS:
+        msg = _("You may only create a maximum of %i characters.") % SETTINGS.MAX_PLAYER_CHARACTERS
+        raise MudderyError(ERR.invalid_input, msg)
 
-        # strip excessive spaces in playername
-        nickname = re.sub(r"\s+", " ", name).strip()
+    # strip excessive spaces in playername
+    nickname = re.sub(r"\s+", " ", name).strip()
 
-        try:
-            CharacterInfo.inst().get_char_id(nickname)
-            # check if this name already exists.
-            await account.msg({"alert":_("{RA character named '{r%s{R' already exists.{n") % name})
-            return
-        except KeyError:
-            pass
+    try:
+        await CharacterInfo.inst().get_char_id(nickname)
+        # check if this name already exists.
+        raise MudderyError(ERR.invalid_input, _("{RA character named '{r%s{R' already exists.{n") % name)
+    except KeyError:
+        pass
 
-        try:
-            if SETTINGS.TEST_MODE:
-                await create_character(
-                    account,
-                    name,
-                    element_type=SETTINGS.PLAYER_CHARACTER_TYPE_TEST_MODE,
-                    character_key=SETTINGS.PLAYER_CHARACTER_KEY_TEST_MODE,
-                )
-            else:
-                await create_character(account, name)
-        except Exception as e:
-            # We are in the middle between logged in and -not, so we have
-            # to handle tracebacks ourselves at this point. If we don't,
-            # we won't see any errors at all.
-            await account.msg({"alert":_("There was an error creating the Player: %s" % e)})
-            logger.log_trace()
-            return
+    try:
+        if SETTINGS.TEST_MODE:
+            await create_character(
+                account,
+                name,
+                element_type=SETTINGS.PLAYER_CHARACTER_TYPE_TEST_MODE,
+                character_key=SETTINGS.PLAYER_CHARACTER_KEY_TEST_MODE,
+            )
+        else:
+            await create_character(account, name)
+    except Exception as e:
+        # We are in the middle between logged in and -not, so we have
+        # to handle tracebacks ourselves at this point. If we don't,
+        # we won't see any errors at all.
+        logger.log_trace()
+        raise MudderyError(ERR.unknown, _("There was an error creating the Player: %s" % e))
 
-        await account.msg({
-            "char_created": True,
-            "char_all": await account.get_all_nicknames(),
-        })
+    return
 
 
-class CmdCharDelete(BaseCommand):
+@AccountCmd.request("char_delete")
+async def char_delete(account, args) -> dict or None:
     """
     Delete a character - this cannot be undone!
 
@@ -328,92 +272,73 @@ class CmdCharDelete(BaseCommand):
 
     Permanently deletes one of your characters.
     """
-    key = "char_delete"
+    if not args:
+        raise MudderyError(ERR.missing_args, _("Please select a character"))
 
-    @classmethod
-    async def func(cls, account, args):
-        "delete the character"
-        if not args:
-            await account.msg({"alert":_("Please select a character")})
-            return
+    char_id = args["id"]
 
-        char_id = args["id"]
+    try:
+        await account.delete_character(char_id)
+    except Exception as e:
+        logger.log_err("Can not delete character %s: %s")
+        raise MudderyError(ERR.unknown, _("Can not delete this character."))
 
-        try:
-            await account.delete_character(char_id)
-        except Exception as e:
-            logger.log_err("Can not delete character %s: %s")
-            await account.msg({"alert": _("You can not delete this character.")})
-            return
-
-        await account.msg({
-            "char_deleted": True,
-            "char_all": await account.get_all_nicknames(),
-        })
+    return
 
 
-class CmdCharDeleteWithPW(BaseCommand):
+@AccountCmd.request("char_delete_pw")
+async def char_delete_pw(account, args) -> dict or None:
     """
     Delete a character - this cannot be undone!
 
     Usage:
-        {"cmd":"char_delete",
-         "args":{"id": <character's id>,
-                 "password": <player's password>}
+        {
+            "cmd": "char_delete",
+            "args": {
+                "id": <character's id>,
+                "password": <player's password>
+            }
         }
 
     Permanently deletes one of your characters.
     """
-    key = "char_delete"
+    if not args:
+        raise MudderyError(ERR.missing_args, _("Please select a character"))
 
-    @classmethod
-    async def func(cls, account, args):
-        "delete the character"
-        if not args:
-            await account.msg({"alert": _("Please select a character")})
-            return
+    if "id" not in args:
+        raise MudderyError(ERR.missing_args, _("Please select a character"))
 
-        if "id" not in args:
-            await account.msg({"alert": _("Please select a character")})
-            return
+    if "password" not in args:
+        raise MudderyError(ERR.missing_args, _("You should input your password."))
 
-        if "password" not in args:
-            await account.msg({"alert": _("You should input your password.")})
-            return
+    char_id = args["id"]
 
-        char_id = args["id"]
+    if SETTINGS.ENABLE_ENCRYPT:
+        encrypted = base64.b64decode(args["password"])
+        decrypted = RSA.inst().decrypt(encrypted)
+        password = decrypted.decode("utf-8")
+    else:
+        password = args["password"]
 
-        if SETTINGS.ENABLE_ENCRYPT:
-            encrypted = base64.b64decode(args["password"])
-            decrypted = RSA.inst().decrypt(encrypted)
-            password = decrypted.decode("utf-8")
-        else:
-            password = args["password"]
+    if not password:
+        raise MudderyError(ERR.missing_args, _("You should input your password."))
 
-        if not password:
-            await account.msg({"alert": _("You should input your password.")})
-            return
+    check = await account.check_password(password)
+    if not check:
+        # No password match
+        raise MudderyError(ERR.no_authentication, _("Incorrect password."))
 
-        check = await account.check_password(password)
-        if not check:
-            # No password match
-            await account.msg({"alert":_("Incorrect password.")})
-            return
+    try:
+        await account.delete_character(char_id)
+    except Exception as e:
+        logger.log_err("Can not delete character %s: %s")
+        raise MudderyError(ERR.unknown, _("Can not delete this character."))
 
-        try:
-            await account.delete_character(char_id)
-        except Exception as e:
-            logger.log_err("Can not delete character %s: %s")
-            await account.msg({"alert": _("You can not delete this character.")})
-            return
-
-        await account.msg({
-            "char_deleted": True,
-            "char_all": await account.get_all_nicknames(),
-        })
+    return
 
 
-class CmdCharAll(BaseCommand):
+@AccountCmd.request("char_all")
+async def func(account, args):
     """
     Get all playable characters of the player.
 
@@ -423,9 +348,24 @@ class CmdCharAll(BaseCommand):
         }
 
     """
-    key = "char_all"
+    return {
+        "char_all": await account.get_all_nicknames(),
+    }
 
-    @classmethod
-    async def func(cls, account, args):
-        "delete the character"
-        await account.msg({"char_all": account.get_all_nicknames()})
+
+@AccountCmd.request("logout")
+async def logout(session, args):
+    """
+    quit when in unlogged-in state
+
+    Usage:
+        {
+            "cmd":"quit",
+            "args":""
+        }
+
+    We maintain a different version of the quit command
+    here for unconnected players for the sake of simplicity. The logged in
+    version is a bit more complicated.
+    """
+    return await session.logout()

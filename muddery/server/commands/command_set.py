@@ -7,7 +7,7 @@ and merged onto entities at runtime.
 """
 
 from muddery.server.utils.logger import logger
-from muddery.common.utils.exception import MudderyError
+from muddery.common.utils.exception import MudderyError, ERR
 
 
 class BaseCommandSet(object):
@@ -38,7 +38,7 @@ class BaseCommandSet(object):
     @classmethod
     def command(cls, key):
         def wrap(func):
-            async def deal_func(caller, args):
+            async def deal_func(caller, args, **kwargs):
                 try:
                     await func(caller, args)
                 except Exception as e:
@@ -53,16 +53,47 @@ class BaseCommandSet(object):
     @classmethod
     def request(cls, key):
         def wrap(func):
-            async def deal_func(caller, args):
+            async def deal_func(caller, args, **kwargs):
                 try:
-                    result = await func(caller, args)
-                    await caller.respond_data(key, result)
+                    data = await func(caller, args)
+                    if not data:
+                        data = {}
+
+                    sn = kwargs.get("sn")
+                    if sn is not None:
+                        await caller.msg({
+                            "response": {
+                                "sn": sn,
+                                "code": 0,
+                                "data": data
+                            }
+                        })
+
                 except MudderyError as e:
-                    await caller.respond_err(key, e.code, str(e))
+                    logger.log_err("Run command error, %s: %s" % (caller, e))
+                    sn = kwargs.get("sn")
+                    if sn is not None:
+                        await caller.msg({
+                            "response": {
+                                "sn": sn,
+                                "code": e.code,
+                                "msg": str(e)
+                            }
+                        })
+
                     return
                 except Exception as e:
                     logger.log_err("Run command error, %s: %s" % (caller, e))
-                    await caller.respond_err("error", "Command %s error: %s" % (key, e))
+                    sn = kwargs.get("sn")
+                    if sn is not None:
+                        await caller.msg({
+                            "response": {
+                                "sn": sn,
+                                "code": ERR.unknown,
+                                "msg": str(e)
+                            }
+                        })
+
                     return
 
             cls.add(key, deal_func)
@@ -71,12 +102,12 @@ class BaseCommandSet(object):
 
 
 class SessionCmd(BaseCommandSet):
-    pass
+    _function_set = {}
 
 
 class AccountCmd(BaseCommandSet):
-    pass
+    _function_set = {}
 
 
 class CharacterCmd(BaseCommandSet):
-    pass
+    _function_set = {}

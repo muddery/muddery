@@ -3,33 +3,23 @@ MudderyCommand = function() {
 }
 
 MudderyCommand.prototype = {
-    // unique request id
-    request_id: 0,
+    // unique request serial number
+    serial_number: 0,
 
     // callback functions
     callbacks: {},
 
-    // send a command to the server
-    sendCommand: function(command, args) {
+    // commands
+    sendCommand : function(command, args, callback) {
         var data = {
             "cmd": command,
             "args": args || "",
         };
-        Connection.send(JSON.stringify(data));
-    },
-
-    // send a request to the server
-    sendRequest: function(key, args, callback) {
-        var req = request_id++;
         if (callback && typeof(callback) == "function") {
-            callbacks[req] = callback;
+            var sn = this.serial_number++;
+            this.callbacks[sn] = callback;
+            data["sn"] = sn;
         }
-
-        var data = {
-            "cmd": command,
-            "args": args || "",
-            "req": req,
-        };
         Connection.send(JSON.stringify(data));
     },
     
@@ -43,29 +33,47 @@ MudderyCommand.prototype = {
        this.sendCommand(cmd, args);
     },
 
-    // query the unloggedin message
-    requestFirstConnect: function(callback) {
+    respond: function(sn, code, data, msg) {
+        var callback = this.callbacks[sn];
+        if (callback) {
+            delete this.callbacks[sn];
+            callback(code, data, msg);
+        }
+    },
+
+    // query necessary data when the client connect to the server
+    firstConnect: function(callback) {
         this.sendCommand("first_connect", {}, callback);
     },
 
     // register
-    register: function(username, password, connect) {
+    register: function(username, password, connect, callback) {
         var args = {
             "username": username,
             "password": settings.enable_encrypt? core.crypto.encrypt(password): password,
             "connect": connect
         };
-        this.sendCommand("create_account", args);
+        this.sendCommand("create_account", args, callback);
     },
 
     // login
-    login: function(username, password) {
+    login: function(username, password, callback) {
         var args = {
             "username" : username,
             "password" : settings.enable_encrypt? core.crypto.encrypt(password): password,
         };
 
-        this.sendCommand("login", args);
+        this.sendCommand("login", args, callback);
+    },
+
+    // logout
+    logout : function(callback) {
+        this.sendCommand("logout", {}, callback);
+    },
+
+    // get a player's all available characters
+    queryAllCharacters : function(callback) {
+        this.sendCommand("char_all", {}, callback);
     },
 
     castSkill: function(skill, target) {
@@ -91,34 +99,34 @@ MudderyCommand.prototype = {
     },
 
     // change password
-    changePassword: function(current, new_password) {
+    changePassword: function(current, new_password, callback) {
         var args = {
             "current": settings.enable_encrypt? core.crypto.encrypt(current): current,
             "new": settings.enable_encrypt? core.crypto.encrypt(new_password): new_password,
         };
-        this.sendCommand("change_pw", args);
+        this.sendCommand("change_pw", args, callback);
     },
 
     // create new character
-    createCharacter: function(name) {
+    createCharacter: function(name, callback) {
    	 	var args = {"name": name};
-		this.sendCommand("char_create", args);
+		this.sendCommand("char_create", args, callback);
     },
 
     // delete a character
-    deleteCharacter: function(obj_id) {
+    deleteCharacter: function(obj_id, callback) {
         var args = {"id": obj_id};
-		this.sendCommand("char_delete", args);
+		this.sendCommand("char_delete", args, callback);
     },
     
     // puppet a character
-    puppetCharacter: function(obj_id) {
-    	this.sendCommand("puppet", obj_id);
+    puppetCharacter: function(obj_id, callback) {
+    	this.sendCommand("puppet", obj_id, callback);
     },
     
     // unpuppet current character
-    unpuppetCharacter: function() {
-        this.sendCommand("unpuppet");
+    unpuppetCharacter: function(callback) {
+        this.sendCommand("unpuppet", {}, callback);
     },
 
     inventoryObject: function(position) {
@@ -166,11 +174,6 @@ MudderyCommand.prototype = {
         var args = {"dialogue": dialogue,
                     "npc": npc};
         this.sendCommand("finish_dialogue", args);
-    },
-    
-    // logout
-    logout : function() {
-        this.sendCommand("logout");
     },
     
     // send command from command box

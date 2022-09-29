@@ -58,8 +58,7 @@ MudderyClient.prototype = {
 
     // handle commands from the server
     handle_message: function(message) {
-     	var parsed = JSON.parse(message);
-     	var all_data = parsed.data;
+     	var all_data = JSON.parse(message);
 
      	// all_data can be a dict or an array of dicts.
      	if (!(all_data instanceof Array)) {
@@ -73,7 +72,10 @@ MudderyClient.prototype = {
                     var log_data = {}
                     log_data[key] = data[key];
 
-                    if (key == "msg") {
+                    if (key == "response") {
+                        core.command.respond(data[key].sn, data[key].code, data[key].data, data[key].msg);
+                    }
+                    else if (key == "msg") {
                         var msg = core.text2html.parseHtml(data[key]);
                         mud.scene_window.displayMessage(msg);
                     } else if (key == "alert") {
@@ -88,12 +90,6 @@ MudderyClient.prototype = {
                         mud.scene_window.displayMessage(data[key], "debug");
                     } else if (key == "prompt") {
                         mud.scene_window.displayMessage(data[key], "prompt");
-                    } else if (key == "first_connect") {
-                        mud.login_window.onRespondFirstConnect(data[key]);
-                    } else if (key == "create_account") {
-                        mud.main_frame.onRespondCreateAccount(data[key]);
-                    } else if (key == "login") {
-                        mud.main_frame.onRespondLogin(data[key]);
                     } else if (key == "logout") {
                         mud.main_frame.onRespondLogout(data[key]);
                     } else if (key == "look_around") {
@@ -154,21 +150,8 @@ MudderyClient.prototype = {
                     } else if (key == "get_exp") {
                         var get_exp = data[key];
                         mud.main_frame.showGetExp(get_exp["exp"]);
-                    } else if (key == "account_delete") {
-                        mud.main_frame.onAccount(data[key]);
-                    } else if (key == "pw_changed") {
-                        mud.main_frame.onPasswordChanged();
                     } else if (key == "unpuppet") {
                         mud.main_frame.onUnpuppet(data[key]);
-                    } else if (key == "char_all") {
-                        mud.select_char_window.setCharacters(data[key]);
-                    } else if (key == "max_char") {
-                        mud.select_char_window.setMaxNumber(data[key]);
-                    } else if (key == "char_created") {
-                        mud.new_char_window.onCharacterCreated(data[key]);
-                    } else if (key == "char_deleted") {
-                    } else if (key == "puppet") {
-                        mud.main_frame.onPuppet(data[key]);
                     } else if (key == "channels") {
                         mud.conversation_window.setChannels(data[key]);
                     } else if (key == "conversation") {

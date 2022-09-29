@@ -117,7 +117,7 @@ class MudderyAccount(BaseElement):
         # Match account name and check password
         if not await self.check_password(username, raw_password):
             # Password not match.
-            raise MudderyError(ERR.no_authentication)
+            raise MudderyError(ERR.no_authentication, _("Incorrect username or password."))
 
         # Check name bans
         try:
@@ -151,29 +151,19 @@ class MudderyAccount(BaseElement):
         if self.session:
             return self.session.uid
 
-    async def at_post_login(self, session):
+    async def login(self, session) -> dict:
         """
         Called at the end of the login process.
         """
         self.session = session
 
-        await async_wait([
-            Accounts.inst().update_login_time(self.username),
+        await Accounts.inst().update_login_time(self.username)
 
-            # Inform the client that we logged in first.
-            session.msg([
-                {
-                    "login": {
-                        "name": self.username,
-                        "id": self.get_id(),
-                    },
-                },
-                {
-                    "char_all": await self.get_all_nicknames(),
-                    "max_char": SETTINGS.MAX_PLAYER_CHARACTERS
-                },
-            ]),
-        ])
+        # return login messages
+        return {
+            "name": self.username,
+            "id": self.get_id(),
+        }
 
     async def at_pre_logout(self):
         """
@@ -243,8 +233,7 @@ class MudderyAccount(BaseElement):
         current_obj = self.puppet_obj
         if current_obj and current_obj.get_db_id() == char_db_id:
             # already puppeting this object
-            await self.msg({"msg": _("You have already puppet this object.")})
-            return
+            raise MudderyError(ERR.invalid_input, _("You have already puppet this object."))
 
         self.puppet_obj = None
 
@@ -269,25 +258,20 @@ class MudderyAccount(BaseElement):
             new_char.set_account(self)
             await new_char.setup_element(char_key)
         except Exception as e:
-            await self.msg({"alert": _("That is not a valid character choice.")})
-            return
+            raise MudderyError(ERR.invalid_input, _("That is not a valid character choice."))
 
         # Send puppet info to the client first.
-        puppet_msg = {
+        character_info = {
             "id": new_char.get_id(),
             "name": new_char.get_name(),
             "icon": getattr(new_char, "icon", None),
         }
 
         if self.type == "STAFF":
-            puppet_msg.update({
+            character_info.update({
                 "is_staff": True,
                 "allow_commands": True,
             })
-
-        await self.msg({
-            "puppet": puppet_msg
-        })
 
         # Set location
         try:
@@ -296,18 +280,13 @@ class MudderyAccount(BaseElement):
             # Set map
             maps = new_char.get_maps([location_key])
             maps.update(new_char.get_neighbour_maps(location_key))
-
-            default_home_key = GameSettings.inst().get("default_player_home_key")
-            if default_home_key and default_home_key != location_key:
-                maps.update(new_char.get_maps([default_home_key]))
-                maps.update(new_char.get_neighbour_maps(default_home_key))
-
-            await self.msg({
-                "reveal_maps": maps,
-            })
+            character_info["reveal_maps"] = maps
 
             location = Server.world.get_room(location_key)
             await new_char.move_to(location)
+            character_info["location"] = new_char.get_location_info()
+            character_info["look_around"] = new_char.look_around()
+
         except KeyError:
             pass
 
@@ -317,8 +296,16 @@ class MudderyAccount(BaseElement):
         # add the character to the world
         Server.world.on_char_puppet(new_char)
 
-        # final hook
-        await new_char.at_post_puppet()
+        character_info["channels"] = new_char.get_available_channels()
+        status, last_dialogue = await async_gather([
+            new_char.return_status(),
+            new_char.get_last_dialogue()
+        ])
+
+        character_info["status"] = status
+        character_info["last_dialogue"] = last_dialogue
+
+        return character_info
 
     async def unpuppet_character(self):
         """
@@ -405,9 +392,6 @@ class MudderyAccount(BaseElement):
         if awaits:
             await async_wait(awaits)
 
-    def at_cmdset_get(self):
-        pass
-
     async def check_password(self, username, raw_password):
         """
         Check if the password is correct.
@@ -420,19 +404,14 @@ class MudderyAccount(BaseElement):
 
         return check_password(raw_password, password, salt)
 
-    async def change_password(self, current_password, new_password):
+    async def change_password(self, new_password):
         """
         Change the account's password.
         """
-        if not self.check_password(self.username, current_password):
-            await self.msg({"alert":_("Incorrect password.")})
-            return
-
         salt = make_salt()
         password = hash_password(new_password, salt)
         await Accounts.inst().set_password(self.username, password, salt)
-
-        await self.msg({"pw_changed": True})
+        return
 
     async def disconnect(self, reason):
         """

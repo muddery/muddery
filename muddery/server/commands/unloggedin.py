@@ -102,6 +102,7 @@ async def first_connect(session, args):
         "conn_screen": connection_screen,
         "equipment_pos": equipment_pos,
         "min_honour_level": honour_settings.min_honour_level,
+        "max_char": SETTINGS.MAX_PLAYER_CHARACTERS,
     }
 
 
@@ -131,6 +132,10 @@ async def create_account(session, args):
     if "password" not in args:
         raise MudderyError(ERR.missing_args, "Need a password.")
 
+    connect = False
+    if "connect" in args:
+        connect = args["connect"]
+
     username = args["username"]
     username = re.sub(r"\s+", " ", username).strip()
 
@@ -151,6 +156,9 @@ async def create_account(session, args):
     # Set the account with username and password.
     await account.new_user(username, password, "")
 
+    if connect:
+        await session.login(account)
+
     return {
         "name": username,
         "id": account.get_id()
@@ -158,7 +166,7 @@ async def create_account(session, args):
 
 
 @SessionCmd.request("login")
-async def login(session, args):
+async def login(session, args) -> dict:
     """
     Login the game server.
 
@@ -175,16 +183,13 @@ async def login(session, args):
     # check for too many login errors too quick.
     if _throttle(session, maxlim=5, timeout=5*60, storage=_LATEST_FAILED_LOGINS):
         # timeout is 5 minutes.
-        await session.msg({"alert": _("{RYou made too many connection attempts. Try again in a few minutes.{n")})
-        return
+        raise MudderyError(ERR.no_permission, "You made too many connection attempts. Try again in a few minutes.")
 
     if "username" not in args:
-        await session.msg({"alert": _("You should input a username.")})
-        return
+        raise MudderyError(ERR.missing_args, "You should input a username.")
 
     if "password" not in args:
-        await session.msg({"alert": _("You should input a password.")})
-        return
+        raise MudderyError(ERR.missing_args, "You should input a password.")
 
     username = args["username"]
     username = re.sub(r"\s+", " ", username).strip()
@@ -197,8 +202,7 @@ async def login(session, args):
         password = args["password"]
 
     if not password:
-        await session.msg({"alert": _("You should input a password.")})
-        return
+        raise MudderyError(ERR.no_authentication, "You can not login.")
 
     # Get the account.
     element_type = SETTINGS.ACCOUNT_ELEMENT_TYPE
@@ -208,15 +212,14 @@ async def login(session, args):
     try:
         await account.set_user(username, password)
     except MudderyError as e:
-        if e.code == ERR.no_authentication:
-            # Wrong username or password.
-            await session.msg({"alert": str(e)})
-        else:
-            await session.msg({"alert": _("You can not login.")})
-
         # this just updates the throttle
         _throttle(session)
-        return None
+
+        if e.code == ERR.no_authentication:
+            # Wrong username or password.
+            raise MudderyError(ERR.no_authentication, str(e))
+        else:
+            raise MudderyError(ERR.no_authentication, "Can not login.")
 
     # actually do the login. This will call all other hooks:
     #   session.at_login()
@@ -224,23 +227,4 @@ async def login(session, args):
     #   player.at_first_login()  # only once, for player-centric setup
     #   player.at_pre_login()
     #   player.at_post_login(session=session)
-    await session.login(account)
-
-
-@SessionCmd.request("logout")
-async def logout(session, args):
-    """
-    quit when in unlogged-in state
-
-    Usage:
-        {
-            "cmd":"quit",
-            "args":""
-        }
-
-    We maintain a different version of the quit command
-    here for unconnected players for the sake of simplicity. The logged in
-    version is a bit more complicated.
-    """
-    await session.logout()
-
+    return await session.login(account)

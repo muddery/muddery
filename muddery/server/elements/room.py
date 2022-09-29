@@ -7,6 +7,8 @@ Rooms are simple containers that has no location of their own.
 
 import ast
 import asyncio
+import traceback
+
 from muddery.server.utils.logger import logger
 from muddery.server.utils.game_settings import GameSettings
 from muddery.server.database.worlddata.image_resource import ImageResource
@@ -109,13 +111,15 @@ class MudderyRoom(ELEMENT("MATTER")):
         self.all_characters = {}
         awaits = []
         for record in records:
-            tables_data = WorldData.get_tables_data(models, record.key)
-            tables_data = tables_data[0]
+            try:
+                tables_data = WorldData.get_tables_data(models, record.key)
+                tables_data = tables_data[0]
 
-            new_obj = ELEMENT(tables_data.element_type)()
-            self.all_characters[new_obj.get_id()] = new_obj
-
-            awaits.append(new_obj.setup_element(tables_data.key, level=tables_data.level, first_time=True))
+                new_obj = ELEMENT(tables_data.element_type)()
+                self.all_characters[new_obj.get_id()] = new_obj
+                awaits.append(new_obj.setup_element(tables_data.key, level=tables_data.level, first_time=True))
+            except Exception as e:
+                logger.log_trace("Load NPC %s error: %s" % (record.key, e))
 
         if awaits:
             await async_wait(awaits)

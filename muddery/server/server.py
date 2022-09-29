@@ -2,7 +2,6 @@
 import traceback
 from muddery.server.settings import SETTINGS
 from muddery.common.utils.singleton import Singleton
-from muddery.server.service.command_handler import CommandHandler
 from muddery.server.database.gamedata_db import GameDataDB
 from muddery.server.database.worlddata_db import WorldDataDB
 from muddery.common.utils.utils import classes_in_path
@@ -78,15 +77,3 @@ class Server(Singleton):
         property, e.g. obj.system.attr = value etc.
         """
         return cls.inst()._world
-
-    def parse_command(self, raw_string):
-        """
-        Parse JSON formatted command.
-        """
-        return CommandHandler.parse_command(raw_string)
-
-    async def handler_command(self, session, key, args):
-        """
-        Get a command from a session.
-        """
-        await CommandHandler.handler_command(session, key, args)
