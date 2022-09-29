@@ -467,7 +467,7 @@ async def show_server_state(gameserver: bool = False, webclient: bool = False, e
     print()
 
 
-async def run_servers(server: bool = False, webclient: bool = False, editor: bool = False, restart: bool = False):
+async def run_servers(server: bool = False, webclient: bool = False, editor: bool = False):
     """
     Run servers.
 
@@ -509,9 +509,6 @@ async def run_servers(server: bool = False, webclient: bool = False, editor: boo
     print("Starting ...")
 
     template = "python %s"
-
-    if restart:
-        template += " restart"
 
     if os.name != "nt":
         template += " &"
@@ -638,6 +635,19 @@ async def kill_servers(server: bool = True, webclient: bool = True, editor: bool
     print()
 
 
+async def restart_servers(server: bool = True, webclient: bool = True, editor: bool = True):
+    """
+    Restart servers.
+
+    :param server:
+    :param webclient:
+    :param editor:
+    :return:
+    """
+    await kill_servers(server, webclient, editor)
+    await run_servers(server, webclient, editor)
+
+
 def run_server_command(run_func, stop_func, default_port):
     parser = ArgumentParser()
     parser.add_argument(
@@ -666,10 +676,6 @@ def run_server_command(run_func, stop_func, default_port):
 
     if operation == "run":
         # start the server
-        run_func(port)
-    elif operation == "restart":
-        # stop and start a new server
-        stop_func()
         run_func(port)
     elif operation == "stop":
         # stop the server

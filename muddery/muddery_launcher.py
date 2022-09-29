@@ -166,6 +166,29 @@ def main():
             sys.exit(-1)
         sys.exit(0)
 
+    elif sys_argv[1] == "restart":
+        # Stop servers.
+        parser = ArgumentParser()
+        parser.add_argument('-s', '--server', action='store_true', dest='server', default=False)
+        parser.add_argument('-c', '--client', action='store_true', dest='client', default=False)
+        parser.add_argument('-e', '--editor', action='store_true', dest='editor', default=False)
+        args, unknown_args = parser.parse_known_args()
+
+        from muddery.launcher import manager
+        try:
+            if not args.server and not args.client and not args.editor:
+                asyncio.run(manager.restart_servers())
+            else:
+                asyncio.run(manager.restart_servers(
+                    server=args.server,
+                    webclient=args.client,
+                    editor=args.editor
+                ))
+        except Exception as e:
+            traceback.print_exc()
+            sys.exit(-1)
+        sys.exit(0)
+
     elif sys_argv[1] == "state":
         # Check servers running states.
         print("Checking server state ...")

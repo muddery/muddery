@@ -266,8 +266,8 @@ controller = {
         controller.pushPage(name, url, null);
     },
 
-    editElement: function(element_type, element_key, no_delete) {
-        var url = "element_editor.html?element_type=" + element_type;
+    editElement: function(base_element_type, element_type, element_key, no_delete) {
+        var url = "matter_editor.html?base_element_type=" + base_element_type + "&element_type=" + element_type;
 
         var name = "";
         if (element_key) {
@@ -284,8 +284,15 @@ controller = {
         controller.pushPage(name, url, null);
     },
 
-    editMatter: function(element_type, element_key, no_delete) {
-        var url = "matter_editor.html?element_type=" + element_type;
+    createElement: function(base_element_type, element_type, field_values) {
+        var url = "element_editor.html?base_element_type=" + base_element_type + "&element_type=" + element_type;
+        var name = "Add " + element_type;
+
+        controller.pushPage(name, url, field_values);
+    },
+
+    editMatter: function(base_element_type, element_type, element_key, no_delete) {
+        var url = "matter_editor.html?base_element_type=" + base_element_type + "&element_type=" + element_type;
 
         var name = "";
         if (element_key) {
@@ -302,8 +309,8 @@ controller = {
         controller.pushPage(name, url, null);
     },
 
-    createObject: function(element_type, field_values) {
-        var url = "element_editor.html?element_type=" + element_type;
+    createMatter: function(base_element_type, element_type, field_values) {
+        var url = "matter_editor.html?base_element_type=" + base_element_type + "&element_type=" + element_type;
         var name = "Add " + element_type;
 
         controller.pushPage(name, url, field_values);

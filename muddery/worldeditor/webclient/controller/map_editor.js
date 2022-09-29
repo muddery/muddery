@@ -152,7 +152,7 @@ MapEditor.prototype.onEditArea = function() {
 
 MapEditor.prototype.saveForEditArea = function(data) {
     controller.changed = true;
-    window.parent.controller.editElement(controller.area_element_type, controller.area_key, true);
+    window.parent.controller.editMatter(controller.area_element_type, controller.area_key, true);
 }
 
 
@@ -812,7 +812,7 @@ MapEditor.prototype.dropPathOnRoom = function(event) {
     var new_path = !(path_id in this.paths);
 
     // Create a new path.
-    var exit_info = {
+    var exit_info_1 = {
         element_type: this.exit_element_type,
         location: source_key,
         destination: target_key
@@ -822,14 +822,14 @@ MapEditor.prototype.dropPathOnRoom = function(event) {
         source_key,
         target_key,
         function(data) {
-            this.addExitSuccess(data, exit_info);
+            controller.addExitSuccess(data, exit_info_1);
         },
         this.addExitFailed
     );
 
     if (new_path) {
         // Add a reverse exit.
-        var exit_info = {
+        var exit_info_2 = {
             element_type: this.exit_element_type,
             location: target_key,
             destination: source_key
@@ -839,7 +839,7 @@ MapEditor.prototype.dropPathOnRoom = function(event) {
             target_key,
             source_key,
             function(data) {
-                this.addExitSuccess(data, exit_info);
+                controller.addExitSuccess(data, exit_info_2);
             },
             this.addExitFailed
         );
@@ -1273,7 +1273,7 @@ MapEditor.prototype.saveForEditRoom = function(data, context) {
     $(".room-menu").remove();
 
     var room_key = context.key;
-    window.parent.controller.editElement(controller.room_element_type, room_key);
+    window.parent.controller.editMatter(controller.room_element_type, room_key);
 }
 
 /*
@@ -1487,7 +1487,7 @@ MapEditor.prototype.saveForCreateExit = function(data, context) {
     var values = {
         location: context.room
     }
-    window.parent.controller.createObject(controller.exit_element_type, values);
+    window.parent.controller.createMatter(controller.exit_element_type, controller.exit_element_type, values);
 }
 
 
@@ -1510,7 +1510,7 @@ MapEditor.prototype.saveForEditExit = function(data, context) {
     controller.changed = true;
 
     var exit_key = context.key;
-    window.parent.controller.editElement(controller.exit_element_type, exit_key);
+    window.parent.controller.editMatter(controller.exit_element_type, exit_key);
 
     // Unselect all rooms.
     $(".element-room").removeClass("element-selected");
@@ -1555,7 +1555,7 @@ MapEditor.prototype.confirmDeleteExit = function(e) {
     window.parent.controller.hideWaiting();
 
     var exit_info = e.data;
-    service.deleteObject(
+    service.deleteElement(
         e.data.exit,
         controller.exit_element_type,
         function(data) {
@@ -1587,7 +1587,15 @@ MapEditor.prototype.deleteExitSuccess = function(data, exit_info) {
     // If all exits have been removed.
     if (Object.keys(controller.paths[path_id].exits).length == 0) {
         // Remove the path.
+        var path_info = controller.paths[path_id];
+        if (path_info.room1 in controller.rooms) {
+            delete controller.rooms[path_info.room1].paths[path_id];
+        }
+        if (path_info.room2 in controller.rooms) {
+            delete controller.rooms[path_info.room2].paths[path_id];
+        }
         delete controller.paths[path_id];
+
         var path = document.getElementById(path_id);
         path.parentNode.removeChild(path);
     }

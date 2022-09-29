@@ -22,7 +22,8 @@ ElementEditor.prototype = prototype(CommonEditor.prototype);
 ElementEditor.prototype.constructor = ElementEditor;
 
 ElementEditor.prototype.init = function() {
-    this.base_element_type = utils.getQueryString("element_type");
+    this.base_element_type = utils.getQueryString("base_element_type");
+    this.obj_element_type = utils.getQueryString("element_type");
     this.element_key = utils.getQueryString("element_key");
     this.no_delete = utils.getQueryString("no_delete");
 
@@ -441,7 +442,7 @@ ElementEditor.prototype.setFields = function() {
         }
     }
 
-    container.find(".control-item-element-type select").on("change", this.onElementTypeChanged);
+    container.find(".control-item-element_type select").on("change", this.onElementTypeChanged);
 
     window.parent.controller.setFrameSize();
 }

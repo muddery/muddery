@@ -480,6 +480,10 @@ service = {
     applyChanges: function(callback_success, callback_failed) {
         this.sendRequest("apply_changes", "", {}, callback_success, callback_failed);
     },
+
+    checkStatus: function(callback_success, callback_failed) {
+        this.getData("status", callback_success, callback_failed);
+    },
 }
 
 

@@ -155,7 +155,7 @@ def query_element_properties(element_type, element_key):
         "help_text": LocalizedStrings.inst().trans("Properties's level.")
     })
 
-    properties_info = ELEMENT(element_type).get_properties_info()
+    properties_info = ELEMENT(element_type).get_properties_info(refresh=True)
     for key, info in properties_info.items():
         fields.append({
             "name": key,
@@ -226,7 +226,7 @@ def query_element_level_properties(element_type, element_key, level):
         "value": level
     })
 
-    properties_info = ELEMENT(element_type).get_properties_info()
+    properties_info = ELEMENT(element_type).get_properties_info(refresh=True)
 
     # Get properties.
     data = {}

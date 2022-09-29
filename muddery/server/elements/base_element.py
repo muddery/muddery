@@ -74,17 +74,20 @@ class BaseElement(object):
         return cls._all_models_
 
     @classmethod
-    def get_properties_info(cls):
+    def get_properties_info(cls, refresh=False):
         """
         Get object's custom properties.
+
+        :param
+        refresh: (boolean) refresh properties data
         """
-        if "_all_properties_" not in cls.__dict__:
+        if "_all_properties_" not in cls.__dict__ or refresh:
             cls._all_properties_ = {}
 
             if cls.element_type:
                 for c in cls.__bases__:
                     if hasattr(c, "get_properties_info"):
-                        cls._all_properties_.update(c.get_properties_info())
+                        cls._all_properties_.update(c.get_properties_info(refresh))
 
                 records = PropertiesDict.get_properties(cls.element_type)
                 for record in records:

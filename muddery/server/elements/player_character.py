@@ -1219,11 +1219,24 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
             await new_obj.setup_element(item["object_key"], item["level"])
             item["obj"] = new_obj
 
-        await CharacterEquipments.inst().add(self.get_db_id(), body_position, item["object_key"], item["level"])
-        self.equipments[body_position] = item
+        obj_num = item["number"]
+        with self.states.transaction():
+            # add to body
+            await CharacterEquipments.inst().add(self.get_db_id(), body_position, item["object_key"], item["level"])
 
-        # Remove from the inventory
-        await self.remove_objects_by_position(position, 1, True)
+            # Remove from the inventory
+            if obj_num > 1:
+                await CharacterInventory.inst().set_dict(self.get_db_id(), position, {"number": obj_num - 1})
+                item["number"] = obj_num - 1
+            elif obj_num == 1:
+                if item["can_remove"]:
+                    await CharacterInventory.inst().remove_object(self.get_db_id(), position)
+                    del self.inventory[position]
+                else:
+                    await CharacterInventory.inst().set_dict(self.get_db_id(), position, {"number": 0})
+                    item["number"] = 0
+
+            self.equipments[body_position] = item
 
         # reset character's attributes
         await self.refresh_states(True)
@@ -1247,9 +1260,38 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
             raise MudderyError(_("Can not find this equipment."))
 
         item = self.equipments[body_position]
-        await self.receive_object(item["object_key"], 1, item["level"], True)
-        await CharacterEquipments.inst().remove_equipment(self.get_db_id(), body_position)
-        del self.equipments[body_position]
+
+        # Move to the inventory
+        common_models = ELEMENT("POCKET_OBJECT").get_models()
+        try:
+            object_record = WorldData.get_tables_data(common_models, key=item["object_key"])
+            object_record = object_record[0]
+        except Exception as e:
+            logger.log_err("Can not find object %s: %s" % (item["object_key"], e))
+            raise MudderyError(_("Can not take off this equipment."))
+
+        if len(self.inventory) > 0:
+            new_position = sorted(self.inventory)[-1] + 1
+        else:
+            new_position = 1
+
+        # save to db first
+        with self.states.transaction():
+            await CharacterInventory.inst().add(self.get_db_id(), new_position, item["object_key"], 1, item["level"])
+            await CharacterEquipments.inst().remove_equipment(self.get_db_id(), body_position)
+
+            # add to the inventory
+            self.inventory[new_position] = {
+                "position": new_position,
+                "object_key": item["object_key"],
+                "level": item["level"],
+                "number": 1,
+                "element_type": object_record.element_type,
+                "can_remove": object_record.can_remove,
+            }
+
+            # remove from body
+            del self.equipments[body_position]
 
         if refresh:
             # reset character's attributes
@@ -1584,7 +1626,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
                     await async_wait(event_kill + quest_kill)
             elif status == defines.COMBAT_LOSE:
                 await self.die(opponents)
-                self.event.at_character_die()
+                await self.event.at_character_die()
         elif combat_type == CombatType.HONOUR:
             if status == defines.COMBAT_WIN:
                 await self.honour_win()
@@ -1635,6 +1677,10 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         """
         Reborn after being killed.
         """
+        # Recover properties.
+        await self.recover()
+        self.is_alive = True
+
         # Reborn at its home.
         home = None
         default_home_key = GameSettings.inst().get("default_player_home_key")
@@ -1646,10 +1692,6 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
 
         if home:
             await self.move_to(home)
-
-        # Recover properties.
-        await self.recover()
-        self.is_alive = True
 
         await self.show_status()
 

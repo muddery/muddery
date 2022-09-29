@@ -296,6 +296,12 @@ class MudderyAccount(BaseElement):
             # Set map
             maps = new_char.get_maps([location_key])
             maps.update(new_char.get_neighbour_maps(location_key))
+
+            default_home_key = GameSettings.inst().get("default_player_home_key")
+            if default_home_key and default_home_key != location_key:
+                maps.update(new_char.get_maps([default_home_key]))
+                maps.update(new_char.get_neighbour_maps(default_home_key))
+
             await self.msg({
                 "reveal_maps": maps,
             })

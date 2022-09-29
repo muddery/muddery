@@ -85,13 +85,13 @@ class CharacterInfo(BaseData, Singleton):
         data = await self.storage.load("", char_id)
         return data["nickname"]
 
-    async def get_char_id(self, nickname):
+    def get_char_id(self, nickname):
         """
         Get an player character's id by its nickname.
         :param nickname:
         :return:
         """
-        return await self.nicknames[nickname]
+        return self.nicknames[nickname]
 
     async def set_level(self, char_id, level):
         """

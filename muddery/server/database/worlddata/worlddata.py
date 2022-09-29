@@ -18,18 +18,18 @@ class WorldData(object):
     tables = {}
 
     @classmethod
-    def clear(cls):
+    def clear_all(cls):
         """
         Clear data.
         """
         cls.tables = {}
 
     @classmethod
-    def reload(cls):
+    def reload_all(cls):
         """
         Reload data to the local storage.
         """
-        cls.clear()
+        cls.clear_all()
 
         module = importlib.import_module(SETTINGS.WORLD_DATA_MODEL_FILE)
         models = [cls for cls in vars(module).values() if inspect.isclass(cls)]
@@ -39,6 +39,14 @@ class WorldData(object):
                 SETTINGS.WORLD_DATA_APP,
                 config["MODELS"],
                 model.__name__)
+
+    @classmethod
+    def refresh(cls, table_name):
+        """
+        Clear data.
+        """
+        if table_name in cls.tables:
+            del cls.tables[table_name]
 
     @classmethod
     def load_table(cls, table_name):
