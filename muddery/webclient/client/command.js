@@ -76,13 +76,13 @@ MudderyCommand.prototype = {
         this.sendCommand("char_all", {}, callback);
     },
 
-    castSkill: function(skill, target) {
+    castSkill: function(skill, target, callback) {
         var cmd = "cast_skill";
         var args = {
             "skill": skill,
             "target": target,
         };
-        this.sendCommand(cmd, args);
+        this.sendCommand(cmd, args, callback);
     },
 
     castCombatSkill: function(skill, target) {
@@ -138,7 +138,7 @@ MudderyCommand.prototype = {
     },
 
     queryEquipments: function(callback) {
-        this.sendCommand("equipments", {}, callback);
+        this.sendCommand("all_equipments", {}, callback);
     },
 
     equipmentsObject: function(obj_id, callback) {
@@ -178,10 +178,12 @@ MudderyCommand.prototype = {
     },
     
     // dialogue
-    finishDialogue: function(dialogue, npc) {
-        var args = {"dialogue": dialogue,
-                    "npc": npc};
-        this.sendCommand("finish_dialogue", args);
+    finishDialogue: function(dialogue, npc, callback) {
+        var args = {
+            "dialogue": dialogue,
+            "npc": npc
+        };
+        this.sendCommand("finish_dialogue", args, callback);
     },
     
     // send command from command box
@@ -237,18 +239,28 @@ MudderyCommand.prototype = {
     	this.sendCommand("get_rankings");
     },
 
+    // query the player's all quests
+    queryAllQuests: function(callback) {
+        this.sendCommand("all_quests", {}, callback);
+    },
+
     // query the quest's detail information
     // args:
     //     key: (string) a quest's key
-    queryQuest: function(key) {
-        this.sendCommand("query_quest", {key: key});
+    queryQuest: function(key, callback) {
+        this.sendCommand("query_quest", {key: key}, callback);
+    },
+
+    // query the player's all skills
+    queryAllSkills: function(callback) {
+        this.sendCommand("all_skills", {}, callback);
     },
 
     // query the skill's detail information
     // args:
     //     key: (string) a skill's key
-    querySkill: function(key) {
-        this.sendCommand("query_skill", {key: key});
+    querySkill: function(key, callback) {
+        this.sendCommand("query_skill", {key: key}, callback);
     },
 
     // query area maps by a list of room keys

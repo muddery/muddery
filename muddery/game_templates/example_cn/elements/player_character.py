@@ -48,4 +48,4 @@ class PlayerCharacter(MudderyPlayerCharacter):
             await self.msg({"msg": _("Not enough mana to cast {b%s{n!") % skill_obj.get_name()})
             return
 
-        await super(PlayerCharacter, self).cast_skill(skill_key, target)
+        return await super(PlayerCharacter, self).cast_skill(skill_key, target)

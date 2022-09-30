@@ -81,40 +81,42 @@ class EventTrigger(object):
         # Query events.
         events = EventData.get_element_event(event_type.value, obj_key)
         if not events:
-            return False
+            return []
 
         # Get available events.
         closed_events = await self.owner.all_closed_events()
         active_events = [e for e in events if e not in closed_events]
         if not active_events:
-            return False
+            return []
 
         matches = await async_gather([STATEMENT_HANDLER.match_condition(e.condition, self.owner, obj) for e in active_events])
         candidates = [e for index, e in enumerate(active_events) if matches[index]]
         if not candidates:
-            return False
+            return []
 
         if self.can_bypass:
-            return False
+            return []
 
-        triggered = False
+        actions = []
         rand = random.random()
         for event in candidates:
             if event.multiple:
                 if rand < event.odds:
                     func = EVENT_ACTION_SET.func(event.action)
                     if func:
-                        await func(event.key, self.owner, obj)
-                    triggered = True
+                        actions.append({"key": event.key, "func": func})
                 rand = random.random()
             else:
                 if rand < event.odds:
                     func = EVENT_ACTION_SET.func(event.action)
                     if func:
-                        await func(event.key, self.owner, obj)
-                    triggered = True
+                        actions.append({"key": event.key, "func": func})
                     break
                 rand -= event.odds
+
+        triggered = []
+        if actions:
+            triggered = await async_gather([a["func"](a["key"], self.owner, obj) for a in actions])
 
         return triggered
 
@@ -127,7 +129,7 @@ class EventTrigger(object):
         """
         Called when a character moves in the event handler's owner, usually a room.
         """
-        await self.trigger(EventType.EVENT_TRIGGER_ARRIVE, location.get_element_key(), location)
+        return await self.trigger(EventType.EVENT_TRIGGER_ARRIVE, location.get_element_key(), location)
 
     def at_character_move_out(self, location):
         """
@@ -145,18 +147,17 @@ class EventTrigger(object):
         """
         Called when a character is killed.
         """
-        await self.trigger(EventType.EVENT_TRIGGER_DIE)
+        return await self.trigger(EventType.EVENT_TRIGGER_DIE)
 
     async def at_character_kill(self, opponent):
         """
         Called when a character kills another one.
         """
         # If has kill event.
-        await self.trigger(EventType.EVENT_TRIGGER_KILL, opponent.get_element_key(), opponent)
+        return await self.trigger(EventType.EVENT_TRIGGER_KILL, opponent.get_element_key(), opponent)
 
     async def at_dialogue(self, dlg_key):
         """
         Called when a character finishes a dialogue.
         """
-        triggered = await self.trigger(EventType.EVENT_TRIGGER_DIALOGUE, dlg_key)
-        return not triggered
+        return await self.trigger(EventType.EVENT_TRIGGER_DIALOGUE, dlg_key)

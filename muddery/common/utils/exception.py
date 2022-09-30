@@ -87,3 +87,5 @@ class ERR(object):
     can_not_find_command = 10022
 
     can_not_pass = 10023
+
+    skill_in_cd = 10024

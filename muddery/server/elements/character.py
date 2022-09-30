@@ -12,6 +12,7 @@ import time, traceback, ast
 from datetime import datetime
 import pytz
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from muddery.common.utils.exception import MudderyError, ERR
 from muddery.server.settings import SETTINGS
 from muddery.server.utils.logger import logger
 from muddery.server.combat.combat_handler import COMBAT_HANDLER
@@ -395,12 +396,12 @@ class MudderyCharacter(ELEMENT("MATTER")):
         skill_obj = skill_info["obj"]
 
         if not await skill_obj.is_available(self, False):
-            return
+            raise MudderyError(ERR.invalid_input, _("This skill is not available."))
 
         time_now = time.time()
         if time_now < self.gcd_finish_time and time_now < skill_info["cd_finish"]:
             # In cd.
-            return
+            raise MudderyError(ERR.skill_in_cd, _("This skill is cooling down."))
 
         cast_result = await skill_obj.cast(self, target)
 
@@ -411,32 +412,14 @@ class MudderyCharacter(ELEMENT("MATTER")):
         # save cd finish time
         self.skills[skill_key]["cd_finish"] = time_now + skill_obj.get_cd()
 
-        skill_cd = {
+        return {
             "skill_cd": {
                 "skill": skill_key,  # skill's key
                 "cd": skill_obj.get_cd(),  # skill's cd
                 "gcd": self.skill_gcd
-            }
+            },
+            "result": cast_result,
         }
-
-        skill_result = {
-            "skill_cast": cast_result
-        }
-
-        await self.msg(skill_cd)
-
-        # send skill result to the player's location
-        combat = await self.get_combat()
-        if combat:
-            await combat.msg_all(skill_result)
-        else:
-            if self.location:
-                # send skill result to its location
-                await self.location.msg_characters(skill_result)
-            else:
-                await self.msg(skill_result)
-
-        return
 
     async def cast_combat_skill(self, skill_key, target_id):
         """

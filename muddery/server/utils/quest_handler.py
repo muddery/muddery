@@ -6,7 +6,7 @@ import weakref
 from muddery.server.utils.logger import logger
 from muddery.server.statements.statement_handler import STATEMENT_HANDLER
 from muddery.server.utils.localized_strings_handler import _
-from muddery.common.utils.exception import MudderyError
+from muddery.common.utils.exception import MudderyError, ERR
 from muddery.server.utils.game_settings import GameSettings
 from muddery.server.database.worlddata.worlddata import WorldData
 from muddery.server.database.worlddata.quest_dependencies import QuestDependencies
@@ -264,19 +264,12 @@ class QuestHandler(object):
             logger.log_err("Can't get quest %s's condition: %s" % (quest_key, e))
         return False
 
-    async def show_quests(self):
-        """
-        Send quests to player.
-        """
-        quests = await self.get_quests_info()
-        await self.owner.msg({"quests": quests})
-
-    async def get_quests_info(self):
+    async def get_quests(self):
         """
         Get quests' data.
         """
         if self.quests:
-            quests_info = await async_gather([quest["obj"].return_info() for quest in self.quests.values()])
+            quests_info = await async_gather([quest["obj"].get_info() for quest in self.quests.values()])
         else:
             quests_info = []
 
@@ -365,7 +358,10 @@ class QuestHandler(object):
         :param quest_key:
         :return:
         """
-        return self.quests[quest_key]["obj"]
+        try:
+            return self.quests[quest_key]["obj"]
+        except KeyError:
+            raise MudderyError(ERR.invalid_input, _("Can not find the skill."))
 
     async def get_quest_info(self, quest_key):
         """
@@ -374,4 +370,4 @@ class QuestHandler(object):
         :return:
         """
         quest = self.get_quest(quest_key)
-        return await quest.return_info()
+        return await quest.get_info()

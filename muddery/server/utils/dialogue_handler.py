@@ -226,16 +226,23 @@ class DialogueHandler(Singleton):
             caller (object): the dialogue caller
             npc (object, optional): the dialogue's NPC, can be None
         """
+        results = {}
+
         if not caller:
-            return
+            return results
 
         dlg = await self.get_dialogue(dlg_key)
         if not dlg:
-            return
+            return results
 
         # do dialogue's event
-        await caller.event.at_dialogue(dlg_key)
+        events = await caller.event.at_dialogue(dlg_key)
+        if events:
+            results["events"] = events
+
         await caller.quest_handler.at_objective(defines.OBJECTIVE_TALK, dlg_key)
+
+        return results
 
     def clear(self):
         """

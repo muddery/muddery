@@ -56,7 +56,7 @@ class MudderyExit(ELEMENT("MATTER")):
             self.destination_obj = weakref.ref(Server.world.get_room(self.const.destination))
 
         try:
-            await character.move_to(self.destination_obj())
+            return await character.move_to(self.destination_obj())
         except Exception as e:
             logger.log_err("%s cannot set location: (%s)%s." % (character.get_id(), type(e).__name__, e))
             raise MudderyError(ERR.unknown, _("You can not go there."))

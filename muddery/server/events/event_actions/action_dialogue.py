@@ -36,7 +36,6 @@ class ActionDialogue(BaseEventAction):
         for record in records:
             if rand <= record.odds:
                 # Make dialogue.
-                await character.show_dialogue(record.dialogue)
-                return
+                return await character.start_dialogue(record.dialogue)
 
             rand -= record.odds

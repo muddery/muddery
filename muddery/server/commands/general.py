@@ -51,10 +51,10 @@ async def inventory_obj(character, args) -> dict or None:
     return await character.get_inventory_object_appearance(args)
 
 
-@CharacterCmd.request("equipments")
-async def equipments(character, args) -> dict or None:
+@CharacterCmd.request("all_equipments")
+async def all_equipments(character, args) -> dict or None:
     """
-    observe equipments
+    observe all equipments on the player's body
 
     Usage:
         {
@@ -191,14 +191,14 @@ class CmdLookRoomChar(BaseCommand):
 @CharacterCmd.request("traverse")
 async def traverse(character, args) -> dict or None:
     """
-    tranverse an exit
+    traverse an exit
 
     Usage: {
         "cmd": "traverse",
         "args": <exit's key>
     }
 
-    Tranverse an exit, go to the destination of the exit.
+    Traverse an exit, go to the destination of the exit.
     """
     if not character.is_alive:
         raise MudderyError(ERR.can_not_pass, _("You are died."))
@@ -212,12 +212,16 @@ async def traverse(character, args) -> dict or None:
     except Exception as e:
         raise MudderyError(ERR.invalid_input, _("Can not find the exit."))
 
-    await exit_obj.traverse(character)
+    results = await exit_obj.traverse(character)
+    if not results:
+        results = {}
 
-    return {
+    results.update({
         "location": character.get_location_info(),
         "look_around": character.look_around()
-    }
+    })
+
+    return results
 
 
 #------------------------------------------------------------
@@ -255,48 +259,41 @@ class CmdTalk(BaseCommand):
         await caller.talk_to_npc(npc)
 
 
-#------------------------------------------------------------
-# talk to npc
-#------------------------------------------------------------
-
-class CmdDialogue(BaseCommand):
+@CharacterCmd.request("finish_dialogue")
+async def finish_dialogue(character, args) -> dict or None:
     """
-    Continue a dialogue.
+    Finish current dialogue.
 
     Usage:
-        {"cmd":"dialogue",
-         "args":{"dialogue":<current dialogue>,
-                 "npc":<npc's id>,
+        {
+            "cmd": "finish_dialogue",
+            "args":
+                {
+                    "dialogue": <current dialogue>,
+                    "npc": <npc's id>,
                 }
         }
 
     Dialogue and sentence refer to the current sentence. This command finishes
     current sentence and get next sentences.
     """
-    key = "finish_dialogue"
+    if not args:
+        raise MudderyError(ERR.missing_args, _("You should talk to someone."))
 
-    @classmethod
-    async def func(cls, caller, args):
-        "Continue a dialogue."
-        if not args:
-            await caller.msg({"alert":_("You should talk to someone.")})
-            return
+    # Get the dialogue.
+    if "dialogue" not in args:
+        raise MudderyError(ERR.missing_args, _("You should say something."))
+    dlg_key = args["dialogue"]
 
-        # Get the dialogue.
-        if "dialogue" not in args:
-            await caller.msg({"alert": _("You should say something.")})
-            return
-        dlg_key = args["dialogue"]
+    try:
+        # get NPC
+        npc_id = int(args["npc"])
+        room = character.get_location()
+        npc = room.get_character(npc_id)
+    except:
+        npc = None
 
-        try:
-            # get NPC
-            npc_id = int(args["npc"])
-            room = caller.get_location()
-            npc = room.get_character(npc_id)
-        except:
-            npc = None
-
-        await caller.finish_dialogue(dlg_key, npc)
+    return await character.finish_dialogue(dlg_key, npc)
 
 
 #------------------------------------------------------------
@@ -506,11 +503,8 @@ class CmdTakeOff(BaseCommand):
         await caller.msg(message)
 
 
-#------------------------------------------------------------
-# cast a skill
-#------------------------------------------------------------
-
-class CmdCastSkill(BaseCommand):
+@CharacterCmd.request("cast_skill")
+async def cast_skill(character, args) -> dict or None:
     """
     Cast a skill when the caller is not in combat.
 
@@ -531,50 +525,35 @@ class CmdCastSkill(BaseCommand):
         }
     
     """
-    key = "cast_skill"
+    if not character.is_alive:
+        raise MudderyError(ERR.invalid_input, _("You are died."))
 
-    @classmethod
-    async def func(cls, caller, args):
-        "Cast a skill."
-        if not caller.is_alive:
-            await caller.msg({"alert":_("You are died.")})
-            return
+    if character.is_in_combat():
+        raise MudderyError(ERR.invalid_input, _("You can not cast this skill in a combat."))
 
-        if caller.is_in_combat():
-            await caller.msg({"alert": _("You can not cast this skill in a combat.")})
-            return
+    if not args:
+        raise MudderyError(ERR.missing_args, _("You should select a skill to cast."))
 
-        if not args:
-            await caller.msg({"alert":_("You should select a skill to cast.")})
-            return
+    # get skill and target
+    target = None
+    if isinstance(args, str):
+        # If the args is a skill's key.
+        skill_key = args
+    else:
+        # If the args is skill's key and target.
+        if "skill" not in args:
+            raise MudderyError(ERR.missing_args, _("You should select a skill to cast."))
+        skill_key = args["skill"]
 
-        # get skill and target
-        skill_key = None
-        target = None
-        if isinstance(args, str):
-            # If the args is a skill's key.
-            skill_key = args
-        else:
-            # If the args is skill's key and target.
-            if "skill" not in args:
-                await caller.msg({"alert":_("You should select a skill to cast.")})
-                return
-            skill_key = args["skill"]
-
-            # Get target
-            try:
-                target_id = int(args["target"])
-                room = caller.get_location()
-                target = room.get_character(target_id)
-            except:
-                target = None
-
+        # Get target
         try:
-            await caller.cast_skill(skill_key, target)
-        except Exception as e:
-            await caller.msg({"alert":_("Can not cast this skill.")})
-            logger.log_trace("Can not cast skill %s: %s" % (skill_key, e))
-            return
+            target_id = int(args["target"])
+            room = character.get_location()
+            target = room.get_character(target_id)
+        except:
+            target = None
+
+    return await character.cast_skill(skill_key, target)
 
 
 #------------------------------------------------------------
@@ -956,7 +935,22 @@ class CmdBuy(BaseCommand):
             return
 
 
-class CmdQueryQuest(BaseCommand):
+@CharacterCmd.request("all_quests")
+async def all_quests(character, args) -> dict or None:
+    """
+    Query the character's all quests.
+
+    Usage:
+        {
+            "cmd": "all_quests",
+            "args": ""
+        }
+    """
+    return await character.get_quests()
+
+
+@CharacterCmd.request("query_quest")
+async def query_quest(character, args) -> dict or None:
     """
     Query a quest's detail information.
 
@@ -968,27 +962,30 @@ class CmdQueryQuest(BaseCommand):
             }
         }
     """
-    key = "query_quest"
+    if not args or "key" not in args:
+        raise MudderyError(ERR.missing_args, _("Can not find the quest."))
 
-    @classmethod
-    async def func(cls, caller, args):
-        """
-        Handle the looking.
-        """
-        if not args or "key" not in args:
-            await caller.msg({"alert": _("Can not find it.")})
-            return
+    quest_key = args["key"]
 
-        quest_key = args["key"]
-
-        try:
-            await caller.msg({"quest_info": await caller.get_quest_info(quest_key)})
-        except Exception as e:
-            logger.log_err("Can not get %s's quest %s." % (caller.id, quest_key))
-            return
+    return await character.get_quest_info(quest_key)
 
 
-class CmdQuerySkill(BaseCommand):
+@CharacterCmd.request("all_skills")
+async def all_skills(character, args) -> dict or None:
+    """
+    Query the character's all skills.
+
+    Usage:
+        {
+            "cmd": "all_skills",
+            "args": ""
+        }
+    """
+    return character.get_skills()
+
+
+@CharacterCmd.request("query_skill")
+async def query_skill(character, args) -> dict or None:
     """
     Query a skill's detail information.
 
@@ -1000,24 +997,12 @@ class CmdQuerySkill(BaseCommand):
             }
         }
     """
-    key = "query_skill"
+    if not args or "key" not in args:
+        raise MudderyError(ERR.missing_args, _("Can not find the skill."))
 
-    @classmethod
-    async def func(cls, caller, args):
-        """
-        Handle the looking.
-        """
-        if not args or "key" not in args:
-            await caller.msg({"alert": _("Can not find it.")})
-            return
+    skill_key = args["key"]
 
-        skill_key = args["key"]
-
-        try:
-            await caller.msg({"skill_info": await caller.get_skill_info(skill_key)})
-        except Exception as e:
-            logger.log_err("Can not get %s's skill %s." % (caller.id, skill_key))
-            return
+    return await character.get_skill_info(skill_key)
 
 
 @CharacterCmd.request("query_maps")

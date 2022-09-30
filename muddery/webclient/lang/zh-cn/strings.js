@@ -188,4 +188,5 @@ MudderyLocalDict = {
     "Your account have been banned.": "您的账号被禁止了。",
     "Can not create this account.": "无法创建这个账号",
     "This username is not available.": "该用户名不可用。",
+    "No result.": "没有效果。",
 };

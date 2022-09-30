@@ -101,23 +101,9 @@ MudderyClient.prototype = {
                     } else if (key == "look_obj") {
                         mud.popup_object.setObject(data[key]);
                         mud.popup_object.show();
-                    } else if (key == "skill_info") {
-                        mud.skills_window.showSkill(data[key]);
-                    } else if (key == "quest_info") {
-                        mud.quests_window.showQuest(data[key]);
-                    } else if (key == "dialogue") {
-                        mud.popup_dialogue.setDialogue(data[key]);
-                        if (mud.popup_dialogue.hasDialogue() && !mud.main_frame.isWindowShow(mud.combat_window)) {
-                            mud.popup_dialogue.show();
-                        }
                     } else if (key == "status") {
                         var status = data[key];
                         mud.main_frame.setStatus(status);
-                    } else if (key == "skills") {
-                        core.data_handler.setSkills(data[key]);
-                        mud.skills_window.setSkills(data[key]);
-                    } else if (key == "quests") {
-                        mud.quests_window.setQuests(data[key]);
                     } else if (key == "get_objects") {
                         mud.main_frame.showGetObjects(data[key]);
                     } else if (key == "joined_combat") {
@@ -134,16 +120,9 @@ MudderyClient.prototype = {
                         mud.combat_window.updateStatus(data[key]);
                     } else if (key == "combat_commands") {
                         mud.combat_window.setCommands(data[key]);
-                    } else if (key == "skill_cd") {
-                        var skill_cd = data[key];
-                        mud.main_frame.setSkillCD(skill_cd["skill"], skill_cd["cd"], skill_cd["gcd"]);
-                    } else if (key == "skill_cast") {
-                        mud.main_frame.setSkillCast(data[key]);
                     } else if (key == "get_exp") {
                         var get_exp = data[key];
                         mud.main_frame.showGetExp(get_exp["exp"]);
-                    } else if (key == "unpuppet") {
-                        mud.main_frame.onUnpuppet(data[key]);
                     } else if (key == "channels") {
                         mud.conversation_window.setChannels(data[key]);
                     } else if (key == "conversation") {
@@ -163,7 +142,7 @@ MudderyClient.prototype = {
                     } else if (key == "match_rejected") {
                         mud.main_frame.matchRejected(data[key]);
                     } else {
-                        mud.scene_window.displayMessage(data[key]);
+                        mud.main_frame.popupAlert(core.trans("Error"), "Unknown message: " + key);
                     }
                 } catch (error) {
                     console.log(key, data[key])
