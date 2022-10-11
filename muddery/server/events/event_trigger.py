@@ -104,13 +104,13 @@ class EventTrigger(object):
                 if rand < event.odds:
                     func = EVENT_ACTION_SET.func(event.action)
                     if func:
-                        actions.append({"key": event.key, "func": func})
+                        actions.append({"key": event.key, "action": event.action, "func": func})
                 rand = random.random()
             else:
                 if rand < event.odds:
                     func = EVENT_ACTION_SET.func(event.action)
                     if func:
-                        actions.append({"key": event.key, "func": func})
+                        actions.append({"key": event.key, "action": event.action, "func": func})
                     break
                 rand -= event.odds
 
@@ -118,7 +118,7 @@ class EventTrigger(object):
         if actions:
             triggered = await async_gather([a["func"](a["key"], self.owner, obj) for a in actions])
 
-        return triggered
+        return [{item[0]: item[1]} for item in zip([a["action"] for a in actions], triggered)]
 
     #########################
     #

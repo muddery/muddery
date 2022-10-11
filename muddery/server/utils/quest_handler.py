@@ -70,9 +70,11 @@ class QuestHandler(object):
         await CharacterQuests.inst().add(self.owner.get_db_id(), quest_key)
         self.add_objectives(quest)
 
-        await self.owner.msg({"msg": _("Accepted quest {C%s{n.") % quest.get_name()})
-        await self.show_quests()
-        await self.owner.show_location()
+        return {
+            "key": quest_key,
+            "name": quest.get_name()
+        }
+
         
     async def remove_all(self):
         """
@@ -109,8 +111,6 @@ class QuestHandler(object):
         del self.quests[quest_key]
         self.calculate_objectives()
 
-        await self.show_quests()
-
     async def turn_in(self, quest_key):
         """
         Turn in a quest.
@@ -140,7 +140,6 @@ class QuestHandler(object):
         self.calculate_objectives()
 
         await self.owner.msg({"msg": _("Turned in quest {C%s{n.") % name})
-        await self.show_quests()
         await self.owner.show_status()
         await self.owner.show_location()
 
@@ -312,8 +311,6 @@ class QuestHandler(object):
         if (object_type, object_key) not in self.objectives:
             return
 
-        status_changed = False
-
         quest_keys = self.objectives[(object_type, object_key)]
         if quest_keys:
             # Check objectives.
@@ -322,20 +319,14 @@ class QuestHandler(object):
             quests = [quest["obj"] for index, quest in enumerate(self.quests.values()) if results[index]]
 
             if quests:
-                status_changed = True
-
                 # Check if quest is accomplished.
                 accomplished = await async_gather([quest.is_accomplished() for quest in quests])
-                quest_names = [quest.get_name() for index, quest in enumerate(quests) if accomplished[index]]
-                
-                if quest_names:
-                    # Notify the player.
-                    await self.owner.msg([
-                        {"msg": _("Quest {C%s{n's goals are accomplished.") % n} for n in quest_names
-                    ])
-
-        if status_changed:
-            await self.show_quests()
+                return {
+                    "accomplished": [{
+                        "key": quest.get_element_key(),
+                        "name": quest.get_name()
+                    } for index, quest in enumerate(quests) if accomplished[index]]
+                }
 
     async def create_quest(self, quest_key):
         """

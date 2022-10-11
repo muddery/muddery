@@ -113,10 +113,6 @@ class BaseCombat(object):
         if self.characters:
             await async_wait([c["char"].join_combat(combat_id) for c in self.characters.values()])
 
-            awaits = [self.show_combat(c["char"]) for c in self.characters.values() if c["char"].is_player()]
-            if awaits:
-                await async_wait(awaits)
-
     def start(self):
         """
         Start a combat, make all NPCs to cast skills automatically.
@@ -137,28 +133,6 @@ class BaseCombat(object):
         :return:
         """
         self.handler.remove_combat(self.combat_id)
-
-    async def show_combat(self, character):
-        """
-        Show combat information to a character.
-        Args:
-            character: (object) character
-
-        Returns:
-            None
-        """
-        # Show combat information to the player.
-        await character.msg([
-            {
-                "joined_combat": True
-            },
-            {
-                "combat_info": self.get_appearance()
-            },
-            {
-                "combat_status": await self.get_combat_status(),
-            },
-        ])
 
     async def prepare_skill(self, skill_key, caller, target_id):
         """

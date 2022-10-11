@@ -98,9 +98,6 @@ MudderyClient.prototype = {
                         mud.main_frame.objMovedIn(data[key]);
                     } else if (key == "obj_moved_out") {
                         mud.main_frame.objMovedOut(data[key]);
-                    } else if (key == "look_obj") {
-                        mud.popup_object.setObject(data[key]);
-                        mud.popup_object.show();
                     } else if (key == "status") {
                         var status = data[key];
                         mud.main_frame.setStatus(status);
@@ -118,8 +115,6 @@ MudderyClient.prototype = {
                             core.data_handler.character_id);
                     } else if (key == "combat_status") {
                         mud.combat_window.updateStatus(data[key]);
-                    } else if (key == "combat_commands") {
-                        mud.combat_window.setCommands(data[key]);
                     } else if (key == "get_exp") {
                         var get_exp = data[key];
                         mud.main_frame.showGetExp(get_exp["exp"]);

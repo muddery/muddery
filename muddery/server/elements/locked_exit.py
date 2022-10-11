@@ -7,6 +7,7 @@ for allowing Characters to traverse the exit to its destination.
 
 """
 
+from muddery.common.utils.exception import MudderyError, ERR
 from muddery.server.statements.statement_handler import STATEMENT_HANDLER
 from muddery.server.utils.localized_strings_handler import _
 from muddery.server.mappings.element_set import ELEMENT
@@ -51,15 +52,11 @@ class MudderyLockedExit(ELEMENT("EXIT")):
             # Can unlock the exit automatically.
             if self.const.unlock_forever:
                 # Unlock it.
-                await character.unlock_exit(self.get_element_key(), True)
+                await character.unlock_exit(self.get_element_key())
             return True
 
         if character.bypass_events():
             return True
-
-        # Show the object's appearance.
-        detail_appearance = await self.get_detail_appearance(character)
-        await character.msg({"look_obj": detail_appearance})
 
         return False
 

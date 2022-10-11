@@ -42,24 +42,33 @@ class MudderyExit(ELEMENT("MATTER")):
             self.set_desc(_("This is an exit"))
         self.set_desc(self.const.desc)
 
-    async def traverse(self, character):
+    async def traverse(self, character) -> dict:
         """
         Traverse to the destination.
 
         :param character:
-        :return:
+        :return: Traverse result.
+            {
+                "traverse_to": the key of the destination,      // if the character passed the exit
+                "cannot_pass": the appearance of the exit,      // if the character cannot pass
+            }
         """
         if not await self.can_traverse(character):
-            raise MudderyError(ERR.can_not_pass, _("You can not pass."))
+            return {"traversed": False}
 
         if not self.destination_obj:
             self.destination_obj = weakref.ref(Server.world.get_room(self.const.destination))
 
         try:
-            return await character.move_to(self.destination_obj())
+            results = await character.move_to(self.destination_obj())
         except Exception as e:
-            logger.log_err("%s cannot set location: (%s)%s." % (character.get_id(), type(e).__name__, e))
+            logger.log_trace("%s cannot set location: (%s)%s." % (character.get_id(), type(e).__name__, e))
             raise MudderyError(ERR.unknown, _("You can not go there."))
+
+        if not results:
+            results = {}
+        results["traversed"] = True
+        return results
 
     async def can_traverse(self, character):
         """

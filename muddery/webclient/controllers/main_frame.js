@@ -52,51 +52,6 @@ MudderyMainFrame.prototype.popupMessage = function(header, content, buttons) {
     mud.popup_message.show();
 }
 
-/*  
- * Show get objects messages.
- */
-MudderyMainFrame.prototype.showGetObjects = function(objects) {
-	// show accepted objects
-	try {
-		var first = true;
-		for (var i = 0; i < objects.length; i++) {
-		    if (!objects[i].reject) {
-                if (first) {
-                    mud.scene_window.displayMessage(core.trans("You got:"));
-                    first = false;
-                }
-                var name = core.text2html.parseHtml(objects[i]["name"]);
-                mud.scene_window.displayMessage(name + ": " + objects[i]["number"]);
-            }
-		}
-	}
-	catch(error) {
-		console.error(error.message);
-	}
-
-	// show rejected objects
-	/*
-	try {
-		var first = true;
-		for (var i = 0; i < objects.length; i++) {
-		    if (objects[i].reject) {
-                if (first) {
-                    mud.scene_window.displayMessage(core.trans("You can not get:"));
-                    first = false;
-                }
-                mud.scene_window.displayMessage(objects[i]["name"] + ": " + objects[i]["reject"]);
-            }
-		}
-	}
-	catch(error) {
-		console.error(error.message);
-	}
-	*/
-
-    mud.popup_get_objects.setObjects(objects);
-    mud.popup_get_objects.show();
-}
-   
 /*
  * Show the combat window. 
  */
@@ -191,20 +146,71 @@ MudderyMainFrame.prototype.matchRejected = function(character_id) {
 }
 
 /*
+ Handle quest changes.
+ */
+MudderyMainFrame.prototype.handle_quests = function(data) {
+    if ("accomplished" in data) {
+        // show accomplished quests.
+        var accomplished = data["accomplished"];
+        var quests = "";
+        for (var i = 0; i < accomplished.length; i++) {
+            if (quests) {
+                quests += ", ";
+            }
+            quests += "{C" + accomplished[i]["name"] + "{n";
+        }
+        var msg = core.text2html.parseHtml(core.trans("Quest ") + quests + core.trans("'s goals are accomplished."));
+        mud.scene_window.displayMessage(msg);
+    }
+}
+
+/*
  Handle all kind of events.
  */
-MudderyMainFrame.prototype.handle_events = function(events) {
-    for (var i = 0; i < events.length; i++) {
-        if ("dialogues" in events[i]) {
-            mud.popup_dialogue.setDialogue(events[i]);
+MudderyMainFrame.prototype.handle_events = function(data) {
+    for (var i = 0; i < data.length; i++) {
+        if ("ACTION_DIALOGUE" in data[i]) {
+            var event = data[i]["ACTION_DIALOGUE"];
+            mud.popup_dialogue.setDialogue(event);
             if (mud.popup_dialogue.hasDialogue() && !mud.main_frame.isWindowShow(mud.combat_window)) {
                 mud.popup_dialogue.show();
             }
         }
+        else if ("ACTION_ACCEPT_QUEST" in data[i]) {
+            var event = data[i]["ACTION_ACCEPT_QUEST"];
+            var quests = "";
+            for (var i = 0; i < event.length; i++) {
+                if (quests) {
+                    quests += ", ";
+                }
+                quests += "{C" + event[i]["name"] + "{n";
+            }
+
+            var msg = core.text2html.parseHtml(core.trans("Accepted quest ") + quests + core.trans("."));
+            mud.scene_window.displayMessage(msg);
+        }
+        else if ("ACTION_ATTACK" in data[i]) {
+            this.handle_combat(data[i]["ACTION_ATTACK"]);
+        }
         else {
-            mud.main_frame.popupAlert(core.trans("Error"), "Unknown event");
+            mud.main_frame.popupAlert(core.trans("Error"), "Unknown event: " + Object.keys(data[i])[0]);
         }
     }
+}
+
+/*
+ Handle combat.
+ */
+MudderyMainFrame.prototype.handle_combat = function(data) {
+    this.showCombat();
+
+    var info = data["combat_info"];
+    var status = data["combat_status"];
+    var commands = data["combat_commands"];
+
+    mud.combat_window.setCombat(info["desc"], info["timeout"], info["characters"], core.data_handler.character_id);
+    mud.combat_window.updateStatus(status);
+    mud.combat_window.setCommands(commands);
 }
 
 //////////////////////////////////////////
@@ -653,8 +659,41 @@ MudderyPopupObject.prototype.onClose = function(element) {
  */
 MudderyPopupObject.prototype.onCommand = function(element) {
 	var index = $(element).data("index");
-	if ("cmd" in this.buttons[index] && "args" in this.buttons[index]) {
-		core.command.sendCommandLink(this.buttons[index]["cmd"], this.buttons[index]["args"]);
+	var button = this.buttons[index];
+	if ("cmd" in button && "args" in button) {
+	    var command = button["cmd"];
+		core.command.sendCommand(button["cmd"], button["args"], function(code, data, msg) {
+            if (code != 0) {
+                mud.main_frame.popupAlert(core.trans("Error"), core.trans(msg));
+            }
+            else {
+                if (command == "loot") {
+                    mud.popup_get_objects.setObjects(data);
+                    mud.popup_get_objects.show();
+                }
+                else if (command == "unlock_exit") {
+                    mud.popup_object.setObject(data["exit"]);
+                    mud.popup_object.show();
+                }
+                else if (command == "traverse") {
+                    if (data["traversed"]) {
+                        core.map_data.setCurrentLocation(data["location"]);
+                        mud.scene_window.setSurroundings(data["look_around"]);
+
+                        if ("quests" in data) {
+                            mud.main_frame.handle_quests(data["quests"]);
+                        }
+                        if ("events" in data) {
+                            mud.main_frame.handle_events(data["events"]);
+                        }
+                    }
+                    else {
+                        mud.popup_object.setObject(data["exit"]);
+                        mud.popup_object.show();
+                    }
+                }
+            }
+		});
 	}
 
 	this.onClose();
@@ -753,6 +792,12 @@ MudderyPopupGetObjects.prototype.onClose = function(element) {
 MudderyPopupGetObjects.prototype.setObjects = function(objects) {
     var object_list = this.select(".popup-body");
 
+    if (!objects || !objects.length) {
+        $("<p>")
+            .append(core.trans("You get nothing."))
+            .appendTo(object_list);
+    }
+
     for (var i = 0; i < objects.length; i++) {
         var obj = objects[i];
 
@@ -781,6 +826,29 @@ MudderyPopupGetObjects.prototype.setObjects = function(objects) {
                 .html("&times;" + obj["number"])
                 .appendTo(item);
         }
+    }
+
+    for (var i = 0; i < objects.length; i++) {
+        var obj = objects[i];
+
+        if (!obj.reject) {
+            continue;
+        }
+
+        var item = $("<p>")
+            .appendTo(object_list);
+
+        if (obj["icon"]) {
+            $("<img>")
+                .addClass("obj-icon")
+                .attr("src", settings.resource_url + obj["icon"])
+                .appendTo(item);
+        }
+
+        $("<span>")
+            .addClass("reject")
+            .html(obj["reject"])
+            .appendTo(item);
     }
 }
 
@@ -863,7 +931,7 @@ MudderyPopupDialogue.prototype.gotoNext = function() {
                 }
 		    }
 		    else {
-		        self.popupAlert(core.trans("Error"), core.trans(msg));
+		        mud.main_frame.popupAlert(core.trans("Error"), core.trans(msg));
 		    }
 		});
 	}
@@ -2123,7 +2191,15 @@ MudderyScene.prototype.onObject = function(element) {
 
     var room_map = core.map_data.getCurrentRoomMap();
     var object_key = room_map["objects"][index]["key"];
-    core.command.look_room_obj(object_key);
+    core.command.look_room_obj(object_key, function(code, data, msg) {
+        if (code == 0) {
+            mud.popup_object.setObject(data);
+            mud.popup_object.show();
+        }
+        else {
+            mud.main_frame.popupAlert(core.trans("Alert"), core.trans(msg));
+        }
+    });
 }
 
 /*
@@ -2154,14 +2230,21 @@ MudderyScene.prototype.onExit = function(element) {
     var exit_key = room_map["exits"][index]["key"];
     core.command.traverse(exit_key, function(code, data, msg) {
         if (code == 0) {
-            core.map_data.setCurrentLocation(data["location"]);
-            mud.scene_window.setSurroundings(data["look_around"]);
-            if ("events" in data) {
-                mud.main_frame.handle_events(data["events"]);
+            if (data["traversed"]) {
+                core.map_data.setCurrentLocation(data["location"]);
+                mud.scene_window.setSurroundings(data["look_around"]);
+
+                if ("quests" in data) {
+                    mud.main_frame.handle_quests(data["quests"]);
+                }
+                if ("events" in data) {
+                    mud.main_frame.handle_events(data["events"]);
+                }
             }
-        }
-        else if (code == ERR.can_not_pass) {
-            mud.main_frame.popupAlert(core.trans("Alert"), core.trans(msg));
+            else {
+                mud.popup_object.setObject(data["exit"]);
+                mud.popup_object.show();
+            }
         }
         else {
             mud.main_frame.popupAlert(core.trans("Error"), core.trans(msg));
@@ -4335,7 +4418,6 @@ MudderyCombat.prototype.reset = function() {
 	this.self_id = "";
 	this.target = "";
 	this.combat_finished = true;
-	this.skill_cd_time = core.data_handler.skill_cd_time;
 	if (this.interval_id != null) {
 		this.interval_id = window.clearInterval(this.interval_id);
 	}
@@ -4471,6 +4553,7 @@ MudderyCombat.prototype.setCommands = function(commands) {
 
     for (var i in commands) {
         var command = commands[i];
+        this.skill_cd_time[command["key"]] = command["cd"];
 
         var item = $("<div>")
             .addClass("skill-button")

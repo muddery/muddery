@@ -21,20 +21,6 @@ class HonourCombat(BaseCombat):
             character = char["char"]
             character.stop_auto_combat_skill()
 
-    async def show_combat(self, character):
-        """
-        Show combat information to a character.
-        Args:
-            character: (object) character
-
-        Returns:
-            None
-        """
-        await super(HonourCombat, self).show_combat(character)
-
-        # send messages in order
-        await character.msg({"combat_commands": character.get_combat_commands()})
-
     async def calc_winners(self):
         """
         Calculate combat winners and losers.

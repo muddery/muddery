@@ -117,10 +117,8 @@ async def say(character, args) -> dict or None:
     return
 
 
-#------------------------------------------------------------
-# look at an object in the room
-#------------------------------------------------------------
-class CmdLookRoomObj(BaseCommand):
+@CharacterCmd.request("look_room_obj")
+async def look_room_obj(character, args) -> dict or None:
     """
     look at an object in the room
 
@@ -129,27 +127,19 @@ class CmdLookRoomObj(BaseCommand):
         "args": <object's key>
     }
     """
-    key = "look_room_obj"
+    if not character.is_alive:
+        raise MudderyError(ERR.invalid_input, _("You are died."))
 
-    @classmethod
-    async def func(cls, caller, args):
-        if not caller.is_alive:
-            await caller.msg({"alert": _("You are died.")})
-            return
+    if not args:
+        raise MudderyError(ERR.missing_args, _("You should appoint an object."))
 
-        if not args:
-            await caller.msg({"alert": _("You should appoint an object.")})
-            return
+    try:
+        room = character.get_location()
+        obj = room.get_object(args)
+    except Exception as e:
+        raise MudderyError(ERR.invalid_input, _("Can not find the object."))
 
-        try:
-            room = caller.get_location()
-            obj = room.get_object(args)
-        except Exception as e:
-            await caller.msg({"alert": _("Can not find the object.")})
-            return
-
-        detail_appearance = await obj.get_detail_appearance(caller)
-        await caller.msg({"look_obj": detail_appearance})
+    return await obj.get_detail_appearance(character)
 
 
 #------------------------------------------------------------
@@ -206,20 +196,27 @@ async def traverse(character, args) -> dict or None:
     if not args:
         raise MudderyError(ERR.missing_args, _("Should appoint an exit to go."))
 
+    exit_key = args
+
     try:
         room = character.get_location()
-        exit_obj = room.get_exit(args)
+        exit_obj = room.get_exit(exit_key)
     except Exception as e:
         raise MudderyError(ERR.invalid_input, _("Can not find the exit."))
 
     results = await exit_obj.traverse(character)
-    if not results:
-        results = {}
 
-    results.update({
-        "location": character.get_location_info(),
-        "look_around": character.look_around()
-    })
+    if results["traversed"]:
+        # the character moved to the new location
+        results.update({
+            "location": character.get_location_info(),
+            "look_around": character.look_around()
+        })
+    else:
+        # can not traverse
+        results.update({
+            "exit": await exit_obj.get_detail_appearance(character)
+        })
 
     return results
 
@@ -296,10 +293,8 @@ async def finish_dialogue(character, args) -> dict or None:
     return await character.finish_dialogue(dlg_key, npc)
 
 
-#------------------------------------------------------------
-# loot objects
-#------------------------------------------------------------
-class CmdLoot(BaseCommand):
+@CharacterCmd.request("loot")
+async def loot(character, args) -> dict or None:
     """
     Loot from a specified object.
 
@@ -311,31 +306,17 @@ class CmdLoot(BaseCommand):
     This command pick out random objects from the loot list and give
     them to the character.
     """
-    key = "loot"
+    if not args:
+        raise MudderyError(ERR.missing_args, _("You should loot something."))
 
-    @classmethod
-    async def func(cls, caller, args):
-        "Loot objects."
-        caller = caller
+    try:
+        room = character.get_location()
+        obj = room.get_object(args)
+    except:
+        raise MudderyError(ERR.invalid_input, _("Can not find the object."))
 
-        if not args:
-            await caller.msg({"alert":_("You should loot something.")})
-            return
-
-        try:
-            room = caller.get_location()
-            obj = room.get_object(args)
-        except:
-            await caller.msg({"alert": _("Can not find the object.")})
-            return
-
-        try:
-            # do loot
-            await obj.loot(caller)
-        except Exception as e:
-            ostring = "Can not loot %s: %s" % (obj.get_element_key(), e)
-            logger.log_trace(ostring)
-            return
+    # loot
+    return await obj.loot(character)
 
 
 #------------------------------------------------------------
@@ -816,39 +797,38 @@ class CmdGiveUpQuest(BaseCommand):
         await caller.msg(message)
 
 
-#------------------------------------------------------------
-# unlock exit
-#------------------------------------------------------------
-class CmdUnlockExit(BaseCommand):
+@CharacterCmd.request("unlock_exit")
+async def unlock_exit(character, args) -> dict or None:
     """
-    Unlock an exit.
+    Unlock a locked exit. A character must unlock a LockedExit before traverse it.
 
     Usage:
-        {"cmd":"unlock_exit",
-         "args":<object's id>
+        {
+            "cmd": "unlock",
+            "args": <object's id>
         }
-    A character must unlock a LockedExit before tranverse it.
     """
-    key = "unlock_exit"
+    if not args:
+        raise MudderyError(ERR.missing_args, _("You should unlock something."))
 
-    @classmethod
-    async def func(cls, caller, args):
-        "Open a locked exit."
-        if not args:
-            await caller.msg({"alert": _("You should unlock something.")})
-            return
+    exit_key = args
 
-        exit_key = args
+    try:
+        room = character.get_location()
+        exit_obj = room.get_exit(exit_key)
+    except Exception as e:
+        raise MudderyError(ERR.invalid_input, _("Can not find the exit."))
 
-        try:
-            # Unlock the exit.
-            if not await caller.unlock_exit(exit_key, False):
-                await caller.msg({"alert": _("Can not open this exit.")})
-                return
-        except Exception as e:
-            await caller.msg({"alert": _("Can not open this exit.")})
-            logger.log_trace("Can not open exit %s: %s" % (exit_key, e))
-            return
+    # Unlock the exit.
+    if await character.unlock_exit(exit_key):
+        # The exit may have different appearance after unlocking.
+        # Send the lastest appearance to the caller.
+        return {
+            "unlocked": True,
+            "exit": await exit_obj.get_detail_appearance(character)
+        }
+    else:
+        return {"unlocked": False}
 
 
 #------------------------------------------------------------

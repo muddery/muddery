@@ -306,13 +306,15 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
 
         results = {}
         if self.location:
-            await async_wait([
-                self.location.at_character_arrive(self),
-                self.quest_handler.at_objective(defines.OBJECTIVE_ARRIVE, location_key),
-            ])
+            await self.location.at_character_arrive(self)
 
             # Trigger the arrive event.
-            events = await self.event.at_character_move_in(self.location)
+            quests, events = await async_gather([
+                self.quest_handler.at_objective(defines.OBJECTIVE_ARRIVE, location_key),
+                self.event.at_character_move_in(self.location)
+            ])
+            if quests:
+                results["quests"] = quests
             if events:
                 results["events"] = events
 
@@ -554,7 +556,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
                 })
 
         if obj_list:
-            await self.receive_objects(obj_list, mute=True)
+            await self.receive_objects(obj_list)
 
     def total_object_number(self, obj_key):
         """
@@ -574,7 +576,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         """
         return self.total_object_number(obj_key) > 0
 
-    async def receive_object(self, object_key, number, level, mute=False):
+    async def receive_object(self, object_key, number, level):
         """
         Add an object to the inventory.
         :param object_key:
@@ -588,9 +590,9 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
             "number": number,
             "level": level
         }]
-        return await self.receive_objects(obj_list, mute)
+        return await self.receive_objects(obj_list)
 
-    async def receive_objects(self, obj_list, mute=False):
+    async def receive_objects(self, obj_list):
         """
         Add a list of objects to the inventory.
 
@@ -751,10 +753,6 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
                 "number": accepted,
                 "reject": reject,
             })
-
-        if not mute:
-            # Send results to the player.
-            await self.msg({"get_objects": objects})
 
         # call quest handler
         awaits = [
@@ -1295,7 +1293,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         unlocked_exits.remove(exit_key)
         await self.states.save("unlocked_exits", unlocked_exits)
 
-    async def unlock_exit(self, exit_key, auto_unlock):
+    async def unlock_exit(self, exit_key) -> bool:
         """
         Unlock an exit. Add the exit's key to the character's unlock list.
         """
@@ -1304,17 +1302,10 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
             return True
 
         if not await self.location.can_unlock_exit(self, exit_key):
-            await self.msg({"msg": _("Can not open this exit.")})
             return False
 
         unlocked_exits.add(exit_key)
         await self.states.save("unlocked_exits", unlocked_exits)
-
-        if not auto_unlock:
-            # The exit may have different appearance after unlocking.
-            # Send the lastest appearance to the caller.
-            detail_appearance = await self.location.get_exit_appearance(self, exit_key)
-            await self.msg({"look_obj": detail_appearance})
 
         return True
 

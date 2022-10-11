@@ -36,6 +36,12 @@ class ActionAttack(BaseEventAction):
             if rand <= record.odds:
                 # Attack mob.
                 await character.attack_temp_target(record.mob, record.level, record.desc)
-                return
+                combat = await character.get_combat()
+                if combat:
+                    return {
+                        "combat_info": combat.get_appearance(),
+                        "combat_commands": character.get_combat_commands(),
+                        "combat_status": await combat.get_combat_status(),
+                    }
 
             rand -= record.odds

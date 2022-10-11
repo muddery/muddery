@@ -720,6 +720,7 @@ class MudderyCharacter(ELEMENT("MATTER")):
                 "key": key,
                 "name": skill["obj"].get_name(),
                 "icon": skill["obj"].get_icon(),
+                "cd": skill["obj"].get_cd(),
             }
 
             commands.append(command)

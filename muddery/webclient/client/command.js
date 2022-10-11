@@ -85,13 +85,13 @@ MudderyCommand.prototype = {
         this.sendCommand(cmd, args, callback);
     },
 
-    castCombatSkill: function(skill, target) {
+    castCombatSkill: function(skill, target, callback) {
         var cmd = "cast_combat_skill";
         var args = {
             "skill": skill,
             "target": target,
         };
-        this.sendCommand(cmd, args);
+        this.sendCommand(cmd, args, callback);
     },
 
     leaveCombat: function() {
@@ -146,8 +146,8 @@ MudderyCommand.prototype = {
     },
 
     // look at an object in the room
-    look_room_obj: function(object_key) {
-        this.sendCommand("look_room_obj", object_key);
+    look_room_obj: function(object_key, callback) {
+        this.sendCommand("look_room_obj", object_key, callback);
     },
 
     // look at a character in the room

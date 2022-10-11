@@ -77,13 +77,14 @@ class BaseCommandSet(object):
                             "response": {
                                 "sn": sn,
                                 "code": e.code,
+                                "data": e.data,
                                 "msg": str(e)
                             }
                         })
 
                     return
                 except Exception as e:
-                    logger.log_err("Run command error, %s: %s" % (caller, e))
+                    logger.log_trace("Run command error, %s: %s" % (caller, e))
                     sn = kwargs.get("sn")
                     if sn is not None:
                         await caller.msg({

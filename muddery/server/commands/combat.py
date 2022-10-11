@@ -2,9 +2,11 @@
 Battle commands. They only can be used when a character is in a combat.
 """
 
+from muddery.common.utils.exception import MudderyError, ERR
 from muddery.server.utils.logger import logger
 from muddery.server.commands.base_command import BaseCommand
 from muddery.server.utils.localized_strings_handler import _
+from muddery.server.commands.command_set import CharacterCmd
 
 
 class CmdCombatInfo(BaseCommand):
@@ -63,11 +65,8 @@ class CmdLeaveCombat(BaseCommand):
         await caller.leave_combat()
 
 
-# ------------------------------------------------------------
-# cast a skill in combat
-# ------------------------------------------------------------
-
-class CmdCastCombatSkill(BaseCommand):
+@CharacterCmd.request("cast_combat_skill")
+async def cast_combat_skill(character, args) -> dict or None:
     """
     Cast a skill when the caller is in combat.
 
@@ -89,49 +88,38 @@ class CmdCastCombatSkill(BaseCommand):
         }
 
     """
-    key = "cast_combat_skill"
+    if not character.is_alive:
+        raise MudderyError(ERR.invalid_input, _("You are died."))
 
-    @classmethod
-    async def func(cls, caller, args):
-        "Cast a skill in a combat."
-        if not caller.is_alive:
-            await caller.msg({"alert": _("You are died.")})
-            return
+    if not character.is_in_combat():
+        raise MudderyError(ERR.invalid_input, _("You can only cast this skill in a combat."))
 
-        if not caller.is_in_combat():
-            await caller.msg({"alert": _("You can only cast this skill in a combat.")})
-            return
+    if character.is_auto_cast_skill():
+        raise MudderyError(ERR.invalid_input, _("You can not cast skills manually."))
 
-        if caller.is_auto_cast_skill():
-            await caller.msg({"alert": _("You can not cast skills manually.")})
-            return
+    if not args:
+        raise MudderyError(ERR.missing_args, _("You should select a skill to cast."))
 
-        if not args:
-            await caller.msg({"alert": _("You should select a skill to cast.")})
-            return
+    # get skill and target
+    target_id = None
+    if isinstance(args, str):
+        # If the args is a skill's key.
+        skill_key = args
+    else:
+        # If the args is skill's key and target.
+        if "skill" not in args:
+            raise MudderyError(ERR.missing_args, _("You should select a skill to cast."))
 
-        # get skill and target
-        skill_key = None
-        target_id = None
-        if isinstance(args, str):
-            # If the args is a skill's key.
-            skill_key = args
-        else:
-            # If the args is skill's key and target.
-            if not "skill" in args:
-                await caller.msg({"alert": _("You should select a skill to cast.")})
-                return
+        skill_key = args["skill"]
 
-            skill_key = args["skill"]
+        # Get target
+        if "target" in args:
+            target_id = int(args["target"])
 
-            # Get target
-            if "target" in args:
-                target_id = int(args["target"])
-
-        try:
-            # cast this skill.
-            await caller.cast_combat_skill(skill_key, target_id)
-        except Exception as e:
-            await caller.msg({"alert": _("Can not cast this skill.")})
-            logger.log_trace("Can not cast skill %s: %s" % (skill_key, e))
-            return
+    try:
+        # cast this skill.
+        await character.cast_combat_skill(skill_key, target_id)
+    except Exception as e:
+        await caller.msg({"alert": _("Can not cast this skill.")})
+        logger.log_trace("Can not cast skill %s: %s" % (skill_key, e))
+        return

@@ -189,4 +189,9 @@ MudderyLocalDict = {
     "Can not create this account.": "无法创建这个账号",
     "This username is not available.": "该用户名不可用。",
     "No result.": "没有效果。",
+    "You get nothing.": "没有获得物品。",
+    "Accepted quest ": "接受任务",
+    "Quest ": "任务",
+    "'s goals are accomplished.": "的目标已完成。",
+    ".": "。",
 };
