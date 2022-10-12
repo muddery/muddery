@@ -405,44 +405,30 @@ class CmdDiscard(BaseCommand):
             return
 
 
-#------------------------------------------------------------
-# put on equipment
-#------------------------------------------------------------
-
-class CmdEquip(BaseCommand):
+@CharacterCmd.request("equip")
+async def equip(character, args) -> dict or None:
     """
-    Put on an equipment.
+    Put on equipment.
 
     Usage:
-        {"cmd":"equip",
-         "args":<object's id>
+        {
+            "cmd": "equip",
+            "args": <object's id>
         }
-    Put on an equipment and add its attributes to the character.
+    Put on equipment and add its attributes to the character.
     """
-    key = "equip"
+    if not args or "position" not in args:
+        raise MudderyError(ERR.missing_args, _("You should equip something."))
 
-    @classmethod
-    async def func(cls, caller, args):
-        "Put on an equipment."
-        caller = caller
+    position = args["position"]
 
-        if not args or "position" not in args:
-            await caller.msg({"alert": _("You should equip something.")})
-            return
-        position = args["position"]
+    # equip
+    await character.equip_object(int(position))
 
-        try:
-            # equip
-            await caller.equip_object(int(position))
-        except Exception as e:
-            await caller.msg({"alert": _("Can not use this equipment.")})
-            logger.log_trace("Can not use equipment %s: %s" % (args, e))
-            return
-
-        # Send lastest status to the player.
-        message = {"alert": _("Equipped!")}
-        await caller.msg(message)
-
+    return {
+        "status": await character.return_status(),
+        "inventory": character.get_inventory_appearance()
+    }
 
 #------------------------------------------------------------
 # take off equipment

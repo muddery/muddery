@@ -132,6 +132,8 @@ MudderyClient.prototype = {
                         mud.main_frame.inCombatQueue(data[key]);
                     } else if (key == "left_combat_queue") {
                         mud.main_frame.leftCombatQueue(data[key]);
+                    } else if (key == "combat_skill_cast") {
+                        mud.combat_window.setSkillCast(data[key]);
                     } else if (key == "prepare_match") {
                         mud.main_frame.prepareMatch(data[key]);
                     } else if (key == "match_rejected") {

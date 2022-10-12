@@ -3303,9 +3303,7 @@ MudderyInventory.prototype.onCommand = function(element) {
 	var index = $(element).data("index");
 	if ("cmd" in this.buttons[index]) {
 	    if (!this.buttons[index]["confirm"]) {
-	        var args = this.buttons[index]["args"]? this.buttons[index]["args"]: {};
-	        args["position"] = this.item_selected;
-		    core.command.sendCommandLink(this.buttons[index]["cmd"], args);
+	        this.confirmCommand(index);
 		}
 		else {
 		    var self = this;
@@ -3331,11 +3329,22 @@ MudderyInventory.prototype.onCommand = function(element) {
 /*
  * Confirm the command.
  */
-MudderyInventory.prototype.confirmCommand = function(data) {
-	var index = data;
-	var args = this.buttons[index]["args"]? this.buttons[index]["args"]: {};
+MudderyInventory.prototype.confirmCommand = function(index) {
+	var button = this.buttons[index];
+	var command = button["cmd"];
+	var args = button["args"]? button["args"]: {};
 	args["position"] = this.item_selected;
-    core.command.sendCommandLink(this.buttons[index]["cmd"], args);
+    core.command.sendCommand(command, args, function(code, data, msg) {
+        if (code != 0) {
+            mud.main_frame.popupAlert(core.trans("Error"), core.trans(msg));
+        }
+        else {
+            if (command == "equip") {
+                mud.main_frame.setStatus(data["status"]);
+                mud.inventory_window.setInventory(data["inventory"]);
+            }
+        }
+    });
 }
 
 /*
@@ -4396,7 +4405,17 @@ MudderyCombat.prototype.onCombatSkill = function(element) {
 		}
 	}
 
-	core.command.castCombatSkill(key, this.target);
+	core.command.castCombatSkill(key, this.target, function(code, data, msg) {
+	    if (code == 0) {
+	        // reset skill's cd
+	        if ("skill_cd" in data) {
+	            mud.combat_window.setSkillCD(data["skill_cd"]["key"], data["skill_cd"]["cd"], data["skill_cd"]["gcd"]);
+	        }
+	    }
+	    else {
+            mud.main_frame.popupAlert(core.trans("Error"), core.trans(msg));
+        }
+	});
 }
 
 /*
@@ -4845,8 +4864,14 @@ MudderyCombatResult.prototype.bindEvents = function() {
  */
 MudderyCombatResult.prototype.onClose = function(element) {
 	// close popup box
-	core.command.leaveCombat();
-    mud.combat_window.leaveCombat();
+	core.command.leaveCombat(function(code, data, msg) {
+	    if (code == 0) {
+            mud.combat_window.leaveCombat();
+        }
+        else {
+            mud.main_frame.popupAlert(core.trans("Error"), core.trans(msg));
+        }
+    });
 }
 
 /*

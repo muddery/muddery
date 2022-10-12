@@ -391,6 +391,12 @@ class MudderyCharacter(ELEMENT("MATTER")):
         Args:
             skill_key: (string) skill's key.
             target: (object) skill's target.
+
+        return:
+            {
+                "skill_cd": skill's cd time,
+                "result": cast_result,
+            }
         """
         skill_info = self.skills[skill_key]
         skill_obj = skill_info["obj"]
@@ -427,9 +433,13 @@ class MudderyCharacter(ELEMENT("MATTER")):
         """
         combat = await self.get_combat()
         if combat:
-            await combat.prepare_skill(skill_key, self, target_id)
+            result = await combat.cast_skill(skill_key, self, target_id)
+            return {
+                "skill_cd": result["skill_cd"]
+            }
         else:
             logger.log_err("Character %s is not in combat." % self.id)
+            raise MudderyError(ERR.invalid_input, _("You can only cast this skill in a combat."))
 
     async def auto_cast_skill(self):
         """

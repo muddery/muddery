@@ -94,8 +94,8 @@ MudderyCommand.prototype = {
         this.sendCommand(cmd, args, callback);
     },
 
-    leaveCombat: function() {
-        this.sendCommand("leave_combat");
+    leaveCombat: function(callback) {
+        this.sendCommand("leave_combat", {}, callback);
     },
 
     // change password
@@ -135,6 +135,10 @@ MudderyCommand.prototype = {
 
     inventoryObject: function(position, callback) {
         this.sendCommand("inventory_obj", position, callback);
+    },
+
+    equip: function(callback) {
+        this.sendCommand("equip", {}, callback);
     },
 
     queryEquipments: function(callback) {

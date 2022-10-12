@@ -39,30 +39,24 @@ class CmdCombatInfo(BaseCommand):
         await caller.msg(message)
 
 
-class CmdLeaveCombat(BaseCommand):
+@CharacterCmd.request("leave_combat")
+async def leave_combat(character, args) -> dict or None:
     """
     Get combat info.
 
     Usage:
-        {"cmd":"leave_combat",
-         "args":""
+        {
+            "cmd":"leave_combat",
+            "args":""
         }
 
     Observes your combat.
     """
-    key = "leave_combat"
+    if not character.is_in_combat():
+        # If the caller is not in combat.
+        raise MudderyError(ERR.invalid_input, _("You are not in combat."))
 
-    @classmethod
-    async def func(cls, caller, args):
-        """
-        Left the current combat.
-        """
-        if not caller.is_in_combat():
-            # If the caller is not in combat.
-            caller.msg({"msg":_("You are not in combat!")})
-            return
-
-        await caller.leave_combat()
+    await character.leave_combat()
 
 
 @CharacterCmd.request("cast_combat_skill")
@@ -116,10 +110,5 @@ async def cast_combat_skill(character, args) -> dict or None:
         if "target" in args:
             target_id = int(args["target"])
 
-    try:
-        # cast this skill.
-        await character.cast_combat_skill(skill_key, target_id)
-    except Exception as e:
-        await caller.msg({"alert": _("Can not cast this skill.")})
-        logger.log_trace("Can not cast skill %s: %s" % (skill_key, e))
-        return
+    # cast this skill.
+    return await character.cast_combat_skill(skill_key, target_id)

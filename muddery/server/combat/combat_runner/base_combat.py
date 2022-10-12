@@ -5,7 +5,7 @@ The life of a combat:
 1. create: create a combat.
 2. set_combat: set teams in the combat and the end time if available, then calls the start_combat.
 3. start_combat: start the combat. Characters in the combat are allowed to use skills.
-4. prepare_skill: characters call the prepare_skill to use skills in the combat. It casts a skill and check if the
+4. cast_skill: characters call the cast_skill to use skills in the combat. It casts a skill and check if the
    combat is finished.
 5. can_finish: Check if the combat is finished. A combat finishes when only one or zero team has alive characters, or
    the combat is timeout. If a combat can finish calls the finish method.
@@ -18,12 +18,15 @@ from enum import Enum
 import time
 import datetime
 import pytz
+import asyncio
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from muddery.common.utils.utils import async_wait, async_gather
-from muddery.server.utils.logger import logger
+from muddery.common.utils.exception import MudderyError, ERR
 from muddery.common.utils import defines
+from muddery.server.utils.logger import logger
 from muddery.server.database.worlddata.worlddata import WorldData
 from muddery.server.mappings.element_set import ELEMENT
+from muddery.server.utils.localized_strings_handler import _
 
 
 class CStatus(Enum):
@@ -134,7 +137,7 @@ class BaseCombat(object):
         """
         self.handler.remove_combat(self.combat_id)
 
-    async def prepare_skill(self, skill_key, caller, target_id):
+    async def cast_skill(self, skill_key, caller, target_id):
         """
         Cast a skill.
 
@@ -142,21 +145,39 @@ class BaseCombat(object):
             skill_key: (string) skill's key
             caller: (obj) the skill's caller's object
             target_id: (int) target's id
+
+        :return
+            {
+                "skill_cd": skill's cd time,
+                "result": cast_result,
+            }
         """
         if self.finished:
-            return
+            raise MudderyError(ERR.invalid_input, _("Combat finished."))
+
+        if not caller:
+            raise MudderyError(ERR.invalid_input, _("Can not cast the skill."))
 
         # get target's object
         target = None
         if target_id and target_id in self.characters:
             target = self.characters[target_id]["char"]
 
-        if caller:
-            await caller.cast_skill(skill_key, target)
+        result = await caller.cast_skill(skill_key, target)
+        asyncio.create_task(self.msg_all({
+            "combat_skill_cast": result["result"],
+        }))
+        asyncio.create_task(self.check_finish())
 
-            if await self.can_finish():
-                # if there is only one team left, kill this handler
-                await self.finish()
+        return result
+
+    async def check_finish(self):
+        """
+        Check the combat.
+        """
+        if await self.can_finish():
+            # if there is only one team left, kill this handler
+            await self.finish()
 
     async def can_finish(self):
         """
@@ -252,8 +273,8 @@ class BaseCombat(object):
 
             self.stop()
 
-    async def msg_all(self, message: str) -> None:
-        "Send message to all combatants"
+    async def msg_all(self, message: dict) -> None:
+        "Send message to all combatants."
         if self.characters:
             await async_wait([c["char"].msg(message) for c in self.characters.values()])
 

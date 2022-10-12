@@ -1218,15 +1218,6 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         # reset character's attributes
         await self.refresh_states(True)
 
-        message = {
-            "status": await self.return_status(),
-            "equipments": self.get_equipments(),
-            "inventory": self.get_inventory_appearance()
-        }
-        await self.msg(message)
-
-        return
-
     async def take_off_equipment(self, body_position, mute=False, refresh=True):
         """
         Take off an equipment.
