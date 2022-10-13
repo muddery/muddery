@@ -98,9 +98,9 @@ MudderyClient.prototype = {
                         mud.main_frame.objMovedIn(data[key]);
                     } else if (key == "obj_moved_out") {
                         mud.main_frame.objMovedOut(data[key]);
-                    } else if (key == "status") {
-                        var status = data[key];
-                        mud.main_frame.setStatus(status);
+                    } else if (key == "state") {
+                        var state = data[key];
+                        mud.main_frame.setState(state);
                     } else if (key == "get_objects") {
                         mud.main_frame.showGetObjects(data[key]);
                     } else if (key == "joined_combat") {
@@ -115,9 +115,6 @@ MudderyClient.prototype = {
                             core.data_handler.character_id);
                     } else if (key == "combat_status") {
                         mud.combat_window.updateStatus(data[key]);
-                    } else if (key == "get_exp") {
-                        var get_exp = data[key];
-                        mud.main_frame.showGetExp(get_exp["exp"]);
                     } else if (key == "channels") {
                         mud.conversation_window.setChannels(data[key]);
                     } else if (key == "conversation") {

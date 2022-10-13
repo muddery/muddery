@@ -4,7 +4,7 @@ Event action.
 
 from muddery.server.events.base_interval_action import BaseIntervalAction
 from muddery.server.database.worlddata.worlddata import WorldData
-from muddery.common.utils.utils import async_wait
+from muddery.common.utils.utils import async_gather
 
 
 class ActionSetRelationship(BaseIntervalAction):
@@ -30,5 +30,5 @@ class ActionSetRelationship(BaseIntervalAction):
 
         # send messages
         if records:
-            await async_wait([character.set_relationship(r.element_type, r.element_key, r.value) for r in records])
+            return await async_gather([character.set_relationship(r.element_type, r.element_key, r.value) for r in records])
 

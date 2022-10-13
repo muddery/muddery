@@ -91,7 +91,7 @@ class MudderyCharacter(ELEMENT("MATTER")):
         # stop auto casting
         self.stop_auto_combat_skill()
 
-    def create_status_handler(self):
+    def create_states_handler(self):
         """
         Characters use memory to store status by default.
         :return:
@@ -129,7 +129,7 @@ class MudderyCharacter(ELEMENT("MATTER")):
         self.set_desc(self.const.desc)
         self.set_icon(self.const.icon)
 
-        self.states = self.create_status_handler()
+        self.states = self.create_states_handler()
 
         # default_relationship
         self.default_relationship = self.const.relationship if self.const.relationship else 0
@@ -263,9 +263,9 @@ class MudderyCharacter(ELEMENT("MATTER")):
             EventType.EVENT_TRIGGER_DIE
         ]
 
-    async def get_combat_status(self):
+    async def get_combat_state(self):
         """
-        Get character status used in combats.
+        Get character state used in combats.
         """
         return {
             "id": self.get_id()
@@ -756,12 +756,6 @@ class MudderyCharacter(ELEMENT("MATTER")):
 
         Returns:
             None
-        """
-        pass
-
-    async def show_status(self):
-        """
-        Show character's status.
         """
         pass
 

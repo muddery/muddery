@@ -41,7 +41,7 @@ class ActionAttack(BaseEventAction):
                     return {
                         "combat_info": combat.get_appearance(),
                         "combat_commands": character.get_combat_commands(),
-                        "combat_status": await combat.get_combat_status(),
+                        "combat_states": await combat.get_combat_states(),
                     }
 
             rand -= record.odds

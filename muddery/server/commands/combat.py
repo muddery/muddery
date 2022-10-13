@@ -56,7 +56,15 @@ async def leave_combat(character, args) -> dict or None:
         # If the caller is not in combat.
         raise MudderyError(ERR.invalid_input, _("You are not in combat."))
 
-    await character.leave_combat()
+    results = await character.leave_combat()
+
+    results.update({
+        "state": await character.get_state(),
+        "location": character.get_location_info(),
+        "look_around": character.look_around(),
+    })
+
+    return results
 
 
 @CharacterCmd.request("cast_combat_skill")

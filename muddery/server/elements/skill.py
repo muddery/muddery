@@ -93,13 +93,13 @@ class MudderySkill(ELEMENT("MATTER")):
 
         if caller:
             skill_cast["caller"] = caller.get_id()
-            skill_cast["status"] = {
-                caller.get_id(): await caller.get_combat_status(),
+            skill_cast["states"] = {
+                caller.get_id(): await caller.get_combat_state(),
             }
 
         if target:
             skill_cast["target"] = target.get_id()
-            skill_cast["status"][target.get_id()] = await target.get_combat_status()
+            skill_cast["states"][target.get_id()] = await target.get_combat_state()
 
         if results:
             skill_cast["result"] = " ".join(results)

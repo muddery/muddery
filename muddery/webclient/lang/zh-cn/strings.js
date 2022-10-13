@@ -190,8 +190,9 @@ MudderyLocalDict = {
     "This username is not available.": "该用户名不可用。",
     "No result.": "没有效果。",
     "You get nothing.": "没有获得物品。",
-    "Accepted quest ": "接受任务",
-    "Quest ": "任务",
-    "'s goals are accomplished.": "的目标已完成。",
-    ".": "。",
+    "Accepted quest %s.": "接受任务%s。",
+    "Quest %s's goals are accomplished.": "任务{C%s{n的目标已完成。",
+    "{RYou died.{n": "{R你死了。{n",
+    "You will be reborn in {C%s{n seconds.": "你将在{C%s{n秒后重生。",
+    "The relationship with %s1 becomes %s2.": "和%s1的关系变为%s2。",
 };

@@ -406,15 +406,15 @@ class BaseCombat(object):
             "characters": characters
         }
 
-    async def get_combat_status(self):
+    async def get_combat_states(self):
         """
-        Get characters status.
+        Get characters states.
         :return:
         """
         if self.characters:
             chars = self.characters.keys()
-            status = await async_gather([char["char"].get_combat_status() for char in self.characters.values()])
-            return dict(zip(chars, status))
+            state = await async_gather([char["char"].get_combat_state() for char in self.characters.values()])
+            return dict(zip(chars, state))
         else:
             return {}
 

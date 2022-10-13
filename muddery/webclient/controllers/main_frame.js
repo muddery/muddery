@@ -63,8 +63,8 @@ MudderyMainFrame.prototype.showCombat = function(combat) {
  * Cast a combat skill.
  */
 MudderyMainFrame.prototype.setSkillCast = function(result) {
-    if ("status" in result && core.data_handler.character_id in result["status"]) {
-        this.setSkillStatus(result["status"][core.data_handler.character_id]);
+    if ("state" in result && core.data_handler.character_id in result["state"]) {
+        this.setSkillStatus(result["state"][core.data_handler.character_id]);
     }
 
 	if (mud.combat_window.isCombatFinished()) {
@@ -110,22 +110,22 @@ MudderyMainFrame.prototype.doClosePopupBox = function() {
 
 
 /*
- *  Set the player's status.
+ *  Set the player's state.
  */
-MudderyMainFrame.prototype.setStatus = function(status) {
-    if ("level" in status) {
-	    core.data_handler.character_level = status["level"]["value"];
+MudderyMainFrame.prototype.setState = function(state) {
+    if ("level" in state) {
+	    core.data_handler.character_level = state["level"]["value"];
 	}
-	mud.scene_window.setStatus(status);
-	mud.char_data_window.setStatus(status);
+	mud.scene_window.setState(state);
+	mud.char_data_window.setState(state);
 }
 
 /*
- *  Set the player's status in combat.
+ *  Set the player's state in combat.
  */
-MudderyMainFrame.prototype.setSkillStatus = function(status) {
-	mud.scene_window.setSkillStatus(status);
-    mud.char_data_window.setSkillStatus(status);
+MudderyMainFrame.prototype.setSkillState = function(state) {
+	mud.scene_window.setSkillState(state);
+    mud.char_data_window.setSkillState(state);
 }
 
 /*
@@ -159,8 +159,8 @@ MudderyMainFrame.prototype.handle_quests = function(data) {
             }
             quests += "{C" + accomplished[i]["name"] + "{n";
         }
-        var msg = core.text2html.parseHtml(core.trans("Quest ") + quests + core.trans("'s goals are accomplished."));
-        mud.scene_window.displayMessage(msg);
+        var msg = core.trans("Quest %s's goals are accomplished.").replace("%s", quests);
+        mud.scene_window.displayMessage(core.text2html.parseHtml(msg));
     }
 }
 
@@ -177,23 +177,34 @@ MudderyMainFrame.prototype.handle_events = function(data) {
             }
         }
         else if ("ACTION_ACCEPT_QUEST" in data[i]) {
-            var event = data[i]["ACTION_ACCEPT_QUEST"];
-            var quests = "";
-            for (var i = 0; i < event.length; i++) {
-                if (quests) {
-                    quests += ", ";
+            var quests = data[i]["ACTION_ACCEPT_QUEST"];
+            var names = "";
+            for (var q = 0; q < quests.length; q++) {
+                if (names) {
+                    names += ", ";
                 }
-                quests += "{C" + event[i]["name"] + "{n";
+                names += "{C" + quests[q]["name"] + "{n";
             }
 
-            var msg = core.text2html.parseHtml(core.trans("Accepted quest ") + quests + core.trans("."));
-            mud.scene_window.displayMessage(msg);
+            var msg = core.trans("Accepted quest %s.").replace("%s", names);
+            mud.scene_window.displayMessage(core.text2html.parseHtml(msg));
         }
         else if ("ACTION_ATTACK" in data[i]) {
             this.handle_combat(data[i]["ACTION_ATTACK"]);
         }
+        else if ("ACTION_SET_RELATION" in data[i]) {
+            var relations = data[i]["ACTION_SET_RELATION"];
+            for (var r = 0; r < relations.length; r++) {
+                if (relations[r]["name"]) {
+                    var msg = core.trans("The relationship with %s1 becomes %s2.")
+                        .replace("%s1", relations[r]["name"])
+                        .replace("%s2", relations[r]["value"]);
+                    mud.scene_window.displayMessage(core.text2html.parseHtml(msg));
+                }
+            }
+        }
         else {
-            mud.main_frame.popupAlert(core.trans("Error"), "Unknown event: " + Object.keys(data[i])[0]);
+            this.popupAlert(core.trans("Error"), "Unknown event: " + Object.keys(data[i])[0]);
         }
     }
 }
@@ -205,11 +216,11 @@ MudderyMainFrame.prototype.handle_combat = function(data) {
     this.showCombat();
 
     var info = data["combat_info"];
-    var status = data["combat_status"];
+    var states = data["combat_states"];
     var commands = data["combat_commands"];
 
     mud.combat_window.setCombat(info["desc"], info["timeout"], info["characters"], core.data_handler.character_id);
-    mud.combat_window.updateStatus(status);
+    mud.combat_window.updateStates(states);
     mud.combat_window.setCommands(commands);
 }
 
@@ -1644,7 +1655,7 @@ MudderySelectChar.prototype.onSelectCharacter = function(element) {
             mud.char_data_window.setInfo(name, data["icon"]);
             mud.combat_window.setInfo(name, data["icon"]);
 
-            mud.main_frame.setStatus(data["status"]);
+            mud.main_frame.setState(data["state"]);
             mud.conversation_window.setChannels(data["channels"]);
 
             if ("allow_commands" in data && data["allow_commands"]) {
@@ -1925,7 +1936,7 @@ MudderyGame.prototype.bindEvents = function() {
 	this.onClick(".button-map", this.onMap);
 
     this.onClick(".button-character", this.onCharacter);
-    this.onClick(".button-status", this.onStatus);
+    this.onClick(".button-state", this.onState);
     this.onClick(".button-inventory", this.onInventory);
     this.onClick(".button-skills", this.onSkills);
     this.onClick(".button-quests", this.onQuests);
@@ -2001,9 +2012,9 @@ MudderyGame.prototype.onCharacter = function(element, event) {
 }
 
 /*
- * Event when clicks the status button.
+ * Event when clicks the state button.
  */
-MudderyGame.prototype.onStatus = function(element) {
+MudderyGame.prototype.onState = function(element) {
     this.showWindow(mud.char_data_window);
 }
 
@@ -2318,17 +2329,17 @@ MudderyScene.prototype.setInfo = function(name, icon) {
 }
 
 /*
- * Set character's status.
+ * Set character's state.
  */
-MudderyScene.prototype.setStatus = function(status) {
-    this.title_bar.setStatus(status);
+MudderyScene.prototype.setState = function(state) {
+    this.title_bar.setState(state);
 }
 
 /*
- * Set character's status in a combat.
+ * Set character's state in a combat.
  */
-MudderyScene.prototype.setSkillStatus = function(status) {
-    this.title_bar.setSkillStatus(status);
+MudderyScene.prototype.setSkillState = function(state) {
+    this.title_bar.setSkillState(state);
 }
 
 /*
@@ -2809,12 +2820,12 @@ MudderyTitleBar.prototype.setInfo = function(name, icon) {
 
 
 /*
- * Set character's status.
+ * Set character's state.
  */
-MudderyTitleBar.prototype.setStatus = function(status) {
-    if ("level" in status) {
+MudderyTitleBar.prototype.setState = function(state) {
+    if ("level" in state) {
 	    this.select(".level")
-	        .text(core.trans("Lv ") + status["level"]["value"])
+	        .text(core.trans("Lv ") + state["level"]["value"])
 	        .show();
 	}
 	else {
@@ -2822,10 +2833,10 @@ MudderyTitleBar.prototype.setStatus = function(status) {
 	}
 
     /*
-    if ("exp" in status && "max_exp" in status) {
+    if ("exp" in state && "max_exp" in state) {
         var exp_str = "";
-        if (status["max_exp"]["value"] > 0) {
-            exp_str = status["exp"]["value"] + "/" + status["max_exp"]["value"];
+        if (state["max_exp"]["value"] > 0) {
+            exp_str = state["exp"]["value"] + "/" + state["max_exp"]["value"];
         }
         else {
             exp_str = "--/--";
@@ -2839,9 +2850,9 @@ MudderyTitleBar.prototype.setStatus = function(status) {
     }
     */
 
-    if ("hp" in status && "max_hp" in status) {
-        this.select(".hp-bar").width(this.full_hp_width * status["hp"]["value"] / status["max_hp"]["value"]);
-		this.select(".hp-number").text(status["hp"]["value"] + "/" + status["max_hp"]["value"]);
+    if ("hp" in state && "max_hp" in state) {
+        this.select(".hp-bar").width(this.full_hp_width * state["hp"]["value"] / state["max_hp"]["value"]);
+		this.select(".hp-number").text(state["hp"]["value"] + "/" + state["max_hp"]["value"]);
 		this.select(".hp").show();
     }
     else {
@@ -2850,21 +2861,21 @@ MudderyTitleBar.prototype.setStatus = function(status) {
 }
 
 /*
- * Set character's status in a combat.
+ * Set character's state in a combat.
  */
-MudderyTitleBar.prototype.setSkillStatus = function(status) {
-    if ("level" in status) {
+MudderyTitleBar.prototype.setSkillState = function(state) {
+    if ("level" in state) {
 	    this.select(".level")
-	        .text(core.trans("Lv ") + status["level"])
+	        .text(core.trans("Lv ") + state["level"])
 	        .show();
 	}
 	else {
 	    this.select(".level").hide();
 	}
 
-    if ("hp" in status && "max_hp" in status) {
-        this.select(".hp-bar").width(this.full_hp_width * status["hp"] / status["max_hp"]);
-		this.select(".hp-number").text(status["hp"] + "/" + status["max_hp"]);
+    if ("hp" in state && "max_hp" in state) {
+        this.select(".hp-bar").width(this.full_hp_width * state["hp"] / state["max_hp"]);
+		this.select(".hp-number").text(state["hp"] + "/" + state["max_hp"]);
 		this.select(".hp").show();
     }
     else {
@@ -2964,29 +2975,29 @@ MudderyCharData.prototype.setInfo = function(name, icon) {
 /*
  * Set player character's information.
  */
-MudderyCharData.prototype.setStatus = function(status) {
+MudderyCharData.prototype.setState = function(state) {
     this.select(".data-list>tr").remove();
     var container = this.select(".data-list");
 
     var row = $("<tr>");
-    for (var key in status) {
+    for (var key in state) {
         if (key.substring(0, 4) == "max_") {
             var relative_key = key.substring(4);
-            if (relative_key in status) {
+            if (relative_key in state) {
                 // Value and max value will show in the same line, so skip max.
                 continue;
             }
         }
 
-        var value = status[key]["value"];
+        var value = state[key]["value"];
         if (value == null || typeof(value) == "undefined") {
             value = "--";
         }
 
         var max_key = "max_" + key;
-        if (max_key in status) {
+        if (max_key in state) {
             // Add max value.
-            var max_value = status[max_key]["value"];
+            var max_value = state[max_key]["value"];
 
             if (max_value == null || typeof(max_value) == "undefined") {
                 max_value = "--";
@@ -3001,7 +3012,7 @@ MudderyCharData.prototype.setStatus = function(status) {
 
         var item = $("<td>")
             .attr("id", "info_" + key)
-            .text(status[key]["name"] + ": ");
+            .text(state[key]["name"] + ": ");
 
         var attr_value = $("<span>")
             .addClass("attr_value")
@@ -3026,11 +3037,11 @@ MudderyCharData.prototype.setStatus = function(status) {
 /*
  * Set player character's information in combat.
  */
-MudderyCharData.prototype.setSkillStatus = function(status) {
-    for (var key in status) {
+MudderyCharData.prototype.setSkillState = function(state) {
+    for (var key in state) {
         if (key.substring(0, 4) == "max_") {
             var relative_key = key.substring(4);
-            if (relative_key in status) {
+            if (relative_key in state) {
                 // Value and max value will show in the same line, so skip max.
                 continue;
             }
@@ -3038,15 +3049,15 @@ MudderyCharData.prototype.setSkillStatus = function(status) {
 
         var item = this.select("#info_" + key);
 
-        var value = status[key];
+        var value = state[key];
         if (value == null || typeof(value) == "undefined") {
             value = "--";
         }
 
         var max_key = "max_" + key;
-        if (max_key in status) {
+        if (max_key in state) {
             // Add max value.
-            var max_value = status[max_key];
+            var max_value = state[max_key];
 
             if (max_value == null || typeof(max_value) == "undefined") {
                 max_value = "--";
@@ -3177,7 +3188,7 @@ MudderyCharData.prototype.onCommand = function(element) {
 	var index = $(element).data("index");
 	if ("cmd" in this.buttons[index] && "args" in this.buttons[index]) {
 	    if (!this.buttons[index]["confirm"]) {
-		    core.command.sendCommandLink(this.buttons[index]["cmd"], this.buttons[index]["args"]);
+		    this.confirmCommand(index);
 		}
 		else {
 		    var self = this;
@@ -3205,15 +3216,26 @@ MudderyCharData.prototype.onCommand = function(element) {
 /*
  * Confirm the command.
  */
-MudderyCharData.prototype.confirmCommand = function(data) {
-	var index = data;
-    core.command.sendCommandLink(this.buttons[index]["cmd"], this.buttons[index]["args"]);
+MudderyCharData.prototype.confirmCommand = function(index) {
+	var button = this.buttons[index];
+	var command = button["cmd"];
+    core.command.sendCommand(command, button["args"], function(code, data, msg) {
+        if (code != 0) {
+            mud.main_frame.popupAlert(core.trans("Error"), core.trans(msg));
+        }
+        else {
+            if (command == "takeoff") {
+                mud.main_frame.setState(data["state"]);
+                mud.char_data_window.setEquipments(data["equipments"]);
+            }
+        }
+    });
 }
 
 /*
- * Show status view.
+ * Show state view.
  */
-MudderyCharData.prototype.showStatus = function(data) {
+MudderyCharData.prototype.showState = function(data) {
     this.item_selected = null;
     this.select(".item-info").hide();
     this.select(".data-table").show();
@@ -3340,7 +3362,7 @@ MudderyInventory.prototype.confirmCommand = function(index) {
         }
         else {
             if (command == "equip") {
-                mud.main_frame.setStatus(data["status"]);
+                mud.main_frame.setState(data["state"]);
                 mud.inventory_window.setInventory(data["inventory"]);
             }
         }
@@ -3574,7 +3596,7 @@ MudderySkills.prototype.onCommand = function(element) {
 MudderySkills.prototype.confirmCommand = function(index) {
 	var button = this.buttons[index];
 	var command = button["cmd"];
-    core.command.sendCommand(button["cmd"], button["args"], function(code, data, msg) {
+    core.command.sendCommand(command, button["args"], function(code, data, msg) {
         if (code != 0) {
             mud.main_frame.popupAlert(core.trans("Error"), core.trans(msg));
         }
@@ -3586,8 +3608,8 @@ MudderySkills.prototype.confirmCommand = function(index) {
 
                 var result = data["result"];
 
-                if ("status" in result && core.data_handler.character_id in result["status"]) {
-                    mud.main_frame.setSkillStatus(result["status"][core.data_handler.character_id]);
+                if ("state" in result && core.data_handler.character_id in result["state"]) {
+                    mud.main_frame.setSkillStatus(result["state"][core.data_handler.character_id]);
                 }
 
                 var message = "";
@@ -4641,15 +4663,15 @@ MudderyCombat.prototype.setSkillCast = function(data) {
 		}
 		else if (data["skill"] == "skill_escape") {
 			if (data["data"] == 1) {
-				var item_id = "#combat-char-" + data["target"] + ".status";
+				var item_id = "#combat-char-" + data["target"] + ".state";
 				$(item_id).text(core.trans("Escaped"));
 			}
 		}
 	}
 
-	// Update status.
-	if ("status" in data) {
-		this.updateStatus(data["status"]);
+	// Update state.
+	if ("states" in data) {
+		this.updateStates(data["states"]);
 	}
 }
 
@@ -4682,16 +4704,16 @@ MudderyCombat.prototype.displayMessage = function(msg) {
 }
 
 /*
- * Update character's status.
+ * Update character's state.
  */
-MudderyCombat.prototype.updateStatus = function(status) {
-	for (var key in status) {
+MudderyCombat.prototype.updateStates = function(states) {
+	for (var key in states) {
 		var hp_bar = "#combat-char-" + key + " .character-hp-bar";
-		$(hp_bar).width(this.character_hp_width * status[key]["hp"] / status[key]["max_hp"]);
+		$(hp_bar).width(this.character_hp_width * states[key]["hp"] / states[key]["max_hp"]);
 
 		if (this.self_id == key) {
-		    this.select(".hp-bar").width(this.full_hp_width * status[key]["hp"] / status[key]["max_hp"]);
-		    this.select(".hp-number").text(status[key]["hp"] + "/" + status[key]["max_hp"]);
+		    this.select(".hp-bar").width(this.full_hp_width * states[key]["hp"] / states[key]["max_hp"]);
+		    this.select(".hp-number").text(states[key]["hp"] + "/" + states[key]["max_hp"]);
 		}
 	}
 }
@@ -4866,6 +4888,25 @@ MudderyCombatResult.prototype.onClose = function(element) {
 	// close popup box
 	core.command.leaveCombat(function(code, data, msg) {
 	    if (code == 0) {
+	        mud.main_frame.setState(data["state"]);
+            core.map_data.setCurrentLocation(data["location"]);
+            mud.scene_window.setSurroundings(data["look_around"]);
+
+            if ("quests" in data) {
+                mud.main_frame.handle_quests(data["quests"]);
+            }
+            if ("events" in data) {
+                mud.main_frame.handle_events(data["events"]);
+            }
+            if ("die" in data) {
+                var msg = core.text2html.parseHtml("{R" + core.trans("You died.") + "{n");
+                mud.scene_window.displayMessage(msg);
+            }
+            if ("reborn_time" in data) {
+                var msg = core.trans("You will be reborn in {C%s{n seconds.").replace("%s", data["reborn_time"]);
+                mud.scene_window.displayMessage(core.text2html.parseHtml(msg));
+            }
+
             mud.combat_window.leaveCombat();
         }
         else {
@@ -4907,6 +4948,10 @@ MudderyCombatResult.prototype.setResult = function(type, result, rewards) {
             this.setGetExp(rewards["exp"]);
         }
 
+        if ("level_up" in rewards) {
+            this.setLevelUp(rewards["level_up"]);
+        }
+
         if ("get_objects" in rewards) {
             this.setGetObjects(rewards["get_objects"]);
         }
@@ -4914,15 +4959,15 @@ MudderyCombatResult.prototype.setResult = function(type, result, rewards) {
 }
 
 /*
- * Set the honours that the player get.
+ * Show the honours that the player get.
  */
-MudderyCombatResult.prototype.setGetHonour = function(exp) {
-	this.select(".result-honour").text(exp);
+MudderyCombatResult.prototype.setGetHonour = function(honour) {
+	this.select(".result-honour").text(honour);
 	this.select(".result-honour-block").show();
 }
 
 /*
- * Set the experiences that the player get.
+ * Show the experiences that the player get.
  */
 MudderyCombatResult.prototype.setGetExp = function(exp) {
 	this.select(".result-exp").text(exp);
@@ -4930,7 +4975,15 @@ MudderyCombatResult.prototype.setGetExp = function(exp) {
 }
 
 /*
- * Set the objects that the player get.
+ * Show the level that the player get.
+ */
+MudderyCombatResult.prototype.setLevelUp = function(level) {
+	this.select(".result-level-up").text(level);
+	this.select(".result-level-up-block").show();
+}
+
+/*
+ * Show the objects that the player get.
  */
 MudderyCombatResult.prototype.setGetObjects = function(objects) {
     var accepted_block = this.select(".result-accepted");

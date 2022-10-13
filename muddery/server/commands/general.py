@@ -426,48 +426,36 @@ async def equip(character, args) -> dict or None:
     await character.equip_object(int(position))
 
     return {
-        "status": await character.return_status(),
+        "state": await character.get_state(),
         "inventory": character.get_inventory_appearance()
     }
 
-#------------------------------------------------------------
-# take off equipment
-#------------------------------------------------------------
 
-class CmdTakeOff(BaseCommand):
+@CharacterCmd.request("takeoff")
+async def takeoff(character, args) -> dict or None:
     """
-    Take off an equipment.
+    Take off an equipment and remove its attributes from the character.
 
     Usage:
-        {"cmd":"takeoff",
-         "args":<object's id>
+        {
+            "cmd": "takeoff",
+            "args": <object's id>
         }
-    Take off an equipment and remove its attributes from the character.
+
     """
-    key = "takeoff"
+    if not args or "position" not in args:
+        raise MudderyError(ERR.missing_args, _("You should take off something."))
 
-    @classmethod
-    async def func(cls, caller, args):
-        "Take off an equipment."
-        if not args or "position" not in args:
-            await caller.msg({"alert":_("You should take off something.")})
-            return
-        position = args["position"]
+    position = args["position"]
 
-        try:
-            # Take off the equipment.
-            await caller.take_off_equipment(position)
-        except MudderyError as e:
-            await caller.msg({"alert": str(e)})
-            return
-        except Exception as e:
-            await caller.msg({"alert": _("Can not take off this equipment.")})
-            logger.log_trace("Can not take off %s: %s" % (args, e))
-            return
+    # Take off the equipment.
+    await character.take_off_equipment(position)
 
-        # Send lastest status to the player.
-        message = {"alert": _("Taken off!")}
-        await caller.msg(message)
+    # Send the latest state to the player.
+    return {
+        "state": await character.get_state(),
+        "equipments": character.get_equipments(),
+    }
 
 
 @CharacterCmd.request("cast_skill")
@@ -778,7 +766,7 @@ class CmdGiveUpQuest(BaseCommand):
             logger.log_trace("Can not give up quest %s: %s" % (quest_key, e))
             return
 
-        # Send lastest status to the player.
+        # Send the latest status to the player.
         message = {"alert": _("Given up!")}
         await caller.msg(message)
 
