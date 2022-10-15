@@ -829,23 +829,17 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
 
         item = self.inventory[position]
         if item["number"] < number:
-            return _("Not enough number.")
+            raise MudderyError(_("Not enough number."))
 
         item_obj = await self.get_inventory_obj_by_pos(position)
 
         # take effect
-        try:
-            result, used = await item_obj.take_effect(self, number)
-            if used > 0:
-                # remove used object
-                await self.remove_objects_by_position(position, used, True)
+        result, used = await item_obj.take_effect(self, number)
+        if used > 0:
+            # remove used object
+            await self.remove_objects_by_position(position, used)
 
-            return result
-        except Exception as e:
-            ostring = "Can not use %s: %s" % (item["key"], e)
-            logger.log_trace(ostring)
-
-        return _("No effect.")
+        return result
 
     async def remove_all_objects_by_position(self, position):
         """
@@ -967,7 +961,9 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
             boolean: success
         """
         for item in obj_list:
-            await self.remove_objects_by_key(item["object_key"], item["number"], True)
+            await self.remove_objects_by_key(item["object_key"], item["number"])
+
+        return obj_list
 
     async def exchange_objects(self, remove_list, receive_list):
         """
@@ -978,8 +974,13 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         :return:
         """
         with self.states.transaction():
-            await self.remove_objects_by_list(remove_list)
-            await self.receive_objects(receive_list, mute=True)
+            remove = await self.remove_objects_by_list(remove_list)
+            receive = await self.receive_objects(receive_list)
+
+        return {
+            "use": remove,
+            "get": receive,
+        }
 
     def get_inventory_appearance(self):
         """
@@ -1336,8 +1337,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
             (boolean) learned skill
         """
         if skill_key in self.skills:
-            await self.msg({"msg": _("You have already learned this skill.")})
-            raise KeyError
+            raise MudderyError(ERR.invalid_input, _("You have already learned this skill."))
 
         try:
             # Create skill object.
@@ -1345,8 +1345,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
             await skill_obj.setup_element(skill_key, level)
         except Exception as e:
             logger.log_err("Can not learn skill %s: (%s) %s" % (skill_key, type(e).__name__, e))
-            await self.msg({"msg": _("Can not learn this skill.")})
-            raise e
+            raise MudderyError(ERR.invalid_input, _("Can not learn this skill."))
 
         # Store new skill.
         self.skills[skill_key] = {
@@ -1365,14 +1364,10 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         if skill_obj.passive:
             await self.refresh_states(True)
 
-        # Notify the player
-        if not mute:
-            await async_wait([
-                self.show_status(),
-                self.msg({"msg": _("You learned skill {C%s{n.") % skill_obj.get_name()}),
-            ])
-
-        return
+        return {
+            "key": skill_key,
+            "name": skill_obj.get_name(),
+        }
 
     def get_skills(self):
         """

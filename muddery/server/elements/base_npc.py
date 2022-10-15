@@ -85,7 +85,7 @@ class MudderyBaseNPC(ELEMENT("CHARACTER")):
             await shop.setup_element(shop_key)
             shop.set_owner(self)
         except Exception as e:
-            logger.log_err("Can not create shop %s: (%s)%s" % (shop_key, type(e).__name__, e))
+            logger.log_trace("Can not create shop %s: (%s)%s" % (shop_key, type(e).__name__, e))
             return
 
         return shop
@@ -115,7 +115,7 @@ class MudderyBaseNPC(ELEMENT("CHARACTER")):
         if shop_key not in self.shops:
             return None
 
-        await self.shops[shop_key].sell_goods(goods_index, caller)
+        return await self.shops[shop_key].sell_goods(goods_index, caller)
 
     async def get_available_commands(self, caller):
         """

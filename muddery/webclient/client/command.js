@@ -144,7 +144,7 @@ MudderyCommand.prototype = {
     },
 
     // look at an object in the room
-    look_room_obj: function(object_key, callback) {
+    lookRoomObj: function(object_key, callback) {
         this.sendCommand("look_room_obj", object_key, callback);
     },
 
@@ -152,7 +152,7 @@ MudderyCommand.prototype = {
     // args:
     //  char_id: (int) character's id
     //
-    look_room_char: function (char_id, callback) {
+    lookRoomChar: function (char_id, callback) {
         this.sendCommand("look_room_char", char_id, callback);
     },
 
@@ -167,12 +167,12 @@ MudderyCommand.prototype = {
     },
     
     // buy something
-    buyGoods: function(npc, shop, goods) {
+    buy: function(npc, shop, goods, callback) {
     	this.sendCommand("buy", {
     	    npc: npc,
     	    shop: shop,
     	    goods: goods,
-    	});
+    	}, callback);
     },
     
     // dialogue

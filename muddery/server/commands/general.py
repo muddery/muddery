@@ -128,7 +128,7 @@ async def look_room_obj(character, args) -> dict or None:
     }
     """
     if not character.is_alive:
-        raise MudderyError(ERR.invalid_input, _("You are died."))
+        raise MudderyError(ERR.died, _("You are died."))
 
     if not args:
         raise MudderyError(ERR.missing_args, _("You should appoint an object."))
@@ -153,7 +153,7 @@ async def look_room_char(character, args) -> dict or None:
     }
     """
     if not character.is_alive:
-        raise MudderyError(ERR.invalid_input, _("You are died."))
+        raise MudderyError(ERR.died, _("You are died."))
 
     if not args:
         raise MudderyError(ERR.missing_args, _("You should appoint a character."))
@@ -181,7 +181,7 @@ async def traverse(character, args) -> dict or None:
     Traverse an exit, go to the destination of the exit.
     """
     if not character.is_alive:
-        raise MudderyError(ERR.can_not_pass, _("You are died."))
+        raise MudderyError(ERR.died, _("You are died."))
 
     if not args:
         raise MudderyError(ERR.missing_args, _("Should appoint an exit to go."))
@@ -224,7 +224,7 @@ async def talk(character, args) -> dict or None:
     Begin a talk with an NPC. Show all available dialogues of this NPC.
     """
     if not character.is_alive:
-        raise MudderyError(ERR.invalid_input, _("You are died."))
+        raise MudderyError(ERR.died, _("You are died."))
 
     if not args:
         raise MudderyError(ERR.missing_args, _("You should talk to someone."))
@@ -302,48 +302,32 @@ async def loot(character, args) -> dict or None:
     return await obj.loot(character)
 
 
-#------------------------------------------------------------
-# use objects
-#------------------------------------------------------------
-
-class CmdUse(BaseCommand):
+@CharacterCmd.request("use")
+async def use(character, args) -> dict or None:
     """
     Use an object.
 
     Usage:
-        {"cmd":"use",
-         "args":<object's id>
+        {
+            "cmd": "use",
+            "args": <object's id>
         }
 
     Call caller's use_object function with specified object.
     Different objects can have different results.
     """
-    key = "use"
+    if not character.is_alive:
+        raise MudderyError(ERR.died, _("You are died."))
 
-    @classmethod
-    async def func(cls, caller, args):
-        if not caller.is_alive:
-            await caller.msg({"alert": _("You are died.")})
-            return
+    if not args or "position" not in args:
+        raise MudderyError(ERR.missing_args, _("You should use something."))
+    position = args["position"]
 
-        if not args or "position" not in args:
-            await caller.msg({"alert": _("You should use something.")})
-            return
-        position = args["position"]
+    # Use the object and get the result.
+    results = await character.use_object(int(position))
+    results["inventory"] = character.get_inventory_appearance()
 
-        result = ""
-        try:
-            # Use the object and get the result.
-            result = await caller.use_object(int(position))
-        except Exception as e:
-            ostring = "Can not use %s: %s" % (args, e)
-            logger.log_trace(ostring)
-
-        # Send result to the player.
-        if not result:
-            result = _("No result.")
-
-        await caller.msg({"alert": result})
+    return results
 
 
 @CharacterCmd.request("discard")
@@ -360,7 +344,7 @@ async def discard(character, args) -> dict or None:
         }
     """
     if not character.is_alive:
-        raise MudderyError(ERR.invalid_input, _("You are died."))
+        raise MudderyError(ERR.died, _("You are died."))
 
     if not args or "position" not in args:
         raise MudderyError(ERR.missing_args, _("You should discard something."))
@@ -450,7 +434,7 @@ async def cast_skill(character, args) -> dict or None:
     
     """
     if not character.is_alive:
-        raise MudderyError(ERR.invalid_input, _("You are died."))
+        raise MudderyError(ERR.died, _("You are died."))
 
     if character.is_in_combat():
         raise MudderyError(ERR.invalid_input, _("You can not cast this skill in a combat."))
@@ -778,10 +762,8 @@ async def shopping(character, args) -> dict or None:
     return await npc.get_shop_info(shop_key, character)
 
 
-#------------------------------------------------------------
-# buy a goods
-#------------------------------------------------------------
-class CmdBuy(BaseCommand):
+@CharacterCmd.request("buy")
+async def buy(character, args) -> dict or None:
     """
     Buy a goods.
 
@@ -795,33 +777,21 @@ class CmdBuy(BaseCommand):
             }
         }
     """
-    key = "buy"
+    if not args or "npc" not in args or "shop" not in args or "goods" not in args:
+        raise MudderyError(ERR.missing_args, _("You should buy something."))
 
-    @classmethod
-    async def func(cls, caller, args):
-        "Buy a goods."
-        if not args or "npc" not in args or "shop" not in args or "goods" not in args:
-            await caller.msg({"alert": _("You should buy something.")})
-            return
+    try:
+        npc_id = int(args["npc"])
+        room = character.get_location()
+        npc = room.get_character(npc_id)
+    except:
+        raise MudderyError(ERR.invalid_input, _("Can not find this NPC."))
 
-        try:
-            npc_id = int(args["npc"])
-            room = caller.get_location()
-            npc = room.get_character(npc_id)
-        except:
-            await caller.msg({"alert": _("Can not find this NPC.")})
-            return
+    shop = args["shop"]
+    goods = args["goods"]
 
-        shop = args["shop"]
-        goods = args["goods"]
-
-        # buy goods
-        try:
-            await npc.sell_goods(shop, int(goods), caller)
-        except Exception as e:
-            await caller.msg({"alert": _("Can not buy this goods.")})
-            logger.log_err("Can not buy %s %s %s: %s" % (args["npc"], shop, goods, e))
-            return
+    # buy goods
+    return await npc.sell_goods(shop, int(goods), character)
 
 
 @CharacterCmd.request("all_quests")

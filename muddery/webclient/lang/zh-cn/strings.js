@@ -197,4 +197,7 @@ MudderyLocalDict = {
     "The relationship with %s1 becomes %s2.": "和%s1的关系变为%s2。",
     "Turned in quest {C%s{n.": "完成任务{C%s{n。",
     "Gave up quest {C%s{n.": "放弃任务{C%s{n。",
+    "Purchase successful!": "购买成功！",
+    "You are died.": "你已经死了。",
+    "No effect.": "没有效果。",
 };

@@ -686,6 +686,9 @@ MudderyPopupObject.prototype.onCommand = function(element) {
             if (code != 0) {
                 mud.main_frame.popupAlert(core.trans("Error"), core.trans(msg));
             }
+            else if (code == ERR.died) {
+                mud.main_frame.popupAlert(core.trans("Alert"), core.trans("You are died."));
+            }
             else {
                 if (command == "loot") {
                     mud.popup_get_objects.setObjects(data);
@@ -720,6 +723,18 @@ MudderyPopupObject.prototype.onCommand = function(element) {
                 }
                 else if (command == "shopping") {
                     mud.game_window.showShop(data);
+                }
+                else if (command == "use") {
+                    if (data) {
+                        mud.main_frame.popupAlert(core.trans("Alert"), data["msg"]);
+
+                        if ("state" in data) {
+                            mud.main_frame.setState(data["state"]);
+                        }
+                    }
+                    else {
+                        mud.main_frame.popupAlert(core.trans("Alert"), core.trans("No effect."));
+                    }
                 }
             }
 		});
@@ -2220,10 +2235,13 @@ MudderyScene.prototype.onObject = function(element) {
 
     var room_map = core.map_data.getCurrentRoomMap();
     var object_key = room_map["objects"][index]["key"];
-    core.command.look_room_obj(object_key, function(code, data, msg) {
+    core.command.lookRoomObj(object_key, function(code, data, msg) {
         if (code == 0) {
             mud.popup_object.setObject(data);
             mud.popup_object.show();
+        }
+        else if (code == ERR.died) {
+            mud.main_frame.popupAlert(core.trans("Alert"), core.trans("You are died."));
         }
         else {
             mud.main_frame.popupAlert(core.trans("Alert"), core.trans(msg));
@@ -2237,10 +2255,13 @@ MudderyScene.prototype.onObject = function(element) {
 MudderyScene.prototype.onNPC = function(element) {
     var index = $(element).data("index");
     var obj_id = this.surroundings["npcs"][index]["id"];
-    core.command.look_room_char(obj_id, function(code, data, msg) {
+    core.command.lookRoomChar(obj_id, function(code, data, msg) {
         if (code == 0) {
             mud.popup_object.setObject(data);
             mud.popup_object.show();
+        }
+        else if (code == ERR.died) {
+            mud.main_frame.popupAlert(core.trans("Alert"), core.trans("You are died."));
         }
         else {
             mud.main_frame.popupAlert(core.trans("Alert"), core.trans(msg));
@@ -2290,6 +2311,9 @@ MudderyScene.prototype.onExit = function(element) {
                 mud.popup_object.setObject(data["exit"]);
                 mud.popup_object.show();
             }
+        }
+        else if (code == ERR.died) {
+            mud.main_frame.popupAlert(core.trans("Alert"), core.trans("You are died."));
         }
         else {
             mud.main_frame.popupAlert(core.trans("Error"), core.trans(msg));
@@ -3394,10 +3418,28 @@ MudderyInventory.prototype.confirmCommand = function(index) {
         if (code != 0) {
             mud.main_frame.popupAlert(core.trans("Error"), core.trans(msg));
         }
+        else if (code == ERR.died) {
+            mud.main_frame.popupAlert(core.trans("Alert"), core.trans("You are died."));
+        }
         else {
             if (command == "equip") {
                 mud.main_frame.setState(data["state"]);
                 mud.inventory_window.setInventory(data["inventory"]);
+            }
+            else if (command == "use") {
+                if (data) {
+                    mud.main_frame.popupAlert(core.trans("Alert"), data["msg"]);
+
+                    if ("state" in data) {
+                        mud.main_frame.setState(data["state"]);
+                    }
+                    if ("inventory" in data) {
+                        mud.inventory_window.setInventory(data["inventory"]);
+                    }
+                }
+                else {
+                    mud.main_frame.popupAlert(core.trans("Alert"), core.trans("No effect."));
+                }
             }
             else if (command == "discard") {
                 mud.inventory_window.setInventory(data["inventory"]);
@@ -3636,6 +3678,9 @@ MudderySkills.prototype.confirmCommand = function(index) {
     core.command.sendCommand(command, button["args"], function(code, data, msg) {
         if (code != 0) {
             mud.main_frame.popupAlert(core.trans("Error"), core.trans(msg));
+        }
+        else if (code == ERR.died) {
+            mud.main_frame.popupAlert(core.trans("Alert"), core.trans("You are died."));
         }
         else {
             if (command == "cast_skill") {
@@ -5253,7 +5298,17 @@ MudderyGoodsDetail.prototype.onClose = function(element) {
  */
 MudderyGoodsDetail.prototype.onBuy = function(element) {
     if (this.goods) {
-        core.command.buyGoods(this.npc, this.shop, this.goods["index"]);
+        core.command.buy(this.npc, this.shop, this.goods["index"], function(code, data, msg) {
+            if (code == 0) {
+                mud.main_frame.popupAlert(core.trans("Alert"), core.trans("Purchase successful!"));
+            }
+            else if (code == ERR.can_not_buy) {
+                mud.main_frame.popupAlert(core.trans("Alert"), core.trans(msg));
+            }
+            else {
+                mud.main_frame.popupAlert(core.trans("Error"), core.trans(msg));
+            }
+        });
     }
 
     // close this window
@@ -5374,7 +5429,7 @@ MudderyConversation.prototype.onSend = function() {
 
 	core.command.say(this.conversation_type, target, message, function(code, data, msg) {
 	    if (code != 0) {
-	        self.popupAlert(core.trans("Error"), core.trans(msg));
+	        mud.main_frame.popupAlert(core.trans("Error"), core.trans(msg));
 	    }
 	});
 }

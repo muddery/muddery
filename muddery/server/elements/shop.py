@@ -102,4 +102,4 @@ class MudderyShop(ELEMENT("MATTER")):
         :param caller:
         :return:
         """
-        await self.goods[goods_index].sell_to(caller)
+        return await self.goods[goods_index].sell_to(caller)

@@ -42,7 +42,7 @@ class MudderyPocketObject(ELEMENT("COMMON_OBJECT")):
         Returns:
             result: (string) a description of the result
         """
-        return _("No effect."), 0
+        return None, 0
 
     def can_discard(self):
         """
@@ -78,23 +78,27 @@ class MudderyFood(ELEMENT("POCKET_OBJECT")):
             raise ValueError("User should not be None.")
 
         if not number:
-            return
+            return None, 0
 
         properties = {key: self.const_data_handler.get(key) for key, info in self.get_properties_info().items()}
         to_change = {key: value * number for key, value in properties.items() if value != 0}
         changes = await user.change_states(to_change)
-        await user.show_status()
 
-        results = []
+        messages = []
         properties_info = self.get_properties_info()
         for key in changes:
             if key in properties_info:
                 # set result
                 attribute_info = properties_info.get(key)
                 signal = '+' if changes[key] >= 0 else ''
-                results.append("%s %s%s" % (attribute_info["name"], signal, changes[key]))
+                messages.append("%s %s%s" % (attribute_info["name"], signal, changes[key]))
 
-        return ", ".join(results), number
+        result = {
+            "msg": ", ".join(messages),
+            "state": await user.get_state(),
+        }
+
+        return result, number
 
     async def get_available_commands(self, caller):
         """
@@ -200,11 +204,13 @@ class MudderySkillBook(ELEMENT("POCKET_OBJECT")):
         skill_key = self.const.skill
         skill_level = self.const.level
         if not skill_key:
-            return _("No effect."), 0
+            return None, 0
 
-        try:
-            await user.learn_skill(skill_key, skill_level, False)
-            return _("You learned skill."), 1
-        except:
-            return _("No effect."), 0
+        learning_result = await user.learn_skill(skill_key, skill_level, False)
 
+        result = {
+            "msg": _("You learned skill {C%s{n.") % learning_result["name"],
+            "state": await user.get_state(),
+        }
+
+        return result, number
