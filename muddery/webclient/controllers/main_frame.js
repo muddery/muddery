@@ -203,6 +203,15 @@ MudderyMainFrame.prototype.handle_events = function(data) {
                 }
             }
         }
+        else if ("ACTION_TURN_IN_QUEST" in data[i]) {
+            var quests = data[i]["ACTION_TURN_IN_QUEST"];
+            for (var q = 0; q < quests.length; q++) {
+                if (quests[q]["name"]) {
+                    var msg = core.trans("Turned in quest {C%s{n.").replace("%s", quests[q]["name"]);
+                    mud.scene_window.displayMessage(core.text2html.parseHtml(msg));
+                }
+            }
+        }
         else {
             this.popupAlert(core.trans("Error"), "Unknown event: " + Object.keys(data[i])[0]);
         }
@@ -702,6 +711,15 @@ MudderyPopupObject.prototype.onCommand = function(element) {
                         mud.popup_object.setObject(data["exit"]);
                         mud.popup_object.show();
                     }
+                }
+                else if (command == "talk") {
+                    mud.popup_dialogue.setDialogue(data);
+                    if (mud.popup_dialogue.hasDialogue() && !mud.main_frame.isWindowShow(mud.combat_window)) {
+                        mud.popup_dialogue.show();
+                    }
+                }
+                else if (command == "shopping") {
+                    mud.game_window.showShop(data);
                 }
             }
 		});
@@ -2219,7 +2237,15 @@ MudderyScene.prototype.onObject = function(element) {
 MudderyScene.prototype.onNPC = function(element) {
     var index = $(element).data("index");
     var obj_id = this.surroundings["npcs"][index]["id"];
-    core.command.look_room_char(obj_id);
+    core.command.look_room_char(obj_id, function(code, data, msg) {
+        if (code == 0) {
+            mud.popup_object.setObject(data);
+            mud.popup_object.show();
+        }
+        else {
+            mud.main_frame.popupAlert(core.trans("Alert"), core.trans(msg));
+        }
+    });
 }
 
 /*
@@ -2228,7 +2254,15 @@ MudderyScene.prototype.onNPC = function(element) {
 MudderyScene.prototype.onPlayer = function(element) {
     var index = $(element).data("index");
     var obj_id = this.surroundings["players"][index]["id"];
-    core.command.look_room_char(obj_id);
+    core.command.look_room_char(obj_id, function(code, data, msg) {
+        if (code == 0) {
+            mud.popup_object.setObject(data);
+            mud.popup_object.show();
+        }
+        else {
+            mud.main_frame.popupAlert(core.trans("Alert"), core.trans(msg));
+        }
+    });
 }
 
 /*
@@ -3365,6 +3399,9 @@ MudderyInventory.prototype.confirmCommand = function(index) {
                 mud.main_frame.setState(data["state"]);
                 mud.inventory_window.setInventory(data["inventory"]);
             }
+            else if (command == "discard") {
+                mud.inventory_window.setInventory(data["inventory"]);
+            }
         }
     });
 }
@@ -3792,7 +3829,7 @@ MudderyQuests.prototype.onCommand = function(element) {
 	var index = $(element).data("index");
 	if ("cmd" in this.buttons[index] && "args" in this.buttons[index]) {
 	    if (!this.buttons[index]["confirm"]) {
-		    core.command.sendCommandLink(this.buttons[index]["cmd"], this.buttons[index]["args"]);
+		    this.confirmCommand(index);
 		}
 		else {
 		    var self = this;
@@ -3818,9 +3855,22 @@ MudderyQuests.prototype.onCommand = function(element) {
 /*
  * Confirm the command.
  */
-MudderyQuests.prototype.confirmCommand = function(data) {
-	var index = data;
-    core.command.sendCommandLink(this.buttons[index]["cmd"], this.buttons[index]["args"]);
+MudderyQuests.prototype.confirmCommand = function(index) {
+	var button = this.buttons[index];
+	var command = button["cmd"];
+    core.command.sendCommand(command, button["args"], function(code, data, msg) {
+        if (code != 0) {
+            mud.main_frame.popupAlert(core.trans("Error"), core.trans(msg));
+        }
+        else {
+            if (command == "give_up_quest") {
+                var msg = core.trans("Gave up quest {C%s{n.").replace("%s", data["name"]);
+                mud.scene_window.displayMessage(core.text2html.parseHtml(msg));
+
+                mud.quests_window.setQuests(data["all_quests"]);
+            }
+        }
+    });
 }
 
 /*

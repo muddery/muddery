@@ -80,20 +80,6 @@ MudderyClient.prototype = {
                         mud.scene_window.displayMessage(msg);
                     } else if (key == "alert") {
                         mud.main_frame.popupMessage(core.trans("Alert"), data[key]);
-                    } else if (key == "out") {
-                        mud.scene_window.displayMessage(data[key], "out");
-                    } else if (key == "err") {
-                        mud.scene_window.displayMessage(data[key]);
-                    } else if (key == "sys") {
-                        mud.scene_window.displayMessage(data[key], "sys");
-                    } else if (key == "debug") {
-                        mud.scene_window.displayMessage(data[key], "debug");
-                    } else if (key == "prompt") {
-                        mud.scene_window.displayMessage(data[key], "prompt");
-                    } else if (key == "logout") {
-                        mud.main_frame.onRespondLogout(data[key]);
-                    } else if (key == "look_around") {
-                        mud.scene_window.setSurroundings(data[key]);
                     } else if (key == "obj_moved_in") {
                         mud.main_frame.objMovedIn(data[key]);
                     } else if (key == "obj_moved_out") {
@@ -101,28 +87,16 @@ MudderyClient.prototype = {
                     } else if (key == "state") {
                         var state = data[key];
                         mud.main_frame.setState(state);
-                    } else if (key == "get_objects") {
-                        mud.main_frame.showGetObjects(data[key]);
                     } else if (key == "joined_combat") {
                         mud.main_frame.showCombat(data[key]);
                     } else if (key == "combat_finish") {
                         mud.combat_window.combatFinish(data[key]);
-                    } else if (key == "combat_info") {
-                        var info = data[key];
-                        mud.combat_window.setCombat(info["desc"],
-                            info["timeout"],
-                            info["characters"],
-                            core.data_handler.character_id);
                     } else if (key == "combat_status") {
                         mud.combat_window.updateStatus(data[key]);
-                    } else if (key == "channels") {
-                        mud.conversation_window.setChannels(data[key]);
                     } else if (key == "conversation") {
                         mud.conversation_window.getMessage(data[key]);
                     } else if (key == "current_location") {
                         core.map_data.setCurrentLocation(data[key]);
-                    } else if (key == "shop") {
-                        mud.game_window.showShop(data[key]);
                     } else if (key == "rankings") {
                         mud.honour_window.setRankings(data[key]);
                     } else if (key == "in_combat_queue") {

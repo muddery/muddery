@@ -1668,7 +1668,8 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         dialogues = await DialogueHandler.inst().get_npc_dialogues(self, npc)
 
         await self.save_current_dialogues(dialogues)
-        await self.msg({"dialogue": dialogues})
+
+        return dialogues
 
     async def start_dialogue(self, dlg_key):
         """
@@ -1685,6 +1686,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
 
         # Send the dialogue to the player.
         await self.save_current_dialogues(dialogue)
+
         return dialogue
 
     async def finish_dialogue(self, dlg_key, npc):
@@ -1794,7 +1796,8 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         :return:
         """
         await CharacterRelationships.inst().save(self.get_db_id(), element_type, element_key, relationship)
-        records = Characters.get_data(element_type, element_key)
+        # todo: get other element's name
+        records = Characters.get_data(element_key)
         return {
             "key": element_key,
             "name": records[0].name if records else "",

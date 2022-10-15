@@ -13,12 +13,11 @@ class Characters(BaseQuery):
     table_name = "characters"
 
     @classmethod
-    def get_data(cls, element, key):
+    def get_data(cls, key):
         """
-        Get element's conditional desc.
+        Get the character's data.
 
         Args:
-            element: (string) element's type.
             key: (string) element's key
         """
-        return WorldData.get_table_data(cls.table_name, element=element, key=key)
+        return WorldData.get_table_data(cls.table_name, key=key)

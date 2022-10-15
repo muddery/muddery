@@ -195,4 +195,6 @@ MudderyLocalDict = {
     "{RYou died.{n": "{R你死了。{n",
     "You will be reborn in {C%s{n seconds.": "你将在{C%s{n秒后重生。",
     "The relationship with %s1 becomes %s2.": "和%s1的关系变为%s2。",
+    "Turned in quest {C%s{n.": "完成任务{C%s{n。",
+    "Gave up quest {C%s{n.": "放弃任务{C%s{n。",
 };

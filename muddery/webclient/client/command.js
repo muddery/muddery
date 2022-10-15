@@ -26,12 +26,6 @@ MudderyCommand.prototype = {
     sendRawCommand: function(text) {
     	Connection.send(text);
     },
-    
-    // functions when user click a command link
-    //
-    sendCommandLink: function(cmd, args) {
-       this.sendCommand(cmd, args);
-    },
 
     respond: function(sn, code, data, msg) {
         var callback = this.callbacks[sn];
@@ -158,8 +152,8 @@ MudderyCommand.prototype = {
     // args:
     //  char_id: (int) character's id
     //
-    look_room_char: function (char_id) {
-        this.sendCommand("look_room_char", char_id);
+    look_room_char: function (char_id, callback) {
+        this.sendCommand("look_room_char", char_id, callback);
     },
 
     // go to
@@ -168,8 +162,8 @@ MudderyCommand.prototype = {
     },
     
     // talk
-    doTalk : function(odj_id) {
-        this.sendCommand("talk", odj_id);
+    talk : function(odj_id, callback) {
+        this.sendCommand("talk", odj_id, callback);
     },
     
     // buy something

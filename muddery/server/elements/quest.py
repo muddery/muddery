@@ -96,7 +96,12 @@ class MudderyQuest(BaseElement):
         """
         commands = []
         if GameSettings.inst().get("can_give_up_quests"):
-            commands.append({"name": _("Give Up"), "cmd": "giveup_quest", "args": self.const.key})
+            commands.append({
+                "name": _("Give Up"),
+                "cmd": "give_up_quest",
+                "args": self.const.key,
+                "confirm": _("Give up this quest?"),
+            })
         return commands
 
     def get_objective_types(self):
