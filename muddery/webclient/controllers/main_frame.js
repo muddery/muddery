@@ -190,7 +190,7 @@ MudderyMainFrame.prototype.handle_events = function(data) {
             mud.scene_window.displayMessage(core.text2html.parseHtml(msg));
         }
         else if ("ACTION_ATTACK" in data[i]) {
-            this.handle_combat(data[i]["ACTION_ATTACK"]);
+            this.handle_combat(data[i]["ACTION_ATTACK"], false);
         }
         else if ("ACTION_SET_RELATION" in data[i]) {
             var relations = data[i]["ACTION_SET_RELATION"];
@@ -221,7 +221,7 @@ MudderyMainFrame.prototype.handle_events = function(data) {
 /*
  Handle combat.
  */
-MudderyMainFrame.prototype.handle_combat = function(data) {
+MudderyMainFrame.prototype.handle_combat = function(data, initiative) {
     this.showCombat();
 
     var info = data["combat_info"];
@@ -231,6 +231,16 @@ MudderyMainFrame.prototype.handle_combat = function(data) {
     mud.combat_window.setCombat(info["desc"], info["timeout"], info["characters"], core.data_handler.character_id);
     mud.combat_window.updateStates(states);
     mud.combat_window.setCommands(commands);
+
+    if (initiative) {
+        var msg = core.trans("You are attacking {R%s{n!").replace("%s", data["target"]);
+    }
+    else {
+        var msg = core.trans("{R%s{n is attacking you!").replace("%s", data["from"]);
+    }
+
+
+    mud.scene_window.displayMessage(core.text2html.parseHtml(msg));
 }
 
 //////////////////////////////////////////
@@ -691,8 +701,12 @@ MudderyPopupObject.prototype.onCommand = function(element) {
             }
             else {
                 if (command == "loot") {
-                    mud.popup_get_objects.setObjects(data);
+                    mud.popup_get_objects.setObjects(data["objects"]);
                     mud.popup_get_objects.show();
+
+                    if ("quests" in data) {
+                        mud.main_frame.handle_quests(data["quests"]);
+                    }
                 }
                 else if (command == "unlock_exit") {
                     mud.popup_object.setObject(data["exit"]);
@@ -720,6 +734,9 @@ MudderyPopupObject.prototype.onCommand = function(element) {
                     if (mud.popup_dialogue.hasDialogue() && !mud.main_frame.isWindowShow(mud.combat_window)) {
                         mud.popup_dialogue.show();
                     }
+                }
+                else if (command == "attack") {
+                    mud.main_frame.handle_combat(data["attack"], true);
                 }
                 else if (command == "shopping") {
                     mud.game_window.showShop(data);

@@ -40,6 +40,8 @@ class CombatHandler(object):
         combat.start()
         self.combats[new_combat_id] = combat
 
+        return combat
+
     def get_combat(self, combat_id):
         """
         Get a combat runner by its id.

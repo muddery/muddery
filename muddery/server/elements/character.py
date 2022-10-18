@@ -145,9 +145,6 @@ class MudderyCharacter(ELEMENT("MATTER")):
         time_now = time.time()
         self.gcd_finish_time = time_now + self.skill_gcd
 
-        # clear target
-        self.target = None
-
         # set reborn time
         self.reborn_time = self.const.reborn_time if self.const.reborn_time else 0
 
@@ -498,24 +495,6 @@ class MudderyCharacter(ELEMENT("MATTER")):
     # Attack a target.
     #
     ########################################
-    def set_target(self, target):
-        """
-        Set character's target.
-
-        Args:
-            target: (object) character's target
-
-        Returns:
-            None
-        """
-        self.target = target
-
-    def clear_target(self):
-        """
-        Clear character's target.
-        """
-        self.target = None
-
     async def attack_target(self, target, desc=""):
         """
         Attack a target.
@@ -530,26 +509,26 @@ class MudderyCharacter(ELEMENT("MATTER")):
         if self.is_in_combat():
             # already in battle
             logger.log_err("%s is already in battle." % self.get_id())
-            return False
+            raise MudderyError(ERR.invalid_input, _("You are in another combat."))
 
         # search target
         if not target:
             logger.log_err("Can not find the target.")
-            return False
+            raise MudderyError(ERR.invalid_input, _("Can not find the target."))
 
         if not target.is_element(SETTINGS.CHARACTER_ELEMENT_TYPE):
             # Target is not a character.
             logger.log_err("Can not attack the target %s." % target.get_id())
-            return False
+            raise MudderyError(ERR.invalid_input, _("You can not attack %s.") % target.get_name())
 
         if target.is_in_combat():
             # obj is already in battle
             logger.log_err("%s is already in battle." % target.get_id())
-            return False
+            raise MudderyError(ERR.invalid_input, _("%s is in another combat." % target.name))
 
         # create a new combat handler
         try:
-            await COMBAT_HANDLER.create_combat(
+            combat = await COMBAT_HANDLER.create_combat(
                 combat_type=CombatType.NORMAL,
                 teams={1: [target], 2: [self]},
                 desc=desc,
@@ -557,9 +536,9 @@ class MudderyCharacter(ELEMENT("MATTER")):
             )
         except Exception as e:
             logger.log_err("Can not create combat: [%s] %s" % (type(e).__name__, e))
-            await self.msg({"alert": _("You can not attack %s.") % target.get_name()})
+            raise MudderyError(ERR.invalid_input, _("You can not attack %s.") % target.get_name())
 
-        return True
+        return combat
 
     async def attack_temp_target(self, target_key, target_level, desc=""):
         """
@@ -578,15 +557,15 @@ class MudderyCharacter(ELEMENT("MATTER")):
         base_model = ELEMENT("CHARACTER").get_base_model()
         table_data = WorldData.get_table_data(base_model, key=target_key)
         if not table_data:
-            logger.log_err("Can not create the target.")
-            return False
+            logger.log_err("Can not create the target %s." % target_key)
+            raise MudderyError(ERR.invalid_input, _("You can not attack."))
 
         table_data = table_data[0]
         target = ELEMENT(table_data.element_type)()
         await target.setup_element(target_key, level=target_level, first_time=True, temp=True)
         if not target:
             logger.log_err("Can not create the target %s." % target_key)
-            return False
+            raise MudderyError(ERR.invalid_input, _("You can not attack."))
 
         return await self.attack_target(target, desc)
 

@@ -200,4 +200,6 @@ MudderyLocalDict = {
     "Purchase successful!": "购买成功！",
     "You are died.": "你已经死了。",
     "No effect.": "没有效果。",
+    "You are attacking {R%s{n!": "你正在攻击{R%s{n！",
+    "{R%s{n is attacking you!": "{R%s{n正在攻击你！",
 };

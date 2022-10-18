@@ -464,90 +464,68 @@ async def cast_skill(character, args) -> dict or None:
     return await character.cast_skill(skill_key, target)
 
 
-#------------------------------------------------------------
-# attack a character
-#------------------------------------------------------------
-class CmdAttack(BaseCommand):
+@CharacterCmd.request("attack")
+async def attack(character, args) -> dict or None:
     """
-    initiates combat
-
-    Usage:
-        {"cmd":"attack",
-         "args":<object's id>}
-        }
-
     This will initiate a combat with the target. If the target is
     already in combat, the caller will join its combat.
+
+    Usage:
+        {
+            "cmd": "attack",
+            "args": <object's id>
+        }
+
+
     """
-    key = "attack"
+    if not character.is_alive:
+        raise MudderyError(ERR.died, _("You are died."))
 
-    @classmethod
-    async def func(cls, caller, args):
-        "Handle command"
-        if not caller:
-            return
+    if not args:
+        raise MudderyError(ERR.missing_args, _("You should select a target."))
 
-        if not caller.is_alive:
-            await caller.msg({"alert":_("You are died.")})
-            return
+    try:
+        target_id = int(args)
+        room = character.get_location()
+        target = room.get_character(target_id)
+    except:
+        raise MudderyError(ERR.invalid_input, _("You should select a target."))
 
-        if not args:
-            await caller.msg({"alert":_("You should select a target.")})
-            return
+    if not character.location or character.location.peaceful:
+        raise MudderyError(ERR.invalid_input, _("You can not attack in this place."))
 
-        try:
-            target_id = int(args)
-            room = caller.get_location()
-            target = room.get_character(target_id)
-        except:
-            await caller.msg({"alert": _("You should select a target.")})
-            return
+    if not target.is_alive:
+        raise MudderyError(ERR.invalid_input, _("%s is died." % target.get_name()))
 
-        if not caller.location or caller.location.peaceful:
-            await caller.msg({"alert": _("You can not attack in this place.")})
-            return
+    if character.location != target.location:
+        raise MudderyError(ERR.invalid_input, _("You can not attack %s.") % target.get_name())
 
-        if not target.is_alive:
-            await caller.msg({"alert": _("%s is died." % target.get_name())})
-            return
+    # set up combat
+    if character.is_in_combat():
+        # caller is in battle
+        raise MudderyError(ERR.invalid_input, _("You are in another combat."))
 
-        if caller.location != target.location:
-            await caller.msg({"alert": _("You can not attack %s.") % target.get_name()})
-            return
+    if target.is_in_combat():
+        # target is in battle
+        raise MudderyError(ERR.invalid_input, _("%s is in another combat." % target.name))
 
-        # Set caller's target.
-        caller.set_target(target)
+    # create a new combat
+    combat = await COMBAT_HANDLER.create_combat(
+        combat_type=CombatType.NORMAL,
+        teams={1: [target], 2: [character]},
+        desc="",
+        timeout=0
+    )
 
-        # set up combat
-        if caller.is_in_combat():
-            # caller is in battle
-            message = {"alert": _("You are in another combat.")}
-            await caller.msg(message)
-            return
-
-        if target.is_in_combat():
-            # target is in battle
-            message = {"alert": _("%s is in another combat." % target.name)}
-            await caller.msg(message)
-            return
-
-        # create a new combat
-        try:
-            await COMBAT_HANDLER.create_combat(
-                combat_type=CombatType.NORMAL,
-                teams={1: [target], 2: [caller]},
-                desc="",
-                timeout=0
-            )
-        except Exception as e:
-            logger.log_err("Can not create combat: [%s] %s" % (type(e).__name__, e))
-            await caller.msg({"alert": _("You can not attack %s.") % target.get_name()})
-            return
-
-        await async_wait([
-            caller.msg({"msg": _("You are attacking {R%s{n! You are in combat.") % target.get_name()}),
-            target.msg({"msg": _("{R%s{n is attacking you! You are in combat.") % caller.get_name()}),
-        ])
+    combat_data = {
+        "combat_info": combat.get_appearance(),
+        "combat_commands": character.get_combat_commands(),
+        "combat_states": await combat.get_combat_states(),
+        "from": character.get_name(),
+        "target": target.get_name(),
+    }
+    await target.msg({"attack": combat_data})
+    return {"attack": combat_data}
 
 
 # ------------------------------------------------------------

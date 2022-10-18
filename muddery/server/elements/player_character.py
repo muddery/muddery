@@ -733,15 +733,35 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
                 "reject": reject,
             })
 
+        results = {
+            "objects": objects
+        }
+
         # call quest handler
         awaits = [
             self.quest_handler.at_objective(defines.OBJECTIVE_OBJECT, obj["key"], obj["number"]) for obj in objects
             if not obj["reject"]
         ]
-        if awaits:
-            await async_wait(awaits)
 
-        return objects
+        if awaits:
+            # Get accomplished quests.
+            quest_results = await async_gather(awaits)
+
+            # Remove empty quests.
+            quest_results = [r for r in quest_results if r]
+
+            if quest_results:
+                quests = {}
+                for r in quest_results:
+                    for key, value in r.items():
+                        if key in quests:
+                            quests[key].append(value)
+                        else:
+                            quests[key] = value
+
+                results["quests"] = quests
+
+        return results
 
     def can_get_object(self, obj_key, number):
         """
@@ -1521,8 +1541,8 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         if combat_result:
             status, opponents, rewards = combat_result
 
-        events = []
-        quests = []
+        event_results = []
+        quest_results = []
         results = {}
 
         combat_type = combat.get_combat_type()
@@ -1531,9 +1551,9 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
             # trigger events
             if status == defines.COMBAT_WIN:
                 if opponents:
-                    events = await async_gather([self.event.at_character_kill(op) for op in opponents])
-                    quests = await async_gather([self.quest_handler.at_objective(defines.OBJECTIVE_KILL, op.get_element_key())
-                                                 for op in opponents])
+                    event_results = await async_gather([self.event.at_character_kill(op) for op in opponents])
+                    quest_results = await async_gather([self.quest_handler.at_objective(defines.OBJECTIVE_KILL, op.get_element_key())
+                                                         for op in opponents])
             elif status == defines.COMBAT_LOSE:
                 await self.die(opponents)
                 events = await self.event.at_character_die()
@@ -1549,11 +1569,23 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         await combat.leave_combat(self)
         self.combat_id = None
 
-        events = [e for event_list in events if event_list for e in event_list]
-        quests = [q for quest_list in quests if quest_list for q in quest_list]
+        # Remove empty events.
+        events = [e for event_list in event_results if event_list for e in event_list]
         if events:
             results["events"] = events
-        if quests:
+
+        # Remove empty quests.
+        quest_results = [r for r in quest_results if r]
+
+        if quest_results:
+            quests = {}
+            for r in quest_results:
+                for key, value in r.items():
+                    if key in quests:
+                        quests[key].append(value)
+                    else:
+                        quests[key] = value
+
             results["quests"] = quests
 
         return results

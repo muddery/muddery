@@ -87,8 +87,8 @@ MudderyClient.prototype = {
                     } else if (key == "state") {
                         var state = data[key];
                         mud.main_frame.setState(state);
-                    } else if (key == "joined_combat") {
-                        mud.main_frame.showCombat(data[key]);
+                    } else if (key == "attack") {
+                        mud.main_frame.handle_combat(data[key], false);
                     } else if (key == "combat_finish") {
                         mud.combat_window.combatFinish(data[key]);
                     } else if (key == "combat_status") {
