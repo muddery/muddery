@@ -56,10 +56,6 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
                     and its commands only be called by itself, not anyone else.
                     (to change things, use at_object_creation() instead)
     at_after_move - launches the "look" command
-    at_post_puppet(player) -  when Player disconnects from the Character, we
-                    store the current location, so the "unconnected" character
-                    object does not need to stay on grid but can be given a
-                    None-location while offline.
     at_pre_puppet - just before Player re-connects, retrieves the character's
                     old location and puts it back on the grid with a "charname
                     has connected" message echoed to the room
@@ -195,6 +191,19 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         await CharacterInfo.inst().set_level(self.get_db_id(), level)
         await super(MudderyPlayerCharacter, self).set_level(level)
 
+    async def level_up(self):
+        """
+        Upgrade level.
+
+        Returns:
+            None
+        """
+        with CharacterInfo.inst().transaction():
+            new_level = await self.get_level() + 1
+            await self.set_level(new_level)
+
+        return new_level
+
     async def setup_element(self, key, level=None, first_time=False, temp=False):
         """
         Set element data's key.
@@ -321,20 +330,6 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
 
         return results
 
-    async def at_post_puppet(self):
-        """
-        Called just after puppeting has been completed and all
-        Player<->Object links have been established.
-
-        """
-        # send character's data to player
-
-        # await self.msg(message)
-
-        # await self.resume_last_dialogue()
-
-        # await self.resume_combat()
-
     async def at_pre_unpuppet(self):
         """
         Called just before beginning to un-connect a puppeting from
@@ -389,7 +384,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
             return
 
         # relay to account
-        await self.account.msg(data, delay)
+        await self.account.msg(data)
 
     async def get_level(self):
         """
@@ -1523,6 +1518,12 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
             if "honour" in rewards and rewards["honour"]:
                 combat_result["rewards"]["honour"] = rewards["honour"]
 
+        # set state
+        if "level_up" in combat_result["rewards"] or combat_type == CombatType.HONOUR:
+            # recover state
+            await self.recover()
+            combat_result["state"] = await self.get_state()
+
         await self.msg({"combat_finish": combat_result})
 
     async def leave_combat(self):
@@ -1556,7 +1557,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
                                                          for op in opponents])
             elif status == defines.COMBAT_LOSE:
                 await self.die(opponents)
-                events = await self.event.at_character_die()
+                event_results = await self.event.at_character_die()
                 results["die"] = True
                 if self.reborn_time > 0:
                     results["reborn_time"] = self.reborn_time
@@ -1568,6 +1569,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
 
         await combat.leave_combat(self)
         self.combat_id = None
+        await CharacterCombat.inst().remove_character(self.get_db_id())
 
         # Remove empty events.
         events = [e for event_list in event_results if event_list for e in event_list]
@@ -1605,15 +1607,14 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         """
         The character win in an honour combat.
         """
-        # Recover properties.
-        await self.recover()
+        pass
+
 
     async def honour_lose(self):
         """
         The character lost in an honour combat.
         """
-        # Recover properties.
-        await self.recover()
+        pass
 
     async def reborn(self):
         """
@@ -1634,8 +1635,6 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
 
         if home:
             await self.move_to(home)
-
-        await self.show_status()
 
         if home:
             await self.msg({"msg": _("You are reborn at {C%s{n.") % home.get_name()})
@@ -1688,9 +1687,6 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         Returns:
             None
         """
-        # Set caller's target.
-        self.set_target(npc)
-
         # Get NPC's dialogue list.
         dialogues = await DialogueHandler.inst().get_npc_dialogues(self, npc)
 

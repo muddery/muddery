@@ -37,12 +37,14 @@ class Character(MudderyCharacter):
         Upgrade level.
 
         Returns:
-            None
+            (integer) new level
         """
-        await super(Character, self).level_up()
+        new_level = await super(Character, self).level_up()
 
         # Recover hp and mp.
         await self.recover()
+
+        return new_level
 
     async def get_combat_state(self):
         """
@@ -96,8 +98,7 @@ class Character(MudderyCharacter):
             if self.const.max_exp > 0:
                 # can upgrade
                 new_exp -= self.const.max_exp
-                await self.level_up()
-                results["level_up"] = self.get_level()
+                results["level_up"] = await self.level_up()
             else:
                 # can not upgrade
                 new_exp = 0

@@ -25,7 +25,7 @@ class CmdCombatInfo(BaseCommand):
     @classmethod
     async def func(cls, caller, args):
         """
-        Return the overall combat informations to the caller.
+        Return the overall combat information to the caller.
         """
         if not caller.is_in_combat():
             # If the caller is not in combat.

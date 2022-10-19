@@ -206,7 +206,7 @@ class MudderySkillBook(ELEMENT("POCKET_OBJECT")):
         if not skill_key:
             return None, 0
 
-        learning_result = await user.learn_skill(skill_key, skill_level, False)
+        learning_result = await user.learn_skill(skill_key, skill_level)
 
         result = {
             "msg": _("You learned skill {C%s{n.") % learning_result["name"],

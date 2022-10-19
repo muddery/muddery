@@ -14,7 +14,7 @@ class system_data(BaseModels.system_data):
 # Game object's runtime attributes.
 #
 # ------------------------------------------------------------
-class character_states(BaseModels.character_status):
+class character_states(BaseModels.character_states):
     pass
 
 

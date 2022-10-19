@@ -4,7 +4,7 @@ Event action.
 
 from muddery.server.events.base_event_action import BaseEventAction
 from muddery.server.database.worlddata.worlddata import WorldData
-from muddery.common.utils.utils import async_wait
+from muddery.common.utils.utils import async_gather
 
 
 class ActionLearnSkill(BaseEventAction):
@@ -30,4 +30,4 @@ class ActionLearnSkill(BaseEventAction):
 
         # Learn skills.
         if records:
-            await async_wait([character.learn_skill(r.skill, r.level, False) for r in records])
+            return await async_gather([character.learn_skill(r.skill, r.level) for r in records])

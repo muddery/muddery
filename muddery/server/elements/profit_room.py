@@ -72,6 +72,8 @@ class MudderyProfitRoom(ELEMENT("ROOM")):
         :param character: The character leaving.
         :return:
         """
+        await super(MudderyProfitRoom, self).at_character_leave(character)
+
         char_id = character.get_id()
         if char_id in self.last_trigger_time:
             del self.last_trigger_time[char_id]

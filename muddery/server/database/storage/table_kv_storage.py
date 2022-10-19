@@ -152,7 +152,6 @@ class TableKVStorage(BaseKeyValueStorage):
         else:
             raise KeyError
 
-
     async def load(self, category, key, *default, for_update=False):
         """
         Get the default field value of a key.

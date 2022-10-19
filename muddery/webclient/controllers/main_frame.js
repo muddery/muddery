@@ -152,15 +152,12 @@ MudderyMainFrame.prototype.handle_quests = function(data) {
     if ("accomplished" in data) {
         // show accomplished quests.
         var accomplished = data["accomplished"];
-        var quests = "";
         for (var i = 0; i < accomplished.length; i++) {
-            if (quests) {
-                quests += ", ";
+            if (accomplished[i]["name"]) {
+                var msg = core.trans("Quest {C%s{n's goals are accomplished.").replace("%s", accomplished[i]["name"]);
+                mud.scene_window.displayMessage(core.text2html.parseHtml(msg));
             }
-            quests += "{C" + accomplished[i]["name"] + "{n";
         }
-        var msg = core.trans("Quest %s's goals are accomplished.").replace("%s", quests);
-        mud.scene_window.displayMessage(core.text2html.parseHtml(msg));
     }
 }
 
@@ -178,16 +175,12 @@ MudderyMainFrame.prototype.handle_events = function(data) {
         }
         else if ("ACTION_ACCEPT_QUEST" in data[i]) {
             var quests = data[i]["ACTION_ACCEPT_QUEST"];
-            var names = "";
             for (var q = 0; q < quests.length; q++) {
-                if (names) {
-                    names += ", ";
+                if (quests[q]["name"]) {
+                    var msg = core.trans("Accepted quest {C%s{n.").replace("%s", quests[q]["name"]);
+                    mud.scene_window.displayMessage(core.text2html.parseHtml(msg));
                 }
-                names += "{C" + quests[q]["name"] + "{n";
             }
-
-            var msg = core.trans("Accepted quest %s.").replace("%s", names);
-            mud.scene_window.displayMessage(core.text2html.parseHtml(msg));
         }
         else if ("ACTION_ATTACK" in data[i]) {
             this.handle_combat(data[i]["ACTION_ATTACK"], false);
@@ -208,6 +201,15 @@ MudderyMainFrame.prototype.handle_events = function(data) {
             for (var q = 0; q < quests.length; q++) {
                 if (quests[q]["name"]) {
                     var msg = core.trans("Turned in quest {C%s{n.").replace("%s", quests[q]["name"]);
+                    mud.scene_window.displayMessage(core.text2html.parseHtml(msg));
+                }
+            }
+        }
+        else if ("ACTION_LEARN_SKILL" in data[i]) {
+            var skills = data[i]["ACTION_LEARN_SKILL"];
+            for (var s = 0; s < skills.length; s++) {
+                if (skills[s]["name"]) {
+                    var msg = core.trans("You learned skill {C%s{n.").replace("%s", skills[s]["name"]);
                     mud.scene_window.displayMessage(core.text2html.parseHtml(msg));
                 }
             }
@@ -3626,6 +3628,7 @@ MudderySkills.prototype.bindEvents = function() {
  */
 MudderySkills.prototype.onShow = function() {
     this.reset();
+    this.select(".skill-info").hide();
     core.command.queryAllSkills(function(code, data, msg) {
         if (code == 0) {
             mud.skills_window.setSkills(data);
@@ -3862,6 +3865,7 @@ MudderyQuests.prototype.bindEvents = function() {
  */
 MudderyQuests.prototype.onShow = function() {
     this.reset();
+    this.select(".quest-info").hide();
     core.command.queryAllQuests(function(code, data, msg) {
         if (code == 0) {
             mud.quests_window.setQuests(data);
@@ -4928,6 +4932,10 @@ MudderyCombat.prototype.combatFinish = function(data) {
     this.combat_result.reset();
 	this.combat_result.setResult(data["type"], data["result"], data["rewards"]);
 	this.combat_result.show();
+
+	if ("state" in data) {
+	    mud.main_frame.setState(data["state"]);
+	}
 }
 
 /*
@@ -4980,6 +4988,8 @@ MudderyCombatResult.prototype.reset = function(skill_cd_time) {
     this.select(".result-honour").empty();
     this.select(".result-exp-block").hide();
     this.select(".result-exp").empty();
+	this.select(".result-level-up-block").hide();
+    this.select(".result-level-up");
     this.select(".result-accepted").hide();
     this.select(".result-accepted-list").empty();
     this.select(".result-rejected").hide();
@@ -5065,7 +5075,10 @@ MudderyCombatResult.prototype.setResult = function(type, result, rewards) {
         }
 
         if ("get_objects" in rewards) {
-            this.setGetObjects(rewards["get_objects"]);
+            this.setGetObjects(rewards["get_objects"]["objects"]);
+            if ("quests" in rewards["get_objects"]) {
+                mud.main_frame.handle_quests(rewards["get_objects"]["quests"]);
+            }
         }
     }
 }

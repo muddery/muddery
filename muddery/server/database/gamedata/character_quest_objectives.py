@@ -3,6 +3,7 @@
 Store object's element key data in memory.
 """
 
+import json
 from muddery.server.database.gamedata.base_data import BaseData
 from muddery.common.utils.singleton import Singleton
 
@@ -28,8 +29,8 @@ class CharacterQuestObjectives(BaseData, Singleton):
         :param quest: (string) quest's key
         :return:
         """
-        character_quest = "%s:%s" % (character_id, quest)
-        return await self.storage.load_category(character_quest, {})
+        data = await self.storage.load(character_id, quest, "{}")
+        return json.loads(data)
 
     async def save_progress(self, character_id, quest, objective_type, object_key, progress):
         """
@@ -41,9 +42,13 @@ class CharacterQuestObjectives(BaseData, Singleton):
         :param progress:
         :return:
         """
-        character_quest = "%s:%s" % (character_id, quest)
         objective = "%s:%s" % (objective_type, object_key)
-        await self.storage.save(character_quest, objective, progress)
+
+        with self.storage.transaction():
+            data = await self.storage.load(character_id, quest, "{}", for_update=True)
+            objectives = json.loads(data)
+            objectives[objective] = progress
+            await self.storage.save(character_id, quest, json.dumps(objectives))
 
     async def get_progress(self, character_id, quest, objective_type, object_key, *default):
         """
@@ -52,12 +57,17 @@ class CharacterQuestObjectives(BaseData, Singleton):
         :param quest:
         :param objective_type:
         :param object_key:
-        :param progress:
-        :return:
+        :return: progress
         """
-        character_quest = "%s:%s" % (character_id, quest)
         objective = "%s:%s" % (objective_type, object_key)
-        return await self.storage.load(character_quest, objective, *default)
+        data = await self.storage.load(character_id, quest, "{}")
+        objectives = json.loads(data)
+        try:
+            return objectives[objective]
+        except KeyError:
+            if len(default) > 0:
+                return default[0]
+            raise
 
     async def remove(self, character_id, quest):
         """
@@ -67,5 +77,14 @@ class CharacterQuestObjectives(BaseData, Singleton):
         :param quest: (string) quest's key
         :return:
         """
-        character_quest = "%s:%s" % (character_id, quest)
-        await self.storage.delete_category(character_quest)
+        await self.storage.delete(character_id, quest)
+
+    async def remove_character(self, character_id):
+        """
+        Remove a quest's all objectives
+
+        :param character_id:
+        :param quest: (string) quest's key
+        :return:
+        """
+        await self.storage.delete_category(character_id)

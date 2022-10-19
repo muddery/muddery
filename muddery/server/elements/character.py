@@ -322,7 +322,7 @@ class MudderyCharacter(ELEMENT("MATTER")):
         self.set_location(location)
 
         if self.location:
-            self.location.at_character_arrive(self)
+            await self.location.at_character_arrive(self)
 
     def get_location(self):
         """

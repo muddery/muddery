@@ -353,18 +353,14 @@ async def func(account, args):
 
 
 @AccountCmd.request("logout")
-async def logout(session, args):
+async def logout(account, args):
     """
-    quit when in unlogged-in state
+    Logout the account.
 
     Usage:
         {
-            "cmd":"quit",
-            "args":""
+            "cmd": "logout",
+            "args": ""
         }
-
-    We maintain a different version of the quit command
-    here for unconnected players for the sake of simplicity. The logged in
-    version is a bit more complicated.
     """
-    return await session.logout()
+    return await account.logout()

@@ -67,11 +67,11 @@ class BaseObjectStates(BaseModel):
     value = Column(String(VALUE_LENGTH))
 
 
-class character_status(BaseObjectStates):
+class character_states(BaseObjectStates):
     """
     Player character's runtime attributes.
     """
-    __tablename__ = "character_status"
+    __tablename__ = "character_states"
 
 
 # ------------------------------------------------------------

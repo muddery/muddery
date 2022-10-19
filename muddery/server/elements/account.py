@@ -24,10 +24,14 @@ from muddery.server.database.gamedata.character_finished_quests import Character
 from muddery.server.database.gamedata.character_skills import CharacterSkills
 from muddery.server.database.gamedata.character_combat import CharacterCombat
 from muddery.server.database.gamedata.character_closed_events import CharacterClosedEvents
+from muddery.server.database.gamedata.character_quest_objectives import CharacterQuestObjectives
+from muddery.server.database.gamedata.character_relationships import CharacterRelationships
+from muddery.server.database.gamedata.object_storage import CharacterObjectStorage
 from muddery.server.database.gamedata.honours_mapper import HonoursMapper
 from muddery.server.elements.base_element import BaseElement
 from muddery.server.mappings.element_set import ELEMENT
 from muddery.server.server import Server
+from muddery.server.utils.object_states_handler import ObjectStatesHandler
 from muddery.server.utils.game_settings import GameSettings
 from muddery.common.utils.exception import MudderyError, ERR
 from muddery.server.utils.localized_strings_handler import _
@@ -189,26 +193,18 @@ class MudderyAccount(BaseElement):
             nicknames = []
         return [{"name": nicknames[index], "id": char_id} for index, char_id in enumerate(char_all)]
 
-    async def msg(self, data, delay=True):
+    async def msg(self, data):
         """
         Element -> User
         This is the main route for sending data back to the user from the
         server.
 
         Args:
-            text (str, optional): text data to send
-            session (Session or list, optional): Session object or a list of
-                Sessions to receive this send. If given, overrules the
-                default send behavior for the current
-                MULTISESSION_MODE.
-            options (list): Protocol-specific options. Passed on to the protocol.
-        Kwargs:
-            any (dict): All other keywords are passed on to the protocol.
-
+            data (dict): data to send
         """
         # session relay
         if self.session:
-            await self.session.msg(data, delay)
+            await self.session.msg(data)
 
     async def puppet_character(self, char_db_id):
         """
@@ -347,8 +343,12 @@ class MudderyAccount(BaseElement):
 
         await self.unpuppet_character()
 
+        # character object's data
+        object_states = ObjectStatesHandler(char_db_id, CharacterObjectStorage)
+
         # delete all character data.
         await async_wait([
+            object_states.clear(),
             AccountCharacters.inst().remove_character(self.id, char_db_id),
             CharacterInfo.inst().remove_character(char_db_id),
             CharacterLocation.inst().remove_character(char_db_id),
@@ -359,6 +359,8 @@ class MudderyAccount(BaseElement):
             CharacterSkills.inst().remove_character(char_db_id),
             CharacterCombat.inst().remove_character(char_db_id),
             CharacterClosedEvents.inst().remove_character(char_db_id),
+            CharacterQuestObjectives.inst().remove_character(char_db_id),
+            CharacterRelationships.inst().remove_character(char_db_id),
             HonoursMapper.inst().remove_character(char_db_id),
         ])
 
@@ -374,8 +376,12 @@ class MudderyAccount(BaseElement):
         all_characters = await self.get_all_characters()
         awaits = []
         for char_db_id in all_characters:
+            # character object's data
+            object_states = ObjectStatesHandler(char_db_id, CharacterObjectStorage)
+
             # delete all character data.
             awaits.extend([
+                object_states.clear(),
                 AccountCharacters.inst().remove_character(self.id, char_db_id),
                 CharacterInfo.inst().remove_character(char_db_id),
                 CharacterLocation.inst().remove_character(char_db_id),
@@ -386,6 +392,8 @@ class MudderyAccount(BaseElement):
                 CharacterSkills.inst().remove_character(char_db_id),
                 CharacterCombat.inst().remove_character(char_db_id),
                 CharacterClosedEvents.inst().remove_character(char_db_id),
+                CharacterQuestObjectives.inst().remove_character(char_db_id),
+                CharacterRelationships.inst().remove_character(char_db_id),
                 HonoursMapper.inst().remove_character(char_db_id),
             ])
 
@@ -413,10 +421,10 @@ class MudderyAccount(BaseElement):
         await Accounts.inst().set_password(self.username, password, salt)
         return
 
-    async def disconnect(self, reason):
+    async def logout(self):
         """
-        Disconnect the session
+        Logout the session
         """
         if self.session:
-            await self.session.disconnect(reason)
+            await self.session.logout()
             self.session = None
