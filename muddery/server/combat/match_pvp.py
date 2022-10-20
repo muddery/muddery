@@ -6,7 +6,9 @@ import time
 import datetime
 import math
 import pytz
+import asyncio
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from muddery.common.utils.exception import MudderyError, ERR
 from muddery.server.database.gamedata.honours_mapper import HonoursMapper
 from muddery.server.utils.localized_strings_handler import _
 from muddery.common.utils.defines import CombatType
@@ -111,10 +113,9 @@ class MatchPVPHandler(Singleton):
         char_db_id = character.get_db_id()
 
         if char_db_id in self.waiting_queue:
-            return
+            raise MudderyError(ERR.invalid_input, _("You are already in the queue."))
         
         self.waiting_queue.append(char_db_id)
-        await character.msg({"in_combat_queue": True})
 
     async def remove(self, character):
         """
@@ -122,27 +123,21 @@ class MatchPVPHandler(Singleton):
         """
         char_db_id = character.get_db_id()
 
-        in_queue = False
         try:
             self.waiting_queue.remove(char_db_id)
-            in_queue = True
         except ValueError:
             pass
 
         try:
             del self.preparing[char_db_id]
-            in_queue = True
         except KeyError:
             pass
-
-        if in_queue:
-            await character.msg({"left_combat_queue": True})
 
     async def match(self):
         """
         Match opponents according to character's scores.
         The longer a character in the queue, the score is higher.
-        The nearer of two character's rank, the score is higher.
+        The nearer of two characters' rank, the score is higher.
         """
         if len(self.waiting_queue) < 2:
             return
@@ -230,16 +225,12 @@ class MatchPVPHandler(Singleton):
         except KeyError:
             pass
 
-        awaits = [character.msg({"match_rejected": char_db_id})]
-
         try:
             opponent = Server.world.get_character(opponent_db_id)
-            awaits.append(opponent.msg({"match_rejected": char_db_id}))
+            asyncio.create_task(opponent.msg({"match_rejected": char_db_id}))
         except KeyError:
             pass
 
-        if awaits:
-            await async_wait(awaits)
         await self.remove(character)
 
     async def fight(self, char_id_A, char_id_B):
@@ -271,19 +262,13 @@ class MatchPVPHandler(Singleton):
             awaits = []
             try:
                 character0 = Server.world.get_character(char_id_A)
-                awaits.append(character0.msg({
-                    "match_rejected": char_id_A,
-                    "left_combat_queue": True,
-                }))
+                awaits.append(character0.msg({"match_rejected": char_id_A}))
             except KeyError:
                 pass
 
             try:
                 character1 = Server.world.get_character(char_id_B)
-                awaits.append(character1.msg({
-                    "match_rejected": char_id_B,
-                    "left_combat_queue": True,
-                }))
+                awaits.append(character1.msg({"match_rejected": char_id_B}))
             except KeyError:
                 pass
 
@@ -299,10 +284,7 @@ class MatchPVPHandler(Singleton):
             awaits = []
             try:
                 character0 = Server.world.get_character(char_id_A)
-                awaits.append(character0.msg({
-                    "match_rejected": char_id_A,
-                    "left_combat_queue": True,
-                }))
+                awaits.append(character0.msg({"match_rejected": char_id_A}))
             except KeyError:
                 pass
 
@@ -314,9 +296,7 @@ class MatchPVPHandler(Singleton):
 
             try:
                 character1 = Server.world.get_character(char_id_B)
-                awaits.append(character1.msg({
-                    "match_rejected": char_id_A,
-                }))
+                awaits.append(character1.msg({"match_rejected": char_id_A}))
             except KeyError:
                 pass
 
@@ -332,10 +312,7 @@ class MatchPVPHandler(Singleton):
             awaits = []
             try:
                 character0 = Server.world.get_character(char_id_B)
-                awaits.append(character0.msg({
-                    "match_rejected": char_id_B,
-                    "left_combat_queue": True,
-                }))
+                awaits.append(character0.msg({"match_rejected": char_id_B}))
             except KeyError:
                 pass
 
@@ -347,9 +324,7 @@ class MatchPVPHandler(Singleton):
 
             try:
                 character1 = Server.world.get_character(char_id_A)
-                awaits.append(character1.msg({
-                    "match_rejected": char_id_B,
-                }))
+                awaits.append(character1.msg({"match_rejected": char_id_B}))
             except KeyError:
                 pass
 
@@ -361,7 +336,7 @@ class MatchPVPHandler(Singleton):
             opponent1 = Server.world.get_character(char_id_B)
 
             # create a new combat
-            await COMBAT_HANDLER.create_combat(
+            combat = await COMBAT_HANDLER.create_combat(
                 combat_type=CombatType.HONOUR,
                 teams={1:[opponent0], 2:[opponent1]},
                 desc=_("Fight of Honour"),
@@ -371,7 +346,23 @@ class MatchPVPHandler(Singleton):
             remove_by_id(char_id_A)
             remove_by_id(char_id_B)
 
+            combat_data_0 = {
+                "combat_info": combat.get_appearance(),
+                "combat_commands": opponent0.get_combat_commands(),
+                "combat_states": await combat.get_combat_states(),
+                "from": opponent0.get_name(),
+                "target": opponent1.get_name(),
+            }
+
+            combat_data_1 = {
+                "combat_info": combat.get_appearance(),
+                "combat_commands": opponent1.get_combat_commands(),
+                "combat_states": await combat.get_combat_states(),
+                "from": opponent1.get_name(),
+                "target": opponent0.get_name(),
+            }
+
             await async_wait([
-                opponent0.msg({"left_combat_queue": True}),
-                opponent1.msg({"left_combat_queue": True}),
+                opponent0.msg({"honour_combat": combat_data_0}),
+                opponent1.msg({"honour_combat": combat_data_1}),
             ])

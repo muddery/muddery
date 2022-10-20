@@ -90,21 +90,17 @@ MudderyClient.prototype = {
                     } else if (key == "conversation") {
                         mud.conversation_window.getMessage(data[key]);
                     } else if (key == "attack") {
-                        mud.main_frame.handle_combat(data[key], false);
+                        mud.main_frame.handle_attack(data[key], false);
                     } else if (key == "combat_skill_cast") {
                         mud.combat_window.setSkillCast(data[key]);
                     } else if (key == "combat_finish") {
                         mud.combat_window.combatFinish(data[key]);
-                    } else if (key == "rankings") {
-                        mud.honour_window.setRankings(data[key]);
-                    } else if (key == "in_combat_queue") {
-                        mud.main_frame.inCombatQueue(data[key]);
-                    } else if (key == "left_combat_queue") {
-                        mud.main_frame.leftCombatQueue(data[key]);
                     } else if (key == "prepare_match") {
                         mud.main_frame.prepareMatch(data[key]);
                     } else if (key == "match_rejected") {
                         mud.main_frame.matchRejected(data[key]);
+                    } else if (key == "honour_combat") {
+                        mud.main_frame.honour_combat(data[key]);
                     } else {
                         mud.main_frame.popupAlert(core.trans("Error"), "Unknown message: " + key);
                     }

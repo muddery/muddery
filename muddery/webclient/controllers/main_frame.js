@@ -183,7 +183,7 @@ MudderyMainFrame.prototype.handle_events = function(data) {
             }
         }
         else if ("ACTION_ATTACK" in data[i]) {
-            this.handle_combat(data[i]["ACTION_ATTACK"], false);
+            this.handle_attack(data[i]["ACTION_ATTACK"], false);
         }
         else if ("ACTION_SET_RELATION" in data[i]) {
             var relations = data[i]["ACTION_SET_RELATION"];
@@ -192,6 +192,24 @@ MudderyMainFrame.prototype.handle_events = function(data) {
                     var msg = core.trans("The relationship with %s1 becomes %s2.")
                         .replace("%s1", relations[r]["name"])
                         .replace("%s2", relations[r]["value"]);
+                    mud.scene_window.displayMessage(core.text2html.parseHtml(msg));
+                }
+            }
+        }
+        else if ("ACTION_ADD_RELATION" in data[i]) {
+            var relations = data[i]["ACTION_ADD_RELATION"];
+            for (var r = 0; r < relations.length; r++) {
+                if (relations[r]["name"]) {
+                    if (relations[r]["value"] >= 0) {
+                        var msg = core.trans("The relationship with %s1 increased by %s2.")
+                            .replace("%s1", relations[r]["name"])
+                            .replace("%s2", relations[r]["value"]);
+                    }
+                    else {
+                        var msg = core.trans("The relationship with %s1 decreased by %s2.")
+                            .replace("%s1", relations[r]["name"])
+                            .replace("%s2", -relations[r]["value"]);
+                    }
                     mud.scene_window.displayMessage(core.text2html.parseHtml(msg));
                 }
             }
@@ -214,6 +232,23 @@ MudderyMainFrame.prototype.handle_events = function(data) {
                 }
             }
         }
+        else if ("ACTION_GET_OBJECTS" in data[i]) {
+            var get_objects = data[i]["ACTION_GET_OBJECTS"];
+            if ("msg" in get_objects) {
+                mud.scene_window.displayMessage(core.text2html.parseHtml(get_objects["msg"]));
+            }
+        }
+        else if ("ACTION_MESSAGE" in data[i]) {
+            var messages = data[i]["ACTION_MESSAGE"];
+            for (var m = 0; m < messages.length; m++) {
+                if (messages[m]) {
+                    mud.scene_window.displayMessage(core.text2html.parseHtml(messages[m]));
+                }
+            }
+        }
+        else if ("ACTION_CLOSE_EVENT" in data[i]) {
+            // pass
+        }
         else {
             this.popupAlert(core.trans("Error"), "Unknown event: " + Object.keys(data[i])[0]);
         }
@@ -221,9 +256,38 @@ MudderyMainFrame.prototype.handle_events = function(data) {
 }
 
 /*
+ Handle attack.
+ */
+MudderyMainFrame.prototype.handle_attack = function(data, initiative) {
+    this.handle_combat(data);
+
+    if ("target" in data && initiative) {
+        var msg = core.trans("You are attacking {R%s{n!").replace("%s", data["target"]);
+        mud.scene_window.displayMessage(core.text2html.parseHtml(msg));
+    }
+
+    if ("from" in data && !initiative) {
+        var msg = core.trans("{R%s{n is attacking you!").replace("%s", data["from"]);
+        mud.scene_window.displayMessage(core.text2html.parseHtml(msg));
+    }
+}
+
+/*
+ Handle honour combat.
+ */
+MudderyMainFrame.prototype.honour_combat = function(data) {
+    this.handle_combat(data);
+
+    mud.honour_window.leftCombatQueue();
+
+    var msg = core.trans("The combat of honour between you and {R%s{n!").replace("%s", data["target"]);
+    mud.scene_window.displayMessage(core.text2html.parseHtml(msg));
+}
+
+/*
  Handle combat.
  */
-MudderyMainFrame.prototype.handle_combat = function(data, initiative) {
+MudderyMainFrame.prototype.handle_combat = function(data) {
     this.showCombat();
 
     var info = data["combat_info"];
@@ -233,16 +297,6 @@ MudderyMainFrame.prototype.handle_combat = function(data, initiative) {
     mud.combat_window.setCombat(info["desc"], info["timeout"], info["characters"], core.data_handler.character_id);
     mud.combat_window.updateStates(states);
     mud.combat_window.setCommands(commands);
-
-    if (initiative) {
-        var msg = core.trans("You are attacking {R%s{n!").replace("%s", data["target"]);
-    }
-    else {
-        var msg = core.trans("{R%s{n is attacking you!").replace("%s", data["from"]);
-    }
-
-
-    mud.scene_window.displayMessage(core.text2html.parseHtml(msg));
 }
 
 //////////////////////////////////////////
@@ -738,7 +792,7 @@ MudderyPopupObject.prototype.onCommand = function(element) {
                     }
                 }
                 else if (command == "attack") {
-                    mud.main_frame.handle_combat(data["attack"], true);
+                    mud.main_frame.handle_attack(data["attack"], true);
                 }
                 else if (command == "shopping") {
                     mud.game_window.showShop(data);
@@ -1277,11 +1331,23 @@ MudderyPopupConfirmCombat.prototype.onConfirmCombat = function(element) {
 	}
 	this.confirmed = true;
 
-	core.command.confirmCombat();
+	core.command.confirmCombat(function(code, data, msg) {
+        if (code == 0) {
+            mud.popup_confirm_combat.combatConfirmed();
+        }
+        else {
+            mud.main_frame.popupAlert(core.trans("Error"), core.trans(msg));
+        }
+    });
+}
 
-	this.select(".confirm-body").text(core.trans("Waiting the opponent to confirm."));
-	this.select(".button-cancel").hide();
-	this.select(".button-ok").hide();
+/*
+ * Combat confirmed.
+ */
+MudderyPopupConfirmCombat.prototype.combatConfirmed = function() {
+    this.select(".confirm-body").text(core.trans("Waiting the opponent to confirm."));
+    this.select(".button-cancel").hide();
+    this.select(".button-ok").hide();
 }
 
 /*
@@ -1292,14 +1358,20 @@ MudderyPopupConfirmCombat.prototype.onRejectCombat = function(element) {
 		return;
 	}
 
-    this.el.hide();
-	core.command.rejectCombat();
-	mud.honour_window.leftCombatQueue();
+    if (this.interval_id != null) {
+        window.clearInterval(this.interval_id);
+        this.interval_id = 0;
+    }
 
-	if (this.interval_id != null) {
-		window.clearInterval(this.interval_id);
-		this.interval_id = 0;
-	}
+    this.el.hide();
+	core.command.rejectCombat(function(code, data, msg) {
+        if (code == 0) {
+	        mud.honour_window.leftCombatQueue();
+        }
+        else {
+            mud.main_frame.popupAlert(core.trans("Error"), core.trans(msg));
+        }
+    });
 }
 
 /*
@@ -1322,12 +1394,13 @@ MudderyPopupConfirmCombat.prototype.refreshPrepareTime = function() {
     this.select(".confirm-time").text(parseInt(remain_time) + text);
 
     if (remain_time <= 0) {
+        if (this.interval_id != null) {
+            window.clearInterval(this.interval_id);
+            this.interval_id = 0;
+        }
+
         if (this.confirmed) {
             // Waiting the opponent to confirm.
-            if (this.interval_id != null) {
-                window.clearInterval(this.interval_id);
-                this.interval_id = 0;
-            }
         }
         else {
             // Reject the combat automatically.
@@ -1731,6 +1804,17 @@ MudderySelectChar.prototype.onSelectCharacter = function(element) {
             }
 
             mud.main_frame.showPuppet();
+
+            if ("last_combat" in data) {
+                mud.main_frame.handle_combat(data["last_combat"]);
+            }
+
+            if ("last_dialogue" in data) {
+                mud.popup_dialogue.setDialogue(data["last_dialogue"]);
+                if (mud.popup_dialogue.hasDialogue() && !mud.main_frame.isWindowShow(mud.combat_window)) {
+                    mud.popup_dialogue.show();
+                }
+            }
         }
         else {
             mud.main_frame.popupAlert(core.trans("Error"), core.trans(msg));
@@ -4085,7 +4169,14 @@ MudderyHonour.prototype.constructor = MudderyHonour;
 MudderyHonour.prototype.onShow = function() {
     var container = this.select(".rank-table");
     container.empty();
-    core.command.getRankings();
+    core.command.getRankings(function(code, data, msg) {
+        if (code == 0) {
+            mud.honour_window.setRankings(data);
+        }
+        else {
+            mud.main_frame.popupAlert(core.trans("Error"), core.trans(msg));
+        }
+    });
 }
 
 /*
@@ -4107,16 +4198,28 @@ MudderyHonour.prototype.onQueueUpCombat = function(element) {
         return;
     }
 
-    this.inCombatQueue();
-    core.command.queueUpCombat();
+    core.command.queueUpCombat(function(code, data, msg) {
+        if (code == 0) {
+            mud.main_frame.inCombatQueue();
+        }
+        else {
+            mud.main_frame.popupAlert(core.trans("Error"), core.trans(msg));
+        }
+    });
 }
 
 /*
  * Event when clicks the quit queue button.
  */
 MudderyHonour.prototype.onQuitCombatQueue = function(element) {
-	this.leftCombatQueue();
-    core.command.quitCombatQueue();
+    core.command.quitCombatQueue(function(code, data, msg) {
+        if (code == 0) {
+            mud.main_frame.leftCombatQueue();
+        }
+        else {
+            mud.main_frame.popupAlert(core.trans("Error"), core.trans(msg));
+        }
+    });
 }
 
 /*

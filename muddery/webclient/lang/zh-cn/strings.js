@@ -195,6 +195,8 @@ MudderyLocalDict = {
     "{RYou died.{n": "{R你死了。{n",
     "You will be reborn in {C%s{n seconds.": "你将在{C%s{n秒后重生。",
     "The relationship with %s1 becomes %s2.": "和%s1的关系变为%s2。",
+    "The relationship with %s1 increased by %s2.": "和%s1的关系增加%s2。",
+    "The relationship with %s1 decreased by %s2.": "和%s1的关系减少%s2。",
     "Turned in quest {C%s{n.": "完成任务{C%s{n。",
     "Gave up quest {C%s{n.": "放弃任务{C%s{n。",
     "Purchase successful!": "购买成功！",
@@ -203,4 +205,5 @@ MudderyLocalDict = {
     "You are attacking {R%s{n!": "你正在攻击{R%s{n！",
     "{R%s{n is attacking you!": "{R%s{n正在攻击你！",
     "You learned skill {C%s{n.": "你学会了技能{C%s{n。",
+    "The combat of honour between you and {R%s{n!": "你和{R%s{n之间的荣誉之战！",
 };

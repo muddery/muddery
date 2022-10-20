@@ -27,7 +27,7 @@ class ActionGetObjects(BaseIntervalAction):
             character: (object) relative character.
             obj: (object) the event object.
         """
-        await self.get_object(event_key, character, 1)
+        return await self.get_object(event_key, character, 1)
 
     async def get_object(self, event_key, character, times):
         """
@@ -62,4 +62,6 @@ class ActionGetObjects(BaseIntervalAction):
                 else:
                     message += _("Get") + " " + item["name"] + " " + str(item["number"])
 
-            await character.msg({"msg": message})
+            return {
+                "msg": message
+            }

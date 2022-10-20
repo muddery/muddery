@@ -184,19 +184,6 @@ MudderyCommand.prototype = {
         this.sendCommand("finish_dialogue", args, callback);
     },
     
-    // send command from command box
-    doSendCommand: function() {
-        var command = $("#box_command :text").val();
-        $("#box_command :text").val("");
-        
-        this.sendRawCommand(command);
-    },
-    
-    // send command text
-    doSendText: function(test) {
-        this.sendRawCommand(test);
-    },
-    
     // send out a speech
     say: function(type, target, message, callback) {
         var args = {
@@ -206,35 +193,30 @@ MudderyCommand.prototype = {
         }
         this.sendCommand("say", args, callback);
     },
-    
-    // make a match
-    makeMatch: function() {
-    	this.sendCommand("make_match");
-    },
 
     // queue up an honour combat
-    queueUpCombat: function() {
-    	this.sendCommand("queue_up_combat");
+    queueUpCombat: function(callback) {
+    	this.sendCommand("queue_up_combat", {}, callback);
     },
     
     // quit a combat queue
-    quitCombatQueue: function() {
-    	this.sendCommand("quit_combat_queue");
+    quitCombatQueue: function(callback) {
+    	this.sendCommand("quit_combat_queue", {}, callback);
     },
     
     // confirm an honour combat
-    confirmCombat: function() {
-    	this.sendCommand("confirm_combat");
+    confirmCombat: function(callback) {
+    	this.sendCommand("confirm_combat", {}, callback);
     },
 
     // reject an honour combat
-    rejectCombat: function() {
-    	this.sendCommand("reject_combat");
+    rejectCombat: function(callback) {
+    	this.sendCommand("reject_combat", {}, callback);
     },
     
     // get character rankings
-    getRankings: function() {
-    	this.sendCommand("get_rankings");
+    getRankings: function(callback) {
+    	this.sendCommand("get_rankings", {}, callback);
     },
 
     // query the player's all quests

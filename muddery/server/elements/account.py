@@ -293,13 +293,19 @@ class MudderyAccount(BaseElement):
         Server.world.on_char_puppet(new_char)
 
         character_info["channels"] = new_char.get_available_channels()
-        state, last_dialogue = await async_gather([
+        state, last_dialogue, last_combat = await async_gather([
             new_char.get_state(),
-            new_char.get_last_dialogue()
+            new_char.get_last_dialogue(),
+            new_char.get_last_combat(),
         ])
 
         character_info["state"] = state
-        character_info["last_dialogue"] = last_dialogue
+
+        if last_dialogue:
+            character_info["last_dialogue"] = last_dialogue
+
+        if last_combat:
+            character_info["last_combat"] = last_combat
 
         return character_info
 

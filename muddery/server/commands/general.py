@@ -528,131 +528,78 @@ async def attack(character, args) -> dict or None:
     return {"attack": combat_data}
 
 
-# ------------------------------------------------------------
-# Queue up for an honour combat.
-# ------------------------------------------------------------
-class CmdQueueUpCombat(BaseCommand):
+@CharacterCmd.request("queue_up_combat")
+async def queue_up_combat(character, args) -> dict or None:
     """
     Queue up to make a match between the caller and a proper opponent.
 
     Usage:
-    {"cmd": "queue_up_combat",
-     "args": None
+    {
+        "cmd": "queue_up_combat",
+        "args": None
     }
     """
-    key = "queue_up_combat"
+    honour_settings = HonourSettings.get_first_data()
+    if await character.get_level() < honour_settings.min_honour_level:
+        raise MudderyError(ERR.invalid_input, _("You need to reach level %s." % honour_settings.min_honour_level))
 
-    @classmethod
-    async def func(cls, caller, args):
-        "Handle command"
-        if not caller:
-            return
-
-        honour_settings = HonourSettings.get_first_data()
-        if await caller.get_level() < honour_settings.min_honour_level:
-            await caller.msg({"alert": _("You need to reach level %s." % honour_settings.min_honour_level)})
-            return
-
-        await MatchPVPHandler.inst().add(caller)
+    await MatchPVPHandler.inst().add(character)
 
 
-# ------------------------------------------------------------
-# Queue up for an honour combat.
-# ------------------------------------------------------------
-class CmdQuitCombatQueue(BaseCommand):
+@CharacterCmd.request("quit_combat_queue")
+async def quit_combat_queue(character, args) -> dict or None:
     """
     Quit the combat queue.
 
     Usage:
-    {"cmd": "quit_combat_queue",
-     "args": None
+    {
+        "cmd": "quit_combat_queue",
+        "args": None
     }
     """
-    key = "quit_combat_queue"
-
-    @classmethod
-    async def func(cls, caller, args):
-        "Handle command"
-        if not caller:
-            return
-
-        await MatchPVPHandler.inst().remove(caller)
+    await MatchPVPHandler.inst().remove(character)
 
 
-# ------------------------------------------------------------
-# Confirm an honour combat.
-# ------------------------------------------------------------
-class CmdConfirmCombat(BaseCommand):
+@CharacterCmd.request("confirm_combat")
+async def confirm_combat(character, args) -> dict or None:
     """
     Confirm an honour combat.
 
     Usage:
-    {"cmd": "confirm_combat",
-     "args": None
+    {
+        "cmd": "confirm_combat",
+        "args": None
     }
     """
-    key = "confirm_combat"
-
-    @classmethod
-    async def func(cls, caller, args):
-        "Handle command"
-        if not caller:
-            return
-
-        MatchPVPHandler.inst().confirm(caller)
+    MatchPVPHandler.inst().confirm(character)
 
 
-# ------------------------------------------------------------
-# Reject an honour combat.
-# ------------------------------------------------------------
-class CmdRejectCombat(BaseCommand):
+@CharacterCmd.request("reject_combat")
+async def reject_combat(character, args) -> dict or None:
     """
     Reject an honour combat queue.
 
     Usage:
-    {"cmd": "reject_combat",
-     "args": None
+    {
+        "cmd": "reject_combat",
+        "args": None
     }
     """
-    key = "reject_combat"
-
-    @classmethod
-    async def func(cls, caller, args):
-        "Handle command"
-
-        caller = caller
-        if not caller:
-            return
-
-        await MatchPVPHandler.inst().reject(caller)
+    await MatchPVPHandler.inst().reject(character)
 
 
-# ------------------------------------------------------------
-# Show top rankings
-# ------------------------------------------------------------
-class CmdGetRankings(BaseCommand):
+@CharacterCmd.request("get_rankings")
+async def get_rankings(character, args) -> dict or None:
     """
     Get top ranking characters.
 
     Usage:
-        {"cmd": "get_rankings",
-         "args": None
+        {
+            "cmd": "get_rankings",
+            "args": None
         }
     """
-    key = "get_rankings"
-
-    @classmethod
-    async def func(cls, caller, args):
-        """
-        Get characters rankings.
-
-        Returns:
-            None
-        """
-        if not caller:
-            return
-
-        await caller.show_rankings()
+    return await character.get_honour_rankings()
 
 
 @CharacterCmd.request("give_up_quest")

@@ -195,10 +195,6 @@ MudderyText2HTML.prototype = {
         '{[C' : '<span class="bgteal">',
         '{[W' : '<span class="bggray">',     // light grey background
         '{[X' : '<span class="bgblack">',    // pure black background
-
-        '{lc' : '<a href="#" onclick="doSendText(\'',    	// link
-        '{lt' : '\')">',                                    // link
-        '{le' : '</a>',                                     // link
     },
 
     regexp_html : /"|&|'|<|>|  |\x0A/g,

@@ -207,12 +207,10 @@ class MudderyRoom(ELEMENT("MATTER")):
         Unlock an exit. Add the exit's key to the character's unlock list.
         """
         if exit_key not in self.all_exits:
-            caller.msg({"msg": _("Can not unlock this exit.")})
             return False
 
         exit_obj = self.all_exits[exit_key]["obj"]
         if not await exit_obj.can_unlock(caller):
-            caller.msg({"msg": _("Can not unlock this exit.")})
             return False
 
         return True
@@ -240,7 +238,7 @@ class MudderyRoom(ELEMENT("MATTER")):
             chars = self.all_characters.values()
 
         if chars:
-            await asyncio.wait([asyncio.create_task(char.msg(msg)) for char in chars])
+            await async_wait([char.msg(msg) for char in chars])
 
     async def at_character_arrive(self, character):
         """

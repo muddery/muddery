@@ -369,16 +369,12 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
 
         await super(MudderyPlayerCharacter, self).refresh_states(keep_states)
 
-    async def msg(self, data, delay=True):
+    async def msg(self, data):
         """
         Emits something to the account attached to the object.
 
         Args:
-            text (str, optional): The message to send
-
-        Notes:
-            `at_msg_receive` will be called on this Object.
-            All extra kwargs will be passed on to the protocol.
+            data (dict): The message to send
         """
         if not self.account:
             return
@@ -1471,20 +1467,24 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
 
         return combat
 
-    async def resume_combat(self):
+    async def get_last_combat(self):
         """
-        Resume unfinished combat.
+        Get unfinished combat.
 
         Returns:
             None
         """
         combat = await self.get_combat()
         if combat:
-            if not combat.is_finished():
-                # show combat infomation
-                await combat.show_combat(self)
-            else:
+            if combat.is_finished():
                 await self.leave_combat()
+            else:
+                # show combat information
+                return {
+                    "combat_info": combat.get_appearance(),
+                    "combat_commands": self.get_combat_commands(),
+                    "combat_states": await combat.get_combat_states(),
+                }
 
     async def combat_result(self, combat_type, result, opponents=None, rewards=None):
         """
@@ -1763,7 +1763,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
             caller.msg({"conversation": output}),
         ])
 
-    async def show_rankings(self):
+    async def get_honour_rankings(self):
         """
         Show character's rankings.
         """
@@ -1776,11 +1776,12 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
 
         nicknames = await async_gather([CharacterInfo.inst().get_nickname(char_id) for char_id in rankings])
 
-        data = [{"name": nicknames[index],
-                 "id": char_id,
-                 "ranking": HonoursMapper.inst().get_ranking(char_id),
-                 "honour": HonoursMapper.inst().get_honour(char_id)} for index, char_id in enumerate(rankings)]
-        await self.msg({"rankings": data})
+        return [{
+            "name": nicknames[index],
+            "id": char_id,
+            "ranking": HonoursMapper.inst().get_ranking(char_id),
+            "honour": HonoursMapper.inst().get_honour(char_id),
+        } for index, char_id in enumerate(rankings)]
 
     async def get_quest_info(self, quest_key):
         """
@@ -1835,3 +1836,10 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         :return:
         """
         await CharacterRelationships.inst().increase(self.get_db_id(), element_type, element_key, value)
+        # todo: get other element's name
+        records = Characters.get_data(element_key)
+        return {
+            "key": element_key,
+            "name": records[0].name if records else "",
+            "value": value,
+        }
