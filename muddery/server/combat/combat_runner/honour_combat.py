@@ -53,16 +53,13 @@ class HonourCombat(BaseCombat):
         rewards = await super(HonourCombat, self).calc_combat_rewards(winners, losers)
 
         # set honour
-        winners_db_id = {char.get_id(): char.get_db_id() for char in winners.values()}
-        losers_db_id = {char.get_id(): char.get_db_id() for char in losers.values()}
+        winners_db_id = [char.get_db_id() for char in winners.values()]
+        losers_db_id = [char.get_db_id() for char in losers.values()]
 
-        honour_changes = await HONOURS_HANDLER.set_honours(winners_db_id.values(), losers_db_id.values())
-        for char_id in self.characters:
-            if char_id in winners_db_id:
-                char_db_id = winners_db_id[char_id]
-            elif char_id in losers_db_id:
-                char_db_id = losers_db_id[char_id]
-            else:
+        honour_changes = await HONOURS_HANDLER.set_honours(winners_db_id, losers_db_id)
+        for char_id, char_info in self.characters.items():
+            char_db_id = char_info["db_id"]
+            if char_db_id is None:
                 continue
 
             if char_id not in rewards:

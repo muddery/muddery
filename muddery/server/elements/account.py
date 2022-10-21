@@ -30,6 +30,7 @@ from muddery.server.database.gamedata.object_storage import CharacterObjectStora
 from muddery.server.database.gamedata.honours_mapper import HonoursMapper
 from muddery.server.elements.base_element import BaseElement
 from muddery.server.mappings.element_set import ELEMENT
+from muddery.server.combat.combat_handler import COMBAT_HANDLER
 from muddery.server.server import Server
 from muddery.server.utils.object_states_handler import ObjectStatesHandler
 from muddery.server.utils.game_settings import GameSettings
@@ -239,20 +240,34 @@ class MudderyAccount(BaseElement):
 
         # Find the character to puppet.
         try:
-            if self.type == "STAFF":
-                char_type = SETTINGS.STAFF_CHARACTER_ELEMENT_TYPE
-                char_key = await GameSettings.inst().get("default_staff_character_key")
+            new_char = None
+
+            # Check if the character is in a combat.
+            combat_id = await CharacterCombat.inst().load(char_db_id, None)
+            if combat_id is not None:
+                # Get the character from the combat.
+                combat = COMBAT_HANDLER.get_combat(combat_id)
+                if combat:
+                    new_char = combat.get_character(char_db_id)
+
+            if new_char:
+                new_char.set_account(self)
             else:
-                char_info = await CharacterInfo.inst().get(char_db_id)
-                char_type = char_info["element_type"]
-                char_key = char_info["element_key"]
+                # Create a new object.
+                if self.type == "STAFF":
+                    char_type = SETTINGS.STAFF_CHARACTER_ELEMENT_TYPE
+                    char_key = await GameSettings.inst().get("default_staff_character_key")
+                else:
+                    char_info = await CharacterInfo.inst().get(char_db_id)
+                    char_type = char_info["element_type"]
+                    char_key = char_info["element_key"]
 
-            new_char = ELEMENT(char_type)()
-            new_char.set_db_id(char_db_id)
+                new_char = ELEMENT(char_type)()
+                new_char.set_db_id(char_db_id)
 
-            # do the connection
-            new_char.set_account(self)
-            await new_char.setup_element(char_key)
+                # do the connection
+                new_char.set_account(self)
+                await new_char.setup_element(char_key)
         except Exception as e:
             raise MudderyError(ERR.invalid_input, _("That is not a valid character choice."))
 

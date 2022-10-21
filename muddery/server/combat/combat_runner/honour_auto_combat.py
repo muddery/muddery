@@ -9,11 +9,11 @@ class HonourAutoCombat(HonourCombat):
     """
     This implements the honour combat handler.
     """
-    def start_combat(self):
+    def start(self):
         """
         Start a combat, make all NPCs to cast skills automatically.
         """
-        super(HonourAutoCombat, self).start_combat()
+        super(HonourAutoCombat, self).start()
 
         # All characters auto cast skills.
         for char in self.characters.values():

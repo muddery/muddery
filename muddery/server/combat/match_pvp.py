@@ -70,7 +70,7 @@ class MatchPVPHandler(Singleton):
 
             try:
                 character = Server.world.get_character(char_db_id)
-                character.msg({"match_rejected": char_db_id})
+                character.msg({"match_rejected": None})
             except Exception:
                 pass
 
@@ -227,7 +227,7 @@ class MatchPVPHandler(Singleton):
 
         try:
             opponent = Server.world.get_character(opponent_db_id)
-            asyncio.create_task(opponent.msg({"match_rejected": char_db_id}))
+            asyncio.create_task(opponent.msg({"match_rejected": character.get_id()}))
         except KeyError:
             pass
 
@@ -262,13 +262,13 @@ class MatchPVPHandler(Singleton):
             awaits = []
             try:
                 character0 = Server.world.get_character(char_id_A)
-                awaits.append(character0.msg({"match_rejected": char_id_A}))
+                awaits.append(character0.msg({"match_rejected": character0.get_id()}))
             except KeyError:
                 pass
 
             try:
                 character1 = Server.world.get_character(char_id_B)
-                awaits.append(character1.msg({"match_rejected": char_id_B}))
+                awaits.append(character1.msg({"match_rejected": character1.get_id()}))
             except KeyError:
                 pass
 
@@ -284,7 +284,7 @@ class MatchPVPHandler(Singleton):
             awaits = []
             try:
                 character0 = Server.world.get_character(char_id_A)
-                awaits.append(character0.msg({"match_rejected": char_id_A}))
+                awaits.append(character0.msg({"match_rejected": character0.get_id()}))
             except KeyError:
                 pass
 
@@ -296,7 +296,7 @@ class MatchPVPHandler(Singleton):
 
             try:
                 character1 = Server.world.get_character(char_id_B)
-                awaits.append(character1.msg({"match_rejected": char_id_A}))
+                awaits.append(character1.msg({"match_rejected": None}))
             except KeyError:
                 pass
 
@@ -312,7 +312,7 @@ class MatchPVPHandler(Singleton):
             awaits = []
             try:
                 character0 = Server.world.get_character(char_id_B)
-                awaits.append(character0.msg({"match_rejected": char_id_B}))
+                awaits.append(character0.msg({"match_rejected": character0.get_id()}))
             except KeyError:
                 pass
 
@@ -324,7 +324,7 @@ class MatchPVPHandler(Singleton):
 
             try:
                 character1 = Server.world.get_character(char_id_A)
-                awaits.append(character1.msg({"match_rejected": char_id_B}))
+                awaits.append(character1.msg({"match_rejected": None}))
             except KeyError:
                 pass
 

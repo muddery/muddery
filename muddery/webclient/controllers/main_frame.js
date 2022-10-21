@@ -140,7 +140,11 @@ MudderyMainFrame.prototype.prepareMatch = function(data) {
  * The player has rejected the honour match.
  */
 MudderyMainFrame.prototype.matchRejected = function(character_id) {
-	if (character_id != core.data_handler.character_id) {
+	if (character_id == core.data_handler.character_id) {
+	    this.leaveCombatQueue();
+	    mud.popup_confirm_combat.hide();
+	}
+	else {
 		mud.popup_confirm_combat.opponentReject();
 	}
 }
@@ -278,7 +282,7 @@ MudderyMainFrame.prototype.handle_attack = function(data, initiative) {
 MudderyMainFrame.prototype.honour_combat = function(data) {
     this.handle_combat(data);
 
-    mud.honour_window.leftCombatQueue();
+    mud.main_frame.leaveCombatQueue();
 
     var msg = core.trans("The combat of honour between you and {R%s{n!").replace("%s", data["target"]);
     mud.scene_window.displayMessage(core.text2html.parseHtml(msg));
@@ -352,9 +356,9 @@ MudderyMainFrame.prototype.inCombatQueue = function() {
 /*
  *  The player left combat queue.
  */
-MudderyMainFrame.prototype.leftCombatQueue = function() {
-    mud.scene_window.leftCombatQueue();
-    mud.honour_window.leftCombatQueue();
+MudderyMainFrame.prototype.leaveCombatQueue = function() {
+    mud.scene_window.leaveCombatQueue();
+    mud.honour_window.leaveCombatQueue();
 
     if (core.data_handler.queue_interval_id) {
         window.clearInterval(core.data_handler.queue_interval_id);
@@ -449,7 +453,7 @@ MudderyMainFrame.prototype.onUnpuppet = function() {
         return;
     }
 	this.puppet = false;
-	this.leftCombatQueue();
+	this.leaveCombatQueue();
 	this.showSelectChar();
 }
 
@@ -1366,7 +1370,7 @@ MudderyPopupConfirmCombat.prototype.onRejectCombat = function(element) {
     this.el.hide();
 	core.command.rejectCombat(function(code, data, msg) {
         if (code == 0) {
-	        mud.honour_window.leftCombatQueue();
+	        mud.honour_window.leaveCombatQueue();
         }
         else {
             mud.main_frame.popupAlert(core.trans("Error"), core.trans(msg));
@@ -1378,6 +1382,13 @@ MudderyPopupConfirmCombat.prototype.onRejectCombat = function(element) {
  * Event when clicks the OK button when the opponent rejected the combat.
  */
 MudderyPopupConfirmCombat.prototype.onFinish = function(element) {
+    this.hide();
+}
+
+/*
+ * Hide the window.
+ */
+MudderyPopupConfirmCombat.prototype.hide = function(element) {
     this.el.hide();
 }
 
@@ -1397,14 +1408,6 @@ MudderyPopupConfirmCombat.prototype.refreshPrepareTime = function() {
         if (this.interval_id != null) {
             window.clearInterval(this.interval_id);
             this.interval_id = 0;
-        }
-
-        if (this.confirmed) {
-            // Waiting the opponent to confirm.
-        }
-        else {
-            // Reject the combat automatically.
-            this.onRejectCombat();
         }
     }
 }
@@ -2523,8 +2526,8 @@ MudderyScene.prototype.refreshWaitingTime = function(waiting_time) {
 /*
  *  The player left combat queue.
  */
-MudderyScene.prototype.leftCombatQueue = function() {
-    this.title_bar.leftCombatQueue();
+MudderyScene.prototype.leaveCombatQueue = function() {
+    this.title_bar.leaveCombatQueue();
 }
 
 /*
@@ -3061,7 +3064,7 @@ MudderyTitleBar.prototype.refreshWaitingTime = function(waiting_time) {
 /*
  * The player left a combat queue.
  */
-MudderyTitleBar.prototype.leftCombatQueue = function() {
+MudderyTitleBar.prototype.leaveCombatQueue = function() {
     this.select(".waiting").hide();
 }
 
@@ -4214,7 +4217,7 @@ MudderyHonour.prototype.onQueueUpCombat = function(element) {
 MudderyHonour.prototype.onQuitCombatQueue = function(element) {
     core.command.quitCombatQueue(function(code, data, msg) {
         if (code == 0) {
-            mud.main_frame.leftCombatQueue();
+            mud.main_frame.leaveCombatQueue();
         }
         else {
             mud.main_frame.popupAlert(core.trans("Error"), core.trans(msg));
@@ -4282,7 +4285,7 @@ MudderyHonour.prototype.refreshWaitingTime = function(waiting_time) {
 /*
  * The player left a combat queue.
  */
-MudderyHonour.prototype.leftCombatQueue = function() {
+MudderyHonour.prototype.leaveCombatQueue = function() {
     this.select(".action-block-waiting").hide();
     this.select(".action-block-queue").show();
     this.select(".queue-waiting-time").text("");

@@ -106,11 +106,17 @@ class BaseCombat(object):
         # Add teams.
         for team in teams:
             for character in teams[team]:
-                self.characters[character.get_id()] = {
+                obj_id = character.get_id()
+                self.characters[obj_id] = {
                     "char": character,
                     "team": team,
                     "status":  CStatus.JOINED,
                 }
+
+                try:
+                    self.characters[obj_id]["db_id"] = character.get_db_id()
+                except AttributeError:
+                    self.characters[obj_id]["db_id"] = None
 
         # Set combat to characters.
         if self.characters:
@@ -423,6 +429,14 @@ class BaseCombat(object):
         Get all characters in combat.
         """
         return self.characters.values()
+
+    def get_character(self, db_id):
+        """
+        Get the character object by ist db_id.
+        """
+        for char_id, char_info in self.characters.items():
+            if char_info["db_id"] == db_id:
+                return char_info["char"]
 
     def get_opponents(self, character_id):
         """
