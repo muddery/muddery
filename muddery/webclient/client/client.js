@@ -80,6 +80,8 @@ MudderyClient.prototype = {
                         mud.scene_window.displayMessage(msg);
                     } else if (key == "alert") {
                         mud.main_frame.popupMessage(core.trans("Alert"), data[key]);
+                    } else if (key == "move_to") {
+                        mud.main_frame.moveTo(data[key]);
                     } else if (key == "obj_moved_in") {
                         mud.main_frame.objMovedIn(data[key]);
                     } else if (key == "obj_moved_out") {

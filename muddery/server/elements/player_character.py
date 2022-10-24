@@ -1635,9 +1635,13 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
 
         if home:
             await self.move_to(home)
-
-        if home:
-            await self.msg({"msg": _("You are reborn at {C%s{n.") % home.get_name()})
+            await self.msg({
+                "msg": _("You are reborn at {C%s{n.") % home.get_name(),
+                "move_to": {
+                    "location": self.get_location_info(),
+                    "look_around": self.look_around(),
+                }
+            })
         else:
             await self.msg({"msg": _("You are reborn.")})
 

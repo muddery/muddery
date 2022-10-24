@@ -310,6 +310,14 @@ MudderyMainFrame.prototype.handle_combat = function(data) {
 //////////////////////////////////////////
 
 /*
+ * Notify that the player moved to a new place.
+ */
+MudderyMainFrame.prototype.moveTo = function(data) {
+    core.map_data.setCurrentLocation(data["location"]);
+    mud.scene_window.setSurroundings(data["look_around"]);
+}
+
+/*
  * Notify an object has moved to the player's current place.
  */
 MudderyMainFrame.prototype.objMovedIn = function(obj) {
@@ -2381,7 +2389,7 @@ MudderyScene.prototype.onNPC = function(element) {
 MudderyScene.prototype.onPlayer = function(element) {
     var index = $(element).data("index");
     var obj_id = this.surroundings["players"][index]["id"];
-    core.command.look_room_char(obj_id, function(code, data, msg) {
+    core.command.lookRoomChar(obj_id, function(code, data, msg) {
         if (code == 0) {
             mud.popup_object.setObject(data);
             mud.popup_object.show();
@@ -3594,6 +3602,22 @@ MudderyInventory.prototype.onSelect = function(element) {
 }
 
 /*
+ * Show an object in the inventory.
+ * param:
+ *    index: the index of the object to show.
+ */
+MudderyInventory.prototype.showInventoryObject = function(position) {
+    core.command.inventoryObject(position, function(code, data, msg) {
+        if (code == 0) {
+            mud.inventory_window.showObject(data);
+        }
+        else {
+            mud.main_frame.popupAlert(core.trans("Error"), core.trans(msg));
+        }
+    });
+}
+
+/*
  * Set inventory's data.
  */
 MudderyInventory.prototype.setInventory = function(inventory) {
@@ -3639,11 +3663,11 @@ MudderyInventory.prototype.setInventory = function(inventory) {
     }
 
     if (has_selected_item) {
-        core.command.inventoryObject(this.item_selected, "inventory");
+        this.showInventoryObject(this.item_selected);
     }
     else {
         this.item_selected = null;
-        this.select(".item-info").hide();
+        this.hideObject();
     }
 }
 
@@ -3681,6 +3705,13 @@ MudderyInventory.prototype.showObject = function(obj) {
     this.item_selected = obj["position"];
 
     this.select(".item-info").show();
+}
+
+/*
+ * Hide the object's information.
+ */
+MudderyInventory.prototype.hideObject = function() {
+    this.select(".item-info").hide();
 }
 
 
@@ -5127,7 +5158,7 @@ MudderyCombatResult.prototype.onClose = function(element) {
                 mud.main_frame.handle_events(data["events"]);
             }
             if ("die" in data) {
-                var msg = core.text2html.parseHtml("{R" + core.trans("You died.") + "{n");
+                var msg = core.text2html.parseHtml("{R" + core.trans("{RYou died.{n") + "{n");
                 mud.scene_window.displayMessage(msg);
             }
             if ("reborn_time" in data) {
