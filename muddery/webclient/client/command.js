@@ -243,9 +243,9 @@ MudderyCommand.prototype = {
         this.sendCommand("query_skill", {key: key}, callback);
     },
 
-    // query area maps by a list of room keys
-    queryMaps: function (room_list, callback) {
-        this.sendCommand("query_maps", {rooms: room_list}, callback);
+    // query the game world's map
+    queryMap: function (callback) {
+        this.sendCommand("query_map", {}, callback);
     },
 
     // do test

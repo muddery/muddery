@@ -48,6 +48,8 @@ class MudderyRoom(ELEMENT("MATTER")):
 
         self.all_exits = {}
         self.all_objects = {}
+        self.neighbours = set()
+        self.map_data = {}
 
         # character_list: {
         #   character's id: character's object
@@ -98,6 +100,29 @@ class MudderyRoom(ELEMENT("MATTER")):
             self.load_objects(),
             self.load_npcs(),
         ])
+
+    def load_map(self):
+        """
+        Load the room's map data.
+        """
+        # set neighbours
+        self.neighbours = set([item["destination"] for item in self.all_exits.values()])
+
+        # Set map data
+        map_data = self.get_appearance()
+        if self.position:
+            map_data["pos"] = self.position
+
+        map_data["objects"] = [item["obj"].get_appearance() for item in self.all_objects.values()]
+
+        map_data["exits"] = [
+            dict(item["obj"].get_appearance(), **{
+                "to": item["destination"],
+            }) for item in self.all_exits.values()
+        ]
+
+        self.map_data = map_data
+        return self.map_data
 
     async def load_npcs(self):
         """
@@ -150,7 +175,7 @@ class MudderyRoom(ELEMENT("MATTER")):
             }
 
         if self.all_exits:
-            await async_wait([char["obj"].setup_element(key) for key, char in self.all_exits.items()])
+            await async_wait([item["obj"].setup_element(key) for key, item in self.all_exits.items()])
 
     async def load_objects(self):
         """
@@ -295,41 +320,12 @@ class MudderyRoom(ELEMENT("MATTER")):
         info["background"] = self.background
         return info
 
-    def get_exits(self):
-        """
-        Get this room's exits.
-        """
-        exits = {}
-        for key, item in self.all_exits.items():
-            if item["destination"]:
-                exits[key] = {
-                    "from": self.get_element_key(),
-                    "to": item["destination"],
-                }
-        return exits
-
     def get_map_data(self):
         """
         Get the room's map.
         :return:
         """
-        appearance = self.get_appearance()
-        if self.position:
-            appearance["pos"] = self.position
-
-        objects = [item["obj"].get_appearance() for item in self.all_objects.values()]
-
-        exits = [
-            dict(item["obj"].get_appearance(), **{
-                "from": self.get_element_key(),
-                "to": item["destination"],
-            }) for item in self.all_exits.values()
-        ]
-
-        return dict(appearance, **{
-            "objects": objects,
-            "exits": exits,
-        })
+        return self.map_data
 
     def get_surroundings(self, caller):
         """

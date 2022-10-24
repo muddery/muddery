@@ -61,9 +61,9 @@ class Server(Singleton):
 
         try:
             from muddery.server.mappings.element_set import ELEMENT
-            world = ELEMENT("WORLD")()
-            await world.setup_element("")
-            self._world = world
+            self._world = ELEMENT("WORLD")()
+            await self._world.setup_element("")
+            self._world.load_map()
         except Exception as e:
             traceback.print_exc()
             raise

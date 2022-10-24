@@ -62,6 +62,18 @@ class character_info(BaseModels.character_info):
 
 # ------------------------------------------------------------
 #
+# player character's revealed maps
+#
+# ------------------------------------------------------------
+class character_revealed_map(BaseModels.character_revealed_map):
+    """
+    Revealed maps.
+    """
+    pass
+
+
+# ------------------------------------------------------------
+#
 # player character's location
 #
 # ------------------------------------------------------------

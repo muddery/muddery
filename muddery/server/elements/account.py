@@ -17,6 +17,7 @@ from muddery.server.database.gamedata.system_data import SystemData
 from muddery.server.database.gamedata.account_characters import AccountCharacters
 from muddery.server.database.gamedata.character_info import CharacterInfo
 from muddery.server.database.gamedata.character_location import CharacterLocation
+from muddery.server.database.gamedata.character_revealed_map import CharacterRevealedMap
 from muddery.server.database.gamedata.character_inventory import CharacterInventory
 from muddery.server.database.gamedata.character_equipments import CharacterEquipments
 from muddery.server.database.gamedata.character_quests import CharacterQuests
@@ -287,16 +288,11 @@ class MudderyAccount(BaseElement):
         # Set location
         try:
             location_key = await CharacterLocation.inst().load(char_db_id)
-
-            # Set map
-            maps = new_char.get_maps([location_key])
-            maps.update(new_char.get_neighbour_maps(location_key))
-            character_info["reveal_maps"] = maps
-
             location = Server.world.get_room(location_key)
             await new_char.move_to(location)
             character_info["location"] = new_char.get_location_info()
             character_info["look_around"] = new_char.look_around()
+            character_info["revealed_maps"] = new_char.get_revealed_maps()
 
         except KeyError:
             pass
@@ -373,6 +369,7 @@ class MudderyAccount(BaseElement):
             AccountCharacters.inst().remove_character(self.id, char_db_id),
             CharacterInfo.inst().remove_character(char_db_id),
             CharacterLocation.inst().remove_character(char_db_id),
+            CharacterRevealedMap.inst().remove_character(char_db_id),
             CharacterInventory.inst().remove_character(char_db_id),
             CharacterEquipments.inst().remove_character(char_db_id),
             CharacterQuests.inst().remove_character(char_db_id),
@@ -406,6 +403,7 @@ class MudderyAccount(BaseElement):
                 AccountCharacters.inst().remove_character(self.id, char_db_id),
                 CharacterInfo.inst().remove_character(char_db_id),
                 CharacterLocation.inst().remove_character(char_db_id),
+                CharacterRevealedMap.inst().remove_character(char_db_id),
                 CharacterInventory.inst().remove_character(char_db_id),
                 CharacterEquipments.inst().remove_character(char_db_id),
                 CharacterQuests.inst().remove_character(char_db_id),

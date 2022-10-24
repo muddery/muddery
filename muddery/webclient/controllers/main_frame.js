@@ -576,14 +576,14 @@ MudderyMainFrame.prototype.showCommandButton = function(show) {
 MudderyMainFrame.prototype.showLoginWindow = function() {
 	// show unlogin UI
 	this.gotoWindow(mud.login_window);
-	core.map_data.clearData();
+	core.map_data.clearCharacterData();
 }
     
 /*
  * Show the layout when players logged in and going to select a character.
  */
 MudderyMainFrame.prototype.showSelectChar = function() {
-	core.map_data.clearData();
+	core.map_data.clearCharacterData();
 	this.gotoWindow(mud.select_char_window);
 }
 
@@ -1687,6 +1687,9 @@ MudderyLogin.prototype.loginSuccess = function() {
         localStorage.is_auto_login = "1";
     }
 
+    // query map data
+    core.map_data.queryMap();
+
     mud.main_frame.showSelectChar();
 }
 
@@ -1802,8 +1805,8 @@ MudderySelectChar.prototype.onSelectCharacter = function(element) {
                 mud.main_frame.showCommandButton(false);
             }
 
-            if ("reveal_maps" in data) {
-                core.map_data.revealMaps(data["reveal_maps"]);
+            if ("revealed_maps" in data) {
+                core.map_data.revealMaps(data["revealed_maps"]);
             }
 
             if ("location" in data) {
@@ -2666,9 +2669,6 @@ MudderyScene.prototype.setSurroundings = function(surroundings) {
     if (exits_data.length > 0) {
         this.setExitsMap(exits_data, room_name);
     }
-
-    // check neighbour rooms
-	core.map_data.checkNeighbourRooms();
 }
 
 /*

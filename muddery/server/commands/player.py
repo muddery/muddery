@@ -12,6 +12,7 @@ from muddery.server.utils.localized_strings_handler import _
 from muddery.server.utils.builder import create_character
 from muddery.server.database.gamedata.character_info import CharacterInfo
 from muddery.server.commands.command_set import AccountCmd
+from muddery.server.server import Server
 
 
 # Obs - these are all intended to be stored on the Player, and as such,
@@ -141,6 +142,7 @@ async def puppet(account, args) -> dict:
     try:
         return await account.puppet_character(puppet_id)
     except Exception as e:
+        traceback.print_exc()
         raise MudderyError(ERR.invalid_input, _("That is not a valid character choice."))
 
 
@@ -364,3 +366,18 @@ async def logout(account, args):
         }
     """
     return await account.logout()
+
+
+
+@AccountCmd.request("query_map")
+async def query_map(account, args) -> dict or None:
+    """
+    Query the game's map data.
+
+    Usage:
+        {
+            "cmd": "query_map",
+            "args": None
+        }
+    """
+    return Server.world.get_map_data()

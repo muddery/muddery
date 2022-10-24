@@ -5,7 +5,6 @@ General Character commands usually availabe to all characters
 import traceback
 from muddery.server.utils.logger import logger
 from muddery.common.utils.utils import async_wait
-from muddery.server.commands.base_command import BaseCommand
 from muddery.server.utils.localized_strings_handler import _
 from muddery.common.utils.exception import MudderyError, ERR
 from muddery.common.utils.defines import CombatType
@@ -789,24 +788,18 @@ async def query_skill(character, args) -> dict or None:
     return await character.get_skill_info(skill_key)
 
 
-@CharacterCmd.request("query_maps")
-async def query_maps(character, args) -> dict or None:
+@CharacterCmd.request("get_revealed_maps")
+async def get_revealed_maps(character, args) -> dict or None:
     """
-    Query area's maps by a list of room keys.
+    Get a character's revealed maps.
 
     Usage:
         {
-            "cmd": "query_maps",
-            "args": {
-                "rooms": (list) a list of room keys
-            }
+            "cmd": "get_revealed_maps",
+            "args": None
         }
     """
-    if not args or "rooms" not in args:
-        raise MudderyError(ERR.missing_args, _("Can not find it."))
-
-    room_list = args["rooms"]
-    return character.get_maps(room_list)
+    return character.get_revealed_maps()
 
 
 @CharacterCmd.request("test")

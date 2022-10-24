@@ -39,6 +39,7 @@ from muddery.server.database.gamedata.character_info import CharacterInfo
 from muddery.server.database.gamedata.character_skills import CharacterSkills
 from muddery.server.database.gamedata.character_combat import CharacterCombat
 from muddery.server.database.gamedata.character_location import CharacterLocation
+from muddery.server.database.gamedata.character_revealed_map import CharacterRevealedMap
 from muddery.server.combat.match_pvp import MatchPVPHandler
 from muddery.server.utils.object_states_handler import ObjectStatesHandler
 from muddery.server.database.gamedata.object_storage import CharacterObjectStorage
@@ -101,6 +102,9 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         #        "obj": object's instance,
         #    }
         self.equipments = {}
+
+        # character revealed maps
+        self.revealed_maps = {}
 
         self.quest_handler = None
 
@@ -242,6 +246,9 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
 
             # load equipments
             self.load_equipments(),
+
+            # load revealed maps
+            self.load_revealed_maps(),
         ])
 
         # initialize events
@@ -304,13 +311,16 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         if self.location:
             # Trigger the moving out event.
             self.event.at_character_move_out(self.location)
+            await self.location.at_character_leave(self)
 
         # save new location
         location_key = location.get_element_key() if location else ""
         await CharacterLocation.inst().save(self.get_db_id(), location_key)
 
-        if self.location:
-            await self.location.at_character_leave(self)
+        area_key = Server.world.get_area_key_by_room(location_key) if location_key else ""
+        if area_key and area_key not in self.revealed_maps:
+            await CharacterRevealedMap.inst().add(self.get_db_id(), area_key)
+            self.revealed_maps[area_key] = None
 
         self.set_location(location)
 
@@ -419,22 +429,17 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
 
         return channels
 
-    def get_maps(self, room_list):
+    async def load_revealed_maps(self):
+        """
+        Load revealed map data from db.
+        """
+        self.revealed_maps = await CharacterRevealedMap.inst().get_character(self.get_db_id())
+
+    def get_revealed_maps(self):
         """
         Get the map of the room's area.
         """
-        areas = set([Server.world.get_area_key_by_room(room_key) for room_key in room_list])
-        maps = {area_key: Server.world.get_area(area_key).get_map() for area_key in areas if area_key}
-        return maps
-
-    def get_neighbour_maps(self, room_key):
-        """
-        Get the map of the room's neighbour.
-        """
-        room = Server.world.get_room(room_key)
-        exits = room.get_exits()
-        neighbours = [exit["to"] for exit in exits.values()]
-        return self.get_maps(neighbours)
+        return self.revealed_maps
 
     async def wear_equipments(self):
         """

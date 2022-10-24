@@ -149,7 +149,7 @@ class account_characters(BaseModel):
     account_id = Column(Integer, index=True, nullable=False)
 
     # playable character's id
-    char_id = Column(Integer, unique=True, nullable=False)
+    character_id = Column(Integer, unique=True, nullable=False)
 
 # ------------------------------------------------------------
 #
@@ -162,7 +162,7 @@ class character_info(BaseModel):
     __tablename__ = "character_info"
 
     # playable character's id
-    char_id = Column(Integer, unique=True, nullable=False)
+    character_id = Column(Integer, unique=True, nullable=False)
 
     # character's element type
     element_type = Column(String(KEY_LENGTH), nullable=False)
@@ -182,13 +182,34 @@ class character_info(BaseModel):
 # player character's info
 #
 # ------------------------------------------------------------
+class character_revealed_map(BaseModel):
+    "player character revealed_map"
+
+    __tablename__ = "character_revealed_map"
+
+    __table_args__ = (
+        UniqueConstraint("character_id", "map_key"),
+    )
+
+    # player character's id
+    character_id = Column(Integer, index=True, nullable=False)
+
+    # map's key (area's key)
+    map_key = Column(String(KEY_LENGTH), nullable=False)
+
+
+# ------------------------------------------------------------
+#
+# player character's info
+#
+# ------------------------------------------------------------
 class character_location(BaseModel):
     "player character's location"
 
     __tablename__ = "character_location"
 
     # player character's id
-    char_id = Column(Integer, unique=True, nullable=False)
+    character_id = Column(Integer, unique=True, nullable=False)
 
     # location (room's key)
     location = Column(String(KEY_LENGTH))

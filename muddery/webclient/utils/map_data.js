@@ -24,12 +24,68 @@ MudderyMapData.prototype = {
 
     _current_location: null,
 
-    clearData: function() {
+    _revealed_maps: {},
+
+    queryMap: function() {
+        if (Object.keys(this._map_areas).length == 0) {
+            // Query map data if there is no map data.
+            core.command.queryMap(function(code, data, msg) {
+                if (code == 0) {
+                    core.map_data.setMapData(data);
+                }
+                else {
+                    mud.main_frame.popupAlert(core.trans("Error"), core.trans(msg));
+                }
+            });
+        }
+    },
+
+    setMapData: function(data) {
         this._map_areas = {};
         this._map_rooms = {};
         this._map_exits = {};
         this._map_paths = {};
+
+        for (var area_key in data) {
+            var area_map = data[area_key];
+
+            this._map_areas[area_key] = area_map;
+            var rooms = area_map["rooms"];
+
+            // Add room.
+            for (var room_key in rooms) {
+                rooms[room_key]["area"] = area_key;
+            }
+            this._map_rooms = Object.assign(this._map_rooms, rooms);
+
+            // Add exits.
+            for (var room_key in rooms) {
+                var exits = rooms[room_key]["exits"];
+                for (var i = 0; i < exits.length; i++) {
+                    var exit_key = exits[i]["key"];
+                    if (!(exit_key in this._map_exits)) {
+                        exits[i]["from"] = room_key;
+                        this._map_exits[exit_key] = exits[i];
+                    }
+                }
+            }
+
+            for (var exit_key in this._map_exits) {
+                var location = this._map_exits[exit_key]["from"];
+                var destination = this._map_exits[exit_key]["to"];
+                if (location in this._map_paths) {
+                    this._map_paths[location].push(destination);
+                }
+                else {
+                    this._map_paths[location] = [destination];
+                }
+            }
+        }
+    },
+
+    clearCharacterData: function() {
    	 	this._current_location = null;
+   	 	this._revealed_maps = {};
     },
 
     setCurrentLocation: function(location) {
@@ -53,102 +109,8 @@ MudderyMapData.prototype = {
     },
 
     revealMaps: function(data) {
-        // save map data
-        var new_map = false;
-        for (var area_key in data) {
-            if (area_key in this._map_areas) {
-                continue;
-            }
-
-            new_map = true;
-            var area_map = data[area_key];
-
-            this._map_areas[area_key] = area_map;
-            var rooms = area_map["rooms"];
-
-            // Add room.
-            for (var room_key in rooms) {
-                rooms[room_key]["area"] = area_key;
-            }
-            this._map_rooms = Object.assign(this._map_rooms, rooms);
-
-            // Add exits.
-            var new_exits = {};
-            for (var room_key in rooms) {
-                var exits = rooms[room_key]["exits"];
-                for (var i = 0; i < exits.length; i++) {
-                    var exit_key = exits[i]["key"];
-                    if (!(exit_key in this._map_exits)) {
-                        this._map_exits[exit_key] = exits[i];
-                        new_exits[exit_key] = exits[i];
-                    }
-                }
-            }
-
-            for (var exit_key in new_exits) {
-                var location = new_exits[exit_key]["from"];
-                var destination = new_exits[exit_key]["to"];
-                if (location in this._map_paths) {
-                    this._map_paths[location].push(destination);
-                }
-                else {
-                    this._map_paths[location] = [destination];
-                }
-            }
-        }
-
-        if (new_map && this._current_location) {
-            this.checkNeighbourRooms(this._current_location.room);
-        }
-    },
-
-    checkNeighbourRooms: function () {
-        if (!this._current_location) {
-            return;
-        }
-
-        var room_key = this._current_location["room"];
-
-        // Check if has the room's map, else query the map.
-        if (!(room_key in this._map_rooms)) {
-            core.command.queryMaps([room_key], function(code, data, msg) {
-                if (code == 0) {
-                    core.map_data.revealMaps(data);
-                }
-                else {
-                    mud.main_frame.popupAlert(core.trans("Error"), core.trans(msg));
-                }
-            });
-            return;
-        }
-
-        var room_list = [];
-        for (var exit_key in this._map_rooms[room_key].exits) {
-            var dest = this._map_rooms[room_key].exits[exit_key]["to"];
-            if (!(dest in this._map_rooms)) {
-                room_list.push(dest);
-            }
-            else {
-                // Check neighbour's neighbour
-                for (var dest_exit_key in this._map_rooms[dest].exits) {
-                    var dest2 = this._map_rooms[dest].exits[dest_exit_key]["to"];
-                    if (!(dest2 in this._map_rooms)) {
-                        room_list.push(dest2);
-                    }
-                }
-            }
-        }
-
-        if (room_list.length > 0) {
-            core.command.queryMaps(room_list, function(code, data, msg) {
-                if (code == 0) {
-                    core.map_data.revealMaps(data);
-                }
-                else {
-                    mud.main_frame.popupAlert(core.trans("Error"), core.trans(msg));
-                }
-            });
-        }
+        // save revealed maps
+        this._revealed_maps = data;
     },
 
     getExitDirection: function(exit) {

@@ -40,6 +40,9 @@ class MudderyWorld(BaseElement):
         # all_characters: {character's db id: character's object
         self.all_characters = {}
 
+        # the map of whole world
+        self.map_data = {}
+
     async def load_data(self, key, level=None):
         """
         Load the object's data.
@@ -101,6 +104,13 @@ class MudderyWorld(BaseElement):
             room_key: area_key for area_key, area in self.all_areas.items() for room_key in area.get_rooms_key()
         }
 
+    def load_map(self):
+        """
+        Load the world's map data.
+        """
+        self.map_data = {key: item.load_map() for key, item in self.all_areas.items()}
+        return self.map_data
+
     def get_area(self, area_key):
         """
         Get a room by its key.
@@ -134,6 +144,12 @@ class MudderyWorld(BaseElement):
         """
         area_key = self.room_dict[room_key]
         return self.all_areas[area_key]
+
+    def get_map_data(self):
+        """
+        Get the world's map.
+        """
+        return self.map_data
 
     def on_char_puppet(self, character):
         """

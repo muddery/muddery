@@ -4,39 +4,8 @@ Battle commands. They only can be used when a character is in a combat.
 
 from muddery.common.utils.exception import MudderyError, ERR
 from muddery.server.utils.logger import logger
-from muddery.server.commands.base_command import BaseCommand
 from muddery.server.utils.localized_strings_handler import _
 from muddery.server.commands.command_set import CharacterCmd
-
-
-class CmdCombatInfo(BaseCommand):
-    """
-    Get combat info.
-
-    Usage:
-        {"cmd":"combat_info",
-         "args":""
-        }
-
-    Observes your combat.
-    """
-    key = "combat_info"
-
-    @classmethod
-    async def func(cls, caller, args):
-        """
-        Return the overall combat information to the caller.
-        """
-        if not caller.is_in_combat():
-            # If the caller is not in combat.
-            await caller.msg({"msg":_("You are not in combat!")})
-            return
-
-        # Get combat's appearance and the character's available commands.
-        appearance = caller.ndb.combat_handler.get_appearance()
-        message = {"combat_info": appearance,
-                   "combat_commands": caller.get_combat_commands()}
-        await caller.msg(message)
 
 
 @CharacterCmd.request("leave_combat")
