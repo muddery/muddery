@@ -11,6 +11,8 @@ import traceback
 import datetime
 from muddery.server.settings import SETTINGS
 from muddery.common.utils.password import hash_password, check_password, make_salt
+from muddery.server.database.worlddata.equipment_positions import EquipmentPositions
+from muddery.server.database.worlddata.honour_settings import HonourSettings
 from muddery.server.database.gamedata.accounts import Accounts
 from muddery.server.database.gamedata.server_bans import ServerBans
 from muddery.server.database.gamedata.system_data import SystemData
@@ -252,7 +254,7 @@ class MudderyAccount(BaseElement):
                     new_char = combat.get_character(char_db_id)
 
             if new_char:
-                new_char.set_account(self)
+                new_char.puppet(self)
             else:
                 # Create a new object.
                 if self.type == "STAFF":
@@ -267,33 +269,16 @@ class MudderyAccount(BaseElement):
                 new_char.set_db_id(char_db_id)
 
                 # do the connection
-                new_char.set_account(self)
+                new_char.puppet(self)
                 await new_char.setup_element(char_key)
         except Exception as e:
             raise MudderyError(ERR.invalid_input, _("That is not a valid character choice."))
-
-        # Send puppet info to the client first.
-        character_info = {
-            "id": new_char.get_id(),
-            "name": new_char.get_name(),
-            "icon": getattr(new_char, "icon", None),
-        }
-
-        if self.type == "STAFF":
-            character_info.update({
-                "is_staff": True,
-                "allow_commands": True,
-            })
 
         # Set location
         try:
             location_key = await CharacterLocation.inst().load(char_db_id)
             location = Server.world.get_room(location_key)
             await new_char.move_to(location)
-            character_info["location"] = new_char.get_location_info()
-            character_info["look_around"] = new_char.look_around()
-            character_info["revealed_maps"] = new_char.get_revealed_maps()
-
         except KeyError:
             pass
 
@@ -303,17 +288,35 @@ class MudderyAccount(BaseElement):
         # add the character to the world
         Server.world.on_char_puppet(new_char)
 
-        character_info["channels"] = new_char.get_available_channels()
-        state, last_dialogue, last_combat = await async_gather([
+        state, last_combat = await async_gather([
             new_char.get_state(),
-            new_char.get_last_dialogue(),
             new_char.get_last_combat(),
         ])
 
-        character_info["state"] = state
+        honour_settings = HonourSettings.get_first_data()
+        records = EquipmentPositions.all()
+        equipment_pos = [{
+            "key": r.key,
+            "name": r.name,
+            "desc": r.desc,
+        } for r in records]
 
-        if last_dialogue:
-            character_info["last_dialogue"] = last_dialogue
+        # Send puppet info to the client first.
+        character_info = {
+            "id": new_char.get_id(),
+            "name": new_char.get_name(),
+            "icon": getattr(new_char, "icon", None),
+            "state": state,
+            "location": new_char.get_location_info(),
+            "look_around": new_char.look_around(),
+            "revealed_maps": new_char.get_revealed_maps(),
+            "channels": new_char.get_available_channels(),
+            "equipment_pos": equipment_pos,
+            "min_honour_level": honour_settings.min_honour_level,
+        }
+
+        if self.type == "STAFF":
+            character_info["is_staff"] = True
 
         if last_combat:
             character_info["last_combat"] = last_combat
@@ -330,7 +333,7 @@ class MudderyAccount(BaseElement):
         """
         obj = self.puppet_obj
         if obj:
-            await obj.at_pre_unpuppet()
+            await obj.unpuppet()
 
             Server.world.on_char_unpuppet(obj)
 

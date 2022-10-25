@@ -13,7 +13,7 @@ class CharacterRevealedMap(BaseData, Singleton):
     __table_name = "character_revealed_map"
     __category_name = "character_id"
     __key_field = "map_key"
-    __default_value_field = None
+    __default_value_field = "map_key"
 
     def __init__(self):
         # data storage

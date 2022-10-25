@@ -403,18 +403,6 @@ MudderyMainFrame.prototype.onConnectionOpen = function() {
                     mud.login_window.setConnScreen(data["conn_screen"]);
                 }
 
-                if ("min_honour_level" in data) {
-                    mud.honour_window.setMinHonourLevel(data["min_honour_level"]);
-                }
-
-                if ("equipment_pos" in data) {
-                    mud.char_data_window.setEquipmentPos(data["equipment_pos"]);
-                }
-
-                if ("max_char" in data) {
-                    mud.select_char_window.setMaxNumber(data["max_char"]);
-                }
-
                 mud.login_window.checkAutoLogin();
             }
             else {
@@ -1553,6 +1541,9 @@ MudderyLogin.prototype.onClickRegister = function(element) {
 
     core.command.register(username, password, true, function(code, data, msg) {
         if (code == 0) {
+            if ("max_char" in data) {
+                mud.select_char_window.setMaxNumber(data["max_char"]);
+            }
             mud.login_window.loginSuccess();
         }
         else if (code === ERR.missing_args || code === ERR.invalid_input) {
@@ -1586,6 +1577,9 @@ MudderyLogin.prototype.onClickLogin = function(element) {
 
     core.command.login(name, password, function(code, data, msg) {
         if (code == 0) {
+            if ("max_char" in data) {
+                mud.select_char_window.setMaxNumber(data["max_char"]);
+            }
             mud.login_window.loginSuccess();
         }
         else if (code === ERR.no_authentication || code === ERR.missing_args || code === ERR.invalid_input) {
@@ -1786,24 +1780,23 @@ MudderySelectChar.prototype.onSelectCharacter = function(element) {
             var name = data["name"];
             if (data["is_staff"]) {
                 name += "[" + core.trans("ADMIN") + "]";
-            }
-            core.data_handler.character_name = name;
-
-            mud.scene_window.clear();
-            mud.scene_window.setInfo(name, data["icon"]);
-            mud.char_data_window.setInfo(name, data["icon"]);
-            mud.combat_window.setInfo(name, data["icon"]);
-
-            mud.main_frame.setState(data["state"]);
-            mud.conversation_window.setChannels(data["channels"]);
-
-            if ("allow_commands" in data && data["allow_commands"]) {
-                // show command button
                 mud.main_frame.showCommandButton(true);
             }
             else {
                 mud.main_frame.showCommandButton(false);
             }
+            core.data_handler.character_name = name;
+
+            mud.scene_window.clear();
+            mud.scene_window.setInfo(name, data["icon"]);
+
+            mud.char_data_window.setInfo(name, data["icon"]);
+            mud.char_data_window.setEquipmentPos(data["equipment_pos"]);
+
+            mud.combat_window.setInfo(name, data["icon"]);
+            mud.main_frame.setState(data["state"]);
+            mud.conversation_window.setChannels(data["channels"]);
+            mud.honour_window.setMinHonourLevel(data["min_honour_level"]);
 
             if ("revealed_maps" in data) {
                 core.map_data.revealMaps(data["revealed_maps"]);
@@ -1821,13 +1814,6 @@ MudderySelectChar.prototype.onSelectCharacter = function(element) {
 
             if ("last_combat" in data) {
                 mud.main_frame.handle_combat(data["last_combat"]);
-            }
-
-            if ("last_dialogue" in data) {
-                mud.popup_dialogue.setDialogue(data["last_dialogue"]);
-                if (mud.popup_dialogue.hasDialogue() && !mud.main_frame.isWindowShow(mud.combat_window)) {
-                    mud.popup_dialogue.show();
-                }
             }
         }
         else {
@@ -3480,6 +3466,13 @@ MudderyInventory.prototype.reset = function() {
  */
 MudderyInventory.prototype.onShow = function() {
     this.reset();
+    this.refresh();
+}
+
+/*
+ * Refresh contents in the inventory.
+ */
+MudderyInventory.prototype.refresh = function() {
     core.command.queryInventory(function(code, data, msg) {
         if (code == 0) {
             mud.inventory_window.setInventory(data);
@@ -3489,6 +3482,7 @@ MudderyInventory.prototype.onShow = function() {
         }
     });
 }
+
 
 /*
  * Event when clicks a command button.
@@ -3536,27 +3530,21 @@ MudderyInventory.prototype.confirmCommand = function(index) {
             mud.main_frame.popupAlert(core.trans("Alert"), core.trans("You are died."));
         }
         else {
+            mud.inventory_window.refresh();
+
             if (command == "equip") {
                 mud.main_frame.setState(data["state"]);
-                mud.inventory_window.setInventory(data["inventory"]);
             }
             else if (command == "use") {
                 if (data) {
                     mud.main_frame.popupAlert(core.trans("Alert"), data["msg"]);
-
                     if ("state" in data) {
                         mud.main_frame.setState(data["state"]);
-                    }
-                    if ("inventory" in data) {
-                        mud.inventory_window.setInventory(data["inventory"]);
                     }
                 }
                 else {
                     mud.main_frame.popupAlert(core.trans("Alert"), core.trans("No effect."));
                 }
-            }
-            else if (command == "discard") {
-                mud.inventory_window.setInventory(data["inventory"]);
             }
         }
     });

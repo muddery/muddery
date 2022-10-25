@@ -27,15 +27,12 @@ async def delete_account(account, args) -> dict or None:
 
     Usage:
         {
-            "cmd":"delete_account",
+            "cmd": "delete_account",
             "args":{
-                "playername":<playername>,
-                "password":<password>,
+                "username": <username>,
+                "password": <password>,
             }
         }
-
-    args:
-        connect: (boolean)connect after created
     """
     if not args:
         raise MudderyError(ERR.missing_args, "Syntax error!")
@@ -63,12 +60,9 @@ async def delete_account(account, args) -> dict or None:
     if not await account.check_password(username, password):
         raise MudderyError(ERR.no_authentication, _("Incorrect password."))
 
+    await account.logout()
     await account.delete_all_characters()
     await account.delete_user(username, password)
-
-    return {
-        "name": username
-    }
 
 
 @AccountCmd.request("change_pw")
@@ -78,8 +72,8 @@ async def delete_account(account, args) -> dict or None:
 
     Usage:
         {
-            "cmd":"change_pw",
-            "args":{
+            "cmd": "change_pw",
+            "args": {
                 "current": <current password>,
                 "new": <new password>
             }
@@ -125,8 +119,8 @@ async def puppet(account, args) -> dict:
 
     Usage:
         {
-            "cmd":"puppet",
-            "args":<object's id>
+            "cmd": "puppet",
+            "args": <object's id>
         }
 
     Puppet a given Character.
@@ -140,10 +134,12 @@ async def puppet(account, args) -> dict:
         raise MudderyError(ERR.invalid_input, _("That is not a valid character choice."))
 
     try:
-        return await account.puppet_character(puppet_id)
+        results = await account.puppet_character(puppet_id)
     except Exception as e:
         traceback.print_exc()
         raise MudderyError(ERR.invalid_input, _("That is not a valid character choice."))
+
+    return results
 
 
 @AccountCmd.request("puppet_name")
@@ -205,7 +201,7 @@ async def char_create(account, args) -> dict or None:
 
     Usage:
         {
-            "cmd":"char_create",
+            "cmd": "char_create",
             "args": {
                 "name": <character's name>
             }
@@ -267,8 +263,11 @@ async def char_delete(account, args) -> dict or None:
     Delete a character - this cannot be undone!
 
     Usage:
-        {"cmd":"char_delete",
-         "args":{"id": <character's id>}
+        {
+            "cmd": "char_delete",
+            "args": {
+                "id": <character's id>
+            }
         }
 
     Permanently deletes one of your characters.
@@ -344,8 +343,8 @@ async def func(account, args):
     Get all playable characters of the player.
 
     Usage:
-        {"cmd":"char_all",
-         "args":""
+        {
+            "cmd": "char_all"
         }
 
     """
@@ -362,11 +361,9 @@ async def logout(account, args):
     Usage:
         {
             "cmd": "logout",
-            "args": ""
         }
     """
     return await account.logout()
-
 
 
 @AccountCmd.request("query_map")
@@ -377,7 +374,6 @@ async def query_map(account, args) -> dict or None:
     Usage:
         {
             "cmd": "query_map",
-            "args": None
         }
     """
     return Server.world.get_map_data()

@@ -323,10 +323,7 @@ async def use(character, args) -> dict or None:
     position = args["position"]
 
     # Use the object and get the result.
-    results = await character.use_object(int(position))
-    results["inventory"] = character.get_inventory_appearance()
-
-    return results
+    return await character.use_object(int(position))
 
 
 @CharacterCmd.request("discard")
@@ -352,10 +349,6 @@ async def discard(character, args) -> dict or None:
     # remove object
     await character.remove_all_objects_by_position(int(position))
 
-    return {
-        "inventory": character.get_inventory_appearance()
-    }
-
 
 @CharacterCmd.request("equip")
 async def equip(character, args) -> dict or None:
@@ -379,7 +372,6 @@ async def equip(character, args) -> dict or None:
 
     return {
         "state": await character.get_state(),
-        "inventory": character.get_inventory_appearance()
     }
 
 

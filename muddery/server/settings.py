@@ -223,15 +223,6 @@ class Settings(object):
     ######################################################################
     # Command settings
     ######################################################################
-    # Command set used on the logged-in session
-    SESSION_CMDSET = "muddery.server.commands.default_cmdsets.SessionCmdSet"
-
-    # Command set for accounts without a character (ooc)
-    ACCOUNT_CMDSET = "muddery.server.commands.default_cmdsets.AccountCmdSet"
-
-    # Default set for logged in player with characters (fallback)
-    CHARACTER_CMDSET = "muddery.server.commands.default_cmdsets.CharacterCmdSet"
-
     # Determine how many commands per second a given Session is allowed
     # to send. Too high rate will drop the command and echo a warning.
     # To turn the limiter off, set to <= 0.

@@ -14,7 +14,7 @@ class CharacterClosedEvents(BaseData, Singleton):
     __table_name = "character_closed_events"
     __category_name = "character_id"
     __key_field = "event"
-    __default_value_field = None
+    __default_value_field = "event"
 
     def __init__(self):
         # data storage

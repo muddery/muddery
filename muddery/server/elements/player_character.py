@@ -255,7 +255,6 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         self.event = EventTrigger(self)
 
         self.solo_mode = GameSettings.inst().get("solo_mode")
-        self.current_dialogues = set()
 
     async def after_element_setup(self, first_time):
         """
@@ -286,9 +285,10 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
             value = self.const_data_handler.get(key)
             self.body_data_handler.add(key, value)
 
-    def set_account(self, account):
+    def puppet(self, account):
         """
-        Set the player's account.
+        Puppet this character.
+
         :param account:
         :return:
         """
@@ -320,7 +320,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         area_key = Server.world.get_area_key_by_room(location_key) if location_key else ""
         if area_key and area_key not in self.revealed_maps:
             await CharacterRevealedMap.inst().add(self.get_db_id(), area_key)
-            self.revealed_maps[area_key] = None
+            self.revealed_maps[area_key] = True
 
         self.set_location(location)
 
@@ -340,7 +340,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
 
         return results
 
-    async def at_pre_unpuppet(self):
+    async def unpuppet(self):
         """
         Called just before beginning to un-connect a puppeting from
         this Player.
@@ -356,6 +356,9 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
                 await self.location.at_character_leave(self)
 
         await MatchPVPHandler.inst().remove(self)
+
+        self.account = None
+        self.account_id = None
 
     async def refresh_states(self, keep_states):
         """
@@ -423,9 +426,12 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
             (dict) channels
         """
         all_channels = Server.world.get_all_channels()
-        channels = {c.get_element_key(): {
-            "type": "CHANNEL",
-            "name": c.get_name()} for c in all_channels}
+        channels = {
+            c.get_element_key(): {
+                "type": "CHANNEL",
+                "name": c.get_name()
+            } for c in all_channels
+        }
 
         return channels
 
@@ -433,7 +439,8 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         """
         Load revealed map data from db.
         """
-        self.revealed_maps = await CharacterRevealedMap.inst().get_character(self.get_db_id())
+        revealed_maps = await CharacterRevealedMap.inst().get_character(self.get_db_id())
+        self.revealed_maps = {key: True for key in revealed_maps}
 
     def get_revealed_maps(self):
         """
@@ -1650,7 +1657,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         else:
             await self.msg({"msg": _("You are reborn.")})
 
-    async def save_current_dialogues(self, current_dialogue):
+    def save_current_dialogues(self, current_dialogue):
         """
         Save player's current dialogues.
 
@@ -1666,26 +1673,6 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         else:
             self.current_dialogues = set()
 
-        if not GameSettings.inst().get("auto_resume_dialogues"):
-            # Can not auto resume dialogues.
-            return
-
-        await self.states.save("current_dialogue", current_dialogue if current_dialogue else None)
-        return
-
-    async def get_last_dialogue(self):
-        """
-        Restore player's dialogues when he return to game.
-
-        Returns:
-            None
-        """
-        if not GameSettings.inst().get("auto_resume_dialogues"):
-            # Can not auto resume dialogues.
-            return
-
-        return await self.states.load("current_dialogue")
-
     async def talk_to_npc(self, npc):
         """
         Talk to an NPC.
@@ -1699,7 +1686,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         # Get NPC's dialogue list.
         dialogues = await DialogueHandler.inst().get_npc_dialogues(self, npc)
 
-        await self.save_current_dialogues(dialogues)
+        self.save_current_dialogues(dialogues)
 
         return dialogues
 
@@ -1717,7 +1704,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         dialogue = await DialogueHandler.inst().get_dialogues_by_key(dlg_key)
 
         # Send the dialogue to the player.
-        await self.save_current_dialogues(dialogue)
+        self.save_current_dialogues(dialogue)
 
         return dialogue
 
@@ -1748,7 +1735,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         results["dialogue"] = next_dialogues
 
         # Send dialogues_list to the player.
-        await self.save_current_dialogues(next_dialogues)
+        self.save_current_dialogues(next_dialogues)
 
         return results
 

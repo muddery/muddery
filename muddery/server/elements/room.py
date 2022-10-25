@@ -338,8 +338,7 @@ class MudderyRoom(ELEMENT("MATTER")):
         if not GameSettings.inst().get("solo_mode"):
             # Players can not see other players in solo mode.
             players = [{
-                "id": item.get_id(),
-                "key": key,
+                "id": key,
                 "name": item.get_name(),
                 "icon": item.get_icon(),
             } for key, item in self.all_characters.items() if item.is_player() and item.get_id() != caller.get_id()]
@@ -348,8 +347,7 @@ class MudderyRoom(ELEMENT("MATTER")):
                 info["players"] = players
 
         npcs = [{
-            "id": item.get_id(),
-            "key": key,
+            "id": key,
             "name": item.get_name(),
             "icon": item.get_icon(),
         } for key, item in self.all_characters.items() if not item.is_player()]

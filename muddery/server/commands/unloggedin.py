@@ -3,7 +3,6 @@ General commands usually availabe to all users.
 """
 
 import re
-import os
 import time
 import base64
 from collections import defaultdict
@@ -12,11 +11,7 @@ from muddery.server.settings import SETTINGS
 from muddery.server.mappings.element_set import ELEMENT
 from muddery.server.utils.logger import logger
 from muddery.server.utils.crypto import RSA
-from muddery.server.commands.base_command import BaseCommand, BaseRequest
-from muddery.server.utils.localized_strings_handler import _
 from muddery.server.utils.game_settings import GameSettings
-from muddery.server.database.worlddata.equipment_positions import EquipmentPositions
-from muddery.server.database.worlddata.honour_settings import HonourSettings
 from muddery.server.commands.command_set import SessionCmd
 
 
@@ -79,7 +74,7 @@ async def first_connect(session, args):
 
     Usage:
         {
-            "cmd": "connect"
+            "cmd": "first_connect"
         }
 
     This is an unconnected version of the look command for simplicity.
@@ -87,22 +82,9 @@ async def first_connect(session, args):
     This is called by the server and kicks everything in gear.
     All it does is display the connect screen.
     """
-    game_name = GameSettings.inst().get("game_name")
-    connection_screen = GameSettings.inst().get("connection_screen")
-    honour_settings = HonourSettings.get_first_data()
-    records = EquipmentPositions.all()
-    equipment_pos = [{
-        "key": r.key,
-        "name": r.name,
-        "desc": r.desc,
-    } for r in records]
-
     return {
-        "game_name": game_name,
-        "conn_screen": connection_screen,
-        "equipment_pos": equipment_pos,
-        "min_honour_level": honour_settings.min_honour_level,
-        "max_char": SETTINGS.MAX_PLAYER_CHARACTERS,
+        "game_name": GameSettings.inst().get("game_name"),
+        "conn_screen": GameSettings.inst().get("connection_screen"),
     }
 
 
@@ -113,10 +95,11 @@ async def create_account(session, args):
 
     Usage:
         {
-            "cmd":"create_account",
-            "args":{
-                "playername":<playername>,
-                "password":<password>,
+            "cmd": "create_account",
+            "args": {
+                "username": <username>,
+                "password": <password>,
+                "connect": True,
             }
         }
 
@@ -161,7 +144,8 @@ async def create_account(session, args):
 
     return {
         "name": username,
-        "id": account.get_id()
+        "id": account.get_id(),
+        "max_char": SETTINGS.MAX_PLAYER_CHARACTERS,
     }
 
 
@@ -221,10 +205,10 @@ async def login(session, args) -> dict:
         else:
             raise MudderyError(ERR.no_authentication, "Can not login.")
 
-    # actually do the login. This will call all other hooks:
-    #   session.at_login()
-    #   player.at_init()  # always called when object is loaded from disk
-    #   player.at_first_login()  # only once, for player-centric setup
-    #   player.at_pre_login()
-    #   player.at_post_login(session=session)
-    return await session.login(account)
+    await session.login(account)
+
+    return {
+        "name": username,
+        "id": account.get_id(),
+        "max_char": SETTINGS.MAX_PLAYER_CHARACTERS,
+    }
