@@ -240,7 +240,9 @@ class DialogueHandler(Singleton):
         if events:
             results["events"] = events
 
-        await caller.quest_handler.at_objective(defines.OBJECTIVE_TALK, dlg_key)
+        quests = await caller.quest_handler.at_objective(defines.OBJECTIVE_TALK, dlg_key)
+        if quests:
+            results["quests"] = quests
 
         return results
 

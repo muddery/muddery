@@ -345,13 +345,6 @@ class MudderyCharacter(ELEMENT("MATTER")):
     #
     ########################################
 
-    def get_skills(self):
-        """
-        Get all skills.
-        :return:
-        """
-        return self.skills
-
     async def get_available_skills(self):
         """
         Get current available skills of a character.

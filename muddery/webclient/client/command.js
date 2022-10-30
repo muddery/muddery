@@ -247,9 +247,4 @@ MudderyCommand.prototype = {
     queryMap: function (callback) {
         this.sendCommand("query_map", {}, callback);
     },
-
-    // do test
-    doTest: function() {
-        // test codes
-    },
 }

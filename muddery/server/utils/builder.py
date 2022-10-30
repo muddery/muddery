@@ -51,7 +51,7 @@ async def create_character(account, nickname, character_key=None,
     new_char.set_db_id(char_db_id)
 
     # set player's account id
-    new_char.set_account(account)
+    new_char.puppet(account)
     await new_char.setup_element(character_key, level=level, first_time=True)
 
     return

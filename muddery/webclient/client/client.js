@@ -87,8 +87,7 @@ MudderyClient.prototype = {
                     } else if (key == "obj_moved_out") {
                         mud.main_frame.objMovedOut(data[key]);
                     } else if (key == "state") {
-                        var state = data[key];
-                        mud.main_frame.setState(state);
+                        mud.main_frame.setState(data[key]);
                     } else if (key == "conversation") {
                         mud.conversation_window.getMessage(data[key]);
                     } else if (key == "attack") {

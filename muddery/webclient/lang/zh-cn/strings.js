@@ -206,4 +206,5 @@ MudderyLocalDict = {
     "{R%s{n is attacking you!": "{R%s{n正在攻击你！",
     "You learned skill {C%s{n.": "你学会了技能{C%s{n。",
     "The combat of honour between you and {R%s{n!": "你和{R%s{n之间的荣誉之战！",
+    "Can not unlock.": "无法解锁。",
 };

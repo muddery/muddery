@@ -765,8 +765,13 @@ MudderyPopupObject.prototype.onCommand = function(element) {
                     }
                 }
                 else if (command == "unlock_exit") {
-                    mud.popup_object.setObject(data["exit"]);
-                    mud.popup_object.show();
+                    if (data["unlocked"]) {
+                        mud.popup_object.setObject(data["exit"]);
+                        mud.popup_object.show();
+                    }
+                    else {
+                        mud.main_frame.popupAlert(core.trans("Alert"), core.trans("Can not unlock."));
+                    }
                 }
                 else if (command == "traverse") {
                     if (data["traversed"]) {
@@ -3097,6 +3102,13 @@ MudderyCharData.prototype.bindEvents = function() {
  * On the character window show.
  */
 MudderyCharData.prototype.onShow = function() {
+    this.refreshEquipments();
+}
+
+/*
+ * Refresh equipments data.
+ */
+MudderyCharData.prototype.refreshEquipments = function() {
     core.command.queryEquipments(function(code, data, msg) {
         if (code == 0) {
             mud.char_data_window.setEquipments(data);
@@ -3384,7 +3396,7 @@ MudderyCharData.prototype.confirmCommand = function(index) {
         else {
             if (command == "takeoff") {
                 mud.main_frame.setState(data["state"]);
-                mud.char_data_window.setEquipments(data["equipments"]);
+                mud.char_data_window.refreshEquipments();
             }
         }
     });
@@ -3972,6 +3984,13 @@ MudderyQuests.prototype.bindEvents = function() {
 MudderyQuests.prototype.onShow = function() {
     this.reset();
     this.select(".quest-info").hide();
+    this.refreshQuests();
+}
+
+/*
+ * Refresh quests data.
+ */
+MudderyQuests.prototype.refreshQuests = function() {
     core.command.queryAllQuests(function(code, data, msg) {
         if (code == 0) {
             mud.quests_window.setQuests(data);
@@ -4035,11 +4054,11 @@ MudderyQuests.prototype.confirmCommand = function(index) {
             mud.main_frame.popupAlert(core.trans("Error"), core.trans(msg));
         }
         else {
+            mud.quests_window.refreshQuests();
+
             if (command == "give_up_quest") {
                 var msg = core.trans("Gave up quest {C%s{n.").replace("%s", data["name"]);
                 mud.scene_window.displayMessage(core.text2html.parseHtml(msg));
-
-                mud.quests_window.setQuests(data["all_quests"]);
             }
         }
     });

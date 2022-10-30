@@ -58,15 +58,17 @@ class MudderyMatter(BaseElement):
         The particular appearance for the caller.
         """
         info = self.get_appearance()
-        details = await asyncio.gather(
+        level, desc, cmds = await asyncio.gather(
+            self.get_level(),
             self.get_conditional_desc(caller),
             self.get_available_commands(caller),
         )
 
-        if details[0]:
-            info["desc"] = details[0]
+        info["level"] = level
+        info["cmds"] = cmds
 
-        info["cmds"] = details[1]
+        if desc:
+            info["desc"] = desc
 
         return info
 

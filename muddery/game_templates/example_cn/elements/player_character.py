@@ -8,6 +8,7 @@ creation commands.
 
 """
 
+from muddery.common.utils.exception import MudderyError, ERR
 from muddery.server.elements.player_character import MudderyPlayerCharacter
 from muddery.server.utils.localized_strings_handler import _
 
@@ -45,7 +46,6 @@ class PlayerCharacter(MudderyPlayerCharacter):
         skill_mp = skill_obj.get_mp()
         mp = await self.states.load("mp")
         if mp < skill_mp:
-            await self.msg({"msg": _("Not enough mana to cast {b%s{n!") % skill_obj.get_name()})
-            return
+            raise MudderyError(ERR.invalid_input, _("Not enough mana to cast {b%s{n!") % skill_obj.get_name())
 
         return await super(PlayerCharacter, self).cast_skill(skill_key, target)

@@ -114,12 +114,7 @@ class MudderyRoom(ELEMENT("MATTER")):
             map_data["pos"] = self.position
 
         map_data["objects"] = [item["obj"].get_appearance() for item in self.all_objects.values()]
-
-        map_data["exits"] = [
-            dict(item["obj"].get_appearance(), **{
-                "to": item["destination"],
-            }) for item in self.all_exits.values()
-        ]
+        map_data["exits"] = [item["obj"].get_appearance() for item in self.all_exits.values()]
 
         self.map_data = map_data
         return self.map_data
@@ -283,7 +278,8 @@ class MudderyRoom(ELEMENT("MATTER")):
                 change = {
                     "type": "players" if character.is_player() else "npcs",
                     "id": character.get_id(),
-                    "name": character.get_name()
+                    "name": character.get_name(),
+                    "icon": character.get_icon(),
                 }
                 await self.msg_characters({"obj_moved_in": change}, {character.get_id()})
 

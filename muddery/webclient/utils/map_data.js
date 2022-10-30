@@ -15,8 +15,8 @@ MudderyMapData.prototype = {
                         //              "area": room's area,
                         //              "pos": position}
 
-    _map_exits: {},     // exit's key: {"from": location,
-                        //              "to": destination}
+    _map_exits: {},     // exit's key: {"location": location,
+                        //              "destination": destination}
 
     _map_paths: {},     // room's key: [room's neighbour1,
                         //              room's neighbour2,
@@ -64,15 +64,15 @@ MudderyMapData.prototype = {
                 for (var i = 0; i < exits.length; i++) {
                     var exit_key = exits[i]["key"];
                     if (!(exit_key in this._map_exits)) {
-                        exits[i]["from"] = room_key;
+                        exits[i]["location"] = room_key;
                         this._map_exits[exit_key] = exits[i];
                     }
                 }
             }
 
             for (var exit_key in this._map_exits) {
-                var location = this._map_exits[exit_key]["from"];
-                var destination = this._map_exits[exit_key]["to"];
+                var location = this._map_exits[exit_key]["location"];
+                var destination = this._map_exits[exit_key]["destination"];
                 if (location in this._map_paths) {
                     this._map_paths[location].push(destination);
                 }
@@ -120,12 +120,12 @@ MudderyMapData.prototype = {
             return;
         }
 
-        var location_key = this._map_exits[exit]["from"];
+        var location_key = this._map_exits[exit]["location"];
         if (!location_key in this._map_rooms) {
             return;
         }
 
-        var destination_key = this._map_exits[exit]["to"];
+        var destination_key = this._map_exits[exit]["destination"];
         if (!destination_key in this._map_rooms) {
             return;
         }

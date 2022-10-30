@@ -49,7 +49,7 @@ class MudderyExit(ELEMENT("MATTER")):
         :param character:
         :return: Traverse result.
             {
-                "traverse_to": the key of the destination,      // if the character passed the exit
+                "traversed": whether the character traversed or not
                 "cannot_pass": the appearance of the exit,      // if the character cannot pass
             }
         """
@@ -86,7 +86,6 @@ class MudderyExit(ELEMENT("MATTER")):
         if self.name:
             return self.name
 
-        name = ""
         if self.const.destination:
             if not self.destination_obj:
                 self.destination_obj = weakref.ref(Server.world.get_room(self.const.destination))
@@ -96,6 +95,14 @@ class MudderyExit(ELEMENT("MATTER")):
 
         self.set_name(name)
         return name
+
+    def get_appearance(self):
+        """
+        Get the common appearance of the exit. It is the same to all players.
+        """
+        info = super(MudderyExit, self).get_appearance()
+        info["destination"] = self.const.destination
+        return info
 
     async def get_available_commands(self, caller):
         """

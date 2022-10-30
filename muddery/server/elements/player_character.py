@@ -1396,12 +1396,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         """
         Get skills' data.
         """
-        skills_list = []
-
-        for skill in self.skills.values():
-            skills_list.append(skill["obj"].get_appearance())
-
-        return skills_list
+        return [skill["obj"].get_appearance() for skill in self.skills.values()]
 
     async def cast_passive_skills(self):
         """

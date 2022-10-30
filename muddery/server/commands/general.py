@@ -7,10 +7,6 @@ from muddery.server.utils.logger import logger
 from muddery.common.utils.utils import async_wait
 from muddery.server.utils.localized_strings_handler import _
 from muddery.common.utils.exception import MudderyError, ERR
-from muddery.common.utils.defines import CombatType
-from muddery.server.combat.combat_handler import COMBAT_HANDLER
-from muddery.server.combat.match_pvp import MatchPVPHandler
-from muddery.server.database.worlddata.honour_settings import HonourSettings
 from muddery.server.server import Server
 from muddery.server.commands.command_set import CharacterCmd
 
@@ -23,7 +19,6 @@ async def inventory(character, args) -> dict or None:
     Usage:
         {
             "cmd": "inventory",
-            "args": ""
         }
       
     Show everything in your inventory.
@@ -58,7 +53,6 @@ async def all_equipments(character, args) -> dict or None:
     Usage:
         {
             "cmd": "equipments",
-            "args": ""
         }
 
     Show everything in your equipments.
@@ -74,7 +68,7 @@ async def equipments_obj(character, args) -> dict or None:
     Usage:
         {
             "cmd": "equipments_obj",
-            "args": <object's id>
+            "args": <object's position>
         }
 
     Observes your location or objects in your vicinity.
@@ -91,9 +85,13 @@ async def say(character, args) -> dict or None:
     speak as your character
 
     Usage:
-        {"cmd":"say",
-         "args":{"target": <target's id>,
-                 "msg": <message>
+        {
+            "cmd": "say",
+            "args": {
+                "type": <target's type>,
+                "target": <target's id>,
+                "msg": <message>
+            }
         }
 
     Talk to those in your current location.
@@ -121,10 +119,11 @@ async def look_room_obj(character, args) -> dict or None:
     """
     look at an object in the room
 
-    Usage: {
-        "cmd": "look_room_obj",
-        "args": <object's key>
-    }
+    Usage:
+        {
+            "cmd": "look_room_obj",
+            "args": <object's key>
+        }
     """
     if not character.is_alive:
         raise MudderyError(ERR.died, _("You are died."))
@@ -146,10 +145,11 @@ async def look_room_char(character, args) -> dict or None:
     """
     look at a character in the room
 
-    Usage: {
-        "cmd": "look_room_char",
-        "args": <character's id>
-    }
+    Usage:
+        {
+            "cmd": "look_room_char",
+            "args": <character's id>
+        }
     """
     if not character.is_alive:
         raise MudderyError(ERR.died, _("You are died."))
@@ -172,10 +172,11 @@ async def traverse(character, args) -> dict or None:
     """
     traverse an exit
 
-    Usage: {
-        "cmd": "traverse",
-        "args": <exit's key>
-    }
+    Usage:
+        {
+            "cmd": "traverse",
+            "args": <exit's key>
+        }
 
     Traverse an exit, go to the destination of the exit.
     """
@@ -215,10 +216,11 @@ async def talk(character, args) -> dict or None:
     """
     Talk to an NPC.
 
-    Usage: {
-        "cmd": "talk",
-        "args": <NPC's id>
-    }
+    Usage:
+        {
+            "cmd": "talk",
+            "args": <NPC's id>
+        }
 
     Begin a talk with an NPC. Show all available dialogues of this NPC.
     """
@@ -246,11 +248,10 @@ async def finish_dialogue(character, args) -> dict or None:
     Usage:
         {
             "cmd": "finish_dialogue",
-            "args":
-                {
-                    "dialogue": <current dialogue>,
-                    "npc": <npc's id>,
-                }
+            "args": {
+                "dialogue": <current dialogue>,
+                "npc": <NPC's id>,
+            }
         }
 
     Dialogue and sentence refer to the current sentence. This command finishes
@@ -280,10 +281,11 @@ async def loot(character, args) -> dict or None:
     """
     Loot from a specified object.
 
-    Usage: {
-        "cmd": "loot",
-        "args": <object's key>
-    }
+    Usage:
+        {
+            "cmd": "loot",
+            "args": <object's key>
+        }
 
     This command pick out random objects from the loot list and give
     them to the character.
@@ -304,12 +306,14 @@ async def loot(character, args) -> dict or None:
 @CharacterCmd.request("use")
 async def use(character, args) -> dict or None:
     """
-    Use an object.
+    Use an object in the inventory.
 
     Usage:
         {
             "cmd": "use",
-            "args": <object's id>
+            "args": {
+                position: <object's position in the inventory>
+            }
         }
 
     Call caller's use_object function with specified object.
@@ -358,7 +362,9 @@ async def equip(character, args) -> dict or None:
     Usage:
         {
             "cmd": "equip",
-            "args": <object's id>
+            "args": {
+                position: <object's position in the inventory>
+            }
         }
     Put on equipment and add its attributes to the character.
     """
@@ -383,7 +389,9 @@ async def takeoff(character, args) -> dict or None:
     Usage:
         {
             "cmd": "takeoff",
-            "args": <object's id>
+            "args": {
+                position: <object's position in the equipments>
+            }
         }
 
     """
@@ -397,8 +405,7 @@ async def takeoff(character, args) -> dict or None:
 
     # Send the latest state to the player.
     return {
-        "state": await character.get_state(),
-        "equipments": character.get_equipments(),
+        "state": await character.get_state()
     }
 
 
@@ -410,15 +417,8 @@ async def cast_skill(character, args) -> dict or None:
     Usage:
         {
             "cmd": "cast_skill",
-            "args": <skill's key>,
-        }
-        
-        or:
-
-        {
-            "cmd": "cast_skill",
-            "args":{
-                "skill":< skill's key>,
+            "args": {
+                "skill": <skill's key>,
                 "target": <skill's target>,
             }
         }
@@ -433,164 +433,21 @@ async def cast_skill(character, args) -> dict or None:
     if not args:
         raise MudderyError(ERR.missing_args, _("You should select a skill to cast."))
 
-    # get skill and target
-    target = None
-    if isinstance(args, str):
-        # If the args is a skill's key.
-        skill_key = args
-    else:
-        # If the args is skill's key and target.
-        if "skill" not in args:
-            raise MudderyError(ERR.missing_args, _("You should select a skill to cast."))
-        skill_key = args["skill"]
+    if "skill" not in args:
+        raise MudderyError(ERR.missing_args, _("You should select a skill to cast."))
+    skill_key = args["skill"]
 
-        # Get target
+    # Get target
+    target = None
+    if "target" in args and args["target"]:
         try:
             target_id = int(args["target"])
             room = character.get_location()
             target = room.get_character(target_id)
         except:
-            target = None
+            raise MudderyError(ERR.invalid_input, _("Can not get the target."))
 
     return await character.cast_skill(skill_key, target)
-
-
-@CharacterCmd.request("attack")
-async def attack(character, args) -> dict or None:
-    """
-    This will initiate a combat with the target. If the target is
-    already in combat, the caller will join its combat.
-
-    Usage:
-        {
-            "cmd": "attack",
-            "args": <object's id>
-        }
-
-
-    """
-    if not character.is_alive:
-        raise MudderyError(ERR.died, _("You are died."))
-
-    if not args:
-        raise MudderyError(ERR.missing_args, _("You should select a target."))
-
-    try:
-        target_id = int(args)
-        room = character.get_location()
-        target = room.get_character(target_id)
-    except:
-        raise MudderyError(ERR.invalid_input, _("You should select a target."))
-
-    if not character.location or character.location.peaceful:
-        raise MudderyError(ERR.invalid_input, _("You can not attack in this place."))
-
-    if not target.is_alive:
-        raise MudderyError(ERR.invalid_input, _("%s is died." % target.get_name()))
-
-    if character.location != target.location:
-        raise MudderyError(ERR.invalid_input, _("You can not attack %s.") % target.get_name())
-
-    # set up combat
-    if character.is_in_combat():
-        # caller is in battle
-        raise MudderyError(ERR.invalid_input, _("You are in another combat."))
-
-    if target.is_in_combat():
-        # target is in battle
-        raise MudderyError(ERR.invalid_input, _("%s is in another combat." % target.name))
-
-    # create a new combat
-    combat = await COMBAT_HANDLER.create_combat(
-        combat_type=CombatType.NORMAL,
-        teams={1: [target], 2: [character]},
-        desc="",
-        timeout=0
-    )
-
-    combat_data = {
-        "combat_info": combat.get_appearance(),
-        "combat_commands": character.get_combat_commands(),
-        "combat_states": await combat.get_combat_states(),
-        "from": character.get_name(),
-        "target": target.get_name(),
-    }
-    await target.msg({"attack": combat_data})
-    return {"attack": combat_data}
-
-
-@CharacterCmd.request("queue_up_combat")
-async def queue_up_combat(character, args) -> dict or None:
-    """
-    Queue up to make a match between the caller and a proper opponent.
-
-    Usage:
-    {
-        "cmd": "queue_up_combat",
-        "args": None
-    }
-    """
-    honour_settings = HonourSettings.get_first_data()
-    if await character.get_level() < honour_settings.min_honour_level:
-        raise MudderyError(ERR.invalid_input, _("You need to reach level %s." % honour_settings.min_honour_level))
-
-    await MatchPVPHandler.inst().add(character)
-
-
-@CharacterCmd.request("quit_combat_queue")
-async def quit_combat_queue(character, args) -> dict or None:
-    """
-    Quit the combat queue.
-
-    Usage:
-    {
-        "cmd": "quit_combat_queue",
-        "args": None
-    }
-    """
-    await MatchPVPHandler.inst().remove(character)
-
-
-@CharacterCmd.request("confirm_combat")
-async def confirm_combat(character, args) -> dict or None:
-    """
-    Confirm an honour combat.
-
-    Usage:
-    {
-        "cmd": "confirm_combat",
-        "args": None
-    }
-    """
-    MatchPVPHandler.inst().confirm(character)
-
-
-@CharacterCmd.request("reject_combat")
-async def reject_combat(character, args) -> dict or None:
-    """
-    Reject an honour combat queue.
-
-    Usage:
-    {
-        "cmd": "reject_combat",
-        "args": None
-    }
-    """
-    await MatchPVPHandler.inst().reject(character)
-
-
-@CharacterCmd.request("get_rankings")
-async def get_rankings(character, args) -> dict or None:
-    """
-    Get top ranking characters.
-
-    Usage:
-        {
-            "cmd": "get_rankings",
-            "args": None
-        }
-    """
-    return await character.get_honour_rankings()
 
 
 @CharacterCmd.request("give_up_quest")
@@ -609,10 +466,7 @@ async def give_up_quest(character, args) -> dict or None:
     quest_key = args
 
     # Give up the quest.
-    results = await character.quest_handler.give_up(quest_key)
-    results["all_quests"] = await character.get_quests()
-
-    return results
+    return await character.quest_handler.give_up(quest_key)
 
 
 @CharacterCmd.request("unlock_exit")
@@ -622,8 +476,8 @@ async def unlock_exit(character, args) -> dict or None:
 
     Usage:
         {
-            "cmd": "unlock",
-            "args": <object's id>
+            "cmd": "unlock_exit",
+            "args": <exit's key>
         }
     """
     if not args:
@@ -658,8 +512,8 @@ async def shopping(character, args) -> dict or None:
         {
             "cmd": "shopping",
             "args": {
-                npc: <npc's id>,
-                shop: <shop's key>,
+                "npc": <npc's id>,
+                "shop": <shop's key>,
             }
         }
     """
@@ -717,8 +571,7 @@ async def all_quests(character, args) -> dict or None:
 
     Usage:
         {
-            "cmd": "all_quests",
-            "args": ""
+            "cmd": "all_quests"
         }
     """
     return await character.get_quests()
@@ -752,8 +605,7 @@ async def all_skills(character, args) -> dict or None:
 
     Usage:
         {
-            "cmd": "all_skills",
-            "args": ""
+            "cmd": "all_skills"
         }
     """
     return character.get_skills()
@@ -787,22 +639,7 @@ async def get_revealed_maps(character, args) -> dict or None:
 
     Usage:
         {
-            "cmd": "get_revealed_maps",
-            "args": None
+            "cmd": "get_revealed_maps"
         }
     """
     return character.get_revealed_maps()
-
-
-@CharacterCmd.request("test")
-async def test(character, args) -> dict or None:
-    """
-    Do some tests.
-
-    Usage:
-        {
-            "cmd":"test"
-        }
-    """
-    # Put your tests here.
-    pass
