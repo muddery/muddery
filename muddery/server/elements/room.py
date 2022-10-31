@@ -369,9 +369,9 @@ class MudderyRoom(ELEMENT("MATTER")):
         """
         output = {
             "type": ConversationType.LOCAL.value,
-            "channel": self.get_name(),
             "from_id": caller.get_id(),
             "from_name": caller.get_name(),
+            "to": self.get_name(),
             "msg": message
         }
 

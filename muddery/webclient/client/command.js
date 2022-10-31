@@ -143,6 +143,10 @@ MudderyCommand.prototype = {
         this.sendCommand("equipments_obj", obj_id, callback);
     },
 
+    lookAround: function(callback) {
+        this.sendCommand("look_around", {}, callback);
+    },
+
     // look at an object in the room
     lookRoomObj: function(object_key, callback) {
         this.sendCommand("look_room_obj", object_key, callback);
@@ -215,8 +219,8 @@ MudderyCommand.prototype = {
     },
     
     // get character rankings
-    getRankings: function(callback) {
-    	this.sendCommand("get_rankings", {}, callback);
+    queryRankings: function(callback) {
+    	this.sendCommand("query_rankings", {}, callback);
     },
 
     // query the player's all quests

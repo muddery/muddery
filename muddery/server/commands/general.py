@@ -11,10 +11,23 @@ from muddery.server.server import Server
 from muddery.server.commands.command_set import CharacterCmd
 
 
+@CharacterCmd.request("look_around")
+async def look_around(character, args) -> dict or None:
+    """
+    Get surroundings in the room.
+
+    Usage:
+        {
+            "cmd": "look_around",
+        }
+    """
+    return character.look_around()
+
+
 @CharacterCmd.request("inventory")
 async def inventory(character, args) -> dict or None:
     """
-    observe inventory
+    Observe inventory
 
     Usage:
         {
@@ -199,8 +212,7 @@ async def traverse(character, args) -> dict or None:
     if results["traversed"]:
         # the character moved to the new location
         results.update({
-            "location": character.get_location_info(),
-            "look_around": character.look_around()
+            "location": character.get_location_info()
         })
     else:
         # can not traverse

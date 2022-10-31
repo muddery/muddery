@@ -314,7 +314,7 @@ MudderyMainFrame.prototype.handle_combat = function(data) {
  */
 MudderyMainFrame.prototype.moveTo = function(data) {
     core.map_data.setCurrentLocation(data["location"]);
-    mud.scene_window.setSurroundings(data["look_around"]);
+    mud.scene_window.querySurroundings();
 }
 
 /*
@@ -776,7 +776,7 @@ MudderyPopupObject.prototype.onCommand = function(element) {
                 else if (command == "traverse") {
                     if (data["traversed"]) {
                         core.map_data.setCurrentLocation(data["location"]);
-                        mud.scene_window.setSurroundings(data["look_around"]);
+                        mud.scene_window.querySurroundings();
 
                         if ("quests" in data) {
                             mud.main_frame.handle_quests(data["quests"]);
@@ -2406,7 +2406,7 @@ MudderyScene.prototype.onExit = function(element) {
         if (code == 0) {
             if (data["traversed"]) {
                 core.map_data.setCurrentLocation(data["location"]);
-                mud.scene_window.setSurroundings(data["look_around"]);
+                mud.scene_window.querySurroundings();
 
                 if ("quests" in data) {
                     mud.main_frame.handle_quests(data["quests"]);
@@ -2535,8 +2535,15 @@ MudderyScene.prototype.leaveCombatQueue = function() {
 /*
  * Refresh the scene window.
  */
-MudderyScene.prototype.refresh = function() {
-    this.setSurroundings(this.surroundings);
+MudderyScene.prototype.querySurroundings = function() {
+    core.command.lookAround(function(code, data, msg) {
+        if (code == 0) {
+            mud.scene_window.setSurroundings(data);
+        }
+        else {
+            mud.main_frame.popupAlert(core.trans("Error"), core.trans(msg));
+        }
+    });
 }
 
 /*
@@ -4210,7 +4217,7 @@ MudderyHonour.prototype.constructor = MudderyHonour;
 MudderyHonour.prototype.onShow = function() {
     var container = this.select(".rank-table");
     container.empty();
-    core.command.getRankings(function(code, data, msg) {
+    core.command.queryRankings(function(code, data, msg) {
         if (code == 0) {
             mud.honour_window.setRankings(data);
         }
@@ -5057,7 +5064,6 @@ MudderyCombat.prototype.leaveCombat = function() {
 	}
 
     mud.main_frame.popWindow(this);
-    mud.scene_window.refresh();
     if (mud.popup_dialogue.hasDialogue()) {
         mud.popup_dialogue.show();
     }
@@ -5155,8 +5161,7 @@ MudderyCombatResult.prototype.onClose = function(element) {
 	core.command.leaveCombat(function(code, data, msg) {
 	    if (code == 0) {
 	        mud.main_frame.setState(data["state"]);
-            core.map_data.setCurrentLocation(data["location"]);
-            mud.scene_window.setSurroundings(data["look_around"]);
+            mud.scene_window.querySurroundings();
 
             if ("quests" in data) {
                 mud.main_frame.handle_quests(data["quests"]);
@@ -5660,14 +5665,14 @@ MudderyConversation.prototype.getMessage = function(message) {
 	var prefix = "";
     if (message["type"] == "PRIVATE") {
 	    if (message["from_id"] == core.data_handler.character_id) {
-	        prefix = core.trans("TO[") + message["channel"] + "]";
+	        prefix = core.trans("TO[") + message["to"] + "]";
 	    }
 	    else {
 	        prefix = core.trans("FROM[") + message["from_name"] + "]";
 	    }
 	}
 	else if (message["type"] == "LOCAL" || message["type"] == "CHANNEL") {
-	    prefix = "[" + message["channel"] + "][" + message["from_name"] + "]";
+	    prefix = "[" + message["to"] + "][" + message["from_name"] + "]";
 	}
 
     var out_text = prefix + " " + message["msg"];

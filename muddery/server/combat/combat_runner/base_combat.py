@@ -181,9 +181,12 @@ class BaseCombat(object):
         """
         Check the combat.
         """
-        if await self.can_finish():
-            # if there is only one team left, kill this handler
-            await self.finish()
+        try:
+            if await self.can_finish():
+                # if there is only one team left, kill this handler
+                await self.finish()
+        except Exception as e:
+            logger.log_trace("check_finish error: %s" % e)
 
     async def can_finish(self):
         """

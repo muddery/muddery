@@ -1645,8 +1645,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
             await self.msg({
                 "msg": _("You are reborn at {C%s{n.") % home.get_name(),
                 "move_to": {
-                    "location": self.get_location_info(),
-                    "look_around": self.look_around(),
+                    "location": self.get_location_info()
                 }
             })
         else:
@@ -1743,9 +1742,9 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         """
         output = {
             "type": ConversationType.PRIVATE.value,
-            "channel": self.get_name(),
             "from_id": caller.get_id(),
             "from_name": caller.get_name(),
+            "to": self.get_name(),
             "msg": message
         }
 

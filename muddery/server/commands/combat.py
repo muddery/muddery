@@ -20,7 +20,6 @@ async def leave_combat(character, args) -> dict or None:
     Usage:
         {
             "cmd":"leave_combat",
-            "args":""
         }
 
     Observes your combat.
@@ -32,9 +31,7 @@ async def leave_combat(character, args) -> dict or None:
     results = await character.leave_combat()
 
     results.update({
-        "state": await character.get_state(),
-        "location": character.get_location_info(),
-        "look_around": character.look_around(),
+        "state": await character.get_state()
     })
 
     return results
@@ -48,23 +45,15 @@ async def cast_combat_skill(character, args) -> dict or None:
     Usage:
         {
             "cmd": "cast_combat_skill",
-            "args": <skill's key>,
-        }
-
-        or:
-
-        {
-            "cmd": "cast_combat_skill",
-            "args":
-                {
-                    "skill": <skill's key>,
-                    "target": <skill's target>,
+            "args": {
+                "skill": <skill's key>,
+                "target": <skill's target>,
             }
         }
 
     """
     if not character.is_alive:
-        raise MudderyError(ERR.invalid_input, _("You are died."))
+        raise MudderyError(ERR.died, _("You are died."))
 
     if not character.is_in_combat():
         raise MudderyError(ERR.invalid_input, _("You can only cast this skill in a combat."))
@@ -75,21 +64,14 @@ async def cast_combat_skill(character, args) -> dict or None:
     if not args:
         raise MudderyError(ERR.missing_args, _("You should select a skill to cast."))
 
-    # get skill and target
+    if "skill" not in args:
+        raise MudderyError(ERR.missing_args, _("You should select a skill to cast."))
+    skill_key = args["skill"]
+
+    # Get target
     target_id = None
-    if isinstance(args, str):
-        # If the args is a skill's key.
-        skill_key = args
-    else:
-        # If the args is skill's key and target.
-        if "skill" not in args:
-            raise MudderyError(ERR.missing_args, _("You should select a skill to cast."))
-
-        skill_key = args["skill"]
-
-        # Get target
-        if "target" in args:
-            target_id = int(args["target"])
+    if "target" in args:
+        target_id = int(args["target"])
 
     # cast this skill.
     return await character.cast_combat_skill(skill_key, target_id)
@@ -106,7 +88,6 @@ async def attack(character, args) -> dict or None:
             "cmd": "attack",
             "args": <object's id>
         }
-
 
     """
     if not character.is_alive:
@@ -166,8 +147,7 @@ async def queue_up_combat(character, args) -> dict or None:
 
     Usage:
     {
-        "cmd": "queue_up_combat",
-        "args": None
+        "cmd": "queue_up_combat"
     }
     """
     honour_settings = HonourSettings.get_first_data()
@@ -184,8 +164,7 @@ async def quit_combat_queue(character, args) -> dict or None:
 
     Usage:
     {
-        "cmd": "quit_combat_queue",
-        "args": None
+        "cmd": "quit_combat_queue"
     }
     """
     await MatchPVPHandler.inst().remove(character)
@@ -199,8 +178,7 @@ async def confirm_combat(character, args) -> dict or None:
 
     Usage:
     {
-        "cmd": "confirm_combat",
-        "args": None
+        "cmd": "confirm_combat"
     }
     """
     MatchPVPHandler.inst().confirm(character)
@@ -214,23 +192,21 @@ async def reject_combat(character, args) -> dict or None:
 
     Usage:
     {
-        "cmd": "reject_combat",
-        "args": None
+        "cmd": "reject_combat"
     }
     """
     await MatchPVPHandler.inst().reject(character)
     return
 
 
-@CharacterCmd.request("get_rankings")
+@CharacterCmd.request("query_rankings")
 async def get_rankings(character, args) -> dict or None:
     """
-    Get top ranking characters.
+    Query honour combat rankings.
 
     Usage:
         {
-            "cmd": "get_rankings",
-            "args": None
+            "cmd": "query_rankings"
         }
     """
     return await character.get_honour_rankings()
