@@ -83,3 +83,13 @@ class ERR(object):
     account_not_available = 10020
 
     password_too_simple = 10021
+
+    can_not_find_command = 10022
+
+    can_not_pass = 10023
+
+    skill_in_cd = 10024
+
+    can_not_buy = 10025
+
+    died = 10026

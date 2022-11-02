@@ -4,7 +4,7 @@ Event action.
 
 from muddery.server.events.base_event_action import BaseEventAction
 from muddery.server.database.worlddata.worlddata import WorldData
-from muddery.common.utils.utils import async_wait
+from muddery.common.utils.utils import async_gather
 
 
 class ActionTurnInQuest(BaseEventAction):
@@ -30,7 +30,7 @@ class ActionTurnInQuest(BaseEventAction):
 
         # Turn in quests.
         if records:
-            await async_wait([character.quest_handler.turn_in(r.quest) for r in records])
+            return await async_gather([character.quest_handler.turn_in(r.quest) for r in records])
 
     def get_quests(self, event_key):
         """

@@ -9,12 +9,10 @@ for allowing Characters to traverse the exit to its destination.
 
 import traceback
 import weakref
-import asyncio
+from muddery.common.utils.exception import MudderyError, ERR
 from muddery.server.utils.logger import logger
 from muddery.server.utils.localized_strings_handler import _
 from muddery.server.mappings.element_set import ELEMENT
-from muddery.server.elements.base_element import BaseElement
-from muddery.server.statements.statement_handler import STATEMENT_HANDLER
 from muddery.server.server import Server
 
 
@@ -44,25 +42,33 @@ class MudderyExit(ELEMENT("MATTER")):
             self.set_desc(_("This is an exit"))
         self.set_desc(self.const.desc)
 
-    async def traverse(self, character):
+    async def traverse(self, character) -> dict:
         """
         Traverse to the destination.
 
         :param character:
-        :return:
+        :return: Traverse result.
+            {
+                "traversed": whether the character traversed or not
+                "cannot_pass": the appearance of the exit,      // if the character cannot pass
+            }
         """
         if not await self.can_traverse(character):
-            await character.msg({"msg": _("You can not pass.")})
-            return
+            return {"traversed": False}
 
         if not self.destination_obj:
             self.destination_obj = weakref.ref(Server.world.get_room(self.const.destination))
 
         try:
-            await character.move_to(self.destination_obj())
+            results = await character.move_to(self.destination_obj())
         except Exception as e:
-            logger.log_err("%s cannot set location: (%s)%s." % (character.get_id(), type(e).__name__, e))
-            await character.msg({"msg": _("You can not go there.")})
+            logger.log_trace("%s cannot set location: (%s)%s." % (character.get_id(), type(e).__name__, e))
+            raise MudderyError(ERR.unknown, _("You can not go there."))
+
+        if not results:
+            results = {}
+        results["traversed"] = True
+        return results
 
     async def can_traverse(self, character):
         """
@@ -80,7 +86,6 @@ class MudderyExit(ELEMENT("MATTER")):
         if self.name:
             return self.name
 
-        name = ""
         if self.const.destination:
             if not self.destination_obj:
                 self.destination_obj = weakref.ref(Server.world.get_room(self.const.destination))
@@ -90,6 +95,14 @@ class MudderyExit(ELEMENT("MATTER")):
 
         self.set_name(name)
         return name
+
+    def get_appearance(self):
+        """
+        Get the common appearance of the exit. It is the same to all players.
+        """
+        info = super(MudderyExit, self).get_appearance()
+        info["destination"] = self.const.destination
+        return info
 
     async def get_available_commands(self, caller):
         """

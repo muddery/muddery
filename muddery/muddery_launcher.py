@@ -7,7 +7,6 @@ This is the start point for running Muddery.
 
 import traceback
 import sys
-import argparse
 import asyncio
 from argparse import ArgumentParser
 from muddery.launcher import configs

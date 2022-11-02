@@ -13,7 +13,7 @@ class AccountCharacters(BaseData, Singleton):
     """
     __table_name = "account_characters"
     __category_name = "account_id"
-    __key_field = "char_id"
+    __key_field = "character_id"
     __default_value_field = None
 
     def __init__(self):

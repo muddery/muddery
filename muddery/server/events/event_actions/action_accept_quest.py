@@ -4,7 +4,7 @@ Event action.
 
 from muddery.server.events.base_event_action import BaseEventAction
 from muddery.server.database.worlddata.worlddata import WorldData
-from muddery.common.utils.utils import async_wait
+from muddery.common.utils.utils import async_gather
 
 
 class ActionAcceptQuest(BaseEventAction):
@@ -30,7 +30,8 @@ class ActionAcceptQuest(BaseEventAction):
 
         # Accept quests.
         if records:
-            await async_wait([character.quest_handler.accept(r.quest) for r in records])
+            quests = await async_gather([character.quest_handler.accept(r.quest) for r in records])
+            return quests
 
     def get_quests(self, event_key):
         """

@@ -4,7 +4,6 @@ Combat handler.
 
 from muddery.server.combat.combat_runner.base_combat import BaseCombat, CStatus
 from muddery.server.utils.honours_handler import HONOURS_HANDLER
-from muddery.common.utils.utils import async_wait
 
 
 class HonourCombat(BaseCombat):
@@ -20,20 +19,6 @@ class HonourCombat(BaseCombat):
             # Stop auto cast skills
             character = char["char"]
             character.stop_auto_combat_skill()
-
-    async def show_combat(self, character):
-        """
-        Show combat information to a character.
-        Args:
-            character: (object) character
-
-        Returns:
-            None
-        """
-        await super(HonourCombat, self).show_combat(character)
-
-        # send messages in order
-        await character.msg({"combat_commands": character.get_combat_commands()})
 
     async def calc_winners(self):
         """
@@ -71,14 +56,14 @@ class HonourCombat(BaseCombat):
         losers_db_id = [char.get_db_id() for char in losers.values()]
 
         honour_changes = await HONOURS_HANDLER.set_honours(winners_db_id, losers_db_id)
-        for char_id in self.characters:
+        for char_id, char_info in self.characters.items():
+            char_db_id = char_info["db_id"]
+            if char_db_id is None:
+                continue
+
             if char_id not in rewards:
                 rewards[char_id] = {}
-            rewards[char_id]["honour"] = honour_changes[char_id] if char_id in honour_changes else 0
 
-        if self.characters:
-            rankings_awaits = [c["char"].show_rankings() for c in self.characters.values()]
-            status_awaits = [c["char"].show_status() for c in self.characters.values()]
-            await async_wait(rankings_awaits + status_awaits)
+            rewards[char_id]["honour"] = honour_changes[char_db_id] if char_db_id in honour_changes else 0
 
         return rewards

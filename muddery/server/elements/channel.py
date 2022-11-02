@@ -58,9 +58,9 @@ class MudderyChannel(BaseElement):
                 char.msg({
                     "conversation": {
                         "type": self.get_element_key(),
-                        "channel": self.const.name,
                         "from_id": caller.get_db_id(),
                         "from_name": caller.get_name(),
+                        "to": self.const.name,
                         "msg": message,
                     }
                 })

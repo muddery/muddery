@@ -71,14 +71,14 @@ class MudderyQuest(BaseElement):
         """
         return self.const.name
 
-    async def return_info(self):
+    async def get_info(self):
         """
         Get return messages for the client.
         """
         # Get name, description and available commands.
         cmds, objectives = await async_gather([
             self.get_available_commands(),
-            self.return_objectives(),
+            self.get_objectives(),
         ])
         info = {
             "key": self.const.key,
@@ -96,7 +96,12 @@ class MudderyQuest(BaseElement):
         """
         commands = []
         if GameSettings.inst().get("can_give_up_quests"):
-            commands.append({"name": _("Give Up"), "cmd": "giveup_quest", "args": self.const.key})
+            commands.append({
+                "name": _("Give Up"),
+                "cmd": "give_up_quest",
+                "args": self.const.key,
+                "confirm": _("Give up this quest?"),
+            })
         return commands
 
     def get_objective_types(self):
@@ -106,7 +111,7 @@ class MudderyQuest(BaseElement):
         """
         return self.objectives.keys()
 
-    async def return_objectives(self):
+    async def get_objectives(self):
         """
         Get the information of all objectives.
         Set desc to an objective can hide the details of the objective.

@@ -13,7 +13,7 @@ from muddery.server.utils.logger import logger
 from muddery.server.server import Server
 from muddery.server.utils.quest_handler import QuestHandler
 from muddery.server.utils.statement_attribute_handler import StatementAttributeHandler
-from muddery.common.utils.exception import MudderyError
+from muddery.common.utils.exception import MudderyError, ERR
 from muddery.server.utils.localized_strings_handler import _
 from muddery.server.utils.game_settings import GameSettings
 from muddery.server.utils.dialogue_handler import DialogueHandler
@@ -25,6 +25,7 @@ from muddery.server.database.worlddata.honour_settings import HonourSettings
 from muddery.server.database.worlddata.default_objects import DefaultObjects
 from muddery.server.database.worlddata.equipment_positions import EquipmentPositions
 from muddery.server.database.worlddata.character_states_dict import CharacterStatesDict
+from muddery.server.database.worlddata.characters import Characters
 from muddery.server.database.gamedata.character_relationships import CharacterRelationships
 from muddery.server.database.gamedata.character_closed_events import CharacterClosedEvents
 from muddery.server.mappings.element_set import ELEMENT
@@ -38,6 +39,7 @@ from muddery.server.database.gamedata.character_info import CharacterInfo
 from muddery.server.database.gamedata.character_skills import CharacterSkills
 from muddery.server.database.gamedata.character_combat import CharacterCombat
 from muddery.server.database.gamedata.character_location import CharacterLocation
+from muddery.server.database.gamedata.character_revealed_map import CharacterRevealedMap
 from muddery.server.combat.match_pvp import MatchPVPHandler
 from muddery.server.utils.object_states_handler import ObjectStatesHandler
 from muddery.server.database.gamedata.object_storage import CharacterObjectStorage
@@ -55,10 +57,6 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
                     and its commands only be called by itself, not anyone else.
                     (to change things, use at_object_creation() instead)
     at_after_move - launches the "look" command
-    at_post_puppet(player) -  when Player disconnects from the Character, we
-                    store the current location, so the "unconnected" character
-                    object does not need to stay on grid but can be given a
-                    None-location while offline.
     at_pre_puppet - just before Player re-connects, retrieves the character's
                     old location and puts it back on the grid with a "charname
                     has connected" message echoed to the room
@@ -105,6 +103,9 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         #    }
         self.equipments = {}
 
+        # character revealed maps
+        self.revealed_maps = {}
+
         self.quest_handler = None
 
         # attributes used in statements
@@ -113,7 +114,6 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         self.event = None
 
         self.solo_mode = None
-        self.available_channels = {}
         self.current_dialogues = set()
 
         self.combat_id = None
@@ -152,9 +152,9 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         raise Exception("Cannot delete the body object!")
     body = property(__body_get, __body_set, __body_del)
 
-    def create_status_handler(self):
+    def create_states_handler(self):
         """
-        Characters use memory to store status by default.
+        Characters use memory to store state by default.
         :return:
         """
         return ObjectStatesHandler(self.get_db_id(), CharacterObjectStorage)
@@ -195,6 +195,19 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         await CharacterInfo.inst().set_level(self.get_db_id(), level)
         await super(MudderyPlayerCharacter, self).set_level(level)
 
+    async def level_up(self):
+        """
+        Upgrade level.
+
+        Returns:
+            None
+        """
+        with CharacterInfo.inst().transaction():
+            new_level = await self.get_level() + 1
+            await self.set_level(new_level)
+
+        return new_level
+
     async def setup_element(self, key, level=None, first_time=False, temp=False):
         """
         Set element data's key.
@@ -233,14 +246,15 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
 
             # load equipments
             self.load_equipments(),
+
+            # load revealed maps
+            self.load_revealed_maps(),
         ])
 
         # initialize events
         self.event = EventTrigger(self)
 
         self.solo_mode = GameSettings.inst().get("solo_mode")
-        self.available_channels = {}
-        self.current_dialogues = set()
 
     async def after_element_setup(self, first_time):
         """
@@ -271,9 +285,10 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
             value = self.const_data_handler.get(key)
             self.body_data_handler.add(key, value)
 
-    def set_account(self, account):
+    def puppet(self, account):
         """
-        Set the player's account.
+        Puppet this character.
+
         :param account:
         :return:
         """
@@ -293,78 +308,56 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         :param location: location's object
         :return:
         """
+        results = {}
         if self.location:
             # Trigger the moving out event.
             self.event.at_character_move_out(self.location)
+            move_results = await self.location.at_character_leave(self)
+            if move_results:
+                results.update(move_results)
 
         # save new location
         location_key = location.get_element_key() if location else ""
         await CharacterLocation.inst().save(self.get_db_id(), location_key)
 
-        if self.location:
-            await self.location.at_character_leave(self)
+        area_key = Server.world.get_area_key_by_room(location_key) if location_key else ""
+        if area_key and area_key not in self.revealed_maps:
+            await CharacterRevealedMap.inst().add(self.get_db_id(), area_key)
+            self.revealed_maps[area_key] = True
 
         self.set_location(location)
 
-        # Send new location's data to the character.
-        location_name = self.location.name if location else ""
-        await self.msg({"msg": _("Moved to %s ...") % location_name})
-        await self.show_location()
-
         if self.location:
-            await async_wait([
-                self.location.at_character_arrive(self),
+            move_results = await self.location.at_character_arrive(self)
+            if move_results:
+                results.update(move_results)
 
-                # Trigger the arrive event.
-                self.event.at_character_move_in(self.location),
+            # Trigger the arrive event.
+            quests, events = await async_gather([
                 self.quest_handler.at_objective(defines.OBJECTIVE_ARRIVE, location_key),
+                self.event.at_character_move_in(self.location)
             ])
+            if quests:
+                results["quests"] = quests
+            if events:
+                results["events"] = events
 
-    async def at_post_puppet(self):
-        """
-        Called just after puppeting has been completed and all
-        Player<->Object links have been established.
+        return results
 
-        """
-        channels, status, skills, quests = await async_gather([
-            self.get_available_channels(),
-            self.return_status(),
-            self.return_skills(),
-            self.quest_handler.get_quests_info(),
-        ])
-        self.available_channels = channels
-
-        # send character's data to player
-        message = {
-            "status": status,
-            "equipments": self.return_equipments(),
-            "inventory": self.get_inventory_appearance(),
-            "skills": skills,
-            "quests": quests,
-            "channels": self.available_channels
-        }
-        await self.msg(message)
-
-        await self.resume_last_dialogue()
-
-        await self.resume_combat()
-
-    async def at_pre_unpuppet(self):
+    async def unpuppet(self):
         """
         Called just before beginning to un-connect a puppeting from
         this Player.
         """
-        # Pause all scripts.
-        #scripts = self.scripts.all()
-        #for script in scripts:
-        #    script.pause()
-
         if not self.solo_mode:
             # notify its location
             if self.location:
                 await self.location.at_character_leave(self)
 
-        await MatchPVPHandler.inst().remove(self)
+        MatchPVPHandler.inst().remove(self)
+
+        self.account = None
+        self.account_id = None
 
     async def refresh_states(self, keep_states):
         """
@@ -388,22 +381,18 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
 
         await super(MudderyPlayerCharacter, self).refresh_states(keep_states)
 
-    async def msg(self, data, delay=True):
+    def msg(self, data):
         """
         Emits something to the account attached to the object.
 
         Args:
-            text (str, optional): The message to send
-
-        Notes:
-            `at_msg_receive` will be called on this Object.
-            All extra kwargs will be passed on to the protocol.
+            data (dict): The message to send
         """
         if not self.account:
             return
 
         # relay to account
-        await self.account.msg(data, delay)
+        self.account.msg(data)
 
     async def get_level(self):
         """
@@ -428,7 +417,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
             commands.append({"name": _("Attack"), "cmd": "attack", "args": self.get_id()})
         return commands
 
-    async def get_available_channels(self):
+    def get_available_channels(self):
         """
         Get available channel's info.
 
@@ -436,28 +425,27 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
             (dict) channels
         """
         all_channels = Server.world.get_all_channels()
-        channels = {c.get_element_key(): {
-            "type": "CHANNEL",
-            "name": c.get_name()} for c in all_channels}
+        channels = {
+            c.get_element_key(): {
+                "type": "CHANNEL",
+                "name": c.get_name()
+            } for c in all_channels
+        }
 
         return channels
 
-    def get_maps(self, room_list):
+    async def load_revealed_maps(self):
+        """
+        Load revealed map data from db.
+        """
+        revealed_maps = await CharacterRevealedMap.inst().get_character(self.get_db_id())
+        self.revealed_maps = {key: True for key in revealed_maps}
+
+    def get_revealed_maps(self):
         """
         Get the map of the room's area.
         """
-        areas = set([Server.world.get_area_key_by_room(room_key) for room_key in room_list])
-        maps = {area_key: Server.world.get_area(area_key).get_map() for area_key in areas if area_key}
-        return maps
-
-    def get_neighbour_maps(self, room_key):
-        """
-        Get the map of the room's neighbour.
-        """
-        room = Server.world.get_room(room_key)
-        exits = room.get_exits()
-        neighbours = [exit["to"] for exit in exits.values()]
-        return self.get_maps(neighbours)
+        return self.revealed_maps
 
     async def wear_equipments(self):
         """
@@ -467,7 +455,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         if self.equipments:
             await async_wait([item["obj"].equip_to(self) for item in self.equipments.values()])
 
-    async def show_location(self):
+    def get_location_info(self):
         """
         Show characters and objects in this location.
         """
@@ -475,19 +463,25 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
             return
 
         room_key = self.location.get_element_key()
-        msg = [
-            {
-                "current_location": {
-                    "area": Server.world.get_area_key_by_room(room_key),
-                    "room": room_key,
-                },
-            },
-            {
-                "look_around": self.location.get_surroundings(self),
-            },
-        ]
+        return {
+            "area": Server.world.get_area_key_by_room(room_key),
+            "room": room_key,
+        }
 
-        await self.msg(msg)
+    def look_around(self):
+        """
+        Show characters and objects in this location.
+        """
+        if not self.location:
+            return
+
+        return self.location.get_surroundings(self)
+
+    async def get_quests(self):
+        """
+        Get player's quests info.
+        """
+        return await self.quest_handler.get_quests()
 
     ################################################
     #
@@ -543,7 +537,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
                 })
 
         if obj_list:
-            await self.receive_objects(obj_list, mute=True)
+            await self.receive_objects(obj_list)
 
     def total_object_number(self, obj_key):
         """
@@ -563,7 +557,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         """
         return self.total_object_number(obj_key) > 0
 
-    async def receive_object(self, object_key, number, level, mute=False):
+    async def receive_object(self, object_key, number, level):
         """
         Add an object to the inventory.
         :param object_key:
@@ -577,9 +571,9 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
             "number": number,
             "level": level
         }]
-        return await self.receive_objects(obj_list, mute)
+        return await self.receive_objects(obj_list)
 
-    async def receive_objects(self, obj_list, mute=False, show=True):
+    async def receive_objects(self, obj_list):
         """
         Add a list of objects to the inventory.
 
@@ -741,22 +735,35 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
                 "reject": reject,
             })
 
-        if not mute:
-            # Send results to the player.
-            await self.msg({"get_objects": objects})
-
-        if show:
-            await self.show_inventory()
+        results = {
+            "objects": objects
+        }
 
         # call quest handler
         awaits = [
             self.quest_handler.at_objective(defines.OBJECTIVE_OBJECT, obj["key"], obj["number"]) for obj in objects
             if not obj["reject"]
         ]
-        if awaits:
-            await async_wait(awaits)
 
-        return objects
+        if awaits:
+            # Get accomplished quests.
+            quest_results = await async_gather(awaits)
+
+            # Remove empty quests.
+            quest_results = [r for r in quest_results if r]
+
+            if quest_results:
+                quests = {}
+                for r in quest_results:
+                    for key, value in r.items():
+                        if key in quests:
+                            quests[key].append(value)
+                        else:
+                            quests[key] = value
+
+                results["quests"] = quests
+
+        return results
 
     def can_get_object(self, obj_key, number):
         """
@@ -844,31 +851,23 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
 
         item = self.inventory[position]
         if item["number"] < number:
-            return _("Not enough number.")
+            raise MudderyError(_("Not enough number."))
 
         item_obj = await self.get_inventory_obj_by_pos(position)
 
         # take effect
-        try:
-            result, used = await item_obj.take_effect(self, number)
-            if used > 0:
-                # remove used object
-                await self.remove_objects_by_position(position, used, True)
+        result, used = await item_obj.take_effect(self, number)
+        if used > 0:
+            # remove used object
+            await self.remove_objects_by_position(position, used)
 
-            await self.show_inventory()
-            return result
-        except Exception as e:
-            ostring = "Can not use %s: %s" % (item["key"], e)
-            logger.log_trace(ostring)
+        return result
 
-        return _("No effect.")
-
-    async def remove_all_objects_by_position(self, position, mute=False):
+    async def remove_all_objects_by_position(self, position):
         """
         Remove all objects by its position.
 
         :param position:
-        :param mute:
         :return:
         """
         if position not in self.inventory:
@@ -882,17 +881,13 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
             await CharacterInventory.inst().set_dict(self.get_db_id(), position, {"number": 0})
             item["number"] = 0
 
-        if not mute:
-            await self.show_inventory()
-
         return
 
-    async def remove_objects_by_position(self, position, number, mute=False):
+    async def remove_objects_by_position(self, position, number):
         """
         Remove objects by its position.
 
         :param obj_id:
-        :param mute:
         :return:
         """
         if position not in self.inventory:
@@ -916,12 +911,9 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         else:
             raise (MudderyError(_("Can not remove this object.")))
 
-        if not mute:
-            await self.show_inventory()
-
         return
 
-    async def remove_all_objects_by_key(self, obj_key, mute=False):
+    async def remove_all_objects_by_key(self, obj_key):
         """
         Remove all objects of this object_key.
         """
@@ -938,12 +930,9 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
                 await CharacterInventory.inst().set_dict(self.get_db_id(), position, {"number": 0})
                 self.inventory[position]["number"] = 0
 
-        if not mute:
-            await self.show_inventory()
-
         return
 
-    async def remove_objects_by_key(self, obj_key, number, mute=False):
+    async def remove_objects_by_key(self, obj_key, number):
         """
         Remove all objects of this object_key.
         """
@@ -979,12 +968,9 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
             if number == 0:
                 break
 
-        if not mute:
-            await self.show_inventory()
-
         return
 
-    async def remove_objects_by_list(self, obj_list, mute=False, show=True):
+    async def remove_objects_by_list(self, obj_list):
         """
         Remove objects from the inventory.
 
@@ -997,32 +983,26 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
             boolean: success
         """
         for item in obj_list:
-            await self.remove_objects_by_key(item["object_key"], item["number"], True)
+            await self.remove_objects_by_key(item["object_key"], item["number"])
 
-        if show:
-            await self.show_inventory()
+        return obj_list
 
-    async def exchange_objects(self, remove_list, receive_list, mute=False, show=True):
+    async def exchange_objects(self, remove_list, receive_list):
         """
         Exchange some objects to other objects.
 
         :param remove_list:
         :param receive_list:
-        :param mute:
         :return:
         """
         with self.states.transaction():
-            await self.remove_objects_by_list(remove_list, mute=True, show=False)
-            await self.receive_objects(receive_list, mute=True, show=False)
+            remove = await self.remove_objects_by_list(remove_list)
+            receive = await self.receive_objects(receive_list)
 
-        if show:
-            await self.show_inventory()
-
-    async def show_inventory(self):
-        """
-        Send inventory data to player.
-        """
-        await self.msg({"inventory": self.get_inventory_appearance()})
+        return {
+            "use": remove,
+            "get": receive,
+        }
 
     def get_inventory_appearance(self):
         """
@@ -1054,64 +1034,62 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         """
         Get inventory's data.
         """
-        if position in self.inventory:
+        try:
             item = self.inventory[position]
-            item_obj = await self.get_inventory_obj_by_pos(position)
+        except KeyError:
+            raise MudderyError(ERR.invalid_input, _("Can not find it in your inventory."))
 
-            appearance = await item_obj.get_detail_appearance(self)
-            appearance["number"] = item["number"]
-            appearance["position"] = position
+        item_obj = await self.get_inventory_obj_by_pos(position)
 
-            # add a discard command
-            if item_obj.can_discard():
-                appearance["cmds"].append({
-                    "name": _("Discard"),
-                    "cmd": "discard",
-                    "confirm": _("Discard this object?"),
-                })
-            return appearance
+        appearance = await item_obj.get_detail_appearance(self)
+        appearance["number"] = item["number"]
+        appearance["position"] = position
+
+        # add a discard command
+        if item_obj.can_discard():
+            appearance["cmds"].append({
+                "name": _("Discard"),
+                "cmd": "discard",
+                "confirm": _("Discard this object?"),
+            })
+        return appearance
 
     async def return_equipments_object(self, position):
         """
         Get equipments data.
         """
-        if position in self.equipments:
-            appearance = await self.equipments[position]["obj"].get_detail_appearance(self)
+        try:
+            item = self.equipments[position]
+        except KeyError:
+            raise MudderyError(ERR.invalid_input, _("Can not find it in your equipments."))
 
-            # add a take off command, remove equip command
-            commands = [c for c in appearance["cmds"] if c["cmd"] != "equip"]
-            commands.append({
-                "name": _("Take Off"),
-                "cmd": "takeoff",
-                "args": {
-                    "position": position
-                },
-            })
-            appearance["cmds"] = commands
+        appearance = await item["obj"].get_detail_appearance(self)
 
-            return appearance
-
-    async def show_status(self):
-        """
-        Send status to player.
-        """
-        status = await self.return_status()
-        await self.msg({
-            "status": status
+        # add a take off command, remove equip command
+        commands = [c for c in appearance["cmds"] if c["cmd"] != "equip"]
+        commands.append({
+            "name": _("Take Off"),
+            "cmd": "takeoff",
+            "args": {
+                "position": position
+            },
         })
+        appearance["cmds"] = commands
 
-    async def return_status(self):
+        return appearance
+
+    async def get_state(self):
         """
-        Get character's status.
+        Get character's state.
         """
-        status = {
+        state = {
             "level": {
                 "name": _("LEVEL"),
                 "value": await self.get_level(),
             }
         }
 
-        status.update({
+        state.update({
             key: {
                 "name": info["name"],
                 "value": self.const_data_handler.get(key),
@@ -1119,14 +1097,14 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         })
 
         records = CharacterStatesDict.all()
-        status.update({
+        state.update({
             record.key: {
                 "name": record.name,
                 "value": await self.states.load(record.key)
             } for record in records
         })
 
-        return status
+        return state
 
     async def load_equipments(self):
         """
@@ -1172,17 +1150,9 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
             await async_wait(awaits)
 
         if take_off:
-            await async_wait([self.take_off_equipment(pos, mute=True, refresh=False) for pos in take_off])
+            await async_wait([self.take_off_equipment(pos, refresh=False) for pos in take_off])
 
-    async def show_equipments(self):
-        """
-        Send equipments to player.
-        """
-        await self.msg({
-            "equipments": self.return_equipments()
-        })
-
-    def return_equipments(self):
+    def get_equipments(self):
         """
         Get equipments' data.
         """
@@ -1210,7 +1180,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
 
         # Take off old equipment
         if body_position in self.equipments:
-            await self.take_off_equipment(body_position, mute=True, refresh=False)
+            await self.take_off_equipment(body_position, refresh=False)
 
         # Put on new equipment.
         if "obj" not in item or not item["obj"]:
@@ -1236,21 +1206,12 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
                     await CharacterInventory.inst().set_dict(self.get_db_id(), position, {"number": 0})
                     item["number"] = 0
 
-            self.equipments[body_position] = item
+        self.equipments[body_position] = item
 
         # reset character's attributes
         await self.refresh_states(True)
 
-        message = {
-            "status": await self.return_status(),
-            "equipments": self.return_equipments(),
-            "inventory": self.get_inventory_appearance()
-        }
-        await self.msg(message)
-
-        return
-
-    async def take_off_equipment(self, body_position, mute=False, refresh=True):
+    async def take_off_equipment(self, body_position, refresh=True):
         """
         Take off an equipment.
         args:
@@ -1290,20 +1251,12 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
                 "can_remove": object_record.can_remove,
             }
 
-            # remove from body
-            del self.equipments[body_position]
+        # remove from body
+        del self.equipments[body_position]
 
         if refresh:
             # reset character's attributes
             await self.refresh_states(True)
-
-        if not mute:
-            message = {
-                "status": await self.return_status(),
-                "equipments": self.return_equipments(),
-                "inventory": self.get_inventory_appearance()
-            }
-            await self.msg(message)
 
     async def lock_exit(self, exit_key):
         """
@@ -1316,7 +1269,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         unlocked_exits.remove(exit_key)
         await self.states.save("unlocked_exits", unlocked_exits)
 
-    async def unlock_exit(self, exit_key, auto_unlock):
+    async def unlock_exit(self, exit_key) -> bool:
         """
         Unlock an exit. Add the exit's key to the character's unlock list.
         """
@@ -1325,17 +1278,10 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
             return True
 
         if not await self.location.can_unlock_exit(self, exit_key):
-            await self.msg({"msg": _("Can not open this exit.")})
             return False
 
         unlocked_exits.add(exit_key)
         await self.states.save("unlocked_exits", unlocked_exits)
-
-        if not auto_unlock:
-            # The exit may have different appearance after unlocking.
-            # Send the lastest appearance to the caller.
-            detail_appearance = await self.location.get_exit_appearance(self, exit_key)
-            await self.msg({"look_obj": detail_appearance})
 
         return True
 
@@ -1401,21 +1347,19 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
             for index, item in enumerate(self.skills.values()):
                 item["obj"] = skills[index]
 
-    async def learn_skill(self, skill_key, level, mute=True):
+    async def learn_skill(self, skill_key, level):
         """
         Learn a new skill.
 
         Args:
             skill_key: (string) skill's key
             level: (number) skill's level
-            mute: (boolean) do not show messages to the player
 
         Returns:
             (boolean) learned skill
         """
         if skill_key in self.skills:
-            await self.msg({"msg": _("You have already learned this skill.")})
-            raise KeyError
+            raise MudderyError(ERR.invalid_input, _("You have already learned this skill."))
 
         try:
             # Create skill object.
@@ -1423,8 +1367,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
             await skill_obj.setup_element(skill_key, level)
         except Exception as e:
             logger.log_err("Can not learn skill %s: (%s) %s" % (skill_key, type(e).__name__, e))
-            await self.msg({"msg": _("Can not learn this skill.")})
-            raise e
+            raise MudderyError(ERR.invalid_input, _("Can not learn this skill."))
 
         # Store new skill.
         self.skills[skill_key] = {
@@ -1443,33 +1386,16 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         if skill_obj.passive:
             await self.refresh_states(True)
 
-        # Notify the player
-        if not mute:
-            await async_wait([
-                self.show_status(),
-                self.show_skills(),
-                self.msg({"msg": _("You learned skill {C%s{n.") % skill_obj.get_name()}),
-            ])
+        return {
+            "key": skill_key,
+            "name": skill_obj.get_name(),
+        }
 
-        return
-
-    async def show_skills(self):
-        """
-        Send skills to player.
-        """
-        skills = await self.return_skills()
-        await self.msg({"skills": skills})
-
-    async def return_skills(self):
+    def get_skills(self):
         """
         Get skills' data.
         """
-        skills_list = []
-
-        for skill in self.skills.values():
-            skills_list.append(skill["obj"].get_appearance())
-
-        return skills_list
+        return [skill["obj"].get_appearance() for skill in self.skills.values()]
 
     async def cast_passive_skills(self):
         """
@@ -1487,9 +1413,6 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
             skill_key: (string) skill's key.
             target: (object) skill's target.
         """
-        if not await self.skills[skill_key]["obj"].is_available(self, False):
-            return
-
         last_cd_finish = self.skills[skill_key]["cd_finish"]
         result = await super(MudderyPlayerCharacter, self).cast_skill(skill_key, target)
         cd_finish = self.skills[skill_key]["cd_finish"]
@@ -1550,20 +1473,24 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
 
         return combat
 
-    async def resume_combat(self):
+    async def get_last_combat(self):
         """
-        Resume unfinished combat.
+        Get unfinished combat.
 
         Returns:
             None
         """
         combat = await self.get_combat()
         if combat:
-            if not combat.is_finished():
-                # show combat infomation
-                await combat.show_combat(self)
-            else:
+            if combat.is_finished():
                 await self.leave_combat()
+            else:
+                # show combat information
+                return {
+                    "combat_info": combat.get_appearance(),
+                    "combat_commands": self.get_combat_commands(),
+                    "combat_states": await combat.get_combat_states(),
+                }
 
     async def combat_result(self, combat_type, result, opponents=None, rewards=None):
         """
@@ -1584,19 +1511,26 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         if rewards:
             if "exp" in rewards and rewards["exp"]:
                 exp = rewards["exp"]
-                await self.add_exp(exp)
+                exp_results = await self.add_exp(exp)
                 combat_result["rewards"]["exp"] = exp
+                combat_result["rewards"].update(exp_results)
 
             # give objects to winner
             if "loots" in rewards and rewards["loots"]:
-                get_objects = await self.receive_objects(rewards["loots"], mute=True)
+                get_objects = await self.receive_objects(rewards["loots"])
                 combat_result["rewards"]["get_objects"] = get_objects
 
             # honours
             if "honour" in rewards and rewards["honour"]:
                 combat_result["rewards"]["honour"] = rewards["honour"]
 
-        await self.msg({"combat_finish": combat_result})
+        # set state
+        if "level_up" in combat_result["rewards"] or combat_type == CombatType.HONOUR:
+            # recover state
+            await self.recover()
+            combat_result["state"] = await self.get_state()
+
+        self.msg({"combat_finish": combat_result})
 
     async def leave_combat(self):
         """
@@ -1610,23 +1544,29 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         if not combat:
             return
 
-        result = combat.get_combat_result(self.id)
-        if result:
-            status, opponents, rewards = result
+        combat_result = combat.get_combat_result(self.id)
+        if combat_result:
+            status, opponents, rewards = combat_result
+
+        event_results = []
+        quest_results = []
+        results = {}
 
         combat_type = combat.get_combat_type()
-
         if combat_type == CombatType.NORMAL:
             # normal combat
             # trigger events
             if status == defines.COMBAT_WIN:
                 if opponents:
-                    event_kill = [self.event.at_character_kill(op) for op in opponents]
-                    quest_kill = [self.quest_handler.at_objective(defines.OBJECTIVE_KILL, op.get_element_key()) for op in opponents]
-                    await async_wait(event_kill + quest_kill)
+                    event_results = await async_gather([self.event.at_character_kill(op) for op in opponents])
+                    quest_results = await async_gather([self.quest_handler.at_objective(defines.OBJECTIVE_KILL, op.get_element_key())
+                                                         for op in opponents])
             elif status == defines.COMBAT_LOSE:
                 await self.die(opponents)
-                await self.event.at_character_die()
+                event_results = await self.event.at_character_die()
+                results["die"] = True
+                if self.reborn_time > 0:
+                    results["reborn_time"] = self.reborn_time
         elif combat_type == CombatType.HONOUR:
             if status == defines.COMBAT_WIN:
                 await self.honour_win()
@@ -1635,11 +1575,28 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
 
         await combat.leave_combat(self)
         self.combat_id = None
+        await CharacterCombat.inst().remove_character(self.get_db_id())
 
-        # show status
-        await self.show_status()
+        # Remove empty events.
+        events = [e for event_list in event_results if event_list for e in event_list]
+        if events:
+            results["events"] = events
 
-        await self.show_location()
+        # Remove empty quests.
+        quest_results = [r for r in quest_results if r]
+
+        if quest_results:
+            quests = {}
+            for r in quest_results:
+                for key, value in r.items():
+                    if key in quests:
+                        quests[key].append(value)
+                    else:
+                        quests[key] = value
+
+            results["quests"] = quests
+
+        return results
 
     async def die(self, killers):
         """
@@ -1651,27 +1608,19 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
             self.reborn_time = 1
 
         await super(MudderyPlayerCharacter, self).die(killers)
-        
-        await self.msg({"msg": _("You died.")})
-
-        if self.reborn_time > 0:
-            await self.msg({"msg": _("You will be reborn in {C%(s)s{n seconds.") % {'s': self.reborn_time}})
 
     async def honour_win(self):
         """
         The character win in an honour combat.
         """
-        # Recover properties.
-        await self.recover()
-        await self.show_status()
+        pass
+
 
     async def honour_lose(self):
         """
         The character lost in an honour combat.
         """
-        # Recover properties.
-        await self.recover()
-        await self.show_status()
+        pass
 
     async def reborn(self):
         """
@@ -1691,16 +1640,18 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
                 pass
 
         if home:
-            await self.move_to(home)
-
-        await self.show_status()
-
-        if home:
-            await self.msg({"msg": _("You are reborn at {C%s{n.") % home.get_name()})
+            results = await self.move_to(home)
+            results.update({
+                "msg": _("You are reborn at {C%s{n.") % home.get_name(),
+                "move_to": {
+                    "location": self.get_location_info()
+                }
+            })
+            self.msg(results)
         else:
-            await self.msg({"msg": _("You are reborn.")})
+            self.msg({"msg": _("You are reborn.")})
 
-    async def save_current_dialogues(self, current_dialogue):
+    def save_current_dialogues(self, current_dialogue):
         """
         Save player's current dialogues.
 
@@ -1716,31 +1667,6 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         else:
             self.current_dialogues = set()
 
-        if not GameSettings.inst().get("auto_resume_dialogues"):
-            # Can not auto resume dialogues.
-            return
-
-        await self.states.save("current_dialogue", current_dialogue if current_dialogue else None)
-        return
-
-    async def resume_last_dialogue(self):
-        """
-        Restore player's dialogues when he return to game.
-
-        Returns:
-            None
-        """
-        if not GameSettings.inst().get("auto_resume_dialogues"):
-            # Can not auto resume dialogues.
-            return
-
-        current_dialogue = await self.states.load("current_dialogue")
-        if not current_dialogue:
-            return
-
-        await self.msg({"dialogue": current_dialogue})
-        return
-
     async def talk_to_npc(self, npc):
         """
         Talk to an NPC.
@@ -1751,18 +1677,16 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         Returns:
             None
         """
-        # Set caller's target.
-        self.set_target(npc)
-
         # Get NPC's dialogue list.
         dialogues = await DialogueHandler.inst().get_npc_dialogues(self, npc)
 
-        await self.save_current_dialogues(dialogues)
-        await self.msg({"dialogue": dialogues})
+        self.save_current_dialogues(dialogues)
 
-    async def show_dialogue(self, dlg_key):
+        return dialogues
+
+    async def start_dialogue(self, dlg_key):
         """
-        Show a dialogue.
+        Start a dialogue.
 
         Args:
             dlg_key: dialogue's key.
@@ -1774,8 +1698,9 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         dialogue = await DialogueHandler.inst().get_dialogues_by_key(dlg_key)
 
         # Send the dialogue to the player.
-        await self.save_current_dialogues(dialogue)
-        await self.msg({"dialogue": dialogue})
+        self.save_current_dialogues(dialogue)
+
+        return dialogue
 
     async def finish_dialogue(self, dlg_key, npc):
         """
@@ -1792,49 +1717,23 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
             logger.log_err("Not in current dialogues: %s" % dlg_key)
             return
 
+        results = {}
         try:
             # Finish current dialogue
-            await DialogueHandler.inst().finish_dialogue(dlg_key, self, npc)
+            results = await DialogueHandler.inst().finish_dialogue(dlg_key, self, npc)
         except Exception as e:
-            ostring = "Can not finish dialogue %s: %s" % (dlg_key, e)
-            logger.log_trace(ostring)
+            logger.log_trace("Can not finish dialogue %s: %s" % (dlg_key, e))
 
         # Get next dialogue.
         next_dialogues = await DialogueHandler.inst().get_next_dialogues(dlg_key, self, npc)
+        results["dialogue"] = next_dialogues
 
         # Send dialogues_list to the player.
-        await self.save_current_dialogues(next_dialogues)
-        await self.msg({"dialogue": next_dialogues})
+        self.save_current_dialogues(next_dialogues)
 
-        if not next_dialogues:
-            # dialogue finished, refresh surroundings
-            await self.show_location()
+        return results
 
-    async def add_exp(self, exp):
-        """
-        Add character's exp.
-        Args:
-            exp: (number) the exp value to add.
-        Returns:
-            None
-        """
-        await super(MudderyPlayerCharacter, self).add_exp(exp)
-
-        await self.msg({"get_exp": {"exp": exp}})
-
-    async def level_up(self):
-        """
-        Upgrade level.
-
-        Returns:
-            None
-        """
-        await super(MudderyPlayerCharacter, self).level_up()
-
-        # notify the player
-        await self.msg({"msg": _("{C%s upgraded to level %s.{n") % (self.get_name(), await self.get_level())})
-
-    async def get_message(self, caller, message):
+    def get_message(self, caller, message):
         """
         Receive a message from a character.
 
@@ -1843,18 +1742,16 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         """
         output = {
             "type": ConversationType.PRIVATE.value,
-            "channel": self.get_name(),
             "from_id": caller.get_id(),
             "from_name": caller.get_name(),
+            "to": self.get_name(),
             "msg": message
         }
 
-        await async_wait([
-            self.msg({"conversation": output}),
-            caller.msg({"conversation": output}),
-        ])
+        self.msg({"conversation": output})
+        caller.msg({"conversation": output})
 
-    async def show_rankings(self):
+    async def get_honour_rankings(self):
         """
         Show character's rankings.
         """
@@ -1867,11 +1764,12 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
 
         nicknames = await async_gather([CharacterInfo.inst().get_nickname(char_id) for char_id in rankings])
 
-        data = [{"name": nicknames[index],
-                 "id": char_id,
-                 "ranking": HonoursMapper.inst().get_ranking(char_id),
-                 "honour": HonoursMapper.inst().get_honour(char_id)} for index, char_id in enumerate(rankings)]
-        await self.msg({"rankings": data})
+        return [{
+            "name": nicknames[index],
+            "id": char_id,
+            "ranking": HonoursMapper.inst().get_ranking(char_id),
+            "honour": HonoursMapper.inst().get_honour(char_id),
+        } for index, char_id in enumerate(rankings)]
 
     async def get_quest_info(self, quest_key):
         """
@@ -1887,8 +1785,10 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         :param skill_key:
         :return:
         """
-        info = await self.skills[skill_key]["obj"].get_detail_appearance(self)
-        return info
+        try:
+            return await self.skills[skill_key]["obj"].get_detail_appearance(self)
+        except KeyError:
+            raise MudderyError(ERR.invalid_input, _("Can not find the skill."))
 
     async def get_relationship(self, element_type, element_key):
         """
@@ -1904,9 +1804,17 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         Get the relationship value between the player and the element.
         :param element_type:
         :param element_key:
+        :param relationship: relationship's value
         :return:
         """
         await CharacterRelationships.inst().save(self.get_db_id(), element_type, element_key, relationship)
+        # todo: get other element's name
+        records = Characters.get_data(element_key)
+        return {
+            "key": element_key,
+            "name": records[0].name if records else "",
+            "value": relationship,
+        }
 
     async def increase_relationship(self, element_type, element_key, value):
         """
@@ -1916,3 +1824,10 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         :return:
         """
         await CharacterRelationships.inst().increase(self.get_db_id(), element_type, element_key, value)
+        # todo: get other element's name
+        records = Characters.get_data(element_key)
+        return {
+            "key": element_key,
+            "name": records[0].name if records else "",
+            "value": value,
+        }

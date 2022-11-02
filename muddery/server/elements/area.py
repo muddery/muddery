@@ -29,6 +29,7 @@ class MudderyArea(ELEMENT("MATTER")):
 
         self.background = None
         self.all_rooms = {}
+        self.map_data = {}
 
     async def at_element_setup(self, first_time):
         """
@@ -59,12 +60,40 @@ class MudderyArea(ELEMENT("MATTER")):
         info["background"] = self.background
         return info
 
+    def load_map(self):
+        """
+        Load the area's map data.
+        """
+        map_data = self.get_appearance()
+        map_data["rooms"] = {
+            key: room.load_map() for key, room in self.all_rooms.items()
+        }
+        self.map_data = map_data
+        return self.map_data
+
     def get_map_data(self):
         """
         Get the area's map data.
         :return:
+        {
+            area's appearance,
+            "rooms" : {
+                room's key: {
+                    room's appearance,
+                    "exits": {
+                        {
+                            exit's key:
+                                {
+                                    exit's appearance,
+                                    "from": room's key,
+                                    "to": room's key,
+                                },
+                        }
+                },
+            }
+        }
         """
-        return self.get_appearance()
+        return self.map_data
 
     async def load_rooms(self):
         """
@@ -100,31 +129,3 @@ class MudderyArea(ELEMENT("MATTER")):
         :return:
         """
         return self.all_rooms[room_key]
-
-    def get_map(self):
-        """
-        Get all rooms and exits' positions in this area.
-
-        {
-            area's appearance,
-            "rooms" : {
-                room's key: {
-                    room's appearance,
-                    "exits": {
-                        {
-                            exit's key:
-                                {
-                                    exit's appearance,
-                                    "from": room's key,
-                                    "to": room's key,
-                                },
-                        }
-                },
-            }
-        }
-        """
-        return dict(self.get_map_data(), **{
-            "rooms": {
-                key: room.get_map_data() for key, room in self.all_rooms.items()
-            }
-        })

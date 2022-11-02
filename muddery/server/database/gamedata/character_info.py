@@ -13,7 +13,7 @@ class CharacterInfo(BaseData, Singleton):
     """
     __table_name = "character_info"
     __category_name = None
-    __key_field = "char_id"
+    __key_field = "character_id"
     __default_value_field = None
 
     def __init__(self):
@@ -85,7 +85,7 @@ class CharacterInfo(BaseData, Singleton):
         data = await self.storage.load("", char_id)
         return data["nickname"]
 
-    def get_char_id(self, nickname):
+    async def get_char_id(self, nickname):
         """
         Get an player character's id by its nickname.
         :param nickname:

@@ -18,10 +18,6 @@ class MudderyStaffCharacter(ELEMENT("PLAYER_CHARACTER")):
                     and its commands only be called by itself, not anyone else.
                     (to change things, use at_object_creation() instead)
     at_after_move - launches the "look" command
-    at_post_puppet(player) -  when Player disconnects from the Character, we
-                    store the current location, so the "unconnected" character
-                    object does not need to stay on grid but can be given a
-                    None-location while offline.
     at_pre_puppet - just before Player re-connects, retrieves the character's
                     old location and puts it back on the grid with a "charname
                     has connected" message echoed to the room

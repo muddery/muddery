@@ -6,9 +6,10 @@ Shop goods is the object in shops. They have some special attributes to record g
 from muddery.server.utils.logger import logger
 from muddery.server.database.worlddata.worlddata import WorldData
 from muddery.server.utils.localized_strings_handler import _
-from muddery.server.mappings.element_set import ELEMENT, ELEMENT_SET
+from muddery.server.mappings.element_set import ELEMENT
 from muddery.server.elements.base_element import BaseElement
 from muddery.server.statements.statement_handler import STATEMENT_HANDLER
+from muddery.common.utils.exception import MudderyError, ERR
 
 
 class MudderyShopGoods(BaseElement):
@@ -108,13 +109,11 @@ class MudderyShopGoods(BaseElement):
         # check price
         unit_number = caller.total_object_number(self.unit_key)
         if unit_number < self.price:
-            await caller.msg({"alert": _("Sorry, %s is not enough.") % self.unit_name})
-            return
+            raise MudderyError(ERR.can_not_buy, _("Sorry, %s is not enough.") % self.unit_name)
 
         # check if can get these objects
         if not caller.can_get_object(self.obj_key, self.number):
-            await caller.msg({"alert": _("Sorry, you can not take more %s.") % self.obj_name})
-            return
+            raise MudderyError(ERR.can_not_buy, _("Sorry, you can not take more %s.") % self.obj_name)
 
         remove_list = [
             {
@@ -131,7 +130,4 @@ class MudderyShopGoods(BaseElement):
         ]
 
         # Reduce price units and give goods.
-        await caller.exchange_objects(remove_list, receive_list, show=True)
-        await caller.msg({"alert": _("Purchase successful!")})
-
-        return
+        return await caller.exchange_objects(remove_list, receive_list)

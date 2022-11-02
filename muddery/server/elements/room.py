@@ -6,7 +6,6 @@ Rooms are simple containers that has no location of their own.
 """
 
 import ast
-import asyncio
 from muddery.server.utils.logger import logger
 from muddery.server.utils.game_settings import GameSettings
 from muddery.server.database.worlddata.image_resource import ImageResource
@@ -46,6 +45,8 @@ class MudderyRoom(ELEMENT("MATTER")):
 
         self.all_exits = {}
         self.all_objects = {}
+        self.neighbours = set()
+        self.map_data = {}
 
         # character_list: {
         #   character's id: character's object
@@ -97,6 +98,24 @@ class MudderyRoom(ELEMENT("MATTER")):
             self.load_npcs(),
         ])
 
+    def load_map(self):
+        """
+        Load the room's map data.
+        """
+        # set neighbours
+        self.neighbours = set([item["destination"] for item in self.all_exits.values()])
+
+        # Set map data
+        map_data = self.get_appearance()
+        if self.position:
+            map_data["pos"] = self.position
+
+        map_data["objects"] = [item["obj"].get_appearance() for item in self.all_objects.values()]
+        map_data["exits"] = [item["obj"].get_appearance() for item in self.all_exits.values()]
+
+        self.map_data = map_data
+        return self.map_data
+
     async def load_npcs(self):
         """
         Load NPCs in this room.
@@ -109,13 +128,15 @@ class MudderyRoom(ELEMENT("MATTER")):
         self.all_characters = {}
         awaits = []
         for record in records:
-            tables_data = WorldData.get_tables_data(models, record.key)
-            tables_data = tables_data[0]
+            try:
+                tables_data = WorldData.get_tables_data(models, record.key)
+                tables_data = tables_data[0]
 
-            new_obj = ELEMENT(tables_data.element_type)()
-            self.all_characters[new_obj.get_id()] = new_obj
-
-            awaits.append(new_obj.setup_element(tables_data.key, level=tables_data.level, first_time=True))
+                new_obj = ELEMENT(tables_data.element_type)()
+                self.all_characters[new_obj.get_id()] = new_obj
+                awaits.append(new_obj.setup_element(tables_data.key, level=tables_data.level, first_time=True))
+            except Exception as e:
+                logger.log_trace("Load NPC %s error: %s" % (record.key, e))
 
         if awaits:
             await async_wait(awaits)
@@ -146,7 +167,7 @@ class MudderyRoom(ELEMENT("MATTER")):
             }
 
         if self.all_exits:
-            await async_wait([char["obj"].setup_element(key) for key, char in self.all_exits.items()])
+            await async_wait([item["obj"].setup_element(key) for key, item in self.all_exits.items()])
 
     async def load_objects(self):
         """
@@ -203,12 +224,10 @@ class MudderyRoom(ELEMENT("MATTER")):
         Unlock an exit. Add the exit's key to the character's unlock list.
         """
         if exit_key not in self.all_exits:
-            caller.msg({"msg": _("Can not unlock this exit.")})
             return False
 
         exit_obj = self.all_exits[exit_key]["obj"]
         if not await exit_obj.can_unlock(caller):
-            caller.msg({"msg": _("Can not unlock this exit.")})
             return False
 
         return True
@@ -223,7 +242,7 @@ class MudderyRoom(ELEMENT("MATTER")):
         exit_obj = self.all_exits[exit_key]["obj"]
         return await exit_obj.get_detail_appearance(caller)
 
-    async def msg_characters(self, msg, exclude=None):
+    def msg_characters(self, msg, exclude=None):
         """
         Send a message to all characters in the room.
         :param msg:
@@ -236,7 +255,7 @@ class MudderyRoom(ELEMENT("MATTER")):
             chars = self.all_characters.values()
 
         if chars:
-            await asyncio.wait([asyncio.create_task(char.msg(msg)) for char in chars])
+            [char.msg(msg) for char in chars]
 
     async def at_character_arrive(self, character):
         """
@@ -256,9 +275,10 @@ class MudderyRoom(ELEMENT("MATTER")):
                 change = {
                     "type": "players" if character.is_player() else "npcs",
                     "id": character.get_id(),
-                    "name": character.get_name()
+                    "name": character.get_name(),
+                    "icon": character.get_icon(),
                 }
-                await self.msg_characters({"obj_moved_in": change}, {character.get_id()})
+                self.msg_characters({"obj_moved_in": change}, {character.get_id()})
 
     async def at_character_leave(self, character):
         """
@@ -282,7 +302,7 @@ class MudderyRoom(ELEMENT("MATTER")):
                     "id": character.get_id(),
                     "name": character.get_name()
                 }
-                await self.msg_characters({"obj_moved_out": change}, {character.get_id()})
+                self.msg_characters({"obj_moved_out": change}, {character.get_id()})
 
     def get_appearance(self):
         """
@@ -293,41 +313,12 @@ class MudderyRoom(ELEMENT("MATTER")):
         info["background"] = self.background
         return info
 
-    def get_exits(self):
-        """
-        Get this room's exits.
-        """
-        exits = {}
-        for key, item in self.all_exits.items():
-            if item["destination"]:
-                exits[key] = {
-                    "from": self.get_element_key(),
-                    "to": item["destination"],
-                }
-        return exits
-
     def get_map_data(self):
         """
         Get the room's map.
         :return:
         """
-        appearance = self.get_appearance()
-        if self.position:
-            appearance["pos"] = self.position
-
-        objects = [item["obj"].get_appearance() for item in self.all_objects.values()]
-
-        exits = [
-            dict(item["obj"].get_appearance(), **{
-                "from": self.get_element_key(),
-                "to": item["destination"],
-            }) for item in self.all_exits.values()
-        ]
-
-        return dict(appearance, **{
-            "objects": objects,
-            "exits": exits,
-        })
+        return self.map_data
 
     def get_surroundings(self, caller):
         """
@@ -340,8 +331,7 @@ class MudderyRoom(ELEMENT("MATTER")):
         if not GameSettings.inst().get("solo_mode"):
             # Players can not see other players in solo mode.
             players = [{
-                "id": item.get_id(),
-                "key": key,
+                "id": key,
                 "name": item.get_name(),
                 "icon": item.get_icon(),
             } for key, item in self.all_characters.items() if item.is_player() and item.get_id() != caller.get_id()]
@@ -350,8 +340,7 @@ class MudderyRoom(ELEMENT("MATTER")):
                 info["players"] = players
 
         npcs = [{
-            "id": item.get_id(),
-            "key": key,
+            "id": key,
             "name": item.get_name(),
             "icon": item.get_icon(),
         } for key, item in self.all_characters.items() if not item.is_player()]
@@ -368,7 +357,7 @@ class MudderyRoom(ELEMENT("MATTER")):
         """
         return [EventType.EVENT_TRIGGER_ARRIVE]
 
-    async def get_message(self, caller, message):
+    def get_message(self, caller, message):
         """
         Receive a message from a character.
 
@@ -377,13 +366,13 @@ class MudderyRoom(ELEMENT("MATTER")):
         """
         output = {
             "type": ConversationType.LOCAL.value,
-            "channel": self.get_name(),
             "from_id": caller.get_id(),
             "from_name": caller.get_name(),
+            "to": self.get_name(),
             "msg": message
         }
 
         if GameSettings.inst().get("solo_mode"):
-            await caller.msg({"conversation": output})
+            caller.msg({"conversation": output})
         else:
-            await self.msg_characters({"conversation": output})
+            self.msg_characters({"conversation": output})

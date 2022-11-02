@@ -66,7 +66,13 @@ class MudderySkill(ELEMENT("MATTER")):
         if self.passive:
             return []
 
-        commands = [{"name": _("Cast"), "cmd": "cast_skill", "args": self.get_element_key()}]
+        commands = [{
+            "name": _("Cast"),
+            "cmd": "cast_skill",
+            "args": {
+                "skill": self.get_element_key()
+            }
+        }]
         return commands
 
     async def cast(self, caller, target):
@@ -93,13 +99,13 @@ class MudderySkill(ELEMENT("MATTER")):
 
         if caller:
             skill_cast["caller"] = caller.get_id()
-            skill_cast["status"] = {
-                caller.get_id(): await caller.get_combat_status(),
+            skill_cast["states"] = {
+                caller.get_id(): await caller.get_combat_state(),
             }
 
         if target:
             skill_cast["target"] = target.get_id()
-            skill_cast["status"][target.get_id()] = await target.get_combat_status()
+            skill_cast["states"][target.get_id()] = await target.get_combat_state()
 
         if results:
             skill_cast["result"] = " ".join(results)
@@ -172,6 +178,16 @@ class MudderySkill(ELEMENT("MATTER")):
         The common appearance for all players.
         """
         info = super(MudderySkill, self).get_appearance()
+        info["passive"] = self.passive
+        info["cd"] = self.get_cd()
+
+        return info
+
+    async def get_detail_appearance(self, caller):
+        """
+        The particular appearance for the caller.
+        """
+        info = await super(MudderySkill, self).get_detail_appearance(caller)
         info["passive"] = self.passive
         info["cd"] = self.get_cd()
 

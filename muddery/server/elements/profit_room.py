@@ -7,8 +7,8 @@ Rooms are simple containers that has no location of their own.
 
 import time
 import pytz
+import asyncio
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from muddery.common.utils.utils import async_wait
 from muddery.server.utils.loot_handler import LootHandler
 from muddery.server.database.worlddata.loot_list import RoomProfitList
 from muddery.server.statements.statement_handler import STATEMENT_HANDLER
@@ -56,14 +56,22 @@ class MudderyProfitRoom(ELEMENT("ROOM")):
         character (Object): The character moved into this one
 
         """
-        await super(MudderyProfitRoom, self).at_character_arrive(character)
+        results = await super(MudderyProfitRoom, self).at_character_arrive(character)
 
         if character.is_player():
             if await STATEMENT_HANDLER.match_condition(self.const.condition, character, None):
                 self.last_trigger_time[character.get_id()] = time.time()
 
                 if self.const.begin_message:
-                    await character.msg({"msg": self.const.begin_message})
+                    if not results:
+                        results = {
+                            "at_arrive": []
+                        }
+                    elif "at_arrive" not in results:
+                        results["at_arrive"] = []
+                    results["at_arrive"].append(self.const.begin_message)
+
+        return results
 
     async def at_character_leave(self, character):
         """
@@ -72,12 +80,22 @@ class MudderyProfitRoom(ELEMENT("ROOM")):
         :param character: The character leaving.
         :return:
         """
+        results = await super(MudderyProfitRoom, self).at_character_leave(character)
+
         char_id = character.get_id()
         if char_id in self.last_trigger_time:
             del self.last_trigger_time[char_id]
 
             if self.const.end_message:
-                await character.msg({"msg": self.const.end_message})
+                if not results:
+                    results = {
+                        "at_leave": []
+                    }
+                elif "at_leave" not in results:
+                    results["at_leave"] = []
+                results["at_leave"].append(self.const.end_message)
+
+        return results
 
     async def put_profits(self):
         """
@@ -86,7 +104,6 @@ class MudderyProfitRoom(ELEMENT("ROOM")):
         :return:
         """
         current_time = time.time()
-        to_send = []
         for char_id, last_time in self.last_trigger_time.items():
             if current_time - last_time >= self.const.interval:
                 char = self.all_characters[char_id]
@@ -96,13 +113,13 @@ class MudderyProfitRoom(ELEMENT("ROOM")):
                 if not obj_list:
                     continue
 
-                get_objects = await char.receive_objects(obj_list, mute=True)
+                get_objects = await char.receive_objects(obj_list)
                 if not get_objects:
                     continue
 
                 msg_templates = {item["object_key"]: item["message"] for item in obj_list}
                 message = ""
-                for item in get_objects:
+                for item in get_objects["objects"]:
                     if message:
                         message += ", "
 
@@ -115,7 +132,4 @@ class MudderyProfitRoom(ELEMENT("ROOM")):
                     else:
                         message += _("Get") + " " + item["name"] + " " + str(item["number"])
 
-                to_send.append(char.msg({"msg": message}))
-
-        if to_send:
-            await async_wait(to_send)
+                char.msg({"msg": message})

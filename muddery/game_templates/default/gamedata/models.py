@@ -14,7 +14,7 @@ class system_data(BaseModels.system_data):
 # Game object's runtime attributes.
 #
 # ------------------------------------------------------------
-class character_states(BaseModels.character_status):
+class character_states(BaseModels.character_states):
     pass
 
 
@@ -56,6 +56,18 @@ class account_characters(BaseModels.account_characters):
 class character_info(BaseModels.character_info):
     """
     Character's data.
+    """
+    pass
+
+
+# ------------------------------------------------------------
+#
+# player character's revealed maps
+#
+# ------------------------------------------------------------
+class character_revealed_map(BaseModels.character_revealed_map):
+    """
+    Revealed maps.
     """
     pass
 

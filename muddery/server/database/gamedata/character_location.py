@@ -1,5 +1,5 @@
 """
-Characters' combat.
+Character's current location.
 """
 
 from muddery.server.database.gamedata.base_data import BaseData
@@ -12,7 +12,7 @@ class CharacterLocation(BaseData, Singleton):
     """
     __table_name = "character_location"
     __category_name = None
-    __key_field = "char_id"
+    __key_field = "character_id"
     __default_value_field = "location"
 
     def __init__(self):

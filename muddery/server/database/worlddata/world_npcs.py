@@ -15,6 +15,6 @@ class WorldNPCs(BaseQuery):
     @classmethod
     def get_location(cls, location):
         """
-        Get a room's exits.
+        Get all NPCs in the room.
         """
         return WorldData.get_table_data(cls.table_name, location=location)

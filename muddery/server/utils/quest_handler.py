@@ -6,7 +6,7 @@ import weakref
 from muddery.server.utils.logger import logger
 from muddery.server.statements.statement_handler import STATEMENT_HANDLER
 from muddery.server.utils.localized_strings_handler import _
-from muddery.common.utils.exception import MudderyError
+from muddery.common.utils.exception import MudderyError, ERR
 from muddery.server.utils.game_settings import GameSettings
 from muddery.server.database.worlddata.worlddata import WorldData
 from muddery.server.database.worlddata.quest_dependencies import QuestDependencies
@@ -70,10 +70,11 @@ class QuestHandler(object):
         await CharacterQuests.inst().add(self.owner.get_db_id(), quest_key)
         self.add_objectives(quest)
 
-        await self.owner.msg({"msg": _("Accepted quest {C%s{n.") % quest.get_name()})
-        await self.show_quests()
-        await self.owner.show_location()
-        
+        return {
+            "key": quest_key,
+            "name": quest.get_name()
+        }
+
     async def remove_all(self):
         """
         Remove all quests.
@@ -102,14 +103,22 @@ class QuestHandler(object):
             logger.log_trace("Can not give up quests.")
             raise MudderyError(_("Can not give up this quest."))
 
-        if quest_key not in self.quests:
+        try:
+            quest = self.get_quest(quest_key)
+        except KeyError:
             raise MudderyError("Can not find this quest.")
 
-        await CharacterQuests.inst().remove_quest(self.owner.get_db_id(), quest_key)
+        # Get quest's name.
+        name = quest.get_name()
+
+        await CharacterQuests.inst().remove(self.owner.get_db_id(), quest_key)
         del self.quests[quest_key]
         self.calculate_objectives()
 
-        await self.show_quests()
+        return {
+            "key": quest_key,
+            "name": name,
+        }
 
     async def turn_in(self, quest_key):
         """
@@ -121,10 +130,11 @@ class QuestHandler(object):
         Returns:
             None
         """
-        if quest_key not in self.quests:
+        try:
+            quest = self.get_quest(quest_key)
+        except KeyError:
             raise MudderyError("Can not find this quest.")
 
-        quest = self.get_quest(quest_key)
         if not await quest.is_accomplished():
             raise MudderyError(_("Can not turn in this quest."))
 
@@ -139,10 +149,10 @@ class QuestHandler(object):
         del self.quests[quest_key]
         self.calculate_objectives()
 
-        await self.owner.msg({"msg": _("Turned in quest {C%s{n.") % name})
-        await self.show_quests()
-        await self.owner.show_status()
-        await self.owner.show_location()
+        return {
+            "key": quest_key,
+            "name": name,
+        }
 
     async def is_accomplished(self, quest_key):
         """
@@ -264,19 +274,12 @@ class QuestHandler(object):
             logger.log_err("Can't get quest %s's condition: %s" % (quest_key, e))
         return False
 
-    async def show_quests(self):
-        """
-        Send quests to player.
-        """
-        quests = await self.get_quests_info()
-        await self.owner.msg({"quests": quests})
-
-    async def get_quests_info(self):
+    async def get_quests(self):
         """
         Get quests' data.
         """
         if self.quests:
-            quests_info = await async_gather([quest["obj"].return_info() for quest in self.quests.values()])
+            quests_info = await async_gather([quest["obj"].get_info() for quest in self.quests.values()])
         else:
             quests_info = []
 
@@ -319,8 +322,6 @@ class QuestHandler(object):
         if (object_type, object_key) not in self.objectives:
             return
 
-        status_changed = False
-
         quest_keys = self.objectives[(object_type, object_key)]
         if quest_keys:
             # Check objectives.
@@ -329,20 +330,14 @@ class QuestHandler(object):
             quests = [quest["obj"] for index, quest in enumerate(self.quests.values()) if results[index]]
 
             if quests:
-                status_changed = True
-
                 # Check if quest is accomplished.
                 accomplished = await async_gather([quest.is_accomplished() for quest in quests])
-                quest_names = [quest.get_name() for index, quest in enumerate(quests) if accomplished[index]]
-                
-                if quest_names:
-                    # Notify the player.
-                    await self.owner.msg([
-                        {"msg": _("Quest {C%s{n's goals are accomplished.") % n} for n in quest_names
-                    ])
-
-        if status_changed:
-            await self.show_quests()
+                return {
+                    "accomplished": [{
+                        "key": quest.get_element_key(),
+                        "name": quest.get_name()
+                    } for index, quest in enumerate(quests) if accomplished[index]]
+                }
 
     async def create_quest(self, quest_key):
         """
@@ -373,5 +368,9 @@ class QuestHandler(object):
         :param quest_key:
         :return:
         """
-        quest = self.get_quest(quest_key)
-        return await quest.return_info()
+        try:
+            quest = self.get_quest(quest_key)
+        except KeyError:
+            raise MudderyError(ERR.invalid_input, _("Can not find the quest."))
+
+        return await quest.get_info()

@@ -12,6 +12,7 @@ import time, traceback, ast
 from datetime import datetime
 import pytz
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from muddery.common.utils.exception import MudderyError, ERR
 from muddery.server.settings import SETTINGS
 from muddery.server.utils.logger import logger
 from muddery.server.combat.combat_handler import COMBAT_HANDLER
@@ -90,7 +91,7 @@ class MudderyCharacter(ELEMENT("MATTER")):
         # stop auto casting
         self.stop_auto_combat_skill()
 
-    def create_status_handler(self):
+    def create_states_handler(self):
         """
         Characters use memory to store status by default.
         :return:
@@ -128,7 +129,7 @@ class MudderyCharacter(ELEMENT("MATTER")):
         self.set_desc(self.const.desc)
         self.set_icon(self.const.icon)
 
-        self.states = self.create_status_handler()
+        self.states = self.create_states_handler()
 
         # default_relationship
         self.default_relationship = self.const.relationship if self.const.relationship else 0
@@ -143,9 +144,6 @@ class MudderyCharacter(ELEMENT("MATTER")):
 
         time_now = time.time()
         self.gcd_finish_time = time_now + self.skill_gcd
-
-        # clear target
-        self.target = None
 
         # set reborn time
         self.reborn_time = self.const.reborn_time if self.const.reborn_time else 0
@@ -262,9 +260,9 @@ class MudderyCharacter(ELEMENT("MATTER")):
             EventType.EVENT_TRIGGER_DIE
         ]
 
-    async def get_combat_status(self):
+    async def get_combat_state(self):
         """
-        Get character status used in combats.
+        Get character state used in combats.
         """
         return {
             "id": self.get_id()
@@ -324,7 +322,7 @@ class MudderyCharacter(ELEMENT("MATTER")):
         self.set_location(location)
 
         if self.location:
-            self.location.at_character_arrive(self)
+            await self.location.at_character_arrive(self)
 
     def get_location(self):
         """
@@ -333,7 +331,7 @@ class MudderyCharacter(ELEMENT("MATTER")):
         """
         return self.location
 
-    async def msg(self, content):
+    def msg(self, content):
         """
         Send a message to the character's player if it has.
         :param content:
@@ -346,13 +344,6 @@ class MudderyCharacter(ELEMENT("MATTER")):
     # Skill methods.
     #
     ########################################
-
-    def get_skills(self):
-        """
-        Get all skills.
-        :return:
-        """
-        return self.skills
 
     async def get_available_skills(self):
         """
@@ -390,17 +381,23 @@ class MudderyCharacter(ELEMENT("MATTER")):
         Args:
             skill_key: (string) skill's key.
             target: (object) skill's target.
+
+        return:
+            {
+                "skill_cd": skill's cd time,
+                "result": cast_result,
+            }
         """
         skill_info = self.skills[skill_key]
         skill_obj = skill_info["obj"]
 
         if not await skill_obj.is_available(self, False):
-            return
+            raise MudderyError(ERR.invalid_input, _("This skill is not available."))
 
         time_now = time.time()
         if time_now < self.gcd_finish_time and time_now < skill_info["cd_finish"]:
             # In cd.
-            return
+            raise MudderyError(ERR.skill_in_cd, _("This skill is cooling down."))
 
         cast_result = await skill_obj.cast(self, target)
 
@@ -411,32 +408,14 @@ class MudderyCharacter(ELEMENT("MATTER")):
         # save cd finish time
         self.skills[skill_key]["cd_finish"] = time_now + skill_obj.get_cd()
 
-        skill_cd = {
+        return {
             "skill_cd": {
                 "skill": skill_key,  # skill's key
                 "cd": skill_obj.get_cd(),  # skill's cd
                 "gcd": self.skill_gcd
-            }
+            },
+            "result": cast_result,
         }
-
-        skill_result = {
-            "skill_cast": cast_result
-        }
-
-        await self.msg(skill_cd)
-
-        # send skill result to the player's location
-        combat = await self.get_combat()
-        if combat:
-            await combat.msg_all(skill_result)
-        else:
-            if self.location:
-                # send skill result to its location
-                await self.location.msg_characters(skill_result)
-            else:
-                await self.msg(skill_result)
-
-        return
 
     async def cast_combat_skill(self, skill_key, target_id):
         """
@@ -444,9 +423,13 @@ class MudderyCharacter(ELEMENT("MATTER")):
         """
         combat = await self.get_combat()
         if combat:
-            await combat.prepare_skill(skill_key, self, target_id)
+            result = await combat.cast_skill(skill_key, self, target_id)
+            return {
+                "skill_cd": result["skill_cd"]
+            }
         else:
             logger.log_err("Character %s is not in combat." % self.id)
+            raise MudderyError(ERR.invalid_input, _("You can only cast this skill in a combat."))
 
     async def auto_cast_skill(self):
         """
@@ -505,24 +488,6 @@ class MudderyCharacter(ELEMENT("MATTER")):
     # Attack a target.
     #
     ########################################
-    def set_target(self, target):
-        """
-        Set character's target.
-
-        Args:
-            target: (object) character's target
-
-        Returns:
-            None
-        """
-        self.target = target
-
-    def clear_target(self):
-        """
-        Clear character's target.
-        """
-        self.target = None
-
     async def attack_target(self, target, desc=""):
         """
         Attack a target.
@@ -537,26 +502,26 @@ class MudderyCharacter(ELEMENT("MATTER")):
         if self.is_in_combat():
             # already in battle
             logger.log_err("%s is already in battle." % self.get_id())
-            return False
+            raise MudderyError(ERR.invalid_input, _("You are in another combat."))
 
         # search target
         if not target:
             logger.log_err("Can not find the target.")
-            return False
+            raise MudderyError(ERR.invalid_input, _("Can not find the target."))
 
         if not target.is_element(SETTINGS.CHARACTER_ELEMENT_TYPE):
             # Target is not a character.
             logger.log_err("Can not attack the target %s." % target.get_id())
-            return False
+            raise MudderyError(ERR.invalid_input, _("You can not attack %s.") % target.get_name())
 
         if target.is_in_combat():
             # obj is already in battle
             logger.log_err("%s is already in battle." % target.get_id())
-            return False
+            raise MudderyError(ERR.invalid_input, _("%s is in another combat." % target.name))
 
         # create a new combat handler
         try:
-            await COMBAT_HANDLER.create_combat(
+            combat = await COMBAT_HANDLER.create_combat(
                 combat_type=CombatType.NORMAL,
                 teams={1: [target], 2: [self]},
                 desc=desc,
@@ -564,9 +529,9 @@ class MudderyCharacter(ELEMENT("MATTER")):
             )
         except Exception as e:
             logger.log_err("Can not create combat: [%s] %s" % (type(e).__name__, e))
-            await self.msg({"alert": _("You can not attack %s.") % target.get_name()})
+            raise MudderyError(ERR.invalid_input, _("You can not attack %s.") % target.get_name())
 
-        return True
+        return combat
 
     async def attack_temp_target(self, target_key, target_level, desc=""):
         """
@@ -585,15 +550,15 @@ class MudderyCharacter(ELEMENT("MATTER")):
         base_model = ELEMENT("CHARACTER").get_base_model()
         table_data = WorldData.get_table_data(base_model, key=target_key)
         if not table_data:
-            logger.log_err("Can not create the target.")
-            return False
+            logger.log_err("Can not create the target %s." % target_key)
+            raise MudderyError(ERR.invalid_input, _("You can not attack."))
 
         table_data = table_data[0]
         target = ELEMENT(table_data.element_type)()
         await target.setup_element(target_key, level=target_level, first_time=True, temp=True)
         if not target:
             logger.log_err("Can not create the target %s." % target_key)
-            return False
+            raise MudderyError(ERR.invalid_input, _("You can not attack."))
 
         return await self.attack_target(target, desc)
 
@@ -737,6 +702,7 @@ class MudderyCharacter(ELEMENT("MATTER")):
                 "key": key,
                 "name": skill["obj"].get_name(),
                 "icon": skill["obj"].get_icon(),
+                "cd": skill["obj"].get_cd(),
             }
 
             commands.append(command)
@@ -762,12 +728,6 @@ class MudderyCharacter(ELEMENT("MATTER")):
 
         Returns:
             None
-        """
-        pass
-
-    async def show_status(self):
-        """
-        Show character's status.
         """
         pass
 

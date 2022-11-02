@@ -40,6 +40,9 @@ class MudderyWorld(BaseElement):
         # all_characters: {character's db id: character's object
         self.all_characters = {}
 
+        # the map of whole world
+        self.map_data = {}
+
     async def load_data(self, key, level=None):
         """
         Load the object's data.
@@ -56,7 +59,6 @@ class MudderyWorld(BaseElement):
             self.load_channels(),
             self.load_areas(),
         ])
-        self.load_commands()
 
     async def load_channels(self):
         """
@@ -102,18 +104,12 @@ class MudderyWorld(BaseElement):
             room_key: area_key for area_key, area in self.all_areas.items() for room_key in area.get_rooms_key()
         }
 
-    def load_commands(self):
+    def load_map(self):
         """
-        Load all client commands.
+        Load the world's map data.
         """
-        session_cmdset = class_from_path(SETTINGS.SESSION_CMDSET)
-        session_cmdset.create()
-
-        account_cmdset = class_from_path(SETTINGS.ACCOUNT_CMDSET)
-        account_cmdset.create()
-
-        character_cmdset = class_from_path(SETTINGS.CHARACTER_CMDSET)
-        character_cmdset.create()
+        self.map_data = {key: item.load_map() for key, item in self.all_areas.items()}
+        return self.map_data
 
     def get_area(self, area_key):
         """
@@ -148,6 +144,12 @@ class MudderyWorld(BaseElement):
         """
         area_key = self.room_dict[room_key]
         return self.all_areas[area_key]
+
+    def get_map_data(self):
+        """
+        Get the world's map.
+        """
+        return self.map_data
 
     def on_char_puppet(self, character):
         """
@@ -205,10 +207,10 @@ class MudderyWorld(BaseElement):
             channel.get_message(caller, message)
         elif target_type == ConversationType.LOCAL.value:
             room = self.get_room(target)
-            await room.get_message(caller, message)
+            room.get_message(caller, message)
         elif target_type == ConversationType.PRIVATE.value:
             character = self.get_character(int(target))
-            await character.get_message(caller, message)
+            character.get_message(caller, message)
 
     def broadcast(self, message):
         """

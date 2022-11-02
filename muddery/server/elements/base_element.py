@@ -268,8 +268,9 @@ class BaseElement(object):
         Returns:
             None
         """
-        level = await self.get_level()
-        await self.set_level(level + 1)
+        new_level = await self.get_level() + 1
+        await self.set_level(new_level)
+        return new_level
 
     async def load_custom_level_data(self, element_type, element_key, level):
         """
@@ -329,13 +330,6 @@ class BaseElement(object):
 
         :arg
             first_time: (bool) the first time to setup the element.
-        """
-        pass
-
-    def at_delete(self):
-        """
-        Called just before this object is deleted.
-        :return:
         """
         pass
 

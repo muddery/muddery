@@ -5,7 +5,7 @@ The life of a combat:
 1. create: create a combat.
 2. set_combat: set teams in the combat and the end time if available, then calls the start_combat.
 3. start_combat: start the combat. Characters in the combat are allowed to use skills.
-4. prepare_skill: characters call the prepare_skill to use skills in the combat. It casts a skill and check if the
+4. cast_skill: characters call the cast_skill to use skills in the combat. It casts a skill and check if the
    combat is finished.
 5. can_finish: Check if the combat is finished. A combat finishes when only one or zero team has alive characters, or
    the combat is timeout. If a combat can finish calls the finish method.
@@ -18,12 +18,15 @@ from enum import Enum
 import time
 import datetime
 import pytz
+import asyncio
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from muddery.common.utils.utils import async_wait, async_gather
-from muddery.server.utils.logger import logger
+from muddery.common.utils.exception import MudderyError, ERR
 from muddery.common.utils import defines
+from muddery.server.utils.logger import logger
 from muddery.server.database.worlddata.worlddata import WorldData
 from muddery.server.mappings.element_set import ELEMENT
+from muddery.server.utils.localized_strings_handler import _
 
 
 class CStatus(Enum):
@@ -103,19 +106,21 @@ class BaseCombat(object):
         # Add teams.
         for team in teams:
             for character in teams[team]:
-                self.characters[character.get_id()] = {
+                obj_id = character.get_id()
+                self.characters[obj_id] = {
                     "char": character,
                     "team": team,
                     "status":  CStatus.JOINED,
                 }
 
+                try:
+                    self.characters[obj_id]["db_id"] = character.get_db_id()
+                except AttributeError:
+                    self.characters[obj_id]["db_id"] = None
+
         # Set combat to characters.
         if self.characters:
             await async_wait([c["char"].join_combat(combat_id) for c in self.characters.values()])
-
-            awaits = [self.show_combat(c["char"]) for c in self.characters.values() if c["char"].is_player()]
-            if awaits:
-                await async_wait(awaits)
 
     def start(self):
         """
@@ -138,29 +143,7 @@ class BaseCombat(object):
         """
         self.handler.remove_combat(self.combat_id)
 
-    async def show_combat(self, character):
-        """
-        Show combat information to a character.
-        Args:
-            character: (object) character
-
-        Returns:
-            None
-        """
-        # Show combat information to the player.
-        await character.msg([
-            {
-                "joined_combat": True
-            },
-            {
-                "combat_info": self.get_appearance()
-            },
-            {
-                "combat_status": await self.get_combat_status(),
-            },
-        ])
-
-    async def prepare_skill(self, skill_key, caller, target_id):
+    async def cast_skill(self, skill_key, caller, target_id):
         """
         Cast a skill.
 
@@ -168,21 +151,42 @@ class BaseCombat(object):
             skill_key: (string) skill's key
             caller: (obj) the skill's caller's object
             target_id: (int) target's id
+
+        :return
+            {
+                "skill_cd": skill's cd time,
+                "result": cast_result,
+            }
         """
         if self.finished:
-            return
+            raise MudderyError(ERR.invalid_input, _("Combat finished."))
+
+        if not caller:
+            raise MudderyError(ERR.invalid_input, _("Can not cast the skill."))
 
         # get target's object
         target = None
         if target_id and target_id in self.characters:
             target = self.characters[target_id]["char"]
 
-        if caller:
-            await caller.cast_skill(skill_key, target)
+        result = await caller.cast_skill(skill_key, target)
+        self.msg_all({
+            "combat_skill_cast": result["result"],
+        })
+        asyncio.create_task(self.check_finish())
 
+        return result
+
+    async def check_finish(self):
+        """
+        Check the combat.
+        """
+        try:
             if await self.can_finish():
                 # if there is only one team left, kill this handler
                 await self.finish()
+        except Exception as e:
+            logger.log_trace("check_finish error: %s" % e)
 
     async def can_finish(self):
         """
@@ -278,10 +282,10 @@ class BaseCombat(object):
 
             self.stop()
 
-    async def msg_all(self, message: str) -> None:
-        "Send message to all combatants"
+    def msg_all(self, message: dict) -> None:
+        "Send message to all combatants."
         if self.characters:
-            await async_wait([c["char"].msg(message) for c in self.characters.values()])
+            [c["char"].msg(message) for c in self.characters.values()]
 
     async def set_combat_draw(self) -> None:
         """
@@ -411,15 +415,15 @@ class BaseCombat(object):
             "characters": characters
         }
 
-    async def get_combat_status(self):
+    async def get_combat_states(self):
         """
-        Get characters status.
+        Get characters states.
         :return:
         """
         if self.characters:
             chars = self.characters.keys()
-            status = await async_gather([char["char"].get_combat_status() for char in self.characters.values()])
-            return dict(zip(chars, status))
+            state = await async_gather([char["char"].get_combat_state() for char in self.characters.values()])
+            return dict(zip(chars, state))
         else:
             return {}
 
@@ -428,6 +432,14 @@ class BaseCombat(object):
         Get all characters in combat.
         """
         return self.characters.values()
+
+    def get_character(self, db_id):
+        """
+        Get the character object by ist db_id.
+        """
+        for char_id, char_info in self.characters.items():
+            if char_info["db_id"] == db_id:
+                return char_info["char"]
 
     def get_opponents(self, character_id):
         """

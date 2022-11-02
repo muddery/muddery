@@ -569,7 +569,7 @@
                     <div class="button-character tab-bar-button">角色</div>
                     <ul class="menu-character popup-menu hidden">
                         <li>
-                            <button type="button" class="button-status button-short">属性</button>
+                            <button type="button" class="button-state button-short">属性</button>
                         </li>
                         <li>
                             <button type="button" class="button-inventory button-short">背包</button>
@@ -643,6 +643,9 @@
                             <div class="result-title">获得经验</div>
                             <div class="result-exp"></div>
                         </div>
+                        <div class="result-level-up-block hidden">
+                            <div>升到<span class="result-level-up"></span>级！</div>
+                        </div>
                         <div class="result-accepted hidden">
                             <div class="result-title">获得物品</div>
                             <div class="result-accepted-list"></div>
@@ -709,7 +712,8 @@
         <script src="../utils/map_data.js" type="text/javascript" charset="utf-8"></script>
         <script src="../utils/utils.js" type="text/javascript" charset="utf-8"></script>
         <script src="../utils/crypto.js" type="text/javascript" charset="utf-8"></script>
-		
+		<script src="../utils/defines.js" type="text/javascript" charset="utf-8"></script>
+
         <script src="../controllers/base_controller.js" type="text/javascript" charset="utf-8"></script>
         <script src="../controllers/main_frame.js" type="text/javascript" charset="utf-8"></script>
 

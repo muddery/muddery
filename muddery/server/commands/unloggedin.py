@@ -3,7 +3,6 @@ General commands usually availabe to all users.
 """
 
 import re
-import os
 import time
 import base64
 from collections import defaultdict
@@ -12,11 +11,8 @@ from muddery.server.settings import SETTINGS
 from muddery.server.mappings.element_set import ELEMENT
 from muddery.server.utils.logger import logger
 from muddery.server.utils.crypto import RSA
-from muddery.server.commands.base_command import BaseCommand
-from muddery.server.utils.localized_strings_handler import _
 from muddery.server.utils.game_settings import GameSettings
-from muddery.server.database.worlddata.equipment_positions import EquipmentPositions
-from muddery.server.database.worlddata.honour_settings import HonourSettings
+from muddery.server.commands.command_set import SessionCmd
 
 
 # Helper function to throttle failed connection attempts.
@@ -24,7 +20,10 @@ from muddery.server.database.worlddata.honour_settings import HonourSettings
 # (just supply a different storage dictionary), but this
 # would also block dummyrunner, so it's not added as default.
 
+
 _LATEST_FAILED_LOGINS = defaultdict(list)
+
+
 def _throttle(session, maxlim=None, timeout=None, storage=_LATEST_FAILED_LOGINS):
     """
     This will check the session's address against the
@@ -68,9 +67,92 @@ def _throttle(session, maxlim=None, timeout=None, storage=_LATEST_FAILED_LOGINS)
         return False
 
 
-class CmdConnectAccount(BaseCommand):
+@SessionCmd.request("first_connect")
+async def first_connect(session, args):
     """
-    connect to the game
+    Get the game's information for the first time connected to the server.
+
+    Usage:
+        {
+            "cmd": "first_connect"
+        }
+
+    This is an unconnected version of the look command for simplicity.
+
+    This is called by the server and kicks everything in gear.
+    All it does is display the connect screen.
+    """
+    return {
+        "game_name": GameSettings.inst().get("game_name"),
+        "conn_screen": GameSettings.inst().get("connection_screen"),
+    }
+
+
+@SessionCmd.request("create_account")
+async def create_account(session, args):
+    """
+    Respond the request of creating a new player account.
+
+    Usage:
+        {
+            "cmd": "create_account",
+            "args": {
+                "username": <username>,
+                "password": <password>,
+                "connect": True,
+            }
+        }
+
+    args:
+        connect: (boolean)connect after created
+    """
+    if not args:
+        raise MudderyError(ERR.missing_args, "Syntax error!")
+
+    if "username" not in args:
+        raise MudderyError(ERR.missing_args, "Need a username.")
+
+    if "password" not in args:
+        raise MudderyError(ERR.missing_args, "Need a password.")
+
+    connect = False
+    if "connect" in args:
+        connect = args["connect"]
+
+    username = args["username"]
+    username = re.sub(r"\s+", " ", username).strip()
+
+    if SETTINGS.ENABLE_ENCRYPT:
+        encrypted = base64.b64decode(args["password"])
+        decrypted = RSA.inst().decrypt(encrypted)
+        password = decrypted.decode("utf-8")
+    else:
+        password = args["password"]
+
+    if not password:
+        raise MudderyError(ERR.invalid_input, "Need a password.")
+
+    # Create an account.
+    element_type = SETTINGS.ACCOUNT_ELEMENT_TYPE
+    account = ELEMENT(element_type)()
+
+    # Set the account with username and password.
+    await account.new_user(username, password, "")
+
+    if connect:
+        await session.login(account)
+
+    return {
+        "name": username,
+        "id": account.get_id(),
+        "max_char": SETTINGS.MAX_PLAYER_CHARACTERS,
+    }
+
+
+@SessionCmd.request("login")
+async def login(session, args) -> dict:
+    """
+    Login the game server.
 
     Usage:
         {
@@ -82,194 +164,51 @@ class CmdConnectAccount(BaseCommand):
         }
 
     """
-    key = "connect"
+    # check for too many login errors too quick.
+    if _throttle(session, maxlim=5, timeout=5*60, storage=_LATEST_FAILED_LOGINS):
+        # timeout is 5 minutes.
+        raise MudderyError(ERR.no_permission, "You made too many connection attempts. Try again in a few minutes.")
 
-    @classmethod
-    async def func(cls, session, args):
-        """
-        Login the game server.
-        """
-        # check for too many login errors too quick.
-        if _throttle(session, maxlim=5, timeout=5*60, storage=_LATEST_FAILED_LOGINS):
-            # timeout is 5 minutes.
-            await session.msg({"alert": _("{RYou made too many connection attempts. Try again in a few minutes.{n")})
-            return
+    if "username" not in args:
+        raise MudderyError(ERR.missing_args, "You should input a username.")
 
-        if "username" not in args:
-            await session.msg({"alert": _("You should input a username.")})
-            return
+    if "password" not in args:
+        raise MudderyError(ERR.missing_args, "You should input a password.")
 
-        if "password" not in args:
-            await session.msg({"alert": _("You should input a password.")})
-            return
+    username = args["username"]
+    username = re.sub(r"\s+", " ", username).strip()
 
-        username = args["username"]
-        username = re.sub(r"\s+", " ", username).strip()
+    if SETTINGS.ENABLE_ENCRYPT:
+        encrypted = base64.b64decode(args["password"])
+        decrypted = RSA.inst().decrypt(encrypted)
+        password = decrypted.decode("utf-8")
+    else:
+        password = args["password"]
 
-        if SETTINGS.ENABLE_ENCRYPT:
-            encrypted = base64.b64decode(args["password"])
-            decrypted = RSA.inst().decrypt(encrypted)
-            password = decrypted.decode("utf-8")
+    if not password:
+        raise MudderyError(ERR.no_authentication, "You can not login.")
+
+    # Get the account.
+    element_type = SETTINGS.ACCOUNT_ELEMENT_TYPE
+    account = ELEMENT(element_type)()
+
+    # Set the account with username and password.
+    try:
+        await account.set_user(username, password)
+    except MudderyError as e:
+        # this just updates the throttle
+        _throttle(session)
+
+        if e.code == ERR.no_authentication:
+            # Wrong username or password.
+            raise MudderyError(ERR.no_authentication, str(e))
         else:
-            password = args["password"]
+            raise MudderyError(ERR.no_authentication, "Can not login.")
 
-        if not password:
-            await session.msg({"alert": _("You should input a password.")})
-            return
+    await session.login(account)
 
-        # Get the account.
-        element_type = SETTINGS.ACCOUNT_ELEMENT_TYPE
-        account = ELEMENT(element_type)()
-
-        # Set the account with username and password.
-        try:
-            await account.set_user(username, password)
-        except MudderyError as e:
-            if e.code == ERR.no_authentication:
-                # Wrong username or password.
-                await session.msg({"alert": str(e)})
-            else:
-                await session.msg({"alert": _("You can not login.")})
-
-            # this just updates the throttle
-            _throttle(session)
-            return None
-
-        # actually do the login. This will call all other hooks:
-        #   session.at_login()
-        #   player.at_init()  # always called when object is loaded from disk
-        #   player.at_first_login()  # only once, for player-centric setup
-        #   player.at_pre_login()
-        #   player.at_post_login(session=session)
-        await session.login(account)
-
-
-class CmdCreateAccount(BaseCommand):
-    """
-    create a new player account and login
-
-    Usage:
-        {
-            "cmd":"create",
-            "args":{
-                "playername":<playername>,
-                "password":<password>,
-                "connect":<connect>
-            }
-        }
-
-    args:
-        connect: (boolean)connect after created
-    """
-    key = "create"
-
-    @classmethod
-    async def func(cls, session, args):
-        "Do checks, create account and login."
-        if not args:
-            await session.msg({"alert": _("Syntax error!")})
-            return
-
-        if "username" not in args:
-            await session.msg({"alert": _("You should appoint a username.")})
-            return
-
-        if "password" not in args:
-            await session.msg({"alert": _("You should appoint a password.")})
-            return
-
-        username = args["username"]
-        username = re.sub(r"\s+", " ", username).strip()
-
-        if SETTINGS.ENABLE_ENCRYPT:
-            encrypted = base64.b64decode(args["password"])
-            decrypted = RSA.inst().decrypt(encrypted)
-            password = decrypted.decode("utf-8")
-        else:
-            password = args["password"]
-
-        if not password:
-            await session.msg({"alert": _("You should input a password.")})
-            return
-
-        connect = True
-        if "connect" in args:
-            connect = args["connect"]
-
-        # Create an account.
-        element_type = SETTINGS.ACCOUNT_ELEMENT_TYPE
-        account = ELEMENT(element_type)()
-
-        # Set the account with username and password.
-        try:
-            await account.new_user(username, password, "")
-        except MudderyError as e:
-            if e.code == ERR.no_authentication:
-                # Wrong username or password.
-                await session.msg({"alert": str(e)})
-            else:
-                await session.msg({"alert": _("There was an error creating the Player: %s" % e)})
-            return None
-
-        if connect:
-            await session.login(account)
-        else:
-            await session.msg({"created":{"name": session, "id": account.get_id()}})
-
-
-class CmdQuitAccount(BaseCommand):
-    """
-    quit when in unlogged-in state
-
-    Usage:
-        {
-            "cmd":"quit",
-            "args":""
-        }
-
-    We maintain a different version of the quit command
-    here for unconnected players for the sake of simplicity. The logged in
-    version is a bit more complicated.
-    """
-    key = "quit"
-
-    @classmethod
-    async def func(cls, session, args):
-        await session.logout()
-
-
-class CmdUnloginLook(BaseCommand):
-    """
-    login started unlogged-in state
-
-    Usage:
-        {
-            "cmd": "unloggedin_look"
-        }
-
-    This is an unconnected version of the look command for simplicity.
-
-    This is called by the server and kicks everything in gear.
-    All it does is display the connect screen.
-    """
-    key = "unloggedin_look"
-
-    @classmethod
-    async def func(cls, session, args):
-        "Show the connect screen."
-        game_name = GameSettings.inst().get("game_name")
-        connection_screen = GameSettings.inst().get("connection_screen")
-        honour_settings = HonourSettings.get_first_data()
-        records = EquipmentPositions.all()
-        equipment_pos = [{
-            "key": r.key,
-            "name": r.name,
-            "desc": r.desc,
-        } for r in records]
-
-        await session.msg({
-            "game_name": game_name,
-            "conn_screen": connection_screen,
-            "equipment_pos": equipment_pos,
-            "min_honour_level": honour_settings.min_honour_level,
-        })
+    return {
+        "name": username,
+        "id": account.get_id(),
+        "max_char": SETTINGS.MAX_PLAYER_CHARACTERS,
+    }

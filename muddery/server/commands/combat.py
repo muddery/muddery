@@ -2,136 +2,211 @@
 Battle commands. They only can be used when a character is in a combat.
 """
 
+from muddery.common.utils.exception import MudderyError, ERR
 from muddery.server.utils.logger import logger
-from muddery.server.commands.base_command import BaseCommand
 from muddery.server.utils.localized_strings_handler import _
+from muddery.server.commands.command_set import CharacterCmd
+from muddery.server.combat.match_pvp import MatchPVPHandler
+from muddery.common.utils.defines import CombatType
+from muddery.server.combat.combat_handler import COMBAT_HANDLER
+from muddery.server.database.worlddata.honour_settings import HonourSettings
 
 
-class CmdCombatInfo(BaseCommand):
+@CharacterCmd.request("leave_combat")
+async def leave_combat(character, args) -> dict or None:
     """
     Get combat info.
 
     Usage:
-        {"cmd":"combat_info",
-         "args":""
+        {
+            "cmd":"leave_combat",
         }
 
     Observes your combat.
     """
-    key = "combat_info"
+    if not character.is_in_combat():
+        # If the caller is not in combat.
+        raise MudderyError(ERR.invalid_input, _("You are not in combat."))
 
-    @classmethod
-    async def func(cls, caller, args):
-        """
-        Return the overall combat informations to the caller.
-        """
-        if not caller.is_in_combat():
-            # If the caller is not in combat.
-            await caller.msg({"msg":_("You are not in combat!")})
-            return
+    results = await character.leave_combat()
 
-        # Get combat's appearance and the character's available commands.
-        appearance = caller.ndb.combat_handler.get_appearance()
-        message = {"combat_info": appearance,
-                   "combat_commands": caller.get_combat_commands()}
-        await caller.msg(message)
+    results.update({
+        "state": await character.get_state()
+    })
+
+    return results
 
 
-class CmdLeaveCombat(BaseCommand):
-    """
-    Get combat info.
-
-    Usage:
-        {"cmd":"leave_combat",
-         "args":""
-        }
-
-    Observes your combat.
-    """
-    key = "leave_combat"
-
-    @classmethod
-    async def func(cls, caller, args):
-        """
-        Left the current combat.
-        """
-        if not caller.is_in_combat():
-            # If the caller is not in combat.
-            caller.msg({"msg":_("You are not in combat!")})
-            return
-
-        await caller.leave_combat()
-
-
-# ------------------------------------------------------------
-# cast a skill in combat
-# ------------------------------------------------------------
-
-class CmdCastCombatSkill(BaseCommand):
+@CharacterCmd.request("cast_combat_skill")
+async def cast_combat_skill(character, args) -> dict or None:
     """
     Cast a skill when the caller is in combat.
 
     Usage:
         {
             "cmd": "cast_combat_skill",
-            "args": <skill's key>,
-        }
-
-        or:
-
-        {
-            "cmd": "cast_combat_skill",
-            "args":
-                {
-                    "skill": <skill's key>,
-                    "target": <skill's target>,
+            "args": {
+                "skill": <skill's key>,
+                "target": <skill's target>,
             }
         }
 
     """
-    key = "cast_combat_skill"
+    if not character.is_alive:
+        raise MudderyError(ERR.died, _("You are died."))
 
-    @classmethod
-    async def func(cls, caller, args):
-        "Cast a skill in a combat."
-        if not caller.is_alive:
-            await caller.msg({"alert": _("You are died.")})
-            return
+    if not character.is_in_combat():
+        raise MudderyError(ERR.invalid_input, _("You can only cast this skill in a combat."))
 
-        if not caller.is_in_combat():
-            await caller.msg({"alert": _("You can only cast this skill in a combat.")})
-            return
+    if character.is_auto_cast_skill():
+        raise MudderyError(ERR.invalid_input, _("You can not cast skills manually."))
 
-        if caller.is_auto_cast_skill():
-            await caller.msg({"alert": _("You can not cast skills manually.")})
-            return
+    if not args:
+        raise MudderyError(ERR.missing_args, _("You should select a skill to cast."))
 
-        if not args:
-            await caller.msg({"alert": _("You should select a skill to cast.")})
-            return
+    if "skill" not in args:
+        raise MudderyError(ERR.missing_args, _("You should select a skill to cast."))
+    skill_key = args["skill"]
 
-        # get skill and target
-        skill_key = None
-        target_id = None
-        if isinstance(args, str):
-            # If the args is a skill's key.
-            skill_key = args
-        else:
-            # If the args is skill's key and target.
-            if not "skill" in args:
-                await caller.msg({"alert": _("You should select a skill to cast.")})
-                return
+    # Get target
+    target_id = None
+    if "target" in args:
+        target_id = int(args["target"])
 
-            skill_key = args["skill"]
+    # cast this skill.
+    return await character.cast_combat_skill(skill_key, target_id)
 
-            # Get target
-            if "target" in args:
-                target_id = int(args["target"])
 
-        try:
-            # cast this skill.
-            await caller.cast_combat_skill(skill_key, target_id)
-        except Exception as e:
-            await caller.msg({"alert": _("Can not cast this skill.")})
-            logger.log_trace("Can not cast skill %s: %s" % (skill_key, e))
-            return
+@CharacterCmd.request("attack")
+async def attack(character, args) -> dict or None:
+    """
+    This will initiate a combat with the target. If the target is
+    already in combat, the caller will join its combat.
+
+    Usage:
+        {
+            "cmd": "attack",
+            "args": <object's id>
+        }
+
+    """
+    if not character.is_alive:
+        raise MudderyError(ERR.died, _("You are died."))
+
+    if not args:
+        raise MudderyError(ERR.missing_args, _("You should select a target."))
+
+    try:
+        target_id = int(args)
+        room = character.get_location()
+        target = room.get_character(target_id)
+    except:
+        raise MudderyError(ERR.invalid_input, _("You should select a target."))
+
+    if not character.location or character.location.peaceful:
+        raise MudderyError(ERR.invalid_input, _("You can not attack in this place."))
+
+    if not target.is_alive:
+        raise MudderyError(ERR.invalid_input, _("%s is died." % target.get_name()))
+
+    if character.location != target.location:
+        raise MudderyError(ERR.invalid_input, _("You can not attack %s.") % target.get_name())
+
+    # set up combat
+    if character.is_in_combat():
+        # caller is in battle
+        raise MudderyError(ERR.invalid_input, _("You are in another combat."))
+
+    if target.is_in_combat():
+        # target is in battle
+        raise MudderyError(ERR.invalid_input, _("%s is in another combat." % target.name))
+
+    # create a new combat
+    combat = await COMBAT_HANDLER.create_combat(
+        combat_type=CombatType.NORMAL,
+        teams={1: [target], 2: [character]},
+        desc="",
+        timeout=0
+    )
+
+    combat_data = {
+        "combat_info": combat.get_appearance(),
+        "combat_commands": character.get_combat_commands(),
+        "combat_states": await combat.get_combat_states(),
+        "from": character.get_name(),
+        "target": target.get_name(),
+    }
+    target.msg({"attack": combat_data})
+    return {"attack": combat_data}
+
+
+@CharacterCmd.request("queue_up_combat")
+async def queue_up_combat(character, args) -> dict or None:
+    """
+    Queue up to make a match between the caller and a proper opponent.
+
+    Usage:
+    {
+        "cmd": "queue_up_combat"
+    }
+    """
+    honour_settings = HonourSettings.get_first_data()
+    if await character.get_level() < honour_settings.min_honour_level:
+        raise MudderyError(ERR.invalid_input, _("You need to reach level %s." % honour_settings.min_honour_level))
+
+    MatchPVPHandler.inst().add(character)
+
+
+@CharacterCmd.request("quit_combat_queue")
+async def quit_combat_queue(character, args) -> dict or None:
+    """
+    Quit the combat queue.
+
+    Usage:
+    {
+        "cmd": "quit_combat_queue"
+    }
+    """
+    MatchPVPHandler.inst().remove(character)
+    return
+
+
+@CharacterCmd.request("confirm_combat")
+async def confirm_combat(character, args) -> dict or None:
+    """
+    Confirm an honour combat.
+
+    Usage:
+    {
+        "cmd": "confirm_combat"
+    }
+    """
+    MatchPVPHandler.inst().confirm(character)
+    return
+
+
+@CharacterCmd.request("reject_combat")
+async def reject_combat(character, args) -> dict or None:
+    """
+    Reject an honour combat queue.
+
+    Usage:
+    {
+        "cmd": "reject_combat"
+    }
+    """
+    MatchPVPHandler.inst().reject(character)
+    return
+
+
+@CharacterCmd.request("query_rankings")
+async def get_rankings(character, args) -> dict or None:
+    """
+    Query honour combat rankings.
+
+    Usage:
+        {
+            "cmd": "query_rankings"
+        }
+    """
+    return await character.get_honour_rankings()
