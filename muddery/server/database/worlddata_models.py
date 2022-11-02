@@ -83,9 +83,6 @@ class game_settings(BaseModel):
     # Allow players to give up quests.
     can_give_up_quests = Column(Boolean, default=True)
 
-    # can close dialogue box or not.
-    can_close_dialogue = Column(Boolean, default=False)
-
     # The key of a world room.
     # The start position for new characters. It is the key of the room.
     # If it is empty, the home will be set to the first room in WORLD_ROOMS.

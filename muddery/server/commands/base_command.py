@@ -17,7 +17,7 @@ class BaseCommand(object):
         try:
             await cls.func(caller, args)
         except Exception as e:
-            logger.log_err("Run command error, %s: %s" % (caller, e))
+            logger.log_trace("Run command error, %s: %s" % (caller, e))
             await caller.respond_err("error", "Command %s error: %s" % (cls.key, e))
             return
 
@@ -41,7 +41,7 @@ class BaseRequest(BaseCommand):
             await caller.respond_err(cls.key, e.code, str(e))
             return
         except Exception as e:
-            logger.log_err("Run command error, %s: %s" % (caller, e))
+            logger.log_trace("Run command error, %s: %s" % (caller, e))
             await caller.respond_err("error", "Command %s error: %s" % (cls.key, e))
             return
 

@@ -6,7 +6,6 @@ import time
 import datetime
 import math
 import pytz
-import asyncio
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from muddery.common.utils.exception import MudderyError, ERR
 from muddery.server.database.gamedata.honours_mapper import HonoursMapper
@@ -16,7 +15,6 @@ from muddery.server.database.worlddata.honour_settings import HonourSettings
 from muddery.server.combat.combat_handler import COMBAT_HANDLER
 from muddery.server.server import Server
 from muddery.common.utils.singleton import Singleton
-from muddery.common.utils.utils import async_wait
 
 
 class MatchPVPHandler(Singleton):
@@ -106,7 +104,7 @@ class MatchPVPHandler(Singleton):
             self.scheduler.add_job(self.match, "interval", seconds=self.match_interval, id=self.key)
             self.scheduler.start()
 
-    async def add(self, character):
+    def add(self, character):
         """
         Add a character to the queue.
         """
@@ -117,7 +115,7 @@ class MatchPVPHandler(Singleton):
         
         self.waiting_queue.append(char_db_id)
 
-    async def remove(self, character):
+    def remove(self, character):
         """
         Remove a character from the queue.
         """
@@ -159,21 +157,17 @@ class MatchPVPHandler(Singleton):
                 # max_honour_diff means no limits
                 if self.max_honour_diff == 0 or math.fabs(honour_A - honour_B) <= self.max_honour_diff:
                     # can match
-                    awaits = []
                     try:
                         character_A = Server.world.get_character(char_id_A)
-                        awaits.append(character_A.msg({"prepare_match": self.preparing_time}))
+                        character_A.msg({"prepare_match": self.preparing_time})
                     except KeyError:
                         pass
 
                     try:
                         character_B = Server.world.get_character(char_id_B)
-                        awaits.append(character_B.msg({"prepare_match": self.preparing_time}))
+                        character_B.msg({"prepare_match": self.preparing_time})
                     except KeyError:
                         pass
-
-                    if awaits:
-                        await async_wait(awaits)
 
                     job_time = datetime.datetime.now(tz=pytz.utc) + datetime.timedelta(seconds=self.preparing_time)
                     job = self.scheduler.add_job(self.fight, 'date', run_date=job_time, args=(char_id_A, char_id_B))
@@ -202,7 +196,7 @@ class MatchPVPHandler(Singleton):
         except KeyError:
             pass
 
-    async def reject(self, character):
+    def reject(self, character):
         """
         Reject an honour combat.
         """
@@ -227,11 +221,11 @@ class MatchPVPHandler(Singleton):
 
         try:
             opponent = Server.world.get_character(opponent_db_id)
-            asyncio.create_task(opponent.msg({"match_rejected": character.get_id()}))
+            opponent.msg({"match_rejected": character.get_id()})
         except KeyError:
             pass
 
-        await self.remove(character)
+        self.remove(character)
 
     async def fight(self, char_id_A, char_id_B):
         """
@@ -259,21 +253,17 @@ class MatchPVPHandler(Singleton):
             remove_by_id(char_id_A)
             remove_by_id(char_id_B)
 
-            awaits = []
             try:
                 character0 = Server.world.get_character(char_id_A)
-                awaits.append(character0.msg({"match_rejected": character0.get_id()}))
+                character0.msg({"match_rejected": character0.get_id()})
             except KeyError:
                 pass
 
             try:
                 character1 = Server.world.get_character(char_id_B)
-                awaits.append(character1.msg({"match_rejected": character1.get_id()}))
+                character1.msg({"match_rejected": character1.get_id()})
             except KeyError:
                 pass
-
-            if awaits:
-                await async_wait(awaits)
 
         elif not confirmed_A:
             # Opponents 0 not confirmed.
@@ -281,10 +271,9 @@ class MatchPVPHandler(Singleton):
             # Remove opponent 0.
             remove_by_id(char_id_A)
 
-            awaits = []
             try:
                 character0 = Server.world.get_character(char_id_A)
-                awaits.append(character0.msg({"match_rejected": character0.get_id()}))
+                character0.msg({"match_rejected": character0.get_id()})
             except KeyError:
                 pass
 
@@ -296,12 +285,9 @@ class MatchPVPHandler(Singleton):
 
             try:
                 character1 = Server.world.get_character(char_id_B)
-                awaits.append(character1.msg({"match_rejected": None}))
+                character1.msg({"match_rejected": None})
             except KeyError:
                 pass
-
-            if awaits:
-                await async_wait(awaits)
 
         elif not confirmed_B:
             # opponents 1 not confirmed
@@ -309,10 +295,9 @@ class MatchPVPHandler(Singleton):
             # Remove opponent 1.
             remove_by_id(char_id_B)
 
-            awaits = []
             try:
                 character0 = Server.world.get_character(char_id_B)
-                awaits.append(character0.msg({"match_rejected": character0.get_id()}))
+                character0.msg({"match_rejected": character0.get_id()})
             except KeyError:
                 pass
 
@@ -324,7 +309,7 @@ class MatchPVPHandler(Singleton):
 
             try:
                 character1 = Server.world.get_character(char_id_A)
-                awaits.append(character1.msg({"match_rejected": None}))
+                character1.msg({"match_rejected": None})
             except KeyError:
                 pass
 
@@ -346,23 +331,26 @@ class MatchPVPHandler(Singleton):
             remove_by_id(char_id_A)
             remove_by_id(char_id_B)
 
+            combat_info = combat.get_appearance()
+            combat_states = combat.get_combat_states()
+            name0 = opponent0.get_name()
+            name1 = opponent1.get_name()
+
             combat_data_0 = {
-                "combat_info": combat.get_appearance(),
+                "combat_info": combat_info,
                 "combat_commands": opponent0.get_combat_commands(),
-                "combat_states": await combat.get_combat_states(),
-                "from": opponent0.get_name(),
-                "target": opponent1.get_name(),
+                "combat_states": combat_states,
+                "from": name0,
+                "target": name1,
             }
 
             combat_data_1 = {
-                "combat_info": combat.get_appearance(),
+                "combat_info": combat_info,
                 "combat_commands": opponent1.get_combat_commands(),
-                "combat_states": await combat.get_combat_states(),
-                "from": opponent1.get_name(),
-                "target": opponent0.get_name(),
+                "combat_states": combat_states,
+                "from": name1,
+                "target": name0,
             }
 
-            await async_wait([
-                opponent0.msg({"honour_combat": combat_data_0}),
-                opponent1.msg({"honour_combat": combat_data_1}),
-            ])
+            opponent0.msg({"honour_combat": combat_data_0})
+            opponent1.msg({"honour_combat": combat_data_1})

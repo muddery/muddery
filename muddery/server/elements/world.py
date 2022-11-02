@@ -207,10 +207,10 @@ class MudderyWorld(BaseElement):
             channel.get_message(caller, message)
         elif target_type == ConversationType.LOCAL.value:
             room = self.get_room(target)
-            await room.get_message(caller, message)
+            room.get_message(caller, message)
         elif target_type == ConversationType.PRIVATE.value:
             character = self.get_character(int(target))
-            await character.get_message(caller, message)
+            character.get_message(caller, message)
 
     def broadcast(self, message):
         """

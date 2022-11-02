@@ -21,8 +21,6 @@ class DialogueHandler(Singleton):
         Initialize the handler.
         """
         super(DialogueHandler, self).__init__()
-
-        self.can_close_dialogue = GameSettings.inst().get("can_close_dialogue")
         self.dialogue_storage = {}
     
     async def load_cache(self, dlg_key):
@@ -251,69 +249,3 @@ class DialogueHandler(Singleton):
         clear cache
         """
         self.dialogue_storage = {}
-
-    async def have_quest(self, caller, npc):
-        """
-        Check if the npc can provide or finish quests.
-        Completing is higher than providing.
-        """
-        provide_quest = False
-        finish_quest = False
-
-        if not caller:
-            return provide_quest, finish_quest
-
-        if not npc:
-            return provide_quest, finish_quest
-
-        # get npc's default dialogues
-        for dlg_key in npc.dialogues:
-            # find quests by recursion
-            provide, finish = await self.dialogue_have_quest(caller, npc, dlg_key)
-                
-            provide_quest = (provide_quest or provide)
-            finish_quest = (finish_quest or finish)
-
-            if finish_quest or provide_quest:
-                break
-
-        return provide_quest, finish_quest
-
-    async def dialogue_have_quest(self, caller, npc, dlg_key):
-        """
-        Find quests by recursion.
-        """
-        provide_quest = False
-        finish_quest = False
-
-        # check if the dialogue is available
-        npc_dlg = await self.get_dialogue(dlg_key)
-        if not npc_dlg:
-            return provide_quest, finish_quest
-
-        if not await npc_dlg.match_condition(caller, npc):
-            return provide_quest, finish_quest
-
-        if not await npc_dlg.match_dependencies(caller):
-            return provide_quest, finish_quest
-
-        # find quests in its sentences
-        if await npc_dlg.can_finish_quest(caller):
-            finish_quest = True
-            return provide_quest, finish_quest
-
-        if await npc_dlg.can_provide_quest(caller):
-            provide_quest = True
-            return provide_quest, finish_quest
-
-        for dlg_key in npc_dlg.get_next_dialogues():
-            # get next dialogue
-            provide, finish = await self.dialogue_have_quest(caller, npc, dlg_key)
-                
-            provide_quest = (provide_quest or provide)
-            finish_quest = (finish_quest or finish)
-
-            if finish_quest or provide_quest:
-                break
-
-        return provide_quest, finish_quest

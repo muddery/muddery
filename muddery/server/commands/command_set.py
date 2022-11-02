@@ -42,7 +42,7 @@ class BaseCommandSet(object):
                 try:
                     await func(caller, args)
                 except Exception as e:
-                    logger.log_err("Run command error, %s: %s" % (caller, e))
+                    logger.log_trace("Run command error, %s: %s" % (caller, e))
                     await caller.respond_err("error", "Command %s error: %s" % (key, e))
                     return
 
@@ -61,7 +61,7 @@ class BaseCommandSet(object):
 
                     sn = kwargs.get("sn")
                     if sn is not None:
-                        await caller.msg({
+                        caller.msg({
                             "response": {
                                 "sn": sn,
                                 "code": 0,
@@ -70,10 +70,10 @@ class BaseCommandSet(object):
                         })
 
                 except MudderyError as e:
-                    logger.log_err("Run command error, %s: %s" % (caller, e))
+                    logger.log_trace("Run command error, %s: %s" % (caller, e))
                     sn = kwargs.get("sn")
                     if sn is not None:
-                        await caller.msg({
+                        caller.msg({
                             "response": {
                                 "sn": sn,
                                 "code": e.code,
@@ -87,7 +87,7 @@ class BaseCommandSet(object):
                     logger.log_trace("Run command error, %s: %s" % (caller, e))
                     sn = kwargs.get("sn")
                     if sn is not None:
-                        await caller.msg({
+                        caller.msg({
                             "response": {
                                 "sn": sn,
                                 "code": ERR.unknown,

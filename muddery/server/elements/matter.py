@@ -5,11 +5,11 @@ Matters can be seen in a room or in an area.
 
 """
 
-import asyncio
 from muddery.server.utils.logger import logger
 from muddery.server.elements.base_element import BaseElement
 from muddery.server.database.worlddata.conditional_desc import ConditionalDesc
 from muddery.server.statements.statement_handler import STATEMENT_HANDLER
+from muddery.common.utils.utils import async_gather
 
 
 class MudderyMatter(BaseElement):
@@ -58,11 +58,11 @@ class MudderyMatter(BaseElement):
         The particular appearance for the caller.
         """
         info = self.get_appearance()
-        level, desc, cmds = await asyncio.gather(
+        level, desc, cmds = await async_gather([
             self.get_level(),
             self.get_conditional_desc(caller),
             self.get_available_commands(caller),
-        )
+        ])
 
         info["level"] = level
         info["cmds"] = cmds
@@ -116,7 +116,7 @@ class MudderyMatter(BaseElement):
         records = ConditionalDesc.get_data(self.element_type, self.get_element_key())
         if records:
             items = [(r.condition, r.desc) for r in records]
-            results = await asyncio.gather(*[
+            results = await async_gather([
                 STATEMENT_HANDLER.match_condition(item[0], caller, self) for item in items
             ])
             for i, result in enumerate(results):

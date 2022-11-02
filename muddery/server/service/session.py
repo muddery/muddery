@@ -1,6 +1,7 @@
 
-import json, traceback
+import json
 import time
+import asyncio
 from collections import deque
 from muddery.common.utils.exception import MudderyError, ERR
 from muddery.server.utils.logger import logger
@@ -29,9 +30,6 @@ class Session(object):
         self.special_command_history = None
         if SETTINGS.SPECIAL_COMMAND_RATE:
             self.special_command_history = {key: deque() for key in SETTINGS.SPECIAL_COMMAND_RATE}
-
-        self.msg_list = []
-        self.delay_msg = False
 
     def __str__(self):
         """
@@ -62,7 +60,7 @@ class Session(object):
             if len(self.command_history) >= SETTINGS.MAX_COMMAND_RATE:
                 command_time = self.command_history.popleft()
                 if now - command_time <= 1.0:
-                    await self.msg({"alert": SETTINGS.COMMAND_RATE_WARNING}, False)
+                    self.msg({"alert": SETTINGS.COMMAND_RATE_WARNING})
                     return
 
             self.command_history.append(now)
@@ -78,13 +76,13 @@ class Session(object):
         if not command:
             logger.log_err("Can not find command.")
             if serial_number:
-                await self.msg({
+                self.msg({
                     "response": {
                         "sn": serial_number,
                         "code": ERR.can_not_find_command,
                         "msg": "Can not find command: %s" % command
                     }
-                }, False)
+                })
             return
 
         # get session commands
@@ -104,20 +102,16 @@ class Session(object):
         if not func:
             logger.log_err("Can not find command, %s: %s" % (self, command))
             if serial_number:
-                await self.msg({
+                self.msg({
                     "response": {
                         "sn": serial_number,
                         "code": ERR.can_not_find_command,
                         "msg": "Can not find command: %s" % command
                     }
-                }, False)
+                })
             return
 
         await func(caller, args, sn=serial_number)
-
-        if self.msg_list:
-            await self.msg(self.msg_list, False)
-            self.msg_list = []
 
     async def login(self, account) -> dict:
         """
@@ -150,25 +144,16 @@ class Session(object):
         """
         pass
 
-    async def msg(self, data: dict or list, delay: bool = True) -> None:
+    def msg(self, data: dict or list) -> None:
         """
         Send data to the client.
 
         :param data: data to send
-        :param delay: delay sending out messages when self.delay_msg is set.
         """
-        if self.delay_msg and delay:
-            # Delay sending out messages when self.delay_msg is set.
-            if type(data) == list:
-                self.msg_list.extend(data)
-            else:
-                self.msg_list.append(data)
-        else:
-            # Send out this message immediately.
-            logger.log_debug("[Send message][%s]%s" % (self, data))
+        logger.log_debug("[Send message][%s]%s" % (self, data))
 
-            # send message
-            try:
-                await self.send_out(data)
-            except Exception as e:
-                logger.log_err("[Send message error][%s]%s" % (self, e))
+        # send message
+        try:
+            asyncio.create_task(self.send_out(data))
+        except Exception as e:
+            logger.log_err("[Send message error][%s]%s" % (self, e))

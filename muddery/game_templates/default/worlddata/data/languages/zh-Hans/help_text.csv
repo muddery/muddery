@@ -5,7 +5,6 @@ help_game_settings,"solo_mode","在单人模式下，一个玩家不会看到其
 help_game_settings,"global_cd","施放技能的公共CD。"
 help_game_settings,"auto_cast_skill_cd","系统自动施放技能的时间间隔，必须大于公共CD。"
 help_game_settings,"can_give_up_quests","如果允许放弃任务，则玩家可以主动放弃任务。"
-help_game_settings,"can_close_dialogue","玩家是否可以主动关闭对话框。"
 help_game_settings,"start_location_key","玩家初次进入系统时的位置。如果为空，则设为数据表中的第一个房间。"
 help_game_settings,"default_player_home_key","玩家的默认位置，如果玩家死亡，则会自动移动到玩家默认位置。如果为空，则设为数据表中的第一个房间。"
 help_game_settings,"default_player_character_key","默认选用的玩家角色。"

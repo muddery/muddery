@@ -136,7 +136,7 @@ async def attack(character, args) -> dict or None:
         "from": character.get_name(),
         "target": target.get_name(),
     }
-    await target.msg({"attack": combat_data})
+    target.msg({"attack": combat_data})
     return {"attack": combat_data}
 
 
@@ -154,7 +154,7 @@ async def queue_up_combat(character, args) -> dict or None:
     if await character.get_level() < honour_settings.min_honour_level:
         raise MudderyError(ERR.invalid_input, _("You need to reach level %s." % honour_settings.min_honour_level))
 
-    await MatchPVPHandler.inst().add(character)
+    MatchPVPHandler.inst().add(character)
 
 
 @CharacterCmd.request("quit_combat_queue")
@@ -167,7 +167,7 @@ async def quit_combat_queue(character, args) -> dict or None:
         "cmd": "quit_combat_queue"
     }
     """
-    await MatchPVPHandler.inst().remove(character)
+    MatchPVPHandler.inst().remove(character)
     return
 
 
@@ -195,7 +195,7 @@ async def reject_combat(character, args) -> dict or None:
         "cmd": "reject_combat"
     }
     """
-    await MatchPVPHandler.inst().reject(character)
+    MatchPVPHandler.inst().reject(character)
     return
 
 

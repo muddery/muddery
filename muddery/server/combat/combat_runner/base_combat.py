@@ -170,9 +170,9 @@ class BaseCombat(object):
             target = self.characters[target_id]["char"]
 
         result = await caller.cast_skill(skill_key, target)
-        asyncio.create_task(self.msg_all({
+        self.msg_all({
             "combat_skill_cast": result["result"],
-        }))
+        })
         asyncio.create_task(self.check_finish())
 
         return result
@@ -282,10 +282,10 @@ class BaseCombat(object):
 
             self.stop()
 
-    async def msg_all(self, message: dict) -> None:
+    def msg_all(self, message: dict) -> None:
         "Send message to all combatants."
         if self.characters:
-            await async_wait([c["char"].msg(message) for c in self.characters.values()])
+            [c["char"].msg(message) for c in self.characters.values()]
 
     async def set_combat_draw(self) -> None:
         """

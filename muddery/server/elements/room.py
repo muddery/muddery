@@ -6,9 +6,6 @@ Rooms are simple containers that has no location of their own.
 """
 
 import ast
-import asyncio
-import traceback
-
 from muddery.server.utils.logger import logger
 from muddery.server.utils.game_settings import GameSettings
 from muddery.server.database.worlddata.image_resource import ImageResource
@@ -245,7 +242,7 @@ class MudderyRoom(ELEMENT("MATTER")):
         exit_obj = self.all_exits[exit_key]["obj"]
         return await exit_obj.get_detail_appearance(caller)
 
-    async def msg_characters(self, msg, exclude=None):
+    def msg_characters(self, msg, exclude=None):
         """
         Send a message to all characters in the room.
         :param msg:
@@ -258,7 +255,7 @@ class MudderyRoom(ELEMENT("MATTER")):
             chars = self.all_characters.values()
 
         if chars:
-            await async_wait([char.msg(msg) for char in chars])
+            [char.msg(msg) for char in chars]
 
     async def at_character_arrive(self, character):
         """
@@ -281,7 +278,7 @@ class MudderyRoom(ELEMENT("MATTER")):
                     "name": character.get_name(),
                     "icon": character.get_icon(),
                 }
-                await self.msg_characters({"obj_moved_in": change}, {character.get_id()})
+                self.msg_characters({"obj_moved_in": change}, {character.get_id()})
 
     async def at_character_leave(self, character):
         """
@@ -305,7 +302,7 @@ class MudderyRoom(ELEMENT("MATTER")):
                     "id": character.get_id(),
                     "name": character.get_name()
                 }
-                await self.msg_characters({"obj_moved_out": change}, {character.get_id()})
+                self.msg_characters({"obj_moved_out": change}, {character.get_id()})
 
     def get_appearance(self):
         """
@@ -360,7 +357,7 @@ class MudderyRoom(ELEMENT("MATTER")):
         """
         return [EventType.EVENT_TRIGGER_ARRIVE]
 
-    async def get_message(self, caller, message):
+    def get_message(self, caller, message):
         """
         Receive a message from a character.
 
@@ -376,6 +373,6 @@ class MudderyRoom(ELEMENT("MATTER")):
         }
 
         if GameSettings.inst().get("solo_mode"):
-            await caller.msg({"conversation": output})
+            caller.msg({"conversation": output})
         else:
-            await self.msg_characters({"conversation": output})
+            self.msg_characters({"conversation": output})

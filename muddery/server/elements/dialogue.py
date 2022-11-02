@@ -108,21 +108,6 @@ class MudderyDialogue(BaseElement):
         else:
             return False
 
-    async def can_provide_quest(self, caller):
-        """
-        Check whether the dialogue can provide quests to the caller.
-
-        :param caller: the dialogue's caller
-        :return:
-        """
-        if self.provide_quest:
-            can_provide = await async_gather([caller.quest_handler.can_provide(key) for key in self.provide_quest])
-
-            # If there is a True in can_finish, it will return True, else return False.
-            return max(can_provide)
-        else:
-            return False
-
     def get_next_dialogues(self):
         """
 

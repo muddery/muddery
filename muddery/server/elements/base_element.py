@@ -333,13 +333,6 @@ class BaseElement(object):
         """
         pass
 
-    def at_delete(self):
-        """
-        Called just before this object is deleted.
-        :return:
-        """
-        pass
-
     def get_element_key(self):
         """
         Get element key.

@@ -156,13 +156,6 @@ class MudderyBaseNPC(ELEMENT("CHARACTER")):
 
         return commands
 
-    async def have_quest(self, caller):
-        """
-        If the npc can complete or provide quests.
-        Returns (can_provide_quest, can_complete_quest).
-        """
-        return await DialogueHandler.inst().have_quest(caller, self)
-
     async def remove_from_combat(self):
         """
         Removed from the current combat.

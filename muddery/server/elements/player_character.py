@@ -308,10 +308,13 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         :param location: location's object
         :return:
         """
+        results = {}
         if self.location:
             # Trigger the moving out event.
             self.event.at_character_move_out(self.location)
-            await self.location.at_character_leave(self)
+            move_results = await self.location.at_character_leave(self)
+            if move_results:
+                results.update(move_results)
 
         # save new location
         location_key = location.get_element_key() if location else ""
@@ -324,9 +327,10 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
 
         self.set_location(location)
 
-        results = {}
         if self.location:
-            await self.location.at_character_arrive(self)
+            move_results = await self.location.at_character_arrive(self)
+            if move_results:
+                results.update(move_results)
 
             # Trigger the arrive event.
             quests, events = await async_gather([
@@ -345,17 +349,12 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         Called just before beginning to un-connect a puppeting from
         this Player.
         """
-        # Pause all scripts.
-        #scripts = self.scripts.all()
-        #for script in scripts:
-        #    script.pause()
-
         if not self.solo_mode:
             # notify its location
             if self.location:
                 await self.location.at_character_leave(self)
 
-        await MatchPVPHandler.inst().remove(self)
+        MatchPVPHandler.inst().remove(self)
 
         self.account = None
         self.account_id = None
@@ -382,7 +381,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
 
         await super(MudderyPlayerCharacter, self).refresh_states(keep_states)
 
-    async def msg(self, data):
+    def msg(self, data):
         """
         Emits something to the account attached to the object.
 
@@ -393,7 +392,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
             return
 
         # relay to account
-        await self.account.msg(data)
+        self.account.msg(data)
 
     async def get_level(self):
         """
@@ -1531,7 +1530,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
             await self.recover()
             combat_result["state"] = await self.get_state()
 
-        await self.msg({"combat_finish": combat_result})
+        self.msg({"combat_finish": combat_result})
 
     async def leave_combat(self):
         """
@@ -1641,15 +1640,16 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
                 pass
 
         if home:
-            await self.move_to(home)
-            await self.msg({
+            results = await self.move_to(home)
+            results.update({
                 "msg": _("You are reborn at {C%s{n.") % home.get_name(),
                 "move_to": {
                     "location": self.get_location_info()
                 }
             })
+            self.msg(results)
         else:
-            await self.msg({"msg": _("You are reborn.")})
+            self.msg({"msg": _("You are reborn.")})
 
     def save_current_dialogues(self, current_dialogue):
         """
@@ -1733,7 +1733,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
 
         return results
 
-    async def get_message(self, caller, message):
+    def get_message(self, caller, message):
         """
         Receive a message from a character.
 
@@ -1748,10 +1748,8 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
             "msg": message
         }
 
-        await async_wait([
-            self.msg({"conversation": output}),
-            caller.msg({"conversation": output}),
-        ])
+        self.msg({"conversation": output})
+        caller.msg({"conversation": output})
 
     async def get_honour_rankings(self):
         """

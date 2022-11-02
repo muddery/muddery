@@ -197,7 +197,7 @@ class MudderyAccount(BaseElement):
             nicknames = []
         return [{"name": nicknames[index], "id": char_id} for index, char_id in enumerate(char_all)]
 
-    async def msg(self, data):
+    def msg(self, data):
         """
         Element -> User
         This is the main route for sending data back to the user from the
@@ -208,7 +208,7 @@ class MudderyAccount(BaseElement):
         """
         # session relay
         if self.session:
-            await self.session.msg(data)
+            self.session.msg(data)
 
     async def puppet_character(self, char_db_id):
         """
@@ -275,10 +275,11 @@ class MudderyAccount(BaseElement):
             raise MudderyError(ERR.invalid_input, _("That is not a valid character choice."))
 
         # Set location
+        move_results = {}
         try:
             location_key = await CharacterLocation.inst().load(char_db_id)
             location = Server.world.get_room(location_key)
-            await new_char.move_to(location)
+            move_results = await new_char.move_to(location)
         except KeyError:
             pass
 
@@ -314,6 +315,9 @@ class MudderyAccount(BaseElement):
             "equipment_pos": equipment_pos,
             "min_honour_level": honour_settings.min_honour_level,
         }
+
+        if move_results and "at_arrive" in move_results:
+            character_info["at_arrive"] = move_results["at_arrive"]
 
         if self.type == "STAFF":
             character_info["is_staff"] = True

@@ -331,7 +331,7 @@ class MudderyCharacter(ELEMENT("MATTER")):
         """
         return self.location
 
-    async def msg(self, content):
+    def msg(self, content):
         """
         Send a message to the character's player if it has.
         :param content:

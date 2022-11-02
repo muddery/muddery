@@ -4,7 +4,6 @@ General Character commands usually availabe to all characters
 
 import traceback
 from muddery.server.utils.logger import logger
-from muddery.common.utils.utils import async_wait
 from muddery.server.utils.localized_strings_handler import _
 from muddery.common.utils.exception import MudderyError, ERR
 from muddery.server.server import Server

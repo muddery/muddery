@@ -315,6 +315,23 @@ MudderyMainFrame.prototype.handle_combat = function(data) {
 MudderyMainFrame.prototype.moveTo = function(data) {
     core.map_data.setCurrentLocation(data["location"]);
     mud.scene_window.querySurroundings();
+
+    if ("at_leave" in data) {
+        for (var i in data["at_leave"]) {
+            mud.scene_window.displayMessage(core.text2html.parseHtml(data["at_leave"][i]));
+        }
+    }
+    if ("at_arrive" in data) {
+        for (var i in data["at_arrive"]) {
+            mud.scene_window.displayMessage(core.text2html.parseHtml(data["at_arrive"][i]));
+        }
+    }
+    if ("quests" in data) {
+        mud.main_frame.handle_quests(data["quests"]);
+    }
+    if ("events" in data) {
+        mud.main_frame.handle_events(data["events"]);
+    }
 }
 
 /*
@@ -778,6 +795,16 @@ MudderyPopupObject.prototype.onCommand = function(element) {
                         core.map_data.setCurrentLocation(data["location"]);
                         mud.scene_window.querySurroundings();
 
+                        if ("at_leave" in data) {
+                            for (var i in data["at_leave"]) {
+                                mud.scene_window.displayMessage(core.text2html.parseHtml(data["at_leave"][i]));
+                            }
+                        }
+                        if ("at_arrive" in data) {
+                            for (var i in data["at_arrive"]) {
+                                mud.scene_window.displayMessage(core.text2html.parseHtml(data["at_arrive"][i]));
+                            }
+                        }
                         if ("quests" in data) {
                             mud.main_frame.handle_quests(data["quests"]);
                         }
@@ -1817,6 +1844,12 @@ MudderySelectChar.prototype.onSelectCharacter = function(element) {
 
             mud.main_frame.showPuppet();
 
+            if ("at_arrive" in data) {
+                for (var i in data["at_arrive"]) {
+                    mud.scene_window.displayMessage(core.text2html.parseHtml(data["at_arrive"][i]));
+                }
+            }
+
             if ("last_combat" in data) {
                 mud.main_frame.handle_combat(data["last_combat"]);
             }
@@ -2408,6 +2441,16 @@ MudderyScene.prototype.onExit = function(element) {
                 core.map_data.setCurrentLocation(data["location"]);
                 mud.scene_window.querySurroundings();
 
+                if ("at_leave" in data) {
+                    for (var i in data["at_leave"]) {
+                        mud.scene_window.displayMessage(core.text2html.parseHtml(data["at_leave"][i]));
+                    }
+                }
+                if ("at_arrive" in data) {
+                    for (var i in data["at_arrive"]) {
+                        mud.scene_window.displayMessage(core.text2html.parseHtml(data["at_arrive"][i]));
+                    }
+                }
                 if ("quests" in data) {
                     mud.main_frame.handle_quests(data["quests"]);
                 }
