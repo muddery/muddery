@@ -67,8 +67,15 @@ class Session(object):
 
         # Pass messages to the muddery server.
         logger.log_debug("[Receive command][%s]%s" % (self, text_data))
+        
+        # Make sure a correct format
+        data = {}
+        try:
+            data = json.loads(text_data)
+        except Exception as e:
+            self.msg({"msg": "ok"})
+            return
 
-        data = json.loads(text_data)
         command = data["cmd"] if "cmd" in data else None
         args = data["args"] if "args" in data else None
         serial_number = data["sn"] if "sn" in data else None
