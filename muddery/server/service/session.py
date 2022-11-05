@@ -73,7 +73,7 @@ class Session(object):
         try:
             data = json.loads(text_data)
         except Exception as e:
-            self.msg({"msg": "ok"})
+            self.msg({"response": {}})
             return
 
         command = data["cmd"] if "cmd" in data else None
