@@ -21,14 +21,14 @@ controller = {
     },
 
     applySuccess: function(data) {
-        controller.status_interval_id = window.setInterval("controller.checkStatus()", 5000);
+        controller.status_interval_id = window.setInterval("controller.checkState()", 5000);
     },
 
-    checkStatus: function() {
-        service.checkStatus(controller.checkStatusSuccess);
+    checkState: function() {
+        service.checkState(controller.checkStateSuccess);
     },
 
-    checkStatusSuccess: function(data) {
+    checkStateSuccess: function(data) {
         window.clearInterval(controller.status_interval_id);
 
         window.parent.controller.hideWaiting();

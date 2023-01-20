@@ -21,6 +21,7 @@ prototype = function(base, el) {
 CommonEditor = function() {
     this.table_name = "";
     this.record_id = null;
+    this.auto_key = false;
     this.fields = [];
     this.areas = {};
     this.file_fields = [];
@@ -30,6 +31,7 @@ CommonEditor = function() {
 CommonEditor.prototype.init = function() {
     this.table_name = utils.getQueryString("table");
     this.record_id = parseInt(utils.getQueryString("record"));
+    this.auto_key = Boolean(utils.getQueryString("auto_key"));
     if (sessionStorage.page_param) {
         this.field_values = JSON.parse(sessionStorage.page_param);
     }
@@ -236,6 +238,7 @@ CommonEditor.prototype.saveForm = function(callback_success, callback_failed, co
     service.saveForm(values,
                      this.table_name,
                      this.record_id,
+                     this.auto_key,
                      callback_success,
                      callback_failed,
                      context);

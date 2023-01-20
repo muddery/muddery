@@ -97,7 +97,7 @@ DialogueEditor.prototype.onAddEvent = function(e) {
     var args = {
         trigger: controller.dialogue_key,
     }
-    window.parent.controller.editRecord(editor, controller.event_table, record, args);
+    window.parent.controller.editRecord(editor, controller.event_table, record, true, args);
 }
 
 DialogueEditor.prototype.onEditEvent = function(e) {
@@ -107,7 +107,7 @@ DialogueEditor.prototype.onEditEvent = function(e) {
         var args = {
             trigger: controller.dialogue_key,
         }
-        window.parent.controller.editRecord(editor, controller.event_table, record_id, args);
+        window.parent.controller.editRecord(editor, controller.event_table, record_id, true, args);
     }
 }
 

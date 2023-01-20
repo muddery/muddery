@@ -24,7 +24,12 @@ def query_fields_info(table_name):
     Query table's data.
     """
     field_names = general_querys.get_field_names(table_name)
-    form_class = FORM_SET.get(table_name)
+
+    try:
+        form_class = FORM_SET.get(table_name)
+    except KeyError:
+        raise MudderyError(ERR.no_table, "Can not find table %s's form." % table_name)
+
     form = form_class()
 
     fields = []

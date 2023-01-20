@@ -9,8 +9,6 @@ import shutil
 import configparser
 import random
 import string
-from subprocess import check_output, CalledProcessError, STDOUT
-from muddery.common.utils.crypto import RSA
 from muddery.launcher import configs
 
 
@@ -31,6 +29,9 @@ def muddery_version():
         version = muddery.__version__
     except ImportError:
         pass
+
+    from subprocess import check_output, CalledProcessError, STDOUT
+
     try:
         rev = check_output("git rev-parse --short HEAD", shell=True, cwd=configs.MUDDERY_ROOT, stderr=STDOUT).strip()
         version = "%s (rev %s)" % (version, rev.decode())
@@ -193,6 +194,8 @@ def create_game_directory(gamedir, template, port):
     create_webclient_settings(gamedir, setting_dict)
 
     # Create game server's RSA keys.
+    from muddery.common.utils.crypto import RSA
+
     rsa = RSA()
     rsa.generate_key()
 
@@ -366,7 +369,7 @@ def print_info():
 
     ind = " " * 8
     info = {
-        "servername": SETTINGS.GAME_SERVERNAME,
+        "servername": SETTINGS.SERVERNAME,
         "version": muddery_version(),
         "status": ""
     }
@@ -390,3 +393,65 @@ def print_info():
     top_border = "-" * (maxwidth - 11) + " Muddery " + "---"
     border = "-" * (maxwidth + 1)
     print("\n" + top_border + "\n" + info + '\n' + border)
+
+
+def print_states(states):
+    """
+    Print server states.
+    :param states: {
+                        <server's name>: {
+                            "name": <server's name>,
+                            "port": <port number>,
+                            "state": <server state>
+                        }
+                   }
+    :return:
+    """
+    contents = [["Server", "Port", "State"]]
+    for value in states.values():
+        contents.append([value["name"], str(value["port"]), value["state"]])
+
+    max_length = [max([len(row[col]) for row in contents]) for col in range(len(contents[0]))]
+
+    for row in contents:
+        print("  ", end="")
+
+        for length in max_length:
+            print("+", end="")
+            print("-" * (length + 4), end="")
+        print("+")
+
+        print("  ", end="")
+        for i, value in enumerate(row):
+            print("|", end="")
+            print("  %s  " % value, end="")
+            print(" " * (max_length[i] - len(value)), end="")
+        print("|")
+
+    print("  ", end="")
+    for length in max_length:
+        print("+", end="")
+        print("-" * (length + 4), end="")
+    print("+")
+
+
+def get_argument_port():
+    # The port number from arguments.
+    from argparse import ArgumentParser
+
+    parser = ArgumentParser()
+    parser.add_argument(
+        '-p', '--port',
+        nargs=1,
+        action='store',
+        dest='port',
+        metavar="<N>",
+        help="Set game's network ports, recommend to use ports above 10000.")
+
+    args, unknown_args = parser.parse_known_args()
+    if args.port:
+        try:
+            port = int(args.port[0])
+            return port
+        except:
+            print("Port must be a number.")

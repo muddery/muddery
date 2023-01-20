@@ -7,6 +7,7 @@ os.chdir(os.path.dirname(os.path.realpath(__file__)))
 VERSION_PATH = os.path.join('VERSION.txt')
 OS_WINDOWS = os.name == "nt"
 
+
 def get_requirements():
     """
     To update the requirements for Muddery, edit the requirements.txt file.

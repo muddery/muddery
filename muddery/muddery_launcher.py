@@ -130,10 +130,10 @@ def main():
         from muddery.launcher import manager
         try:
             if not args.server and not args.client and not args.editor:
-                asyncio.run(manager.run_servers(server=True, webclient=True, editor=True))
+                asyncio.run(manager.run_servers(gameserver=True, webclient=True, editor=True))
             else:
                 asyncio.run(manager.run_servers(
-                    server=args.server,
+                    gameserver=args.server,
                     webclient=args.client,
                     editor=args.editor
                 ))
@@ -153,10 +153,10 @@ def main():
         from muddery.launcher import manager
         try:
             if not args.server and not args.client and not args.editor:
-                asyncio.run(manager.kill_servers())
+                asyncio.run(manager.kill_servers(gameserver=True, webclient=True, editor=True))
             else:
                 asyncio.run(manager.kill_servers(
-                    server=args.server,
+                    gameserver=args.server,
                     webclient=args.client,
                     editor=args.editor
                 ))
@@ -179,7 +179,7 @@ def main():
                 asyncio.run(manager.restart_servers())
             else:
                 asyncio.run(manager.restart_servers(
-                    server=args.server,
+                    gameserver=args.server,
                     webclient=args.client,
                     editor=args.editor
                 ))
@@ -193,7 +193,7 @@ def main():
         print("Checking server state ...")
         from muddery.launcher import manager
         try:
-            asyncio.run(manager.show_server_state(gameserver=True, webclient=True, editor=True, req_timeout=5))
+            asyncio.run(manager.show_server_state(gameserver=True, webclient=True, editor=True))
         except Exception as e:
             traceback.print_exc()
             sys.exit(-1)

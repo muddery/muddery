@@ -2,11 +2,10 @@
 Battle commands. They only can be used when a character is in a combat.
 """
 
-import json, traceback
+import json
 from muddery.common.utils.exception import MudderyError, ERR
 from muddery.common.networks.responses import success_response
 from muddery.server.mappings.event_action_set import EVENT_ACTION_SET
-from muddery.launcher import manager
 from muddery.worldeditor.services import data_query, data_edit
 from muddery.worldeditor.utils.logger import logger
 from muddery.worldeditor.controllers.base_request_processer import BaseRequestProcesser
@@ -427,8 +426,9 @@ class SaveForm(BaseRequestProcesser):
         values = args["values"]
         table_name = args["table"]
         record_id = args.get('record', None)
+        auto_key = args.get("auto_key", False)
 
-        record_id = data_edit.save_form(values, table_name, record_id)
+        record_id = data_edit.save_form(values, table_name, record_id, auto_key)
         data = data_edit.query_form(table_name, {"id": record_id})
 
         # Refresh the game world's data.
@@ -880,8 +880,6 @@ class ApplyChanges(BaseRequestProcesser):
             # restart the game server
             import subprocess
             subprocess.Popen("muddery restart", shell=True)
-
-            # await manager.restart_servers(server=True, webclient=False, editor=False)
         except Exception as e:
             message = "Can not build the world: %s" % e
             logger.log_trace(message)

@@ -1,7 +1,6 @@
 
-import re
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, Float, String, Unicode, Text, UnicodeText, DateTime, Boolean
+from sqlalchemy import Column, Integer, Float, String, Unicode, UnicodeText, Boolean
 from sqlalchemy import UniqueConstraint
 Base = declarative_base()
 
@@ -46,7 +45,7 @@ class system_data(BaseModel):
     """
     __tablename__ = "system_data"
 
-    # The last id of accounts.
+    # The last id of objects.
     object_index = Column(Integer, default=0, nullable=False)
 
     test = Column(Integer, default=0, nullable=False)

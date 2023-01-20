@@ -7,7 +7,6 @@ from muddery.server.mappings.element_set import ELEMENT, ELEMENT_SET
 from muddery.server.mappings.event_action_set import EVENT_ACTION_SET
 from muddery.server.database.worlddata_db import WorldDataDB
 from muddery.worldeditor.utils.logger import logger
-from muddery.worldeditor.settings import SETTINGS
 from muddery.worldeditor.dao import general_querys
 from muddery.worldeditor.dao.system_data_mapper import SystemDataMapper
 from muddery.worldeditor.dao.element_properties_mapper import ElementPropertiesMapper
@@ -24,9 +23,10 @@ def query_form(table_name, condition=None):
         table_name: (string) data table's name.
         condition: (dict) conditions.
     """
-    form_class = FORM_SET.get(table_name)
-    if not form_class:
-        raise MudderyError(ERR.no_table, "Can not find table: %s" % table_name)
+    try:
+        form_class = FORM_SET.get(table_name)
+    except KeyError:
+        raise MudderyError(ERR.no_table, "Can not find table %s's form." % table_name)
 
     form = None
     record = None
@@ -68,7 +68,7 @@ def query_form(table_name, condition=None):
     return fields
 
 
-def save_form(values, table_name, record_id=None):
+def save_form(values, table_name, record_id=None, auto_key=False):
     """
     Save data to a record.
     
@@ -77,16 +77,17 @@ def save_form(values, table_name, record_id=None):
         table_name: (string) data table's name.
         record_id: (string, optional) record's id. If it is empty, add a new record.
     """
-    form_class = FORM_SET.get(table_name)
-    if not form_class:
-        raise MudderyError(ERR.no_table, "Can not find table: %s" % table_name)
-
-    form_data = FormData(values)
+    try:
+        form_class = FORM_SET.get(table_name)
+    except KeyError:
+        raise MudderyError(ERR.no_table, "Can not find table %s's form." % table_name)
 
     is_new = True
     if record_id:
         try:
             # Query record's data.
+            form_data = FormData(values)
+
             record = general_querys.get_record_by_id(table_name, record_id)
             form = form_class(formdata=form_data, obj=record)
             form.populate_obj(record)
@@ -95,6 +96,14 @@ def save_form(values, table_name, record_id=None):
             pass
 
     if is_new:
+        if auto_key:
+            if "key" not in values or not values["key"]:
+                # Does not have a new key, generate a new key.
+                index = SystemDataMapper.inst().get_object_index()
+                new_key = "%s_auto_%s" % (table_name, index)
+                values["key"] = new_key
+
+        form_data = FormData(values)
         model = WorldDataDB.inst().get_model(table_name)
         record = model(**values)
         form = form_class(formdata=form_data)
@@ -225,7 +234,7 @@ def save_element_form(tables, element_type, element_key):
         new_key = element_key
 
     if not new_key:
-        # Does not has a new key, generate a new key.
+        # Does not have a new key, generate a new key.
         index = SystemDataMapper.inst().get_object_index()
         new_key = "%s_auto_%s" % (element_type, index)
         for table in tables:
@@ -236,9 +245,10 @@ def save_element_form(tables, element_type, element_key):
         table_name = table["table"]
         values = table["values"]
 
-        form_class = FORM_SET.get(table_name)
-        if not form_class:
-            raise MudderyError(ERR.no_table, "Can not find table: %s" % table_name)
+        try:
+            form_class = FORM_SET.get(table_name)
+        except KeyError:
+            raise MudderyError(ERR.no_table, "Can not find table %s's form." % table_name)
 
         form_data = FormData(values)
 

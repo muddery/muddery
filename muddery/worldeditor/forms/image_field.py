@@ -1,6 +1,6 @@
 
 """
-World location's field. Group rooms by areas.
+Image's field.
 """
 
 from wtforms import widgets, fields

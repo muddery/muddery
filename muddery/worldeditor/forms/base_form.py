@@ -5,7 +5,6 @@ The base of all forms.
 from wtforms import fields
 from wtforms_alchemy import ModelForm
 from muddery.server.database.worlddata_db import WorldDataDB
-from muddery.worldeditor.settings import SETTINGS
 
 
 class FormData(object):

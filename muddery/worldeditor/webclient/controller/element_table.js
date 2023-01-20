@@ -11,6 +11,7 @@ ElementTable.prototype.constructor = ElementTable;
 
 ElementTable.prototype.init = function() {
     this.element_type = utils.getQueryString("element_type");
+    this.auto_key = utils.getQueryString("auto_key");
 
     $("#table-name").text(this.element_type);
     this.bindEvents();

@@ -3,7 +3,7 @@ Battle commands. They only can be used when a character is in a combat.
 """
 
 import base64
-from sqlalchemy.orm.exc import NoResultFound
+from sqlalchemy.exc import NoResultFound
 from muddery.common.utils.password import check_password
 from muddery.common.utils.exception import MudderyError, ERR
 from muddery.common.networks.responses import success_response

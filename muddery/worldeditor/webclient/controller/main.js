@@ -224,30 +224,32 @@ controller = {
         e.preventDefault();
     },
 
-    editRecord: function(editor_type, table_name, record_id, args) {
+    editRecord: function(editor_type, table_name, record_id, auto_key, args) {
         var name = "";
         var url = "";
         if (editor_type == "event") {
-            url = "event_editor.html?table=" + table_name;
+            url = "event_editor.html";
         }
         else if (editor_type == "element_event") {
-            url = "element_event_editor.html?table=" + table_name;
+            url = "element_event_editor.html";
         }
         else if (editor_type == "dialogue_event") {
-            url = "dialogue_event_editor.html?table=" + table_name;
+            url = "dialogue_event_editor.html";
         }
         else if (editor_type == "event_action") {
-            url = "event_action_editor.html?table=" + table_name;
+            url = "event_action_editor.html";
         }
         else if (editor_type == "dialogue") {
-            url = "dialogue_editor.html?table=" + table_name;
+            url = "dialogue_editor.html";
         }
         else if (editor_type == "sentence") {
-            url = "dialogue_sentence_editor.html?table=" + table_name;
+            url = "dialogue_sentence_editor.html";
         }
         else {
-            url = "common_editor.html?table=" + table_name;
+            url = "common_editor.html";
         }
+
+        url += "?table=" + table_name
 
         if (record_id) {
             name = "Edit " + table_name;
@@ -255,6 +257,10 @@ controller = {
         }
         else {
             name = "Add " + table_name;
+        }
+
+        if (auto_key) {
+            url += "&auto_key=1";
         }
 
         if (args) {

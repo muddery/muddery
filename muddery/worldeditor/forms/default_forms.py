@@ -101,6 +101,11 @@ class WorldRoomsForm(BaseForm):
         model = get_model("world_rooms")
 
 
+class ProfitRoomsForm(BaseForm):
+    class Meta:
+        model = get_model("profit_rooms")
+
+
 class WorldExitsForm(BaseForm):
     @classmethod
     def refresh(cls):
@@ -576,7 +581,7 @@ class ActionGetObjectsForm(BaseForm):
     @classmethod
     def refresh(cls):
         # available objects
-        cls.choices = get_all_pocketable_objects()
+        choices = get_all_pocketable_objects()
         cls.object = SelectField(choices=choices)
 
     class Meta:
