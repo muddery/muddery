@@ -49,9 +49,9 @@ class Settings(object):
     ######################################################################
 
     # This is a security setting protecting against host poisoning
-    # attacks.  It defaults to allowing all. In production, make
+    # attacks.  It defaults to allowing localhost. In production, make
     # sure to change this to your actual host addresses/IPs.
-    ALLOWED_HOST = "0.0.0.0"
+    ALLOWED_HOST = "127.0.0.1"
 
     # The worldeditor server's name.
     WORLD_EDITOR_SERVER_NAME = "World_Editor"
