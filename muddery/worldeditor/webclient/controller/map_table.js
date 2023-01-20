@@ -11,6 +11,7 @@ MapTable.prototype.constructor = MapTable;
 
 MapTable.prototype.init = function() {
     this.element = "AREA";
+    this.auto_key = utils.getQueryString("auto_key");
 
     this.bindEvents();
 

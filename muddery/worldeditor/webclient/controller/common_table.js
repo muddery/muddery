@@ -25,6 +25,7 @@ CommonTable = function() {
 CommonTable.prototype.init = function() {
     this.editor_type = utils.getQueryString("editor");
     this.table_name = utils.getQueryString("table");
+    this.auto_key = utils.getQueryString("auto_key");
 
     $("#table-name").text(this.table_name);
 
@@ -42,7 +43,8 @@ CommonTable.prototype.bindEvents = function() {
 CommonTable.prototype.onAdd = function(e) {
     var editor = controller.editor_type;
     var table = controller.table_name;
-    window.parent.controller.editRecord(editor, table);
+    var auto_key = controller.auto_key;
+    window.parent.controller.editRecord(editor, table, null, auto_key);
 }
 
 CommonTable.prototype.onEdit = function(e) {
@@ -50,7 +52,8 @@ CommonTable.prototype.onEdit = function(e) {
     if (record_id) {
         var editor = controller.editor_type;
         var table = controller.table_name;
-        window.parent.controller.editRecord(editor, table, record_id);
+        var auto_key = controller.auto_key;
+        window.parent.controller.editRecord(editor, table, record_id, auto_key);
     }
 }
 

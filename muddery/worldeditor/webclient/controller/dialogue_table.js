@@ -12,6 +12,7 @@ DialogueTable.prototype.constructor = DialogueTable;
 DialogueTable.prototype.init = function() {
     this.editor_type = utils.getQueryString("editor");
     this.table_name = "dialogues";
+    this.auto_key = utils.getQueryString("auto_key");
 
     $("#table-name").text(this.table_name);
 

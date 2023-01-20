@@ -317,11 +317,12 @@ service = {
         this.sendRequest("add_exit", "", args, callback_success, callback_failed);
     },
 
-    saveForm: function(values, table_name, record_id, callback_success, callback_failed) {
+    saveForm: function(values, table_name, record_id, auto_key, callback_success, callback_failed) {
         var args = {
             values: values,
             table: table_name,
-            record: record_id
+            record: record_id,
+            auto_key: auto_key,
         };
         this.sendRequest("save_form", "", args, callback_success, callback_failed);
     },
@@ -481,8 +482,8 @@ service = {
         this.sendRequest("apply_changes", "", {}, callback_success, callback_failed);
     },
 
-    checkStatus: function(callback_success, callback_failed) {
-        this.getData("status", callback_success, callback_failed);
+    checkState: function(callback_success, callback_failed) {
+        this.getData("state", callback_success, callback_failed);
     },
 }
 

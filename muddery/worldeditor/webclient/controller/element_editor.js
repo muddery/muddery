@@ -113,7 +113,7 @@ ElementEditor.prototype.onAddEvent = function(e) {
         trigger: controller.element_key,
         element_type: controller.obj_element_type? controller.obj_element_type: controller.base_element_type,
     }
-    window.parent.controller.editRecord(editor, controller.event_table, record, args);
+    window.parent.controller.editRecord(editor, controller.event_table, record, true, args);
 }
 
 ElementEditor.prototype.onEditEvent = function(e) {
@@ -124,7 +124,7 @@ ElementEditor.prototype.onEditEvent = function(e) {
             trigger: controller.element_key,
             element_type: controller.obj_element_type? controller.obj_element_type: controller.base_element_type,
         }
-        window.parent.controller.editRecord(editor, controller.event_table, record_id, args);
+        window.parent.controller.editRecord(editor, controller.event_table, record_id, true, args);
     }
 }
 
