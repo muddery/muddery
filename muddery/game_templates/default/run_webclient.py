@@ -10,9 +10,8 @@ def main():
     SETTINGS.LOG_NAME = "muddery_webclient"
     SETTINGS.LOG_FILE = os.path.join(SETTINGS.LOG_PATH, "webclient.log")
 
-    from muddery.launcher.manager import run_server_command
-    from muddery.server.networks.sanic_webclient import run, stop
-    run_server_command(run, stop, SETTINGS.WEBCLIENT_PORT)
+    from muddery.server.networks.sanic_webclient import SanicWebclient
+    SanicWebclient.run()
 
 
 if __name__ == '__main__':

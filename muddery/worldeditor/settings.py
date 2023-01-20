@@ -34,8 +34,14 @@ class Settings(object):
     # Base server settings
     ######################################################################
 
+    # Set test mode.
+    TEST_MODE = False
+
+    # Debug mod.
+    DEBUG = False
+
     # This is the name of your server.
-    GAME_SERVERNAME = "Muddery"
+    SERVERNAME = "Muddery"
 
 
     ######################################################################
@@ -46,6 +52,9 @@ class Settings(object):
     # attacks.  It defaults to allowing all. In production, make
     # sure to change this to your actual host addresses/IPs.
     ALLOWED_HOST = "0.0.0.0"
+
+    # The worldeditor server's name.
+    WORLD_EDITOR_SERVER_NAME = "World_Editor"
 
     # http port to open for the worldeditor.
     WORLD_EDITOR_PORT = 8002
@@ -60,10 +69,6 @@ class Settings(object):
 
     MUDDERY_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     GAME_DIR = os.getcwd()
-
-    # Worldedotir's pid file
-    WORLD_EDITOR_PID = os.path.join(GAME_DIR, "worldeditor.pid")
-
 
     ######################################################################
     # Logging settings

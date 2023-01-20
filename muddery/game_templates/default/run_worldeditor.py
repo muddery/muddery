@@ -15,9 +15,8 @@ def main():
     GAME_SERVER_SETTINGS.update(GameServerSettings())
     GAME_SERVER_SETTINGS.LOG_NAME = "muddery_worldeditor"
 
-    from muddery.launcher.manager import run_server_command
-    from muddery.worldeditor.networks.sanic_server import run, stop
-    run_server_command(run, stop, WORLDEDITOR_SETTINGS.WORLD_EDITOR_PORT)
+    from muddery.worldeditor.networks.sanic_worldeditor import SanicWorldEditor
+    SanicWorldEditor.run()
 
 
 if __name__ == '__main__':

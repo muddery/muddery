@@ -1,4 +1,4 @@
-# The game server.
+# The game's webclient.
 
 import os
 from muddery.server.settings import SETTINGS
@@ -8,11 +8,10 @@ from server.settings import ServerSettings
 def main():
     SETTINGS.update(ServerSettings())
     SETTINGS.LOG_NAME = "muddery_gameserver"
-    SETTINGS.LOG_FILE = os.path.join(SETTINGS.LOG_PATH, "server.log")
+    SETTINGS.LOG_FILE = os.path.join(SETTINGS.LOG_PATH, "webclient.log")
 
-    from muddery.launcher.manager import run_server_command
-    from muddery.server.networks.sanic_server import run, stop
-    run_server_command(run, stop, SETTINGS.GAME_SERVER_PORT)
+    from muddery.server.networks.sanic_game_server import SanicGameServer
+    SanicGameServer.run()
 
 
 if __name__ == '__main__':

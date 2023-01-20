@@ -37,8 +37,11 @@ class Settings(object):
     # Set test mode.
     TEST_MODE = False
 
+    # Debug mod.
+    DEBUG = False
+
     # This is the name of your server.
-    GAME_SERVERNAME = "Muddery"
+    SERVERNAME = "Muddery"
 
     # The maximum number of characters allowed by the default.
     MAX_PLAYER_CHARACTERS = 5
@@ -56,11 +59,17 @@ class Settings(object):
     # sure to change this to your actual host addresses/IPs.
     ALLOWED_HOST = "0.0.0.0"
 
+    # The webserver's name.
+    WEBCLIENT_SERVER_NAME = "Webclient"
+
     # The webserver sits behind a Portal proxy.
     WEBCLIENT_PORT = 8000
 
+    # The game server's name.
+    GAME_SERVER_NAME = "Game_Server"
+
     # Server-side websocket port to open for the webclient.
-    WEBSERVER_PORT = 8001
+    GAME_SERVER_PORT = 8001
 
     ######################################################################
     # Folders and files settings
@@ -68,13 +77,6 @@ class Settings(object):
 
     MUDDERY_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     GAME_DIR = os.getcwd()
-
-    # Server's pid file
-    SERVER_PID = os.path.join(GAME_DIR, "server.pid")
-
-    # Webclient's pid file
-    WEBCLIENT_PID = os.path.join(GAME_DIR, "webclient.pid")
-
 
     ######################################################################
     # Logging settings
