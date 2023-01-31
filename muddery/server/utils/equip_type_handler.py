@@ -53,5 +53,5 @@ class EquipTypeHandler(object):
         return equip in self.career_equip[career]
 
 
-# main dialoguehandler
+# main handler
 EQUIP_TYPE_HANDLER = EquipTypeHandler()

@@ -2,8 +2,7 @@
 from wtforms import validators, widgets
 from wtforms.fields import SelectField
 from muddery.server.mappings.quest_objective_set import QUEST_OBJECTIVE_SET
-from muddery.server.mappings.quest_status_set import QUEST_STATUS_SET
-from muddery.server.mappings.event_action_set import EVENT_ACTION_SET
+from muddery.server.mappings.event_action_set import EventActionSet
 from muddery.server.mappings.event_trigger_set import EVENT_TRIGGER_SET
 from muddery.server.database.worlddata_db import WorldDataDB
 from muddery.worldeditor.dao import common_mappers as CM
@@ -416,39 +415,6 @@ class QuestObjectivesForm(BaseForm):
         model = get_model("quest_objectives")
 
 
-class QuestDependenciesForm(BaseForm):
-    @classmethod
-    def refresh(cls):
-        records = CM.QUESTS.all_with_base()
-        choices = generate_choices(records)
-        cls.quest = SelectField(choices=choices)
-        cls.dependency = SelectField(choices=choices)
-
-        choices = QUEST_STATUS_SET.choice_all()
-        cls.type = SelectField(choices=choices)
-
-    class Meta:
-        model = get_model("quest_dependencies")
-
-
-class DialogueQuestDependenciesForm(BaseForm):
-    @classmethod
-    def refresh(cls):
-        records = CM.DIALOGUES.all()
-        choices = generate_choices(records)
-        cls.dialogue = SelectField(choices=choices)
-
-        records = CM.QUESTS.all_with_base()
-        choices = generate_choices(records)
-        cls.dependency = SelectField(choices=choices)
-
-        choices = QUEST_STATUS_SET.choice_all()
-        cls.type = SelectField(choices=choices)
-
-    class Meta:
-        model = get_model("dialogue_quest_dependencies")
-
-
 class EquipmentsForm(BaseForm):
     @classmethod
     def refresh(cls):
@@ -467,7 +433,7 @@ class EquipmentsForm(BaseForm):
 class EventDataForm(BaseForm):
     @classmethod
     def refresh(cls):
-        choices = EVENT_ACTION_SET.choice_all()
+        choices = EventActionSet.inst().choice_all()
         cls.action = SelectField(choices=choices)
 
         choices = EVENT_TRIGGER_SET.choice_all()

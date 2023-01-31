@@ -96,8 +96,6 @@ ACTION_CLOSE_EVENT = CommonMapper("action_close_event")
 
 DIALOGUES = CommonMapper("dialogues")
 
-DIALOGUE_QUEST_DEPENDENCIES = CommonMapper("dialogue_quest_dependencies")
-
 DIALOGUE_RELATIONS = CommonMapper("dialogue_relations")
 
 NPC_DIALOGUES = CommonMapper("npc_dialogues")

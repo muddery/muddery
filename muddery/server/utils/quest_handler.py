@@ -10,7 +10,6 @@ from muddery.common.utils.exception import MudderyError, ERR
 from muddery.server.utils.game_settings import GameSettings
 from muddery.server.database.worlddata.worlddata import WorldData
 from muddery.server.database.worlddata.quest_dependencies import QuestDependencies
-from muddery.server.mappings.quest_status_set import QUEST_STATUS_SET
 from muddery.server.mappings.element_set import ELEMENT
 from muddery.server.database.gamedata.character_quests import CharacterQuests
 from muddery.server.database.gamedata.character_finished_quests import CharacterFinishedQuests
@@ -242,15 +241,7 @@ class QuestHandler(object):
         Returns:
             (boolean) result
         """
-        dependencies = QuestDependencies.get(quest_key)
-        if dependencies:
-            results = await async_gather([
-                QUEST_STATUS_SET.get(dep.type).match(self.owner, dep.dependency) for dep in dependencies
-            ])
-        else:
-            return True
-
-        return min(results)
+        return True
 
     async def match_condition(self, quest_key):
         """

@@ -6,7 +6,7 @@ import random
 import weakref
 from muddery.server.statements.statement_handler import STATEMENT_HANDLER
 from muddery.server.database.worlddata.event_data import EventData
-from muddery.server.mappings.event_action_set import EVENT_ACTION_SET
+from muddery.server.mappings.event_action_set import EventActionSet
 from muddery.common.utils.defines import EventType
 from muddery.common.utils.utils import async_gather
 
@@ -102,13 +102,13 @@ class EventTrigger(object):
         for event in candidates:
             if event.multiple:
                 if rand < event.odds:
-                    func = EVENT_ACTION_SET.func(event.action)
+                    func = EventActionSet.inst().get_func(event.action)
                     if func:
                         actions.append({"key": event.key, "action": event.action, "func": func})
                 rand = random.random()
             else:
                 if rand < event.odds:
-                    func = EVENT_ACTION_SET.func(event.action)
+                    func = EventActionSet.inst().get_func(event.action)
                     if func:
                         actions.append({"key": event.key, "action": event.action, "func": func})
                     break

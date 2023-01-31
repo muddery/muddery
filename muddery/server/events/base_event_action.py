@@ -26,6 +26,9 @@ class BaseEventAction(object):
     # this action can be called repeatedly in an event
     repeatedly = False
 
+    async def init(self):
+        pass
+
     @classmethod
     def model(cls):
         """

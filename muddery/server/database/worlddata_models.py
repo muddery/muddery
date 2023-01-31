@@ -990,37 +990,8 @@ class dialogues(BaseModel):
     # dialogue's name
     name = Column(Unicode(NAME_LENGTH))
 
-    # condition to show this dialogue
-    condition = Column(String(CONDITION_LENGTH))
-
     # dialogue's content
     content = Column(UnicodeText)
-
-
-# ------------------------------------------------------------
-#
-# store dialogue quest dependencies
-#
-# ------------------------------------------------------------
-class dialogue_quest_dependencies(BaseModel):
-    "Store dialogue quest dependencies."
-    __tablename__ = "dialogue_quest_dependencies"
-
-    __table_args__ = (
-        UniqueConstraint("dialogue", "dependency", "type"),
-    )
-
-    # The key of a dialogue.
-    # dialogue's key
-    dialogue = Column(String(KEY_LENGTH), index=True, nullable=False)
-
-    # The key of a quest.
-    # related quest's key
-    dependency = Column(String(KEY_LENGTH), nullable=False)
-
-    # The key of a quest dependency type.
-    # dependency's type
-    type = Column(String(KEY_LENGTH), nullable=False)
 
 
 # ------------------------------------------------------------
@@ -1044,6 +1015,12 @@ class dialogue_relations(BaseModel):
     # next dialogue's key
     next_dlg = Column(String(KEY_LENGTH), index=True, nullable=False)
 
+    # condition to show this dialogue
+    condition = Column(String(CONDITION_LENGTH))
+
+    # When otherwise is True, this dialogue will be shown if all conditions are False.
+    otherwise = Column(Boolean, default=False)
+
 
 # ------------------------------------------------------------
 #
@@ -1066,8 +1043,11 @@ class npc_dialogues(BaseModel):
     # dialogue's key
     dialogue = Column(String(KEY_LENGTH), index=True, nullable=False)
 
-    # if it is a default dialogue
-    default = Column(Boolean, default=False)
+    # condition to show this dialogue
+    condition = Column(String(CONDITION_LENGTH))
+
+    # When otherwise is True, this dialogue will be shown if all conditions are False.
+    otherwise = Column(Boolean, default=False)
 
 
 # ------------------------------------------------------------

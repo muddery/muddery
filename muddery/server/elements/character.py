@@ -58,11 +58,11 @@ class MudderyCharacter(ELEMENT("MATTER")):
         CHARACTER_LAST_ID += 1
         return CHARACTER_LAST_ID
 
-    def __init__(self):
+    def __init__(self, *agrs, **wargs):
         """
         Initial the object.
         """
-        super(MudderyCharacter, self).__init__()
+        super(MudderyCharacter, self).__init__(*agrs, **wargs)
 
         self.set_id(self.generate_id())
         self.states = None

@@ -1,8 +1,5 @@
 """
-DialogueHandler
-
-The DialogueHandler maintains a pool of dialogues.
-
+A shop where players can buy goods.
 """
 
 from muddery.server.mappings.element_set import ELEMENT

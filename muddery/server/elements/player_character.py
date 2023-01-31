@@ -16,7 +16,7 @@ from muddery.server.utils.statement_attribute_handler import StatementAttributeH
 from muddery.common.utils.exception import MudderyError, ERR
 from muddery.server.utils.localized_strings_handler import _
 from muddery.server.utils.game_settings import GameSettings
-from muddery.server.utils.dialogue_handler import DialogueHandler
+from muddery.server.mappings.dialogue_set import DialogueSet
 from muddery.common.utils.defines import ConversationType
 from muddery.common.utils.defines import CombatType
 from muddery.server.database.worlddata.worlddata import WorldData
@@ -1678,13 +1678,13 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
             None
         """
         # Get NPC's dialogue list.
-        dialogues = await DialogueHandler.inst().get_npc_dialogues(self, npc)
+        dialogues = await npc.get_dialogues(self)
 
         self.save_current_dialogues(dialogues)
 
         return dialogues
 
-    async def start_dialogue(self, dlg_key):
+    def start_dialogue(self, dlg_key):
         """
         Start a dialogue.
 
@@ -1694,13 +1694,22 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         Returns:
             None
         """
+        dialogues = []
+
         # Get next sentences_list.
-        dialogue = await DialogueHandler.inst().get_dialogues_by_key(dlg_key)
+        dialogue = DialogueSet.inst().get_dialogue(dlg_key)
+        if dialogue:
+            dialogues = {
+                "dialogues": [{
+                    "key": dlg_key,
+                    "content": dialogue.get_content(),
+                }],
+            }
 
         # Send the dialogue to the player.
-        self.save_current_dialogues(dialogue)
+        self.save_current_dialogues(dialogues)
 
-        return dialogue
+        return dialogues
 
     async def finish_dialogue(self, dlg_key, npc):
         """
@@ -1717,15 +1726,17 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
             logger.log_err("Not in current dialogues: %s" % dlg_key)
             return
 
+        dialogue = DialogueSet.inst().get_dialogue(dlg_key)
+
         results = {}
         try:
             # Finish current dialogue
-            results = await DialogueHandler.inst().finish_dialogue(dlg_key, self, npc)
+            results = await dialogue.finish_dialogue(self, npc)
         except Exception as e:
             logger.log_trace("Can not finish dialogue %s: %s" % (dlg_key, e))
 
         # Get next dialogue.
-        next_dialogues = await DialogueHandler.inst().get_next_dialogues(dlg_key, self, npc)
+        next_dialogues = await dialogue.get_next_dialogues(self, npc)
         results["dialogue"] = next_dialogues
 
         # Send dialogues_list to the player.

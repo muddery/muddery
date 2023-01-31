@@ -8,15 +8,18 @@ creation commands.
 
 """
 
+from muddery.common.utils import defines
+from muddery.common.utils.utils import async_wait, async_gather
 from muddery.server.utils.logger import logger
-from muddery.server.utils.dialogue_handler import DialogueHandler
+from muddery.server.mappings.dialogue_set import DialogueSet
 from muddery.server.mappings.element_set import ELEMENT
 from muddery.server.database.worlddata.npc_dialogues import NPCDialogues
 from muddery.server.database.worlddata.npc_shops import NPCShops
 from muddery.server.database.worlddata.worlddata import WorldData
-from muddery.common.utils import defines
+
 from muddery.server.utils.localized_strings_handler import _
-from muddery.common.utils.utils import async_gather
+
+from muddery.server.statements.statement_handler import STATEMENT_HANDLER
 
 
 class MudderyBaseNPC(ELEMENT("CHARACTER")):
@@ -33,6 +36,8 @@ class MudderyBaseNPC(ELEMENT("CHARACTER")):
     def __init__(self, *agrs, **wargs):
         super(MudderyBaseNPC, self).__init__(*agrs, **wargs)
 
+        self.auto_fight = True
+        self.dialogues = []
         self.shops = {}
 
     async def at_element_setup(self, first_time):
@@ -45,19 +50,63 @@ class MudderyBaseNPC(ELEMENT("CHARACTER")):
         self.auto_fight = True
 
         # load dialogues.
-        self.load_dialogues()
+        await self.load_dialogues()
 
         # load shops
         await self.load_shops()
 
-    def load_dialogues(self):
+    async def load_dialogues(self):
         """
         Load dialogues.
         """
-        dialogues = NPCDialogues.get(self.get_element_key())
+        records = NPCDialogues.get(self.get_element_key())
+        if records:
+            self.dialogues = [{
+                "key": record.dialogue,
+                "condition": record.condition,
+                "otherwise": record.otherwise,
+            } for record in records]
+            await async_wait([DialogueSet.inst().load_dialogue(r.dialogue) for r in records])
 
-        self.default_dialogues = [dialogue.dialogue for dialogue in dialogues if dialogue.dialogue and dialogue.default]
-        self.dialogues = [dialogue.dialogue for dialogue in dialogues if dialogue.dialogue and not dialogue.default]
+    async def get_dialogues(self, caller):
+        """
+        Get NPC's dialogues that can show to the caller.
+
+        Args:
+            caller: (object) the character who want to start a talk.
+
+        Returns:
+            dialogues: (list) a list of available dialogues.
+        """
+        if not caller:
+            return
+
+        dialogues = []
+
+        # Get the NPC's dialogues.
+        if self.dialogues:
+            candidates = [item for item in self.dialogues if not item["otherwise"]]
+            if candidates:
+                matches = await async_gather([STATEMENT_HANDLER.match_condition(item["condition"], caller, self)
+                                              for item in candidates])
+                dialogues = [DialogueSet.inst().get_dialogue(item["key"]) for index, item in enumerate(candidates)
+                             if matches[index]]
+
+                if not dialogues:
+                    # Get otherwise sentences.
+                    dialogues = [DialogueSet.inst().get_dialogue(item["key"]) for item in self.dialogues
+                                 if item["otherwise"]]
+
+        dialogues = [{"key": d.get_element_key(), "content": d.get_content()} for d in dialogues]
+
+        return {
+            "target": {
+                "id": self.get_id(),
+                "name": self.get_name(),
+                "icon": getattr(self, "icon", None),
+            },
+            "dialogues": dialogues,
+        }
 
     async def load_shops(self):
         """

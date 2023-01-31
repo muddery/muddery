@@ -4,7 +4,7 @@ Battle commands. They only can be used when a character is in a combat.
 
 from muddery.common.utils.exception import MudderyError, ERR
 from muddery.server.mappings.element_set import ELEMENT, ELEMENT_SET
-from muddery.server.mappings.event_action_set import EVENT_ACTION_SET
+from muddery.server.mappings.event_action_set import EventActionSet
 from muddery.server.database.worlddata_db import WorldDataDB
 from muddery.worldeditor.utils.logger import logger
 from muddery.worldeditor.dao import general_querys
@@ -365,7 +365,7 @@ def query_event_action_forms(action_type, event_key):
         event_key: (string) event's key
     """
     # Get action's data.
-    action = EVENT_ACTION_SET.get(action_type)
+    action = EventActionSet.inst().get(action_type)
     if not action:
         raise MudderyError(ERR.no_table, "Can not find action: %s" % action_type)
 

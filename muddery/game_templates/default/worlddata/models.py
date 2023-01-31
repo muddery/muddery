@@ -420,16 +420,6 @@ class dialogues(BaseModels.dialogues):
 
 # ------------------------------------------------------------
 #
-# store dialogue quest dependencies
-#
-# ------------------------------------------------------------
-class dialogue_quest_dependencies(BaseModels.dialogue_quest_dependencies):
-    "Store dialogue quest dependencies."
-    pass
-
-
-# ------------------------------------------------------------
-#
 # store dialogue relations
 #
 # ------------------------------------------------------------

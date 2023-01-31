@@ -3,6 +3,8 @@ Event action.
 """
 
 import random
+from muddery.common.utils.utils import async_wait
+from muddery.server.mappings.dialogue_set import DialogueSet
 from muddery.server.events.base_event_action import BaseEventAction
 from muddery.server.database.worlddata.worlddata import WorldData
 
@@ -15,6 +17,21 @@ class ActionDialogue(BaseEventAction):
     name = "Dialogue"
     model_name = "action_dialogue"
     repeatedly = False
+
+    async def init(self, *args, **kwargs):
+        """
+        Init the session.
+
+        :param args:
+        :param kwargs:
+        """
+        await super(ActionDialogue, self).init()
+
+        # load dialogues
+        records = WorldData.get_table_all(self.model_name)
+        if records:
+            # load dialogues to the cache
+            await async_wait([DialogueSet.inst().load_dialogue(record.dialogue) for record in records])
 
     async def func(self, event_key, character, obj):
         """
@@ -36,6 +53,6 @@ class ActionDialogue(BaseEventAction):
         for record in records:
             if rand <= record.odds:
                 # Make dialogue.
-                return await character.start_dialogue(record.dialogue)
+                return character.start_dialogue(record.dialogue)
 
             rand -= record.odds

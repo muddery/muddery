@@ -2,20 +2,22 @@
 All available event actions.
 """
 
+from muddery.common.utils.utils import classes_in_path
+from muddery.common.utils.singleton import Singleton
+from muddery.common.utils.utils import async_wait
 from muddery.server.settings import SETTINGS
 from muddery.server.utils.logger import logger
-from muddery.common.utils.utils import classes_in_path
 from muddery.server.events.base_event_action import BaseEventAction
 
 
-class EventActionSet(object):
+class EventActionSet(Singleton):
     """
     All available event triggers.
     """
     def __init__(self):
         self.dict = {}
 
-    def load(self):
+    async def load(self):
         """
         Add all event actions from the path.
         """
@@ -25,7 +27,10 @@ class EventActionSet(object):
             if key:
                 if key in self.dict:
                     logger.log_debug("Event action %s is replaced by %s." % (key, cls))
-                self.dict[key] = cls()
+                action = cls()
+                self.dict[key] = action
+
+        await async_wait([item.init() for item in self.dict.values()])
 
     def get(self, key):
         """
@@ -33,7 +38,7 @@ class EventActionSet(object):
         """
         return self.dict.get(key, None)
 
-    def func(self, key):
+    def get_func(self, key):
         """
         Get the function of the event action.
         """
@@ -64,7 +69,3 @@ class EventActionSet(object):
         Get all repeatedly event types and names.
         """
         return [(key, "%s (%s)" % (value.name, key)) for key, value in self.dict.items() if value.repeatedly]
-
-
-EVENT_ACTION_SET = EventActionSet()
-EVENT_ACTION_SET.load()

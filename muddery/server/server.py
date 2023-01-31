@@ -2,10 +2,11 @@
 import traceback
 from muddery.server.settings import SETTINGS
 from muddery.common.utils.singleton import Singleton
+from muddery.common.utils.utils import classes_in_path
 from muddery.server.database.gamedata_db import GameDataDB
 from muddery.server.database.worlddata_db import WorldDataDB
-from muddery.common.utils.utils import classes_in_path
 from muddery.server.database.gamedata.base_data import BaseData
+from muddery.server.mappings.event_action_set import EventActionSet
 
 
 class Server(Singleton):
@@ -27,6 +28,9 @@ class Server(Singleton):
     async def init(self):
         await self.connect_db()
         await self.create_the_world()
+
+        # load event actions
+        await EventActionSet.inst().load()
 
         # load commands
         from muddery.server.commands import combat, general, player, unloggedin

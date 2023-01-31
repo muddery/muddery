@@ -6,13 +6,14 @@ in the character. It controls quest's objectives.
 
 """
 
-from muddery.server.statements.statement_handler import STATEMENT_HANDLER
+from muddery.common.utils import defines
+from muddery.common.utils.utils import async_wait, async_gather
+from muddery.server.utils.logger import logger
 from muddery.server.database.worlddata.dialogues import Dialogues
 from muddery.server.database.worlddata.dialogue_relations import DialogueRelations
-from muddery.server.database.worlddata.dialogue_quests import DialogueQuests
 from muddery.server.elements.base_element import BaseElement
-from muddery.server.mappings.quest_status_set import QUEST_STATUS_SET
-from muddery.common.utils.utils import async_gather
+from muddery.server.statements.statement_handler import STATEMENT_HANDLER
+from muddery.server.mappings.dialogue_set import DialogueSet
 
 
 class MudderyDialogue(BaseElement):
@@ -21,6 +22,18 @@ class MudderyDialogue(BaseElement):
     """
     element_type = "DIALOGUE"
     element_name = "Dialogue"
+
+    def __init__(self, *agrs, **wargs):
+        """
+        Initial the object.
+        """
+        super(MudderyDialogue, self).__init__(*agrs, **wargs)
+
+        self.content = ""
+        self.event = None
+        self.provide_quest = []
+        self.finish_quest = []
+        self.nexts = []
 
     async def load_data(self, key, level=None):
         """
@@ -38,24 +51,22 @@ class MudderyDialogue(BaseElement):
             dialogue_record = Dialogues.get(key)
             dialogue_record = dialogue_record[0]
         except Exception as e:
+            logger.log_err("Can not load dialogue: %s" % key)
             return
 
         # Add db fields to data object.
         self.content = dialogue_record.content
-        self.condition = dialogue_record.condition
 
-        dependencies = DialogueQuests.get(key)
-        self.dependencies = [{
-            "quest": d.dependency,
-            "type": d.type
-        } for d in dependencies]
+        records = DialogueRelations.get(key)
+        self.nexts = [{
+            "key": record.next_dlg,
+            "condition": record.condition,
+            "otherwise": record.otherwise,
+        } for record in records]
 
-        self.event = None
-        self.provide_quest = []
-        self.finish_quest = []
-
-        nexts = DialogueRelations.get(key)
-        self.nexts = [next_one.next_dlg for next_one in nexts]
+        if self.nexts:
+            # load dialogues to the cache
+            await async_wait([DialogueSet.inst().load_dialogue(item["key"]) for item in self.nexts])
 
     def get_content(self):
         """
@@ -63,35 +74,6 @@ class MudderyDialogue(BaseElement):
         :return:
         """
         return self.content
-
-    async def match_condition(self, caller, npc):
-        """
-        Check the dialogue's condition.
-
-        :param caller:
-        :param npc:
-        :return:
-        """
-        return await STATEMENT_HANDLER.match_condition(self.condition, caller, npc)
-
-    async def match_dependencies(self, caller):
-        """
-        Check the dialogue's dependencies.
-
-        :param caller:
-        :param npc:
-        :return:
-        """
-        statuses = [QUEST_STATUS_SET.get(dep["type"]) for dep in self.dependencies]
-        quests = [dep["quest"] for dep in self.dependencies]
-        awaits = [status.match(caller, quest) for status, quest in zip(statuses, quests)]
-        if awaits:
-            matches = await async_gather(awaits)
-
-            # If there is a False in matches, it will return False, else return True.
-            return min(matches)
-        else:
-            return True
 
     async def can_finish_quest(self, caller):
         """
@@ -108,9 +90,68 @@ class MudderyDialogue(BaseElement):
         else:
             return False
 
-    def get_next_dialogues(self):
+    async def get_next_dialogues(self, caller, npc):
         """
+        Get dialogues next to this dialogue.
 
-        :return:
+        Args:
+            caller: (object) the character who want to start a talk.
+            npc: (object) the NPC that the character want to talk to.
+
+        Returns:
+            sentences: (list) a list of available sentences.
         """
-        return self.nexts
+        if not self.nexts:
+            return
+
+        target = {}
+        if npc:
+            target = {
+                "id": npc.get_id(),
+                "name": npc.get_name(),
+                "icon": getattr(npc, "icon", None),
+            }
+
+        dialogues = []
+
+        if self.nexts:
+            candidates = [item for item in self.nexts if not item["otherwise"]]
+            if candidates:
+                matches = await async_gather([STATEMENT_HANDLER.match_condition(item["condition"], caller, npc)
+                                              for item in candidates])
+                dialogues = [DialogueSet.inst().get_dialogue(item["key"]) for index, item in enumerate(candidates)
+                             if matches[index]]
+
+            if not dialogues:
+                # Get otherwise sentences.
+                dialogues = [DialogueSet.inst().get_dialogue(item["key"]) for item in self.nexts if item["otherwise"]]
+
+        dialogues = [{"key": d.get_element_key(), "content": d.get_content()} for d in dialogues]
+
+        return {
+            "target": target,
+            "dialogues": dialogues,
+        }
+
+    async def finish_dialogue(self, caller, npc):
+        """
+        A dialogue finished, do its action.
+        args:
+            caller (object): the dialogue caller
+            npc (object, optional): the dialogue's NPC, can be None
+        """
+        results = {}
+
+        if not caller:
+            return results
+
+        # do dialogue's event
+        events = await caller.event.at_dialogue(self.get_element_key())
+        if events:
+            results["events"] = events
+
+        quests = await caller.quest_handler.at_objective(defines.OBJECTIVE_TALK, self.get_element_key())
+        if quests:
+            results["quests"] = quests
+
+        return results
