@@ -3,8 +3,12 @@
  * Derive from the base class.
  */
 FlowEditor = function() {
-    this.box_width = 120;
+    this.box_width = 160;
     this.box_height = 40;
+
+    this.box_gap_x = 60;
+    this.box_gap_y = 30;
+
     this.path_color = "#666";
 
     this.path_index = 0;
@@ -94,32 +98,25 @@ FlowEditor.prototype.createBox = function(info, x, y) {
         paths: {}
     }
 
+    var text = info.key;
+    if (info.name) {
+        text = info.name + "<br>(" + info.key + ")";
+    }
+
     var box = $("<div>")
         .attr("id", "box-" + info.key)
         .data("key", info.key)
+        .height(this.box_height)
+        .html(text)
         .addClass("element-box")
         .appendTo($("#container"));
 
     box.css({
+        "min-width": this.box_width,
         "left": x - box.outerWidth() / 2,
         "top": y - box.outerHeight() / 2,
         "position": "absolute"
     });
-
-    if (info.name) {
-        var name = $("<div>")
-            .attr("id", "boxname-" + info.key)
-            .addClass("element-box-name")
-            .text(info.name)
-            .appendTo($("#container"));
-
-        var width = name.width();
-
-        name.css({
-            "left": x - name.width() / 2,
-            "top": y - name.height() / 2,
-            "position": "absolute"});
-    }
 }
 
 /*
@@ -1286,55 +1283,185 @@ FlowEditor.prototype.refresh = function(param) {
  * Query the flow's data success.
  */
 FlowEditor.prototype.queryFlowSuccess = function(data) {
-    // Clear map.
+    controller.origin_flow = data;
+    controller.drawFlowGraph(data);
+}
+
+
+/*
+ * Draw the flow graph.
+ */
+FlowEditor.prototype.drawFlowGraph = function(data) {
+    // Clear graph.
     $("#container>.element-box").remove();
     $("#container>.element-box-name").remove();
     var svg = document.getElementById("map-svg");
     svg.innerHTML = "";
 
-    if (!controller.origin_flow) {
-        controller.origin_flow = data;
-    }
-
     controller.boxes = {};
     controller.paths = {};
 
+    // sort nodes by levels
+    var levels = [];
+
     // heads
+    var all_positions = {};
+    var level = [];
     for (var i = 0; i < data.heads.length; i++) {
-        var box_info = data.nodes[heads[i]];
+        var box_info = data.nodes[data.heads[i]];
+        box_info.key = data.heads[i];
+        box_info.previous = [];
 
-        var x = box_width * i + box_width / 2 + 20;
-        var y = box_height / 2 + 20;
-        controller.createBox(box_info, x, y);
+        all_positions[data.heads[i]] = {
+            x: level.length,
+            y: levels.length
+        }
+        level.push(box_info);
+    }
+    levels.push(level);
 
-        for (var j = 0; j < box_info.nexts.length; j++) {
-            var next_box_info = data.nodes[box_info.nexts[j]];
-            controller.drawNextBox(box_info, next_box_info);
+    // other nodes
+    var current_level = level;
+    var max_width = levels[0].length;
+    var max_width_level = 0;
+    while (true) {
+        level = [];
+        for (var i = 0; i < current_level.length; i++) {
+            var node = current_level[i];
+            for (var j = 0; j < node.nexts.length; j++) {
+                var key = node.nexts[j].quest;
+                if (key in all_positions) {
+                    box_info.previous.push(node.key);
+                    continue;
+                }
+
+                var box_info = data.nodes[key];
+                box_info.key = key;
+                box_info.previous = [node.key];
+
+                all_positions[key] = {
+                    x: level.length,
+                    y: levels.length
+                }
+                level.push(box_info);
+            }
         }
 
-        /*
-        // exits
-        for (var i = 0; i < data.exits.length; i++) {
-            var exit_info = data.exits[i];
+        if (level.length > 0) {
+            if (level.length > max_width) {
+                max_width = level.length;
+                max_width_level = levels.length;
+            }
 
-            if (!(exit_info.location in controller.rooms)) {
-                controller.createOuterPath(exit_info);
-            }
-            else if (!(exit_info.destination in controller.rooms)) {
-                controller.createOuterPath(exit_info);
-            }
-            else {
-                controller.createPath(exit_info);
-            }
+            levels.push(level);
+            current_level = level;
         }
-        */
+        else {
+            break;
+        }
     }
 
+    var offset_x = 120;
+    var offset_y = 20;
+
+    // draw the max width level
+    for (var j = 0; j < levels[max_width_level].length; j++) {
+        var x = j * this.box_width + offset_x;
+        var y = max_width_level * this.box_height + offset_y;
+        this.createBox(levels[max_width_level][j], x, y);
+    }
+
+    var getUpperRange = function(node) {
+        var node_position = all_positions[node.key];
+
+        var left_next = max_width;
+        var right_next = 0;
+        for (var n = 0; n < node.previous.length; n++) {
+            var pre_position = all_positions[box_info.previous[n]];
+            if (pre_position.y != node_position.y - 1) {
+                continue;
+            }
+
+            if (pre_position.x < left_next) {
+                left_next = pre_position.x;
+            }
+
+            if (pre_position.x > right_next) {
+                right_next = pre_position.x;
+            }
+        }
+
+        return {
+            left: left_next,
+            right: right_next
+        }
+    }
+
+    var getLowerRange = function(node) {
+        var node_position = all_positions[node.key];
+
+        var left_next = max_width;
+        var right_next = 0;
+        for (var n = 0; n < node.nexts.length; n++) {
+            var next_position = all_positions[box_info.nexts[n]];
+            if (next_position.y != node_position.y + 1) {
+                continue;
+            }
+
+            if (next_position.x < left_next) {
+                left_next = next_position.x;
+            }
+
+            if (next_position.x > right_next) {
+                right_next = next_position.x;
+            }
+        }
+
+        return {
+            left: left_next,
+            right: right_next
+        }
+    }
+
+    // draw upper part
+    for (var i = max_width_level - 1; i >= 0; i--) {
+        for (var j = 0; j < levels[i].length; j++) {
+            var box_info = levels[i][j];
+
+            var range = getLowerRange(box_info);
+            if (range.left > range.right) {
+                range = getUpperRange(box_info);
+            }
+
+            var x = (range.left + range.right) / 2 * (this.box_width + this.box_gap_x) + offset_x;
+            var y = i * (this.box_height + this.box_gap_y) + offset_y;
+            this.createBox(levels[i][j], x, y);
+        }
+    }
+
+    // draw lower part
+    for (var i = max_width_level + 1; i < levels.length; i++) {
+        for (var j = 0; j < levels[i].length; j++) {
+            var box_info = levels[i][j];
+
+            var range = getUpperRange(box_info);
+
+            var x = (range.left + range.right) / 2 * (this.box_width + this.box_gap_x) + offset_x;
+            var y = i * (this.box_height + this.box_gap_y) + offset_y;
+            this.createBox(levels[i][j], x, y);
+        }
+    }
+
+    var total_width = max_width * (this.box_width + this.box_gap_x) + offset_x;
+    var total_height = levels.length * (this.box_height + this.box_gap_y) + offset_y;
+
+    $("#container").width(total_width);
+    $("#container").height(total_height);
+
+    $("#map-svg").width(total_width);
+    $("#map-svg").height(total_height);
+
     window.parent.controller.setFrameSize();
-}
-
-FlowEditor.prototype.drawNextBox(from_box, to_box) {
-
 }
 
 

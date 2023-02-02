@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title></title>
+        <meta name="HandheldFriendly" content="True" />
+        <link href="../css/bootstrap.min.css?hash=08df9a96" rel="stylesheet" type="text/css" />
+        <link href="../css/bootstrap-table.min.css?hash=d819dada" rel="stylesheet" type="text/css" />
+        <link href="../css/main.css?hash=58d3930d" rel="stylesheet" type="text/css" />
+        <link href="../css/common_editor.css?hash=4631bf63" rel="stylesheet" type="text/css" />
+        <link href="../css/flow_editor.css?hash=ca98c91f" rel="stylesheet" type="text/css" />
+    </head>
+
+    <body>
+        <form class="form-horizontal">
+            <fieldset>
+                <legend id="legend">
+                    <div id="form-name" class="pull-left">
+                    </div>
+                    <div class="pull-right">
+                        <button id="exit-button" type="button" class="btn btn-default right hidden">Exit</button>
+                        <button id="save-record" type="button" class="btn btn-success right hidden">Save</button>
+                    </div>
+                </legend>
+            </fieldset>
+        </form>
+        <div id="editor-window">
+            <div id="window-left">
+                <div id="window-map">
+                    <div id="container">
+                        <svg id="map-svg" version="1.1"  xmlns="http://www.w3.org/2000/svg">
+                        </svg>
+                    </div>
+                </div>
+            </div>
+            <div id="window-right">
+                <div class="block">
+                    <button id="add-box" type="button" class="btn btn-default">添加</button>
+                </div>
+            </div>
+        </div>
+        <script src="../libs/jquery-3.2.1.min.js?hash=1055018c" type="text/javascript"></script>
+        <script src="../libs/bootstrap.min.js?hash=b07a5be9" type="text/javascript"></script>
+        <script src="../libs/bootstrap-table.min.js?hash=f367ac61" type="text/javascript"></script>
+        <script src="../libs/jsencrypt/jsencrypt.min.js?hash=733d4d1a" type="text/javascript"></script>
+        <script src="../config.js?hash=3b615658" type="text/javascript"></script>
+        <script src="../service/service.js?hash=64cf9359" type="text/javascript"></script>
+        <script src="../utils/utils.js?hash=b5e16be9" type="text/javascript"></script>
+        <script src="../controller/map_editor.js?hash=ed26c68a" type="text/javascript"></script>
+        <script src="../controller/flow_editor.js?hash=ed26c68a" type="text/javascript"></script>
+        <script type="text/javascript">
+            var controller = new FlowEditor();
+            $(document).ready(function() {controller.init()});
+        </script>
+    </body>
+
+</html>
