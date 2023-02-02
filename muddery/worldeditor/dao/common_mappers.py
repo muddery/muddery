@@ -78,7 +78,7 @@ DEFAULT_SKILLS = CommonMapper("default_skills")
 
 QUEST_OBJECTIVES = CommonMapper("quest_objectives")
 
-QUEST_DEPENDENCIES = CommonMapper("quest_dependencies")
+QUEST_RELATIONS = CommonMapper("quest_relations")
 
 EVENT_DATA = CommonMapper("event_data")
 

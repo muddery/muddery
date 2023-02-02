@@ -1,0 +1,5 @@
+quest,pre_quest,necessary
+quest_find_guardhouse_key,quest_find_survivor,1
+quest_find_binder,quest_find_guardhouse_key,1
+quest_find_screws,quest_find_binder,1
+quest_kill_robots,quest_find_screws,1

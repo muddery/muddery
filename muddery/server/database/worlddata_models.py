@@ -918,12 +918,12 @@ class quest_objectives(BaseModel):
 # store quest dependencies
 #
 # ------------------------------------------------------------
-class quest_dependencies(BaseModel):
-    "Store quest dependency."
-    __tablename__ = "quest_dependencies"
+class quest_relations(BaseModel):
+    "Store quest relations."
+    __tablename__ = "quest_relations"
 
     __table_args__ = (
-        UniqueConstraint("quest", "dependency", "type"),
+        UniqueConstraint("quest", "pre_quest"),
     )
 
     # The key of a quest.
@@ -931,12 +931,11 @@ class quest_dependencies(BaseModel):
     quest = Column(String(KEY_LENGTH), index=True, nullable=False)
 
     # The key of a quest.
-    # quest that dependends on
-    dependency = Column(String(KEY_LENGTH), nullable=False)
+    # players need to finish the pre_quest first
+    pre_quest = Column(String(KEY_LENGTH), index=True, nullable=False)
 
-    # The key of a quest dependency type.
-    # dependency's type
-    type = Column(String(KEY_LENGTH), nullable=False)
+    # Players need to finish all necessary pre_quests to get the next quest.
+    necessary = Column(Boolean, default=True)
 
 
 # ------------------------------------------------------------

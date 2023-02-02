@@ -242,14 +242,13 @@ controller = {
         else if (editor_type == "dialogue") {
             url = "dialogue_editor.html";
         }
-        else if (editor_type == "sentence") {
-            url = "dialogue_sentence_editor.html";
-        }
         else {
             url = "common_editor.html";
         }
 
-        url += "?table=" + table_name
+        if (table_name) {
+            url += "?table=" + table_name
+        }
 
         if (record_id) {
             name = "Edit " + table_name;
@@ -273,7 +272,7 @@ controller = {
     },
 
     editElement: function(base_element_type, element_type, element_key, no_delete) {
-        var url = "matter_editor.html?base_element_type=" + base_element_type + "&element_type=" + element_type;
+        var url = "element_editor.html?base_element_type=" + base_element_type + "&element_type=" + element_type;
 
         var name = "";
         if (element_key) {
@@ -376,6 +375,21 @@ controller = {
         }
         else {
             name = "添加描述信息";
+        }
+
+        controller.pushPage(name, url, null);
+    },
+
+    editQuest: function(element_key) {
+        var url = "flow_editor.html";
+
+        var name = "";
+        if (element_key) {
+            name = "Edit Quest";
+            url += "?flow=" + element_key;
+        }
+        else {
+            name = "Add Quest";
         }
 
         controller.pushPage(name, url, null);

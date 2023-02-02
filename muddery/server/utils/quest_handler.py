@@ -9,7 +9,7 @@ from muddery.server.utils.localized_strings_handler import _
 from muddery.common.utils.exception import MudderyError, ERR
 from muddery.server.utils.game_settings import GameSettings
 from muddery.server.database.worlddata.worlddata import WorldData
-from muddery.server.database.worlddata.quest_dependencies import QuestDependencies
+from muddery.server.database.worlddata.quest_relations import QuestRelations
 from muddery.server.mappings.element_set import ELEMENT
 from muddery.server.database.gamedata.character_quests import CharacterQuests
 from muddery.server.database.gamedata.character_finished_quests import CharacterFinishedQuests
@@ -64,7 +64,7 @@ class QuestHandler(object):
         if quest_key in self.quests or quest_key in self.finished_quests:
             return
 
-        # Create quest object.
+        # Create the quest object.
         quest = await self.create_quest(quest_key)
         await CharacterQuests.inst().add(self.owner.get_db_id(), quest_key)
         self.add_objectives(quest)
@@ -78,7 +78,7 @@ class QuestHandler(object):
         """
         Remove all quests.
         
-        It will be called when quests' owner will be deleted.
+        It will be called when quests' owner is going to be deleted.
         """
         self.quests = {}
         self.finished_quests = set()
@@ -103,7 +103,7 @@ class QuestHandler(object):
             raise MudderyError(_("Can not give up this quest."))
 
         try:
-            quest = self.get_quest(quest_key)
+            quest = self.quests[quest_key]
         except KeyError:
             raise MudderyError("Can not find this quest.")
 
@@ -130,7 +130,7 @@ class QuestHandler(object):
             None
         """
         try:
-            quest = self.get_quest(quest_key)
+            quest = self.quests[quest_key]
         except KeyError:
             raise MudderyError("Can not find this quest.")
 
@@ -166,7 +166,7 @@ class QuestHandler(object):
         if not self.is_in_progress(quest_key):
             return False
 
-        return await self.quests[quest_key]["obj"].is_accomplished()
+        return await self.quests[quest_key].is_accomplished()
 
     async def is_not_accomplished(self, quest_key):
         """
@@ -181,7 +181,7 @@ class QuestHandler(object):
         if not self.is_in_progress(quest_key):
             return False
 
-        return not await self.quests[quest_key]["obj"].is_accomplished()
+        return not await self.quests[quest_key].is_accomplished()
 
     def is_finished(self, quest_key):
         """
@@ -241,7 +241,19 @@ class QuestHandler(object):
         Returns:
             (boolean) result
         """
-        return True
+        records = QuestRelations.get(quest_key)
+        if not records:
+            return True
+
+        one_finished = False
+        for record in records:
+            if record.pre_quest in self.finished_quests:
+                one_finished = True
+            elif record.necessary:
+                # not all necessary pre_quests are finished.
+                return False
+
+        return one_finished
 
     async def match_condition(self, quest_key):
         """
@@ -265,12 +277,12 @@ class QuestHandler(object):
             logger.log_err("Can't get quest %s's condition: %s" % (quest_key, e))
         return False
 
-    async def get_quests(self):
+    async def get_quests_info(self):
         """
         Get quests' data.
         """
         if self.quests:
-            quests_info = await async_gather([quest["obj"].get_info() for quest in self.quests.values()])
+            quests_info = await async_gather([quest.get_info() for quest in self.quests.values()])
         else:
             quests_info = []
 
@@ -288,7 +300,7 @@ class QuestHandler(object):
     def calculate_objectives(self):
         objectives = {}
         for key, quest in self.quests.items():
-            objective_types = quest["obj"].get_objective_types()
+            objective_types = quest.get_objective_types()
             for objective_type in objective_types:
                 if objective_type not in objectives:
                     objectives[objective_type] = [key]
@@ -316,9 +328,9 @@ class QuestHandler(object):
         quest_keys = self.objectives[(object_type, object_key)]
         if quest_keys:
             # Check objectives.
-            quests = [self.get_quest(key) for key in quest_keys]
+            quests = [self.quests[key] for key in quest_keys]
             results = await async_gather([quest.at_objective(object_type, object_key, number) for quest in quests])
-            quests = [quest["obj"] for index, quest in enumerate(self.quests.values()) if results[index]]
+            quests = [quest for index, quest in enumerate(self.quests.values()) if results[index]]
 
             if quests:
                 # Check if quest is accomplished.
@@ -339,19 +351,9 @@ class QuestHandler(object):
         quest = ELEMENT("QUEST")()
         await quest.setup_element(quest_key)
         quest.set_character(self.owner.get_db_id())
-        self.quests[quest_key] = {
-            "obj": quest
-        }
+        self.quests[quest_key] = quest
 
         return quest
-
-    def get_quest(self, quest_key):
-        """
-        Get a quest object by its key.
-        :param quest_key:
-        :return:
-        """
-        return self.quests[quest_key]["obj"]
 
     async def get_quest_info(self, quest_key):
         """
@@ -360,7 +362,7 @@ class QuestHandler(object):
         :return:
         """
         try:
-            quest = self.get_quest(quest_key)
+            quest = self.quests[quest_key]
         except KeyError:
             raise MudderyError(ERR.invalid_input, _("Can not find the quest."))
 

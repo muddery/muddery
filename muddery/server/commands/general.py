@@ -585,7 +585,7 @@ async def all_quests(character, args) -> dict or None:
             "cmd": "all_quests"
         }
     """
-    return await character.get_quests()
+    return await character.get_quests_info()
 
 
 @CharacterCmd.request("query_quest")

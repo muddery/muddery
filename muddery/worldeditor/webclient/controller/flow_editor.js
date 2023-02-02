@@ -421,9 +421,9 @@ FlowEditor.prototype.dragBox = function(event) {
  ***********************************/
 
 /*
- * On mouse up on a room.
+ * On mouse up on a box.
  */
-MapEditor.prototype.onRoomMouseUp = function(event) {
+FlowEditor.prototype.onBoxMouseUp = function(event) {
     if (controller.mode == "DRAG_PATH") {
         // Drop the new path.
         controller.dropPathOnRoom(event);
@@ -1264,19 +1264,12 @@ MapEditor.prototype.deleteExitSuccess = function(data, exit_info) {
 }
 
 
-MapEditor.prototype.refresh = function(param) {
-    if (param && "element_type" in param) {
-        if (param.element_type == this.area_element_type) {
-            if ("key" in param) {
-                this.area_key = param.key;
-            }
-        }
-    }
-
-    if (this.area_key) {
-        service.queryMap(this.area_key, this.queryMapSuccess, this.failedCallback);
+FlowEditor.prototype.refresh = function(param) {
+    if (this.flow_key) {
+        service.queryQuestsChain(this.flow_key, this.queryFlowSuccess, this.failedCallback);
     }
     else {
+        /*
         service.addArea(
             this.area_element_type,
             this.default_map_width,
@@ -1284,117 +1277,64 @@ MapEditor.prototype.refresh = function(param) {
             this.addAreaSuccess,
             this.addAreaFailed,
         );
+        */
     }
 }
 
 
 /*
- * Query the map's data success.
+ * Query the flow's data success.
  */
-MapEditor.prototype.queryMapSuccess = function(data) {
+FlowEditor.prototype.queryFlowSuccess = function(data) {
     // Clear map.
-    $("#container>.element-room").remove();
-    $("#container>.element-room-name").remove();
+    $("#container>.element-box").remove();
+    $("#container>.element-box-name").remove();
     var svg = document.getElementById("map-svg");
     svg.innerHTML = "";
 
-    if (!controller.origin_map) {
-        controller.origin_map = data;
+    if (!controller.origin_flow) {
+        controller.origin_flow = data;
     }
 
-    // Show the map's name.
-    var name = data.area.name? data.area.name: "";
-    var key = data.area.key? data.area.key: "";
-    $("#form-name").text(name + "(" + key + ")");
-
-    controller.background = "";
-    controller.rooms = {};
+    controller.boxes = {};
     controller.paths = {};
 
-    // Draw the background.
+    // heads
+    for (var i = 0; i < data.heads.length; i++) {
+        var box_info = data.nodes[heads[i]];
 
-    /*
-    var map_scale = 1;
-    var map_room_size = 40;
-    var original_point_x = 0;
-    var original_point_y = 0;
-    */
+        var x = box_width * i + box_width / 2 + 20;
+        var y = box_height / 2 + 20;
+        controller.createBox(box_info, x, y);
 
-    // area
-    controller.background = data.area.background;
-
-    /*
-    map_scale = data.area.map_scale | 1;
-    map_room_size = data.area.map_room_size | 40;
-
-    var background_point_x = 0;
-    var background_point_y = 0;
-    var corresp_pos_x = 0;
-    var corresp_pos_y = 0;
-
-    if (data.area.background_point) {
-        background_point_x = data.area.background_point[0];
-        background_point_y = data.area.background_point[1];
-    }
-
-    if (data.area.corresp_map_pos) {
-        corresp_pos_x = data.area.corresp_map_pos[0];
-        corresp_pos_y = data.area.corresp_map_pos[1];
-    }
-
-    original_point_x = background_point_x - corresp_pos_x * map_scale;
-    original_point_y = background_point_y + corresp_pos_y * map_scale;
-    */
-
-    if (controller.background) {
-        controller.area_width = data.area.width || 0;
-        controller.area_height = data.area.height || 0;
-        $("#map-image")
-            .attr("src", CONFIG.resource_url + controller.background);
-    }
-    else {
-        controller.area_width = data.area.width || controller.default_map_width;
-        controller.area_height = data.area.height || controller.default_map_height;
-        $("#map-image")
-            .attr("src", controller.blank_map);
-
-    }
-
-    // rooms
-    for (var i = 0; i < data.rooms.length; i++) {
-        var room_info = data.rooms[i];
-
-        var x = 0;
-        var y = 0;
-        if (room_info.position) {
-            x = room_info.position[0];
-            y = room_info.position[1];
-            //x = original_point_x + room_info.position[0] * map_scale;
-            //y = original_point_y - room_info.position[1] * map_scale;
+        for (var j = 0; j < box_info.nexts.length; j++) {
+            var next_box_info = data.nodes[box_info.nexts[j]];
+            controller.drawNextBox(box_info, next_box_info);
         }
-        else {
-            x = controller.area_width / 2;
-            y = controller.area_height / 2;
-        }
-        controller.createRoom(room_info, x, y);
-    }
 
-    // exits
-    for (var i = 0; i < data.exits.length; i++) {
-        var exit_info = data.exits[i];
+        /*
+        // exits
+        for (var i = 0; i < data.exits.length; i++) {
+            var exit_info = data.exits[i];
 
-        if (!(exit_info.location in controller.rooms)) {
-            controller.createOuterPath(exit_info);
+            if (!(exit_info.location in controller.rooms)) {
+                controller.createOuterPath(exit_info);
+            }
+            else if (!(exit_info.destination in controller.rooms)) {
+                controller.createOuterPath(exit_info);
+            }
+            else {
+                controller.createPath(exit_info);
+            }
         }
-        else if (!(exit_info.destination in controller.rooms)) {
-            controller.createOuterPath(exit_info);
-        }
-        else {
-            controller.createPath(exit_info);
-        }
+        */
     }
 
     window.parent.controller.setFrameSize();
+}
+
+FlowEditor.prototype.drawNextBox(from_box, to_box) {
+
 }
 
 

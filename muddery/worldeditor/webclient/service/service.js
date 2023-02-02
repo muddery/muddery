@@ -440,6 +440,13 @@ service = {
         this.sendRequest("query_dialogues_table", "", {}, callback_success, callback_failed);
     },
 
+    queryQuestsChain: function(quest_key, callback_success, callback_failed) {
+        var args = {
+            quest_key: quest_key
+        };
+        this.sendRequest("query_quests_chain", "", args, callback_success, callback_failed);
+    },
+
     saveElementLevelProperties: function(element_type, element_key, level, values, callback_success, callback_failed) {
         var args = {
             element_type: element_type,

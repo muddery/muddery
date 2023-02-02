@@ -59,6 +59,35 @@ class FuncIsQuestAccomplished(StatementFunction):
         return await self.caller.quest_handler.is_accomplished(quest_key)
 
 
+class FuncIsQuestNotAccomplished(StatementFunction):
+    """
+    The player is doing this quest and not all objectives of this quest are accomplished.
+
+    Args:
+        args[0]: (string) quest's key
+
+    Returns:
+        boolean result
+    """
+
+    key = "is_quest_not_accomplished"
+    const = True
+
+    async def func(self):
+        """
+        Implement the function.
+        """
+        if not self.args:
+            return False
+
+        quest_key = self.args[0]
+
+        if not self.caller.quest_handler.is_in_progress(quest_key):
+            return False
+
+        return not await self.caller.quest_handler.is_accomplished(quest_key)
+
+
 class FuncIsQuestInProgress(StatementFunction):
     """
     If the caller is doing specified quest.

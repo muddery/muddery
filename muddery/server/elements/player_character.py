@@ -477,11 +477,11 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
 
         return self.location.get_surroundings(self)
 
-    async def get_quests(self):
+    async def get_quests_info(self):
         """
         Get player's quests info.
         """
-        return await self.quest_handler.get_quests()
+        return await self.quest_handler.get_quests_info()
 
     ################################################
     #

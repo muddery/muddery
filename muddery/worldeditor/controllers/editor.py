@@ -865,6 +865,27 @@ class QueryDialoguesTable(BaseRequestProcesser):
         return success_response(data)
 
 
+class QueryQuestsChain(BaseRequestProcesser):
+    """
+    Query a chain of quests by their relations.
+
+    Args:
+        key.
+    """
+    path = "query_quests_chain"
+    name = ""
+
+    async def func(self, args, request):
+        if 'quest_key' not in args:
+            raise MudderyError(ERR.missing_args, 'Missing the argument: "quest_key".')
+
+        quest_key = args["quest_key"]
+
+        quests_chain = data_query.query_quests_chain(quest_key)
+
+        return success_response(quests_chain)
+
+
 class ApplyChanges(BaseRequestProcesser):
     """
     Query all tables' names.

@@ -3,6 +3,8 @@ Battle commands. They only can be used when a character is in a combat.
 """
 
 import ast
+import traceback
+
 from sqlalchemy.sql import text
 from muddery.common.utils.exception import MudderyError, ERR
 from muddery.common.utils.defines import EventType
@@ -10,7 +12,7 @@ from muddery.server.mappings.element_set import ELEMENT_SET, ELEMENT
 from muddery.server.database.worlddata_db import WorldDataDB
 from muddery.worldeditor.utils.localized_strings import LocalizedStrings
 from muddery.worldeditor.utils.logger import logger
-from muddery.worldeditor.dao.common_mappers import WORLD_AREAS
+from muddery.worldeditor.dao.common_mappers import WORLD_AREAS, QUESTS, QUEST_RELATIONS
 from muddery.worldeditor.dao.world_rooms_mapper import WorldRoomsMapper
 from muddery.worldeditor.dao.world_exits_mapper import WorldExitsMapper
 from muddery.worldeditor.dao.element_properties_mapper import ElementPropertiesMapper
@@ -493,3 +495,55 @@ def query_dialogues_table():
     }
 
     return table
+
+
+def query_quests_chain(quest_key):
+    """
+    Query a chain of quests by their relations.
+
+    :param quest_key:
+    :return:
+    """
+    heads = set()
+    nodes = {}
+
+    def add_node(key):
+        if key in nodes:
+            return
+
+        record = QUESTS.get({"key": key})
+        if not record:
+            return
+
+        nodes[key] = {
+            "name": record.name,
+        }
+
+        get_heads(key)
+        nodes[key]["nexts"] = get_followers(key)
+
+    def get_heads(key):
+        records = QUEST_RELATIONS.filter({"quest": key})
+        if records:
+            for r in records:
+                add_node(r.pre_quest)
+        else:
+            heads.add(key)
+
+    def get_followers(key):
+        records = QUEST_RELATIONS.filter({"pre_quest": key})
+        for record in records:
+            if record.quest not in nodes:
+                add_node(record.quest)
+
+        return [{
+            "quest": r.quest,
+            "necessary": r.necessary
+        } for r in records]
+
+    add_node(quest_key)
+
+    return {
+        "heads": list(heads),
+        "nodes": nodes
+    }

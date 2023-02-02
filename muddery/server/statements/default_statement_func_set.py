@@ -41,6 +41,7 @@ class ConditionFuncSet(BaseStatementFuncSet):
         """
         self.add(condition.FuncIsQuestAccepted)
         self.add(condition.FuncIsQuestAccomplished)
+        self.add(condition.FuncIsQuestNotAccomplished)
         self.add(condition.FuncIsQuestInProgress)
         self.add(condition.FuncCanProvideQuest)
         self.add(condition.FuncIsQuestFinished)

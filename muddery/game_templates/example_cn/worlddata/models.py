@@ -393,7 +393,7 @@ class quest_objectives(BaseModels.quest_objectives):
 # store quest dependencies
 #
 #------------------------------------------------------------
-class quest_dependencies(BaseModels.quest_dependencies):
+class quest_relations(BaseModels.quest_relations):
     "Store quest dependency."
     pass
 

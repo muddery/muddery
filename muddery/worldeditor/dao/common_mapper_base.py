@@ -81,7 +81,7 @@ class CommonMapper(object):
         result = self.session.execute(stmt)
 
         if result.rowcount == 0:
-            # Can not found the record to update, insert a new record.
+            # Can not find the record to update, insert a new record.
             data = dict(condition, **values)
             record = self.model(**data)
             self.session.add(record)
