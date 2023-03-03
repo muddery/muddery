@@ -42,6 +42,7 @@ FlowEditor.prototype.bindEvents = function() {
     $("#save-record").on("click", this.onSave);
 
     // Mouse down on a box.
+    /*
     $("#container").on("mousedown", ".element-room", this.onBoxMouseDown);
 
     // Mouse move on the container.
@@ -52,6 +53,7 @@ FlowEditor.prototype.bindEvents = function() {
 
     // Mouse up on the container.
     $("#container").on("mouseup", this.onContainerMouseUp);
+    */
 }
 
 FlowEditor.prototype.onExit = function() {
@@ -1298,8 +1300,8 @@ FlowEditor.prototype.drawFlowGraph = function(data) {
     var svg = document.getElementById("map-svg");
     svg.innerHTML = "";
 
-    controller.boxes = {};
-    controller.paths = {};
+    var boxes = {};
+    var links = {};
 
     // sort nodes by levels
     var levels = [];
@@ -1313,8 +1315,8 @@ FlowEditor.prototype.drawFlowGraph = function(data) {
         box_info.previous = [];
 
         all_positions[data.heads[i]] = {
-            x: level.length,
-            y: levels.length
+            col: level.length,
+            row: levels.length
         }
         level.push(box_info);
     }
@@ -1330,8 +1332,9 @@ FlowEditor.prototype.drawFlowGraph = function(data) {
             var node = current_level[i];
             for (var j = 0; j < node.nexts.length; j++) {
                 var key = node.nexts[j].quest;
+                links.append({source: node.key, target: key})
+
                 if (key in all_positions) {
-                    box_info.previous.push(node.key);
                     continue;
                 }
 
@@ -1340,8 +1343,8 @@ FlowEditor.prototype.drawFlowGraph = function(data) {
                 box_info.previous = [node.key];
 
                 all_positions[key] = {
-                    x: level.length,
-                    y: levels.length
+                    col: level.length,
+                    row: levels.length
                 }
                 level.push(box_info);
             }
@@ -1361,14 +1364,17 @@ FlowEditor.prototype.drawFlowGraph = function(data) {
         }
     }
 
+    // set nodes positions
     var offset_x = 120;
     var offset_y = 20;
 
     // draw the max width level
     for (var j = 0; j < levels[max_width_level].length; j++) {
+        var key = levels[max_width_level][j].key;
         var x = j * this.box_width + offset_x;
         var y = max_width_level * this.box_height + offset_y;
-        this.createBox(levels[max_width_level][j], x, y);
+        all_positions[key].x = x;
+        all_positions[key].y = y;
     }
 
     var getUpperRange = function(node) {
@@ -1435,7 +1441,8 @@ FlowEditor.prototype.drawFlowGraph = function(data) {
 
             var x = (range.left + range.right) / 2 * (this.box_width + this.box_gap_x) + offset_x;
             var y = i * (this.box_height + this.box_gap_y) + offset_y;
-            this.createBox(levels[i][j], x, y);
+            all_positions[box_info.key].x = x;
+            all_positions[box_info.key].y = y;
         }
     }
 
@@ -1448,18 +1455,150 @@ FlowEditor.prototype.drawFlowGraph = function(data) {
 
             var x = (range.left + range.right) / 2 * (this.box_width + this.box_gap_x) + offset_x;
             var y = i * (this.box_height + this.box_gap_y) + offset_y;
-            this.createBox(levels[i][j], x, y);
+            all_positions[box_info.key].x = x;
+            all_positions[box_info.key].y = y;
         }
     }
 
     var total_width = max_width * (this.box_width + this.box_gap_x) + offset_x;
     var total_height = levels.length * (this.box_height + this.box_gap_y) + offset_y;
 
+    var svg = d3.select("#container")
+        .append("svg")
+        .attr("width", total_width)
+        .attr("height", total_height)
+        .attr("stroke-width", 1)
+        .attr("stroke", "black")
+        .attr("fill", "#FFFFFF")
+        .style("background", "#F5F5F5");
+
+    var drag = d3.drag()
+        .on("start", function(event, d) {
+            d3.select(this)
+                .attr("stroke-width", 3);
+        })
+        .on("drag", function(event, d) {
+            d3.select(this)
+                .attr("x", d.x = event.x)
+                .attr("y", d.y = event.y);
+            simulation.alpha(0).restart();
+        })
+        .on("end", function(event, d) {
+            d3.select(this)
+                .attr("stroke-width", 1);
+        });
+
+    var marker = svg.append("defs").append("marker")
+        .attr("id", "arrow")
+        .attr("viewBox", "0 -5 13 10")
+        .attr("refX", 15)
+        .attr("refY", -0.5)
+        .attr("markerWidth", 6)
+        .attr("markerHeight", 6)
+        .attr("orient", "auto")
+        .attr("stroke", "#000000")
+        .attr("stroke-width", 2)
+        .append("path")
+        .attr("d", "M0,-5L13,0L0,5")
+        .attr("fill", "#000");
+
+    var link = svg.selectAll(".line")
+      .data(links)
+      .join("line")
+      .attr("fill", "#000000")
+      .attr("stroke", "#000000")
+      .attr("stroke-width", 1.5)
+      .attr("class", "line")
+      .attr("marker-end", "url(#arrow)")
+      .classed("link", true);
+
+    var node = svg.selectAll(".node")
+        .data(nodes)
+        .join("rect")
+        .attr("class", "node")
+        .attr("width", this.box_width)
+        .attr("height", this.box_height)
+        .classed("node", true)
+        .call(drag);
+
+    function tick() {
+        link
+            .attr("x1", d => {
+                var dx = d.source.x - d.target.x;
+                var dy = d.source.y - d.target.y;
+                var margin_x = 0;
+                if (dx > 0 && Math.abs(dx) > Math.abs(dy)) {
+                    margin_x = -10;
+                }
+                else if (dx < 0 && Math.abs(dx) > Math.abs(dy)) {
+                    margin_x = 10;
+                }
+
+                return d.source.x + margin_x;
+            })
+            .attr("y1", d => {
+                var dx = d.source.x - d.target.x;
+                var dy = d.source.y - d.target.y;
+                var margin_y = 0;
+                if (dy > 0 && Math.abs(dx) < Math.abs(dy)) {
+                    margin_y = -10;
+                }
+                else if (dy < 0 && Math.abs(dx) < Math.abs(dy)) {
+                    margin_y = 10;
+                }
+
+                return d.source.y + margin_y;
+            })
+            .attr("x2", d => {
+                var dx = d.target.x - d.source.x;
+                var dy = d.target.y - d.source.y;
+                var margin_x = 0;
+                if (dx > 0 && Math.abs(dx) > Math.abs(dy)) {
+                    margin_x = -10;
+                }
+                else if (dx < 0 && Math.abs(dx) > Math.abs(dy)) {
+                    margin_x = 10;
+                }
+
+                return d.target.x + margin_x;
+            })
+            .attr("y2", d => {
+                var dx = d.target.x - d.source.x;
+                var dy = d.target.y - d.source.y;
+                var margin_y = 0;
+                if (dy > 0 && Math.abs(dx) < Math.abs(dy)) {
+                    margin_y = -10;
+                }
+                else if (dy < 0 && Math.abs(dx) < Math.abs(dy)) {
+                    margin_y = 10;
+                }
+
+                return d.target.y + margin_y;
+            })
+
+        node
+          .attr("x", d => d.x - this.box_width / 2)
+          .attr("y", d => d.y - this.box_height / 2);
+    }
+
+    var simulation = d3
+        .forceSimulation()
+        .nodes(nodes)
+        .force("charge", d3.forceManyBody())
+        .force("link", d3.forceLink(links))
+        .on("tick", tick);
+
+    simulation.alpha(0).restart();
+
+    return
+
+    /*
     $("#container").width(total_width);
     $("#container").height(total_height);
 
     $("#map-svg").width(total_width);
     $("#map-svg").height(total_height);
+    */
 
     window.parent.controller.setFrameSize();
 }
@@ -1642,6 +1781,6 @@ MapEditor.prototype.exit = function() {
     setInterval(function() {window.parent.controller.popPage(true);}, 0);
 }
 
-MapEditor.prototype.exitNoChange = function() {
+FlowEditor.prototype.exitNoChange = function() {
     setInterval(function() {window.parent.controller.popPage(false);}, 0);
 }
