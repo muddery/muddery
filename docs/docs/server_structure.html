@@ -1,0 +1,181 @@
+
+<!DOCTYPE html>
+
+<html lang="zh_CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>5. 系统架构 &#8212; Muddery 0.8.0 文档</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/style.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/translations.js"></script>
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="搜索" href="../search.html" />
+    <link rel="next" title="6. 游戏世界架构" href="world_framework.html" />
+    <link rel="prev" title="4. 命令行操作" href="command_line.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="id1">
+<h1><span class="section-number">5. </span>系统架构<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h1>
+<section id="id2">
+<h2><span class="section-number">5.1. </span>整体结构<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
+<p>Muddery系统是一个开源的网络游戏框架，整个系统可分为三个部分：游戏服务器、网络客户端和游戏编辑器。</p>
+<ul class="simple">
+<li><p>游戏服务器使用 Python 编写，为游戏提供后台服务，处理游戏逻辑和数据存储，对外提供API接口供客户端调用。</p></li>
+<li><p>网络客户端使用 HTML/JavaScript 编写，游戏前后端分离，前端可以部署在任意的Web服务器上，系统也自带了一个简单的Web服务器。游戏客户端可以用浏览器打开，方便用户访问游戏。开发者也可以开发自己的客户端，只要遵守服务端的接口规则，都可以和游戏服务器对接。</p></li>
+<li><p>游戏编辑器使用 Python 和 HTML/Javascript 编写，提供网页编辑界面，方便游戏开发者制作游戏，减少对游戏代码的编辑和修改，游戏数据可以打包导入、导出，可以直接提供给游戏服务器使用，方便游戏部署。</p></li>
+</ul>
+<p>服务器的关系见下图</p>
+<img alt="../_images/system_structure.png" src="../_images/system_structure.png" />
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+<section id="id3">
+<h2><span class="section-number">5.2. </span>游戏服务器<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h2>
+<p>游戏服务器是系统的核心，它负责管理用户连接、处理游戏逻辑、保存游戏运行状态等。</p>
+<p>服务器只负责处理游戏逻辑、保存游戏数据，不负责客户端的显示，服务器对外全部使用json格式传输信息。客户端会将玩家的操作格式化为一个json格式的字符串发送到服务器。服务器再将json格式的字符串解析成为操作命令，按游戏逻辑进行处理，然后再以json格式将处理结果返回给客户端。其他需要传递到客户端的数据也都是json格式的。客户端收到json格式的数据后，可以按自己的方式对数据进行解析处理。</p>
+<p>游戏服务器的结构可以分为5层：网络接入、消息处理、游戏逻辑、数据管理、数据存储，详见下图：</p>
+<img alt="../_images/server_structure.png" src="../_images/server_structure.png" />
+<ol class="arabic simple">
+<li><p>网络接入</p></li>
+</ol>
+<p>游戏服务器使用Websocket协议进行通讯，使用Sanic作为网络服务框架，对外提供网络接口，负责接受客户端发来的命令，并将服务器的消息推送给客户端。</p>
+<ol class="arabic simple" start="2">
+<li><p>消息处理</p></li>
+</ol>
+<p>网络接入层收到的命令会交给游戏服务器，服务器解析命令后会按照相应的逻辑进行处理。服务器发送给客户端的消息也通过消息处理层发送给客户端。</p>
+<ol class="arabic simple" start="3">
+<li><p>游戏逻辑</p></li>
+</ol>
+<p>游戏逻辑层是游戏服务器的核心功能，角色行为、对话、事件触发、任务完成等功能都在此处理。处理的结果会反馈给相关的客户端。</p>
+<ol class="arabic simple" start="4">
+<li><p>数据管理</p></li>
+</ol>
+<p>游戏数据可以分为两类：构建游戏世界的数据以及游戏中玩家的相关数据。游戏服务器运行时游戏世界的数据是不会变的，运行时加载到内存中以加快访问速度。玩家的数据以Key/Value的形式存储，使用内存缓存。</p>
+<ol class="arabic simple" start="5">
+<li><p>数据存储</p></li>
+</ol>
+<p>游戏数据可以选用多种存储方式，目前支持Sqlite3和MySQL，以后会增加支持Redis、Oracle等。Sqlite3仅可用于开发、测试使用，正式运行请使用MySQL。游戏世界的数据仅在服务器启动时加载到内存中，之后不再读取。玩家的数据会实时保存到数据库中。</p>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+<section id="id4">
+<h2><span class="section-number">5.3. </span>游戏客户端<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h2>
+<p>Muddery 提供了一个 HTML/JavaScript 编写的网页客户端，可以在网页浏览器上独立运行。页面完全由静态文件组成，通过 Websocket 和服务器通讯。客户端的页面文件可以放在任何一个静态网页服务器上，也可以打包成本地文件，以独立App的形式提供给玩家。</p>
+<p>客户端的可以将用户的操作，比如点击某个按钮的动作，组织成服务端可以识别的命令，以json格式的字符串发送到服务端。服务端发给客户端的数据也需要经过客户端的解析才能展示，比如地图、背包、任务、战斗等，服务端只发送数据，展示出来的形式完全由客户端决定。因此展示的形式可以是多种多样的，可以有文字、表格、图片等。</p>
+<p>用户也可以自己创建一个客户端，使用规定的协议和服务端交互信息，在前端用自己想要的形式展示游戏内容。</p>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+<section id="id5">
+<h2><span class="section-number">5.4. </span>游戏编辑器<a class="headerlink" href="#id5" title="永久链接至标题">¶</a></h2>
+<p>Muddery 提供了一套网页版的游戏编辑器，游戏制作人员可以在网页版的编辑器上直接修改游戏的内容，也可以使用Excel或文本编辑器直接修改游戏数据。</p>
+<p>Muddery系统的游戏数据存放在一张张数据表中，所有的房间、物品、NPC、对话、任务都由一张或几张表格构成。编辑这些表格然后将表格中的数据提交到服务器，就可以完成对游戏内容的更新。用户还可以从服务器导出游戏内容，放到表格文件或打包成zip文件中。这样可以很方便地将游戏内容部署到多个服务器上，便于多个服务器的管理。</p>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">Muddery</a></h1>
+
+
+
+
+
+
+
+
+<h3>导航</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html">1. 系统简介</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting_started.html">2. 安装启动</a></li>
+<li class="toctree-l1"><a class="reference internal" href="upgrade_system.html">3. 系统更新</a></li>
+<li class="toctree-l1"><a class="reference internal" href="command_line.html">4. 命令行操作</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">5. 系统架构</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#id2">5.1. 整体结构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id3">5.2. 游戏服务器</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id4">5.3. 游戏客户端</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id5">5.4. 游戏编辑器</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="world_framework.html">6. 游戏世界架构</a></li>
+<li class="toctree-l1"><a class="reference internal" href="client_commands.html">7. 客户端命令</a></li>
+<li class="toctree-l1"><a class="reference internal" href="server_msg.html">8. 服务端消息</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">9. 演示游戏</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../update_log.html">10. 更新日志</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="command_line.html" title="上一章"><span class="section-number">4. </span>命令行操作</a></li>
+      <li>Next: <a href="world_framework.html" title="下一章"><span class="section-number">6. </span>游戏世界架构</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">快速搜索</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="转向" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, Lu Yijun.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.4.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

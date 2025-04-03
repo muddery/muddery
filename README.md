@@ -1,8 +1,11 @@
+# Due to changes in life and work, this project is suspended. Thank you for your support and encouragement.
+# 由于生活和工作的变化，本项目暂停更新，感谢大家的支持和鼓励。
+
 # Intro
 Muddery is an online text game (like MUD) framework in Python. It is licensed under 3-clause BSD license.
 
-Our chinese website is http://www.muddery.org.
-（欢迎访问中文网站：http://www.muddery.org ）
+Our chinese website is https://www.muddery.org.
+（欢迎访问中文网站：https://www.muddery.org ，可能需要翻墙。）
 
 
 #Features

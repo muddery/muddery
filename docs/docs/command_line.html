@@ -1,0 +1,278 @@
+
+<!DOCTYPE html>
+
+<html lang="zh_CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>4. 命令行操作 &#8212; Muddery 0.8.0 文档</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/style.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/translations.js"></script>
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="搜索" href="../search.html" />
+    <link rel="next" title="5. 系统架构" href="server_structure.html" />
+    <link rel="prev" title="3. 系统更新" href="upgrade_system.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="id1">
+<h1><span class="section-number">4. </span>命令行操作<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h1>
+<p>用户在命令行中执行指令，对服务器进行基本的管理和操作，Muddery支持的命令如下。</p>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<ol class="arabic simple">
+<li><p>创建游戏目录</p></li>
+</ol>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>muddery init &lt;dir&gt; [template] [-p &lt;number&gt;]
+</pre></div>
+</div>
+<p>在一个新的目录中创建游戏。</p>
+<dl>
+<dt>dir</dt><dd><p>游戏目录的名字，会在当前目录下创建以这个名字为名的目录。</p>
+</dd>
+<dt>template</dt><dd><p>（可选）游戏模板的名字，可以将 muddery/game_templates 中的文件复制到游戏目录中，默认会复制 muddery/game_templates/default/ 目录中的文件，如果加上了其他的模板名字，则会在复制完 default 目录中的文件之后再将指定目录中的文件复制过来。</p>
+</dd>
+<dt>选项：</dt><dd><dl class="option-list">
+<dt><kbd><span class="option">-p</span>, <span class="option">--port <var>&lt;number&gt;</var></span></kbd></dt>
+<dd><p>游戏服务器的端口，会使用输入的数字以及之后两个数字做为游戏客户端、游戏服务器websocket接口、游戏编辑器使用的端口号。默认使用 8000 为网页客户端的端口号，8001为游戏服务器websocket接口的端口号，8002为游戏编辑器的端口号。</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<ol class="arabic simple" start="2">
+<li><p>设置游戏</p></li>
+</ol>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>muddery setup
+</pre></div>
+</div>
+<p>在新建的游戏目录中设置数据库、加载基本数据等。</p>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<ol class="arabic simple" start="3">
+<li><p>启动服务器</p></li>
+</ol>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>muddery start [-s] [-c] [-e]
+</pre></div>
+</div>
+<p>启动游戏服务器。</p>
+<p>选项：</p>
+<blockquote>
+<div><dl class="option-list">
+<dt><kbd><span class="option">-s</span>, <span class="option">--server</span></kbd></dt>
+<dd><p>只启动游戏后台服务器。&lt;/td&gt;</p>
+</dd>
+<dt><kbd><span class="option">-c</span>, <span class="option">--client</span></kbd></dt>
+<dd><p>只启动游戏客户端服务器。</p>
+</dd>
+<dt><kbd><span class="option">-e</span>, <span class="option">--editor</span></kbd></dt>
+<dd><p>只启动游戏编辑器服务器。</p>
+</dd>
+</dl>
+</div></blockquote>
+<p>如果不带参数，则同时启动所有服务器。</p>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<ol class="arabic simple" start="4">
+<li><p>关闭服务器</p></li>
+</ol>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>muddery stop [-s] [-c] [-e]
+</pre></div>
+</div>
+<p>关闭游戏服务器。</p>
+<p>选项：</p>
+<blockquote>
+<div><dl class="option-list">
+<dt><kbd><span class="option">-s</span>, <span class="option">--server</span></kbd></dt>
+<dd><p>只关闭游戏后台服务器。</p>
+</dd>
+<dt><kbd><span class="option">-c</span>, <span class="option">--client</span></kbd></dt>
+<dd><p>只关闭游戏客户端服务器。</p>
+</dd>
+<dt><kbd><span class="option">-e</span>, <span class="option">--editor</span></kbd></dt>
+<dd><p>只关闭游戏编辑器服务器。</p>
+</dd>
+</dl>
+</div></blockquote>
+<p>如果不带参数，则同时关闭所有服务器。</p>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<ol class="arabic simple" start="5">
+<li><p>服务器状态</p></li>
+</ol>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>muddery state
+</pre></div>
+</div>
+<p>检查服务器当前的运行状态。</p>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<ol class="arabic simple" start="6">
+<li><p>升级服务器</p></li>
+</ol>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>muddery upgrade
+</pre></div>
+</div>
+<p>当系统版本升级时，相应地升级游戏目录。</p>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<ol class="arabic simple" start="7">
+<li><p>升级数据库</p></li>
+</ol>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>muddery migrate
+</pre></div>
+</div>
+<p>手动将数据库升级到最新版本。</p>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<ol class="arabic simple" start="8">
+<li><p>加载本地数据</p></li>
+</ol>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>muddery loaddata
+</pre></div>
+</div>
+<p>重新加载 worlddata 目录中的游戏数据。</p>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<ol class="arabic simple" start="9">
+<li><p>加载系统文件</p></li>
+</ol>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>muddery sysdata
+</pre></div>
+</div>
+<p>重新加载 Muddery 系统中的默认游戏数据。</p>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<ol class="arabic simple" start="10">
+<li><p>显示帮助信息</p></li>
+</ol>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>muddery -h
+</pre></div>
+</div>
+<p>显示游戏命令的帮助信息。</p>
+<dl class="simple">
+<dt>选项：</dt><dd><p>-h, –help</p>
+</dd>
+</dl>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<ol class="arabic simple" start="11">
+<li><p>显示游戏版本</p></li>
+</ol>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>muddery -v
+</pre></div>
+</div>
+<p>显示系统的版本信息。</p>
+<dl class="simple">
+<dt>选项：</dt><dd><p>-v, –version</p>
+</dd>
+</dl>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">Muddery</a></h1>
+
+
+
+
+
+
+
+
+<h3>导航</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html">1. 系统简介</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting_started.html">2. 安装启动</a></li>
+<li class="toctree-l1"><a class="reference internal" href="upgrade_system.html">3. 系统更新</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">4. 命令行操作</a></li>
+<li class="toctree-l1"><a class="reference internal" href="server_structure.html">5. 系统架构</a></li>
+<li class="toctree-l1"><a class="reference internal" href="world_framework.html">6. 游戏世界架构</a></li>
+<li class="toctree-l1"><a class="reference internal" href="client_commands.html">7. 客户端命令</a></li>
+<li class="toctree-l1"><a class="reference internal" href="server_msg.html">8. 服务端消息</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">9. 演示游戏</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../update_log.html">10. 更新日志</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="upgrade_system.html" title="上一章"><span class="section-number">3. </span>系统更新</a></li>
+      <li>Next: <a href="server_structure.html" title="下一章"><span class="section-number">5. </span>系统架构</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">快速搜索</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="转向" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, Lu Yijun.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.4.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

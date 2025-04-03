@@ -1,0 +1,523 @@
+
+<!DOCTYPE html>
+
+<html lang="zh_CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>8. 服务端消息 &#8212; Muddery 0.8.0 文档</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/style.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/translations.js"></script>
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="搜索" href="../search.html" />
+    <link rel="next" title="9. 演示游戏" href="../examples.html" />
+    <link rel="prev" title="7. 客户端命令" href="client_commands.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="id1">
+<h1><span class="section-number">8. </span>服务端消息<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h1>
+<p>客户端与服务端通过 WebSocket 通讯，当相关信息发生变化时，服务端会主动发送消息给客户端，让客户端及时响应变化。</p>
+<section id="id2">
+<h2><span class="section-number">8.1. </span>消息格式<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
+<p>服务端发送给客户端的数据为 JSON 格式的字符串，格式如下：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="nx">消息类型</span><span class="o">:</span> <span class="nx">数据</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>或：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">[</span>
+    <span class="p">{</span>
+        <span class="nx">消息类型</span><span class="o">:</span> <span class="nx">数据</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="nx">消息类型</span><span class="o">:</span> <span class="nx">数据</span>
+    <span class="p">},</span>
+    <span class="p">...</span>
+    <span class="p">{</span>
+        <span class="nx">消息类型</span><span class="o">:</span> <span class="nx">数据</span>
+    <span class="p">}</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+<p>消息可以是一个key/value对，也可以是一个key/value对的列表。 <strong>如果是列表格式的消息，必须按列表中的次序逐个处理消息。</strong></p>
+<p>Muddery 向客户端发送的全部消息如下：</p>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+<section id="id3">
+<h2><span class="section-number">8.2. </span>文本类消息<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h2>
+<p>服务器发给客户端的文本信息，通常需要显示给用户看。</p>
+<section id="msg">
+<h3><span class="section-number">8.2.1. </span>msg<a class="headerlink" href="#msg" title="永久链接至标题">¶</a></h3>
+<p>向客户端发送普通信息。</p>
+<p>格式为：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;msg&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">文本信息</span><span class="o">&gt;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>消息内容为文本信息，客户端收到消息后需要在界面上显示消息内容。信息支持富文本标记，如设置文字颜色的标记等。</p>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+<section id="alert">
+<h3><span class="section-number">8.2.2. </span>alert<a class="headerlink" href="#alert" title="永久链接至标题">¶</a></h3>
+<p>向客户端发送警告信息。</p>
+<p>格式为：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;alert&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">文本信息</span><span class="o">&gt;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>消息内容为文本信息，客户端收到消息后需要用弹窗提醒用户。信息支持富文本标记，如设置文字颜色的标记等。</p>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+</section>
+<section id="id4">
+<h2><span class="section-number">8.3. </span>环境信息<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h2>
+<p>和玩家周围环境发生变化时发送的消息。</p>
+<section id="state">
+<h3><span class="section-number">8.3.1. </span>state<a class="headerlink" href="#state" title="永久链接至标题">¶</a></h3>
+<p>玩家角色的最新状态。</p>
+<p>格式为：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;state&quot;</span><span class="o">:</span> <span class="p">{</span>
+        <span class="o">&lt;</span><span class="nx">状态1的名称</span><span class="o">&gt;:</span> <span class="o">&lt;</span><span class="nx">状态1的值</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="o">&lt;</span><span class="nx">状态2的名称</span><span class="o">&gt;:</span> <span class="o">&lt;</span><span class="nx">状态2的值</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="p">...</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>当玩家角色的状态被动变化时，服务器会将玩家角色的最新状态发送给客户端</p>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+<section id="move-to">
+<h3><span class="section-number">8.3.2. </span>move_to<a class="headerlink" href="#move-to" title="永久链接至标题">¶</a></h3>
+<p>玩家角色移动到新位置。</p>
+<p>格式为：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;location&quot;</span><span class="o">:</span> <span class="p">{</span>      <span class="c1">// 玩家角色所在的新位置</span>
+        <span class="s2">&quot;area&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">所在区域的key</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;room&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">所在房间的key</span><span class="o">&gt;</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;at_leave&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">list</span><span class="p">)</span><span class="nx">离开之前房间的信息</span><span class="o">&gt;</span><span class="p">(</span><span class="nx">可选</span><span class="p">),</span>
+    <span class="s2">&quot;at_arrive&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">list</span><span class="p">)</span><span class="nx">到达当前房间的信息</span><span class="o">&gt;</span><span class="p">(</span><span class="nx">可选</span><span class="p">),</span>
+    <span class="s2">&quot;events&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">list</span><span class="p">)</span><span class="nx">触发的事件</span><span class="o">&gt;</span><span class="p">(</span><span class="nx">可选</span><span class="p">),</span>
+    <span class="s2">&quot;quests&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">list</span><span class="p">)</span><span class="nx">影响的任务</span><span class="o">&gt;</span><span class="p">(</span><span class="nx">可选</span><span class="p">)</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>当玩家角色被动移动到新的位置时，服务器会将新位置的信息发送到客户端。</p>
+<dl>
+<dt>area</dt><dd><p>新位置所在区域的 key。</p>
+</dd>
+<dt>room</dt><dd><p>新位置所在房间的 key。</p>
+</dd>
+<dt>at_leave</dt><dd><p>玩家角色在离开之前房间时可能有一些信息需要显示给用户。格式为：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">[</span>
+    <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">信息文本</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="p">...</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+</dd>
+<dt>at_arrive</dt><dd><p>玩家角色在进入当前房间时可能有一些信息需要显示给用户。格式为：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">[</span>
+    <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">信息文本</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="p">...</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+</dd>
+<dt>events</dt><dd><p>如果玩家的行动触发了事件，会返回相关事件的信息。格式为：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">[</span>
+    <span class="p">{</span>
+        <span class="o">&lt;</span><span class="nx">事件动作的id</span><span class="o">&gt;:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">any</span><span class="p">)</span><span class="nx">事件动作的信息</span><span class="o">&gt;</span>
+    <span class="p">}</span>
+    <span class="p">...</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+</dd>
+<dt>quests</dt><dd><p>如果玩家的行动引起任务目标达成，会返回相关的任务信息。格式为：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;accomplished&quot;</span><span class="o">:</span> <span class="p">[</span>   <span class="c1">// 达成的任务</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;key&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">任务的key</span><span class="o">&gt;</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">任务的名字</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="p">},</span>
+        <span class="p">...</span>
+    <span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+<section id="obj-moved-in">
+<h3><span class="section-number">8.3.3. </span>obj_moved_in<a class="headerlink" href="#obj-moved-in" title="永久链接至标题">¶</a></h3>
+<p>角色进入房间。</p>
+<p>格式为：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;obj_moved_in&quot;</span><span class="o">:</span> <span class="p">{</span>
+        <span class="s2">&quot;type&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">角色的类型</span><span class="o">&gt;</span><span class="p">,</span>  <span class="c1">// &quot;players&quot;或&quot;npcs&quot;</span>
+        <span class="s2">&quot;id&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="kr">int</span><span class="p">)</span><span class="nx">角色的id</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">角色的名字</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;icon&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">角色的图标</span><span class="o">&gt;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>有角色进入玩家当前所在的房间时，服务器会通知客户端。</p>
+<dl class="simple">
+<dt>type</dt><dd><p>角色的类型，players 为玩家角色、npcs 为NPC。</p>
+</dd>
+<dt>id</dt><dd><p>角色对象的id。</p>
+</dd>
+<dt>name</dt><dd><p>角色显示的名字。</p>
+</dd>
+<dt>icon</dt><dd><p>角色的图标信息，如图标的名字、路径，如果没有则为空。</p>
+</dd>
+</dl>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+<section id="obj-moved-out">
+<h3><span class="section-number">8.3.4. </span>obj_moved_out<a class="headerlink" href="#obj-moved-out" title="永久链接至标题">¶</a></h3>
+<p>角色离开房间。</p>
+<p>格式为：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;obj_moved_out&quot;</span><span class="o">:</span> <span class="p">{</span>
+        <span class="s2">&quot;type&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">角色的类型</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;id&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="kr">int</span><span class="p">)</span><span class="nx">角色的id</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">角色的名字</span><span class="o">&gt;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>有角色离开玩家当前所在的房间时，服务器会通知客户端。</p>
+<dl class="simple">
+<dt>type</dt><dd><p>角色的类型有两种：players 为玩家角色、npcs 为NPC。</p>
+</dd>
+<dt>id</dt><dd><p>角色对象的id。</p>
+</dd>
+<dt>name</dt><dd><p>角色显示的名字。</p>
+</dd>
+</dl>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+<section id="conversation">
+<h3><span class="section-number">8.3.5. </span>conversation<a class="headerlink" href="#conversation" title="永久链接至标题">¶</a></h3>
+<p>玩家之间聊天的内容。</p>
+<p>格式为：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;conversation&quot;</span><span class="o">:</span> <span class="p">{</span>
+        <span class="s2">&quot;type&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">聊天的类型</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;from_id&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">说话者的id</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;from_name&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">说话者的名字</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;to&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">聊天对象的名字</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;msg&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">聊天的内容</span><span class="o">&gt;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>玩家之间进行的聊天会通过该消息传送。</p>
+<dl>
+<dt>type</dt><dd><p>默认有三种类型的聊天：</p>
+<p>PRIVATE 私聊，玩家一对一的聊天。</p>
+<p>LOCAL 本地，和当前房间内的所有玩家聊天。</p>
+<p>CHANNEL 公共频道，和公共频道内的所有玩家聊天。</p>
+</dd>
+<dt>from_id</dt><dd><p>说话者的id。</p>
+</dd>
+<dt>from_name</dt><dd><p>说话者的名字。</p>
+</dd>
+<dt>to</dt><dd><p>聊天对象的名字：</p>
+<p>PRIVATE 类型：为聊天玩家对象的名字。</p>
+<p>LOCAL 类型：为房间的名字。</p>
+<p>CHANNEL 类型：为聊天频道的名字。</p>
+</dd>
+<dt>msg</dt><dd><p>聊天的文本内容。</p>
+</dd>
+</dl>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+</section>
+<section id="id5">
+<h2><span class="section-number">8.4. </span>战斗信息<a class="headerlink" href="#id5" title="永久链接至标题">¶</a></h2>
+<p>与战斗有关的信息。</p>
+<section id="attack">
+<h3><span class="section-number">8.4.1. </span>attack<a class="headerlink" href="#attack" title="永久链接至标题">¶</a></h3>
+<p>玩家被攻击。</p>
+<p>格式为：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;from&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">攻击发起者的名字</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="s2">&quot;target&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">被攻击者的名字</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="s2">&quot;combat_info&quot;</span><span class="o">:</span> <span class="p">{</span>       <span class="c1">// 战斗的基本信息</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;desc&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">战斗的描述信息</span><span class="o">&gt;</span><span class="p">,</span>
+            <span class="s2">&quot;timeout&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="kr">int</span><span class="p">)</span><span class="nx">战斗的最长时间</span><span class="o">&gt;</span><span class="p">,</span>
+            <span class="s2">&quot;characters&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">list</span><span class="p">)</span><span class="nx">参与战斗的所有角色</span><span class="o">&gt;</span>
+        <span class="p">}</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;combat_commands&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">list</span><span class="p">)</span><span class="nx">该角色可在战斗中使用的技能</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="s2">&quot;combat_states&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">dict</span><span class="p">)</span><span class="nx">战斗相关所有角色的状态</span><span class="o">&gt;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>玩家角色被攻击时服务端会发送该消息通知客户端。客户端需要切换到战斗界面进入战斗状态。</p>
+<p>消息格式与 <a class="reference external" href="client_commands.html#attack">attack</a> 命令返回的格式相同，请参见 <a class="reference external" href="client_commands.html#attack">attack</a> 。</p>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+<section id="honour-combat">
+<h3><span class="section-number">8.4.2. </span>honour_combat<a class="headerlink" href="#honour-combat" title="永久链接至标题">¶</a></h3>
+<p>开始荣誉战斗。</p>
+<p>格式为：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;from&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">攻击发起者的名字</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="s2">&quot;target&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">被攻击者的名字</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="s2">&quot;combat_info&quot;</span><span class="o">:</span> <span class="p">{</span>       <span class="c1">// 战斗的基本信息</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;desc&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">战斗的描述信息</span><span class="o">&gt;</span><span class="p">,</span>
+            <span class="s2">&quot;timeout&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="kr">int</span><span class="p">)</span><span class="nx">战斗的最长时间</span><span class="o">&gt;</span><span class="p">,</span>
+            <span class="s2">&quot;characters&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">list</span><span class="p">)</span><span class="nx">参与战斗的所有角色</span><span class="o">&gt;</span>
+        <span class="p">}</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;combat_commands&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">list</span><span class="p">)</span><span class="nx">该角色可在战斗中使用的技能</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="s2">&quot;combat_states&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">dict</span><span class="p">)</span><span class="nx">战斗相关所有角色的状态</span><span class="o">&gt;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>荣誉战斗开始时服务端会发送该消息通知客户端。客户端需要切换到战斗界面进入战斗状态。</p>
+<p>消息格式与 <a class="reference external" href="client_commands.html#attack">attack</a> 命令返回的格式相同，请参见 <a class="reference external" href="client_commands.html#attack">attack</a> 。</p>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+<section id="combat-skill-cast">
+<h3><span class="section-number">8.4.3. </span>combat_skill_cast<a class="headerlink" href="#combat-skill-cast" title="永久链接至标题">¶</a></h3>
+<p>战斗中有技能施放。</p>
+<p>格式为：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;combat_skill_cast&quot;</span><span class="o">:</span> <span class="p">{</span>        <span class="c1">// 技能施放结果</span>
+        <span class="s2">&quot;skill&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">技能的key</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;main_type&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">技能的主类型</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;sub_type&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">技能的次类型</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;caller&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="kr">int</span><span class="p">)</span><span class="nx">技能施放者的id</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;target&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="kr">int</span><span class="p">)</span><span class="nx">技能施放目标的id</span><span class="o">&gt;</span><span class="p">(</span><span class="nx">可选</span><span class="p">),</span>
+        <span class="s2">&quot;states&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">dict</span><span class="p">)</span><span class="nx">技能施放后相关对象的状态</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;cast&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">施放技能的文字描述信息</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;result&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">技能施放结果的文字描述信息</span><span class="o">&gt;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>战斗中的角色施放技能后，服务器会把技能发送的情况发送给所有参与战斗的玩家。</p>
+<p>消息格式与 <a class="reference external" href="client_commands.html#cast-skill">cast_skill</a> 命令返回的 result 相同，请参见 <a class="reference external" href="client_commands.html#cast-skill">cast_skill</a> 。</p>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+<section id="combat-finish">
+<h3><span class="section-number">8.4.4. </span>combat_finish<a class="headerlink" href="#combat-finish" title="永久链接至标题">¶</a></h3>
+<p>战斗结束。</p>
+<p>格式为：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;combat_finish&quot;</span><span class="o">:</span> <span class="p">{</span>
+        <span class="s2">&quot;type&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">战斗的类型</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;result&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">战斗结果</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;rewards&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">dict</span><span class="p">)</span><span class="nx">战斗奖励</span><span class="o">&gt;</span>
+   <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>战斗结束时发送给客户端，通知客户端战斗已结束，告知战斗的结果。</p>
+<dl>
+<dt>type</dt><dd><p>战斗的类型：</p>
+<p>NORMAL 普通战斗</p>
+<p>HONOUR 荣誉战斗</p>
+</dd>
+<dt>result</dt><dd><p>战斗结果：</p>
+<blockquote>
+<div><p>COMBAT_WIN 胜利</p>
+<p>COMBAT_LOSE 失败</p>
+<p>COMBAT_DRAW 平局</p>
+<p>COMBAT_ESCAPED 逃离战斗</p>
+</div></blockquote>
+</dd>
+<dt>rewards</dt><dd><p>战斗获得的奖励，如果有相应奖励就会传输该项内容，没有传输则没有获得相关奖励。格式为：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;exp&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="kr">int</span><span class="p">)</span><span class="nx">获得经验值</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="s2">&quot;honour&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="kr">int</span><span class="p">)</span><span class="nx">获得荣誉值</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="s2">&quot;level_up&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="kr">int</span><span class="p">)</span><span class="nx">升到等级</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="s2">&quot;loots&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">dict</span><span class="p">)</span><span class="nx">获得物品</span><span class="o">&gt;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<dl class="simple">
+<dt>exp</dt><dd><p>角色获得的经验值。</p>
+</dd>
+<dt>honour</dt><dd><p>角色获得的荣誉值。</p>
+</dd>
+<dt>level_up</dt><dd><p>角色升级，传输升到的等级。</p>
+</dd>
+<dt>loots</dt><dd><p>角色获得的物品，与 <a class="reference external" href="client_commands.html#loot">loot</a> 命令返回的格式相同，请参见 <a class="reference external" href="client_commands.html#loot">loot</a> 。</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+<section id="prepare-match">
+<h3><span class="section-number">8.4.5. </span>prepare_match<a class="headerlink" href="#prepare-match" title="永久链接至标题">¶</a></h3>
+<p>准备荣誉战斗。</p>
+<p>格式为：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;prepare_match&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="kr">int</span><span class="p">)</span><span class="nx">准备时间</span><span class="o">&gt;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>荣誉战斗匹配到对战对手后，会给玩家一定的时间准备进入战斗。准备完毕需要发送 <a class="reference external" href="client_commands.html#confirm-combat">confirm_combat</a> 确认战斗的命令给服务器。如果超过准备时间不确认战斗，或者在准备期间发送 <a class="reference external" href="client_commands.html#reject-combat">reject_combat</a> 拒绝战斗的命令给服务器，则不会进入荣誉战斗并且退出荣誉战斗队列。</p>
+<p>准备时间单位为秒。</p>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+<section id="match-rejected">
+<h3><span class="section-number">8.4.6. </span>match_rejected<a class="headerlink" href="#match-rejected" title="永久链接至标题">¶</a></h3>
+<p>拒绝荣誉战斗。</p>
+<p>格式为：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;match_rejected&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="kr">int</span><span class="p">)</span><span class="nx">拒绝方的id</span><span class="p">(</span><span class="nx">可选</span><span class="p">)</span><span class="o">&gt;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>荣誉战斗匹配到对战对手后，如果参与荣誉战的一方拒绝战的，服务器会通知客户端。</p>
+<p>如果玩家超时没有确认战斗，传送的参数是玩家自己的id，玩家会自动退出荣誉战的队列。如果是匹配的对方拒绝战斗，传送的参数为空，玩家仍保留在荣誉战的队列中继续匹配新的对手。</p>
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">Muddery</a></h1>
+
+
+
+
+
+
+
+
+<h3>导航</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html">1. 系统简介</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting_started.html">2. 安装启动</a></li>
+<li class="toctree-l1"><a class="reference internal" href="upgrade_system.html">3. 系统更新</a></li>
+<li class="toctree-l1"><a class="reference internal" href="command_line.html">4. 命令行操作</a></li>
+<li class="toctree-l1"><a class="reference internal" href="server_structure.html">5. 系统架构</a></li>
+<li class="toctree-l1"><a class="reference internal" href="world_framework.html">6. 游戏世界架构</a></li>
+<li class="toctree-l1"><a class="reference internal" href="client_commands.html">7. 客户端命令</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">8. 服务端消息</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#id2">8.1. 消息格式</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id3">8.2. 文本类消息</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id4">8.3. 环境信息</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id5">8.4. 战斗信息</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">9. 演示游戏</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../update_log.html">10. 更新日志</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="client_commands.html" title="上一章"><span class="section-number">7. </span>客户端命令</a></li>
+      <li>Next: <a href="../examples.html" title="下一章"><span class="section-number">9. </span>演示游戏</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">快速搜索</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="转向" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, Lu Yijun.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.4.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,238 @@
+
+<!DOCTYPE html>
+
+<html lang="zh_CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>6. 游戏世界架构 &#8212; Muddery 0.8.0 文档</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/style.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/translations.js"></script>
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="搜索" href="../search.html" />
+    <link rel="next" title="7. 客户端命令" href="client_commands.html" />
+    <link rel="prev" title="5. 系统架构" href="server_structure.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="id1">
+<h1><span class="section-number">6. </span>游戏世界架构<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h1>
+<p>Muddery的游戏世界是通过一个个元素（Element）构建起来的，整个游戏世界就是一个元素，游戏中的角色、房间、物品都是一个个元素。</p>
+<p>游戏中元素的关联关系如图</p>
+<img alt="../_images/world_framework.png" src="../_images/world_framework.png" />
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<ol class="arabic simple">
+<li><p>世界（WORLD）</p></li>
+</ol>
+<blockquote>
+<div><p>游戏中最基础的元素是“世界”，一个游戏服务器中只有一个世界，游戏中的所有物体都是运行在这个世界之上的。一个世界上可以有多个区域（AREA）。</p>
+</div></blockquote>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<ol class="arabic simple" start="2">
+<li><p>区域（AREA）</p></li>
+</ol>
+<blockquote>
+<div><p>一个区域对应一张地图，玩家在客户端查看地图时只能看到当前所在区域的地图，设计师在游戏编辑器里一次也只能编辑一个区域。一个区域上可以有多个房间（ROOM）。</p>
+</div></blockquote>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<ol class="arabic simple" start="3">
+<li><p>房间（ROOM）</p></li>
+</ol>
+<blockquote>
+<div><p>房间是进行游戏活动的基本场所，房间里可以有各种物体，包括出口（EXIT）、玩家（PLAYER_CHARACTER）、NPC（WORLD_NPC）和物品（WORLD_OBJECT）等。玩家只能处于某个房间之中，只能到当前所在房间里的物体。可以和房间中的其他玩家、NPC、物品交互，可以通过房间里的出口（EXIT）从一个房间移动到另一个房间。</p>
+</div></blockquote>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<ol class="arabic simple" start="4">
+<li><p>出口（EXIT）</p></li>
+</ol>
+<blockquote>
+<div><p>出口是从一个房间通往另一个房间的通道，玩家和NPC可以通过出口从一个房间移动到另一个房间。在Muddery中出口是单向的，只能让玩家从一个房间移动到另一个房间。如果要从另一个房间回到之前的房间，那就要在另一个房间中创建一个通往之前房间的出口。</p>
+<p>在Muddery中还有一种带锁的出口（LOCKED_EXIT），玩家需要符合特定的条件才能穿过它，比如完成了某个任务或携带了某件物品。</p>
+</div></blockquote>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<ol class="arabic simple" start="5">
+<li><p>世界物品（WORLD_OBJECT）</p></li>
+</ol>
+<blockquote>
+<div><p>一个世界物品只会出现在一个世界的一个房间中，所以称为世界物品。世界物品不会在房间之间移动，玩家可以和物品进行交互，设计师可以给物品添加不同的功能。</p>
+</div></blockquote>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<ol class="arabic simple" start="6">
+<li><p>世界NPC（WORLD_NPC）</p></li>
+</ol>
+<blockquote>
+<div><p>一个世界NPC只会出现在一个世界的一个房间中，所以称为世界NPC。NPC可以在房间之间移动，玩家可以和NPC对话、交互、打斗，设计师可以给NPC添加不同的功能。如果给NPC添加了商店（SHOP），玩家还可以向NPC购买商品。</p>
+</div></blockquote>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<ol class="arabic simple" start="7">
+<li><p>技能（SKILL）</p></li>
+</ol>
+<blockquote>
+<div><p>玩家和NPC可以拥有多个技能，可以天生自带，也可以后天学习，有些技能能在战斗中使用，有些技能能在平时使用。设计师可以设计各种技能给玩家或NPC使用。</p>
+</div></blockquote>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<ol class="arabic simple" start="8">
+<li><p>对话（DIALOGUE）</p></li>
+</ol>
+<blockquote>
+<div><p>设计师可以给NPC设置一个或多个对话，还可以给它们加上条件。当玩家符合特定条件时，NPC有会用相应的对话和玩家交互。</p>
+</div></blockquote>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<ol class="arabic simple" start="9">
+<li><p>商店（SHOP）</p></li>
+</ol>
+<blockquote>
+<div><p>可以给NPC设置商店功能，一个商店里可以有很多商品（SHOP_GOODS），玩家可以向NPC购买这些商品。</p>
+</div></blockquote>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<ol class="arabic simple" start="10">
+<li><p>商品（SHOP_GOODS）</p></li>
+</ol>
+<blockquote>
+<div><p>商品可以在商店中出售，设计师可以给商品设置购买的价格和数量。</p>
+</div></blockquote>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<ol class="arabic simple" start="11">
+<li><p>玩家角色（PLAYER_CHARACTER）</p></li>
+</ol>
+<blockquote>
+<div><p>玩家角色是玩家在游戏中可以操纵的角色，玩家可以控制它从一个房间移动到另一个房间，可以与其他玩家交互、打斗。</p>
+</div></blockquote>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<ol class="arabic simple" start="12">
+<li><p>可携带物品（POCKET_OBJECT）</p></li>
+</ol>
+<blockquote>
+<div><p>可携带物品包括普通物品、装备（EQUIPMENT）、食物（FOOD）、技能书（SKILL_BOOK）等。只有可携带物品才能放入玩家的行囊。</p>
+</div></blockquote>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<ol class="arabic simple" start="13">
+<li><p>任务（QUEST）</p></li>
+</ol>
+<blockquote>
+<div><p>设计是可以给玩家设计各种任务，玩家可以接受任务、完成任务、取得任务奖励。游戏的剧情可以通过任务来推动。任务的完成情况还可以影响玩家和NPC、物品的交互。</p>
+</div></blockquote>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">Muddery</a></h1>
+
+
+
+
+
+
+
+
+<h3>导航</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html">1. 系统简介</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting_started.html">2. 安装启动</a></li>
+<li class="toctree-l1"><a class="reference internal" href="upgrade_system.html">3. 系统更新</a></li>
+<li class="toctree-l1"><a class="reference internal" href="command_line.html">4. 命令行操作</a></li>
+<li class="toctree-l1"><a class="reference internal" href="server_structure.html">5. 系统架构</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">6. 游戏世界架构</a></li>
+<li class="toctree-l1"><a class="reference internal" href="client_commands.html">7. 客户端命令</a></li>
+<li class="toctree-l1"><a class="reference internal" href="server_msg.html">8. 服务端消息</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">9. 演示游戏</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../update_log.html">10. 更新日志</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="server_structure.html" title="上一章"><span class="section-number">5. </span>系统架构</a></li>
+      <li>Next: <a href="client_commands.html" title="下一章"><span class="section-number">7. </span>客户端命令</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">快速搜索</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="转向" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, Lu Yijun.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.4.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,173 @@
+
+<!DOCTYPE html>
+
+<html lang="zh_CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>3. 系统更新 &#8212; Muddery 0.8.0 文档</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/style.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/translations.js"></script>
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="搜索" href="../search.html" />
+    <link rel="next" title="4. 命令行操作" href="command_line.html" />
+    <link rel="prev" title="2. 安装启动" href="getting_started.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="id1">
+<h1><span class="section-number">3. </span>系统更新<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h1>
+<p>Muddery系统仍在持续更新，经常会有新的内容或修改发布出来，用户需要更新系统才能获取最新发布的内容。</p>
+<section id="muddery">
+<h2><span class="section-number">3.1. </span>更新 Muddery 系统<a class="headerlink" href="#muddery" title="永久链接至标题">¶</a></h2>
+<p>Muddery 的代码是发布在 Github 和 Gitee 上的，用户可以随时从</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><a class="reference external" href="https://github.com/muddery/muddery">https://github.com/muddery/muddery</a> 或</p></li>
+<li><p><a class="reference external" href="https://gitee.com/muddery/muddery">https://gitee.com/muddery/muddery</a></p></li>
+</ul>
+</div></blockquote>
+<p>获取最新代码。更新系统时，进入 Muddery 代码所在的目录，然后执行</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>git pull
+</pre></div>
+</div>
+<p>这样就可以从服务器拉取最新的代码，并且和你本地的代码进行合并。</p>
+<p><strong>请注意，如果你修改过本地的 Muddery 代码，可能会造成合并、更新失败，不建议用户直接修改 Muddery 目录中的代码。</strong></p>
+<p>如果想给系统添加自定义的内容，可以在用户自己的游戏目录中创建派生类，在派生类添加自己的内容。具体的修改方法之后会有详细的教程。</p>
+</section>
+<section id="id2">
+<h2><span class="section-number">3.2. </span>自动升级游戏<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
+<p>当 Muddery 系统的数据库结构发生了变化或者有较大改动时，用户不仅要更新 Muddery 系统，还要升级已创建好的游戏才能让游戏正常运行。</p>
+<p>游戏对应的系统版本号和模版记录在游戏目录的 <code class="docutils literal notranslate"><span class="pre">game.cfg</span></code> 文件中，系统会以此判断游戏的版本是否需要升级。</p>
+<p>如果在启动游戏时显示以下信息：</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>Your game&#39;s version is too old. Please run:
+
+       muddery upgrade
+
+to upgrade your game.
+</pre></div>
+</div>
+<p>就说明游戏目录必须升级才能继续运行。</p>
+<p>在游戏目录中执行</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>muddery upgrade
+</pre></div>
+</div>
+<p>系统就会自动升级。</p>
+<p>升级前，升级程序会先备份当前的游戏目录，备份目录的名字为游戏目录名加上 <code class="docutils literal notranslate"><span class="pre">_bak_日期</span></code>。用户可以在这个文件夹中找到所有升级前的文件。如果用户觉得升级有问题，只要将备份目录的名字改为原来的名字就可以回退。</p>
+</section>
+<section id="id3">
+<h2><span class="section-number">3.3. </span>人工升级游戏<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h2>
+<p>有时后 Muddery 框架的改动很大无法自动升级游戏，就需要人工升级游戏，主要操作步骤如下：</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li><p>请在新的目录中下载、安装 Muddery 系统。</p></li>
+<li><p>创建一个新的游戏项目。</p></li>
+<li><p>将原有项目中修改的代码复制到新项目中。</p></li>
+<li><p>从原有项目中导出游戏数据，对游戏数据做相应修改，然后导入到新项目中。</p></li>
+<li><p>将玩家数据备份，做相应的修改，然后导入到新项目中。如果使用的是 SQLite3 数据库，游戏数据在``server/gamedata.db3``中；如果使用的是MySQL或其他数据库，需要修改游戏设置连接到数据库。</p></li>
+</ol>
+</div></blockquote>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">Muddery</a></h1>
+
+
+
+
+
+
+
+
+<h3>导航</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html">1. 系统简介</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting_started.html">2. 安装启动</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">3. 系统更新</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#muddery">3.1. 更新 Muddery 系统</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id2">3.2. 自动升级游戏</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id3">3.3. 人工升级游戏</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="command_line.html">4. 命令行操作</a></li>
+<li class="toctree-l1"><a class="reference internal" href="server_structure.html">5. 系统架构</a></li>
+<li class="toctree-l1"><a class="reference internal" href="world_framework.html">6. 游戏世界架构</a></li>
+<li class="toctree-l1"><a class="reference internal" href="client_commands.html">7. 客户端命令</a></li>
+<li class="toctree-l1"><a class="reference internal" href="server_msg.html">8. 服务端消息</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">9. 演示游戏</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../update_log.html">10. 更新日志</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="getting_started.html" title="上一章"><span class="section-number">2. </span>安装启动</a></li>
+      <li>Next: <a href="command_line.html" title="下一章"><span class="section-number">4. </span>命令行操作</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">快速搜索</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="转向" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, Lu Yijun.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.4.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

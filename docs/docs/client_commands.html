@@ -1,0 +1,2117 @@
+
+<!DOCTYPE html>
+
+<html lang="zh_CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>7. 客户端命令 &#8212; Muddery 0.8.0 文档</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/style.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/translations.js"></script>
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="搜索" href="../search.html" />
+    <link rel="next" title="8. 服务端消息" href="server_msg.html" />
+    <link rel="prev" title="6. 游戏世界架构" href="world_framework.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="id1">
+<h1><span class="section-number">7. </span>客户端命令<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h1>
+<p>客户端与服务端通过 WebSocket 通讯，当用户操作客户端时，客户端会把相关命令发送到服务端，服务端会把操作的结果返回给客户端。</p>
+<section id="id2">
+<h2><span class="section-number">7.1. </span>消息格式<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
+<p>客户端发送给服务端请求为 JSON 格式的字符串，格式如下：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;cmd&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">命令名</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="s2">&quot;args&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">any</span><span class="p">)</span><span class="nx">命令参数</span><span class="o">&gt;</span><span class="p">(</span><span class="nx">可选</span><span class="p">),</span>
+    <span class="s2">&quot;sn&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="kr">int</span><span class="p">)</span><span class="nx">命令序列号</span><span class="o">&gt;</span><span class="p">(</span><span class="nx">可选</span><span class="p">)</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<dl class="simple">
+<dt>cmd</dt><dd><p>命令的名字。</p>
+</dd>
+<dt>args</dt><dd><p>命令的参数。不同命令需要不同的参数，可以是数字、字符串、列表、字典等，也可以为空。</p>
+</dd>
+<dt>sn</dt><dd><p>命令的序列号。如果命令带有序列号，服务端在返回对应数据时也会带上这个序列号，通讯层会按照序列号将命令和返回的数据关联起来。如果发送给服务端的命令不带序列号，服务端则不会返回数据给客户端。</p>
+</dd>
+</dl>
+<p>如果命令执行后返回以下格式的数据：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+     <span class="s2">&quot;code&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="kr">int</span><span class="p">)</span><span class="nx">返回码</span><span class="o">&gt;</span><span class="p">,</span>
+     <span class="s2">&quot;data&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">any</span><span class="p">)</span><span class="nx">返回数据</span><span class="o">&gt;</span><span class="p">,</span>
+     <span class="s2">&quot;msg&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">返回信息</span><span class="o">&gt;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<dl class="simple">
+<dt>code</dt><dd><p>返回码为 0 表示命令执行成功，其他值表示执行出现了异常情况。不同返回码的含义可见客户端 webclient/utils/defines.js 文件或服务端 common/utils/exception.py 文件中的定义。</p>
+</dd>
+<dt>data</dt><dd><p>返回的数据，可能是字符串、数字，绝大多数情况下是一个字典。如果命令执行成功，返回的数据会放在 data 字段里，某些命令执行失败后也会将相关数据放在 data 字段中。</p>
+</dd>
+<dt>msg</dt><dd><p>返回的文本信息。命令执行出错时，会将报错信息放在 msg 字段中。</p>
+</dd>
+</dl>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<p>Muddery 服务端支持的全部命令如下：</p>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+<section id="id3">
+<h2><span class="section-number">7.2. </span>未登录命令<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h2>
+<p>不论用户是否登录，都可以使用以下命令。</p>
+<section id="first-connect">
+<h3><span class="section-number">7.2.1. </span>first_connect<a class="headerlink" href="#first-connect" title="永久链接至标题">¶</a></h3>
+<p>客户端初次连接到服务端时获取游戏的基本信息。</p>
+<p>命令格式：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;cmd&quot;</span><span class="o">:</span> <span class="s2">&quot;first_connect&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>返回 data：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;game_name&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">游戏的名字</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="s2">&quot;conn_screen&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">游戏的欢迎信息</span><span class="o">&gt;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<dl class="simple">
+<dt>game_name</dt><dd><p>游戏展示的名字。</p>
+</dd>
+<dt>conn_screen</dt><dd><p>游戏的欢迎信息，通常显示在游戏的欢迎页面或登录页面上。</p>
+</dd>
+</dl>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+<section id="create-account">
+<h3><span class="section-number">7.2.2. </span>create_account<a class="headerlink" href="#create-account" title="永久链接至标题">¶</a></h3>
+<p>创建账号。</p>
+<p>命令格式：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;cmd&quot;</span><span class="o">:</span> <span class="s2">&quot;create_account&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;args&quot;</span><span class="o">:</span> <span class="p">{</span>
+        <span class="s2">&quot;username&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">用户名</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;password&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">密码</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;connect&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">bool</span><span class="p">)</span><span class="nx">是否登录</span><span class="o">&gt;</span><span class="p">(</span><span class="nx">可选</span><span class="p">)</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<dl class="simple">
+<dt>username</dt><dd><p>新建用户的用户名。</p>
+</dd>
+<dt>password</dt><dd><p>新建用户的密码，如果启用了加密，应该传输加密后的密文。</p>
+</dd>
+<dt>connect</dt><dd><p>账号创建成功后是否立即登录。如果传 true，创建账号后会自动登录，如果传 false，需要用户用新的用户名和密码手动登录。</p>
+</dd>
+</dl>
+<p>返回 code=0 表示账号创建成功，如果参数 connect 为 true 则同时登录成功，返回 data：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">用户名</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="kr">int</span><span class="p">)</span><span class="nx">账号的id</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="s2">&quot;max_char&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="kr">int</span><span class="p">)</span><span class="nx">玩家可以创建的最大角色数量</span><span class="o">&gt;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<dl class="simple">
+<dt>name</dt><dd><p>用户设置的用户名，和命令中的 username 一致。</p>
+</dd>
+<dt>id</dt><dd><p>用户账号的 id，是一个数字。</p>
+</dd>
+<dt>max_char</dt><dd><p>玩家可以创建的最大角色数量，用来限制玩家创建角色的数量。最大角色数量为服务端配置文件 server/settings.py 中配置的 MAX_PLAYER_CHARACTERS。</p>
+</dd>
+</dl>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+<section id="login">
+<h3><span class="section-number">7.2.3. </span>login<a class="headerlink" href="#login" title="永久链接至标题">¶</a></h3>
+<p>登录账号。</p>
+<p>命令格式：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;cmd&quot;</span><span class="o">:</span> <span class="s2">&quot;login&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;args&quot;</span><span class="o">:</span> <span class="p">{</span>
+        <span class="s2">&quot;username&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">用户名</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;password&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">密码</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<dl class="simple">
+<dt>username</dt><dd><p>用户的用户名。</p>
+</dd>
+<dt>password</dt><dd><p>用户的密码，如果启用了加密，应该传输加密后的密文。</p>
+</dd>
+</dl>
+<p>返回 code=0 表示登录成功，返回 data：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">用户名</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="kr">int</span><span class="p">)</span><span class="nx">账号的id</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="s2">&quot;max_char&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="kr">int</span><span class="p">)</span><span class="nx">玩家可以创建的最大角色数量</span><span class="o">&gt;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<dl class="simple">
+<dt>name</dt><dd><p>用户设置的用户名，和命令中的 username 一致。</p>
+</dd>
+<dt>id</dt><dd><p>用户账号的 id，是一个数字。</p>
+</dd>
+<dt>max_char</dt><dd><p>玩家可以创建的最大角色数量，用来限制玩家创建角色的数量。最大角色数量为服务端配置文件 server/settings.py 中配置的 MAX_PLAYER_CHARACTERS。</p>
+</dd>
+</dl>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+</section>
+<section id="id4">
+<h2><span class="section-number">7.3. </span>账号命令<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h2>
+<p>用户登录了自己的账号后，可以使用账号命令。</p>
+<section id="delete-account">
+<h3><span class="section-number">7.3.1. </span>delete_account<a class="headerlink" href="#delete-account" title="永久链接至标题">¶</a></h3>
+<p>删除账号。</p>
+<p>命令格式：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;cmd&quot;</span><span class="o">:</span> <span class="s2">&quot;delete_account&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;args&quot;</span><span class="o">:</span> <span class="p">{</span>
+        <span class="s2">&quot;username&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">用户名</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;password&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">密码</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<dl class="simple">
+<dt>username</dt><dd><p>用户的用户名。</p>
+</dd>
+<dt>password</dt><dd><p>用户的密码，如果启用了加密，应该传输加密后的密文。</p>
+</dd>
+</dl>
+<p>返回 code=0 表示删除成功。</p>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+<section id="change-pw">
+<h3><span class="section-number">7.3.2. </span>change_pw<a class="headerlink" href="#change-pw" title="永久链接至标题">¶</a></h3>
+<p>修改密码。</p>
+<p>命令格式：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;cmd&quot;</span><span class="o">:</span> <span class="s2">&quot;change_pw&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;args&quot;</span><span class="o">:</span> <span class="p">{</span>
+        <span class="s2">&quot;current&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="nx">当前的密码</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;new&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="nx">新密码</span><span class="o">&gt;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<dl class="simple">
+<dt>current</dt><dd><p>用户当前的密码，如果启用了加密，应该传输加密后的密文。</p>
+</dd>
+<dt>new</dt><dd><p>用户设置的新密码，如果启用了加密，应该传输加密后的密文。</p>
+</dd>
+</dl>
+<p>返回 code=0 表示修改密码成功。</p>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+<section id="char-create">
+<h3><span class="section-number">7.3.3. </span>char_create<a class="headerlink" href="#char-create" title="永久链接至标题">¶</a></h3>
+<p>创建角色。</p>
+<p>命令格式：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;cmd&quot;</span><span class="o">:</span> <span class="s2">&quot;char_create&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;args&quot;</span><span class="o">:</span> <span class="p">{</span>
+        <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">角色名</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<dl class="simple">
+<dt>name</dt><dd><p>新角色的名字。角色名字的长度只能在 1 到 30 个字符之间，不得与其他用户已有的角色名字重复。每个用户能创建的角色数量不能超过最大角色数量，最大角色数量为服务端配置文件 server/settings.py 中配置的 MAX_PLAYER_CHARACTERS。</p>
+</dd>
+</dl>
+<p>返回 code=0 表示创建成功。</p>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+<section id="char-delete">
+<h3><span class="section-number">7.3.4. </span>char_delete<a class="headerlink" href="#char-delete" title="永久链接至标题">¶</a></h3>
+<p>删除角色。</p>
+<p>命令格式：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;cmd&quot;</span><span class="o">:</span> <span class="s2">&quot;char_delete&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;args&quot;</span><span class="o">:</span> <span class="p">{</span>
+        <span class="s2">&quot;id&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="kr">int</span><span class="p">)</span><span class="nx">玩家角色的id</span><span class="o">&gt;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<dl class="simple">
+<dt>id</dt><dd><p>玩家角色的id。</p>
+</dd>
+</dl>
+<p>返回 code=0 表示删除成功。</p>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+<section id="char-delete-pw">
+<h3><span class="section-number">7.3.5. </span>char_delete_pw<a class="headerlink" href="#char-delete-pw" title="永久链接至标题">¶</a></h3>
+<p>验证密码后删除角色。</p>
+<p>命令格式：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;cmd&quot;</span><span class="o">:</span> <span class="s2">&quot;char_delete_pw&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;args&quot;</span><span class="o">:</span> <span class="p">{</span>
+        <span class="s2">&quot;id&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="kr">int</span><span class="p">)</span><span class="nx">玩家角色的id</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;password&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">密码</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<dl class="simple">
+<dt>id</dt><dd><p>玩家角色的id。</p>
+</dd>
+<dt>password</dt><dd><p>用户的密码，如果启用了加密，应该传输加密后的密文。</p>
+</dd>
+</dl>
+<p>返回 code=0 表示删除成功。</p>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+<section id="puppet">
+<h3><span class="section-number">7.3.6. </span>puppet<a class="headerlink" href="#puppet" title="永久链接至标题">¶</a></h3>
+<p>登录角色。</p>
+<p>命令格式：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;cmd&quot;</span><span class="o">:</span> <span class="s2">&quot;puppet&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;args&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="kr">int</span><span class="p">)</span><span class="nx">玩家角色id</span><span class="o">&gt;</span><span class="p">,</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<dl class="simple">
+<dt>args</dt><dd><p>玩家角色的 id。</p>
+</dd>
+</dl>
+<p>返回 code=0 表示登录成功，返回 data：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;id&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="kr">int</span><span class="p">)</span><span class="nx">对象id</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">角色名字</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="s2">&quot;icon&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">角色图标</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="s2">&quot;state&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">dict</span><span class="p">)</span><span class="nx">角色状态</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="s2">&quot;location&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">dict</span><span class="p">)</span><span class="nx">角色所在位置</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="s2">&quot;look_around&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">dict</span><span class="p">)</span><span class="nx">角色周围环境</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="s2">&quot;at_arrive&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">list</span><span class="p">)</span><span class="nx">到达当前房间的信息</span><span class="o">&gt;</span><span class="p">(</span><span class="nx">可选</span><span class="p">),</span>
+    <span class="s2">&quot;revealed_maps&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">dict</span><span class="p">)</span><span class="nx">角色已开启的地图</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="s2">&quot;channels&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">dict</span><span class="p">)</span><span class="nx">可用的交流频道</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="s2">&quot;equipment_pos&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">list</span><span class="p">)</span><span class="nx">可装备的位置</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="s2">&quot;min_honour_level&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="kr">int</span><span class="p">)</span><span class="nx">可以参加荣誉战斗的最低等级</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="s2">&quot;is_staff&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">bool</span><span class="p">)</span><span class="nx">是否是管理人员</span><span class="o">&gt;</span><span class="p">(</span><span class="nx">可选</span><span class="p">),</span>
+    <span class="s2">&quot;last_combat&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">dict</span><span class="p">)</span><span class="nx">最后未完的战斗</span><span class="o">&gt;</span><span class="p">(</span><span class="nx">可选</span><span class="p">)</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<dl>
+<dt>id</dt><dd><p>对象的id。请注意，对象id和玩家角色id是不一样的的。玩家角色id是保存在数据库中的，在创建完角色之后就不会改变；对象id是服务器中创建的对象的id，角色登录期间不会变化，但每次登录后都会发生变化。</p>
+</dd>
+<dt>name</dt><dd><p>玩家角色显示的名字。</p>
+</dd>
+<dt>icon</dt><dd><p>玩家角色的图标信息，如图标的名字、路径，如果没有则为空。</p>
+</dd>
+<dt>state</dt><dd><p>玩家角色的状态，格式为：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="o">&lt;</span><span class="nx">状态1的名称</span><span class="o">&gt;:</span> <span class="o">&lt;</span><span class="nx">状态1的值</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="o">&lt;</span><span class="nx">状态2的名称</span><span class="o">&gt;:</span> <span class="o">&lt;</span><span class="nx">状态2的值</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="p">...</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</dd>
+<dt>location</dt><dd><p>玩家角色所在位置，格式为：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;area&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">所在区域的id</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="s2">&quot;room&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">所在房间的id</span><span class="o">&gt;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>格式与 <a class="reference external" href="#traverse">traverse</a> 返回的 location 相同，可参见 <a class="reference external" href="#traverse">traverse</a> 。</p>
+</dd>
+<dt>look_around</dt><dd><p>玩家角色所在房间的环境信息，格式为：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;players&quot;</span><span class="o">:</span> <span class="p">[</span>   <span class="c1">// 房间中的其他玩家</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;id&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="kr">int</span><span class="p">)</span><span class="nx">对象id</span><span class="o">&gt;</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">显示的名字</span><span class="o">&gt;</span><span class="p">,</span>
+            <span class="s2">&quot;icon&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">显示的图标</span><span class="o">&gt;</span><span class="p">(</span><span class="nx">可选</span><span class="p">)</span>
+        <span class="p">},</span>
+        <span class="p">...</span>
+    <span class="p">],</span>
+    <span class="s2">&quot;npcs&quot;</span><span class="o">:</span> <span class="p">[</span>      <span class="c1">// 房间中的NPC</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;id&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="kr">int</span><span class="p">)</span><span class="nx">对象id</span><span class="o">&gt;</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">显示的名字</span><span class="o">&gt;</span><span class="p">,</span>
+            <span class="s2">&quot;icon&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">显示的图标</span><span class="o">&gt;</span><span class="p">(</span><span class="nx">可选</span><span class="p">)</span>
+        <span class="p">},</span>
+        <span class="p">...</span>
+    <span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>格式与 <a class="reference external" href="#traverse">traverse</a> 返回的 look_around 相同，可参见 <a class="reference external" href="#traverse">traverse</a> 。</p>
+</dd>
+<dt>at_arrive</dt><dd><p>玩家角色在进入当前房间时可能有一些信息需要显示给用户。格式为：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">[</span>
+    <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">信息文本</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="p">...</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+<p>格式与 <a class="reference external" href="#traverse">traverse</a> 返回的 at_arrive 相同，可参见 <a class="reference external" href="#traverse">traverse</a> 。</p>
+</dd>
+<dt>revealed_maps</dt><dd><p>玩家角色已开启的地图，格式为：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">地图区域1的key</span><span class="o">&gt;:</span> <span class="kc">true</span><span class="p">,</span>
+    <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">地图区域2的key</span><span class="o">&gt;:</span> <span class="kc">true</span><span class="p">,</span>
+    <span class="p">...</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</dd>
+<dt>channels</dt><dd><p>玩家角色可用的聊天频道，格式为：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">频道1的key</span><span class="o">&gt;:</span> <span class="p">{</span>
+       <span class="s2">&quot;type&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">频道类型</span><span class="o">&gt;</span><span class="p">,</span>
+       <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">频道名称</span><span class="o">&gt;</span>
+    <span class="p">},</span>
+    <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">频道2的key</span><span class="o">&gt;:</span> <span class="p">{</span>
+       <span class="s2">&quot;type&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">频道类型</span><span class="o">&gt;</span><span class="p">,</span>
+       <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">频道名称</span><span class="o">&gt;</span>
+    <span class="p">},</span>
+    <span class="p">...</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</dd>
+<dt>equipment_pos</dt><dd><p>玩家角色可以穿着装备的位置，格式为：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">[</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;key&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">位置的key</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">位置的名称</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;desc&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">位置的描述信息</span><span class="o">&gt;</span>
+    <span class="p">},</span>
+    <span class="p">...</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+</dd>
+<dt>min_honour_level</dt><dd><p>玩家角色可以参加荣誉战的最低等级，只有达到这个等级才能参与荣誉战。等级可以在管理平台配置。</p>
+</dd>
+<dt>is_staff</dt><dd><p>是否是管理员。管理员账号创建的角色拥有一些特殊的功能。</p>
+</dd>
+<dt>last_combat</dt><dd><p>最后未完的战斗。如果玩家角色在战斗中退出，再次登入时如果战斗还没结束，可以继续之前未完成的战斗。如果没有需要继续的战斗话则为空。数据格式为：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;combat_info&quot;</span><span class="o">:</span> <span class="p">{</span>       <span class="c1">// 战斗信息</span>
+        <span class="s2">&quot;desc&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">战斗的描述信息</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;timeout&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="kr">int</span><span class="p">)</span><span class="nx">战斗的最长时间</span><span class="p">(</span><span class="nx">单位</span><span class="o">:</span><span class="nx">秒</span><span class="p">)</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;characters&quot;</span><span class="o">:</span> <span class="p">[</span>    <span class="c1">// 参与战斗的角色</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;id&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="kr">int</span><span class="p">)</span><span class="nx">对象id</span><span class="o">&gt;</span><span class="p">,</span>
+                <span class="s2">&quot;key&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">对象的key</span><span class="o">&gt;</span><span class="p">,</span>
+                <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">对象的名称</span><span class="o">&gt;</span><span class="p">,</span>
+                <span class="s2">&quot;desc&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">角色的描述信息</span><span class="o">&gt;</span><span class="p">,</span>
+                <span class="s2">&quot;icon&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">角色的图标</span><span class="o">&gt;</span><span class="p">(</span><span class="nx">可选</span><span class="p">),</span>
+                <span class="s2">&quot;team&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="kr">int</span><span class="p">)</span><span class="nx">对象所属队伍的id</span><span class="o">&gt;</span>
+            <span class="p">}</span>
+        <span class="p">],</span>
+        <span class="p">...</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;combat_commands&quot;</span><span class="o">:</span> <span class="p">[</span>   <span class="c1">// 战斗中可用的技能</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;key&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">技能的key</span><span class="o">&gt;</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">技能的名称</span><span class="o">&gt;</span><span class="p">,</span>
+            <span class="s2">&quot;cd&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="kr">int</span><span class="p">)</span><span class="nx">技能的CD时间</span><span class="o">&gt;</span><span class="p">,</span>
+            <span class="s2">&quot;icon&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">技能的图标</span><span class="o">&gt;</span><span class="p">(</span><span class="nx">可选</span><span class="p">)</span>
+        <span class="p">},</span>
+        <span class="p">...</span>
+    <span class="p">],</span>
+    <span class="s2">&quot;combat_states&quot;</span><span class="o">:</span> <span class="p">{</span>     <span class="c1">// 战斗中各个对象的状态信息</span>
+        <span class="o">&lt;</span><span class="p">(</span><span class="kr">int</span><span class="p">)</span><span class="nx">对象id</span><span class="o">&gt;:</span> <span class="p">{</span>
+            <span class="s2">&quot;id&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="kr">int</span><span class="p">)</span><span class="nx">对象id</span><span class="o">&gt;</span><span class="p">,</span>
+            <span class="o">&lt;</span><span class="nx">属性1的key</span><span class="o">&gt;:</span> <span class="o">&lt;</span><span class="nx">属性1的值</span><span class="o">&gt;</span><span class="p">,</span>
+            <span class="o">&lt;</span><span class="nx">属性2的key</span><span class="o">&gt;:</span> <span class="o">&lt;</span><span class="nx">属性2的值</span><span class="o">&gt;</span><span class="p">,</span>
+            <span class="p">...</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+<section id="puppet-name">
+<h3><span class="section-number">7.3.7. </span>puppet_name<a class="headerlink" href="#puppet-name" title="永久链接至标题">¶</a></h3>
+<p>通过角色名字登录角色。</p>
+<p>命令格式：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;cmd&quot;</span><span class="o">:</span> <span class="s2">&quot;puppet_name&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;args&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">玩家角色的名字</span><span class="o">&gt;</span><span class="p">,</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<dl class="simple">
+<dt>args</dt><dd><p>玩家角色的名字。</p>
+</dd>
+</dl>
+<p>返回 code=0 表示登录成功，返回 data 与 <a class="reference external" href="#puppet">puppet</a> 相同。</p>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+<section id="unpuppet">
+<h3><span class="section-number">7.3.8. </span>unpuppet<a class="headerlink" href="#unpuppet" title="永久链接至标题">¶</a></h3>
+<p>登出当前登录的玩家角色。</p>
+<p>命令格式：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;cmd&quot;</span><span class="o">:</span> <span class="s2">&quot;unpuppet&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>返回 code=0 表示登出角色成功。</p>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+<section id="char-all">
+<h3><span class="section-number">7.3.9. </span>char_all<a class="headerlink" href="#char-all" title="永久链接至标题">¶</a></h3>
+<p>查询当前账号下的所有角色。</p>
+<p>命令格式：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;cmd&quot;</span><span class="o">:</span> <span class="s2">&quot;char_all&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>返回 code=0 表示查询成功，返回 data：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">[</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;id&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="kr">int</span><span class="p">)</span><span class="nx">玩家角色id</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">玩家角色名字</span><span class="o">&gt;</span>
+    <span class="p">}</span>
+    <span class="p">...</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+<section id="logout">
+<h3><span class="section-number">7.3.10. </span>logout<a class="headerlink" href="#logout" title="永久链接至标题">¶</a></h3>
+<p>登出当前账号。</p>
+<p>命令格式：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;cmd&quot;</span><span class="o">:</span> <span class="s2">&quot;logout&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>返回 code=0 表示登出账号成功。</p>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+<section id="query-map">
+<h3><span class="section-number">7.3.11. </span>query_map<a class="headerlink" href="#query-map" title="永久链接至标题">¶</a></h3>
+<p>查询地图信息。</p>
+<p>命令格式：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;cmd&quot;</span><span class="o">:</span> <span class="s2">&quot;query_map&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>返回 code=0 表示查询成功，返回 data：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">区域的key</span><span class="o">&gt;:</span> <span class="p">{</span>
+        <span class="s2">&quot;key&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">区域的key</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">区域的名字</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;desc&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">区域的描述信息</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;icon&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">区域的图标</span><span class="o">&gt;</span><span class="p">(</span><span class="nx">可选</span><span class="p">),</span>
+        <span class="s2">&quot;background&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">区域的背景图</span><span class="o">&gt;</span><span class="p">(</span><span class="nx">可选</span><span class="p">),</span>
+        <span class="s2">&quot;rooms&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">dict</span><span class="p">)</span><span class="nx">区域中的所有房间</span><span class="o">&gt;</span>
+    <span class="p">},</span>
+    <span class="p">...</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<dl>
+<dt>key</dt><dd><p>区域的唯一标志。</p>
+</dd>
+<dt>name</dt><dd><p>区域显示的名称。</p>
+</dd>
+<dt>desc</dt><dd><p>区域的描述信息。</p>
+</dd>
+<dt>icon</dt><dd><p>区域的图标信息，如图标的名字、路径，如果没有则为空。</p>
+</dd>
+<dt>background</dt><dd><p>区域的背景图信息，如背景图的名字、路径，没有则为空。</p>
+</dd>
+<dt>rooms</dt><dd><p>区域中的所有房间，格式为：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">房间的key</span><span class="o">&gt;:</span> <span class="p">{</span>
+        <span class="s2">&quot;key&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">房间的key</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">房间的名字</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;desc&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">房间的描述信息</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;icon&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">房间的图标</span><span class="o">&gt;</span><span class="p">(</span><span class="nx">可选</span><span class="p">),</span>
+        <span class="s2">&quot;background&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">房间的背景图</span><span class="o">&gt;</span><span class="p">(</span><span class="nx">可选</span><span class="p">),</span>
+        <span class="s2">&quot;peaceful&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">bool</span><span class="p">)</span><span class="nx">是否是和平房间</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;pos&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">any</span><span class="p">)</span><span class="nx">房间所在的位置</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;objects&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">list</span><span class="p">)</span><span class="nx">房间中的物体</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;exits&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">list</span><span class="p">)</span><span class="nx">房间的出口</span><span class="o">&gt;</span>
+    <span class="p">},</span>
+    <span class="p">...</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<dl>
+<dt>key</dt><dd><p>房间的唯一标志。</p>
+</dd>
+<dt>name</dt><dd><p>房间显示的名称。</p>
+</dd>
+<dt>desc</dt><dd><p>房间的描述信息。</p>
+</dd>
+<dt>icon</dt><dd><p>房间的图标信息，如图标的名字、路径，如果没有则为空。</p>
+</dd>
+<dt>background</dt><dd><p>房间的背景图信息，如背景图的名字、路径，没有则为空。</p>
+</dd>
+<dt>peaceful</dt><dd><p>是否是和平房间，在和平房间内不允许玩家互相战斗。</p>
+</dd>
+<dt>pos</dt><dd><p>房间所在的位置信息，默认是房间的二维坐标，也可以定义成其他形式。</p>
+</dd>
+<dt>objects</dt><dd><p>房间中的所有物体，物体是固定在房间中不能移动位置的。格式为：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">[</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;key&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">物体的key</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">物体的名字</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;desc&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">物体的描述信息</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;icon&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">物体的图标</span><span class="o">&gt;</span><span class="p">(</span><span class="nx">可选</span><span class="p">),</span>
+    <span class="p">}</span>
+    <span class="p">...</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+</dd>
+<dt>exits</dt><dd><p>房间中的所有出口，玩家可以通过出口去往另一个房间。格式为：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">[</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;key&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">出口的key</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">出口的名字</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;desc&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">出口的描述信息</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;icon&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">出口的图标</span><span class="o">&gt;</span><span class="p">(</span><span class="nx">可选</span><span class="p">),</span>
+        <span class="s2">&quot;destination&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">出口目的地的key</span><span class="o">&gt;</span>
+    <span class="p">}</span>
+    <span class="p">...</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+</dd>
+</dl>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+</section>
+<section id="id11">
+<h2><span class="section-number">7.4. </span>角色命令<a class="headerlink" href="#id11" title="永久链接至标题">¶</a></h2>
+<p>用户登录角色后，可以使用角色命令。</p>
+<section id="look-room-obj">
+<h3><span class="section-number">7.4.1. </span>look_room_obj<a class="headerlink" href="#look-room-obj" title="永久链接至标题">¶</a></h3>
+<p>观察当前房间内的物体。</p>
+<p>命令格式：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;cmd&quot;</span><span class="o">:</span> <span class="s2">&quot;look_room_obj&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;args&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">物体的key</span><span class="o">&gt;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<dl class="simple">
+<dt>args</dt><dd><p>想要观察的物体的key。</p>
+</dd>
+</dl>
+<p>返回 code=0 表示观察成功，返回 data：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;key&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">物品的key</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">物品的名字</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="s2">&quot;level&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="kr">int</span><span class="p">)</span><span class="nx">物品的等级</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="s2">&quot;desc&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">物品的描述信息</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="s2">&quot;icon&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">物品的图标</span><span class="o">&gt;</span><span class="p">(</span><span class="nx">可选</span><span class="p">),</span>
+    <span class="s2">&quot;cmds&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">list</span><span class="p">)</span><span class="nx">可对物品使用的命令</span><span class="o">&gt;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<dl>
+<dt>key</dt><dd><p>物品的标志，同类物品据有相同的key。</p>
+</dd>
+<dt>name</dt><dd><p>物品的名字。</p>
+</dd>
+<dt>level</dt><dd><p>物品的等级，如果为空表示该物品没有等级变化。</p>
+</dd>
+<dt>desc</dt><dd><p>物品的描述信息。</p>
+</dd>
+<dt>icon</dt><dd><p>物品的图标信息，如图标的名字、路径，如果没有则为空。</p>
+</dd>
+<dt>cmds</dt><dd><p>可以对物品使用的命令，前端界面需要把命令展示出来，供用户操作。格式为：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;cmd&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">命令的id</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">命令显示的名字</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="s2">&quot;args&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">any</span><span class="p">)</span><span class="nx">命令的参数</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="s2">&quot;confirm&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">bool或str</span><span class="p">)</span><span class="nx">确认信息</span><span class="o">&gt;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<dl class="simple">
+<dt>cmd</dt><dd><p>命令的唯一id。</p>
+</dd>
+<dt>name</dt><dd><p>显示给用户看的命令名字。</p>
+</dd>
+<dt>args</dt><dd><p>向后台发送命令时需要完整地带上 args 中的参数。</p>
+</dd>
+<dt>confirm</dt><dd><p>命令的确认信息。如果为空或为 false，表示命令不需要确认可以直接发送到后端，如果为字符串或为 true，用户选择了该命令后，前端需要弹出确认框让用户确认后才能发送到后端，如果为字符串需要在确认信息中显示字符串的内容，如果为 true 需要显示默认的确认信息。</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+<section id="look-room-char">
+<h3><span class="section-number">7.4.2. </span>look_room_char<a class="headerlink" href="#look-room-char" title="永久链接至标题">¶</a></h3>
+<p>观察当前房间内的角色。</p>
+<p>命令格式：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;cmd&quot;</span><span class="o">:</span> <span class="s2">&quot;look_room_char&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;args&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="kr">int</span><span class="p">)</span><span class="nx">对象id</span><span class="o">&gt;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<dl class="simple">
+<dt>args:</dt><dd><p>想要观察的角色对象的id。</p>
+</dd>
+</dl>
+<p>返回 code=0 表示观察成功，返回 data：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;key&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">角色对象的key</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">角色对象的名字</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="s2">&quot;level&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="kr">int</span><span class="p">)</span><span class="nx">角色对象的等级</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="s2">&quot;desc&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">角色对象的描述信息</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="s2">&quot;icon&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">角色对象的图标</span><span class="o">&gt;</span><span class="p">(</span><span class="nx">可选</span><span class="p">),</span>
+    <span class="s2">&quot;cmds&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">list</span><span class="p">)</span><span class="nx">可对角色对象使用的命令</span><span class="o">&gt;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>与 <a class="reference external" href="#look-room-obj">look_room_obj</a> 返回的物品信息相同，请参见 <a class="reference external" href="#look-room-obj">look_room_obj</a> 。</p>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+<section id="id14">
+<h3><span class="section-number">7.4.3. </span>traverse<a class="headerlink" href="#id14" title="永久链接至标题">¶</a></h3>
+<p>穿越出口。</p>
+<p>命令格式：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;cmd&quot;</span><span class="o">:</span> <span class="s2">&quot;traverse&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;args&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">出口的key</span><span class="o">&gt;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<dl class="simple">
+<dt>args:</dt><dd><p>出口的唯一标志。</p>
+</dd>
+</dl>
+<p>返回 code=0 表示已执行操作，返回 data：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;traversed&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">bool</span><span class="p">)</span><span class="nx">是否穿越成功</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="s2">&quot;location&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">dict</span><span class="p">)</span><span class="nx">目的地信息</span><span class="o">&gt;</span><span class="p">(</span><span class="nx">如果穿越成功</span><span class="p">),</span>
+    <span class="s2">&quot;look_around&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">dict</span><span class="p">)</span><span class="nx">目的地环境</span><span class="o">&gt;</span><span class="p">(</span><span class="nx">如果穿越成功</span><span class="p">),</span>
+    <span class="s2">&quot;at_leave&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">list</span><span class="p">)</span><span class="nx">离开之前房间的信息</span><span class="o">&gt;</span><span class="p">(</span><span class="nx">如果穿越成功</span><span class="p">,</span><span class="nx">可选</span><span class="p">),</span>
+    <span class="s2">&quot;at_arrive&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">list</span><span class="p">)</span><span class="nx">到达当前房间的信息</span><span class="o">&gt;</span><span class="p">(</span><span class="nx">如果穿越成功</span><span class="p">,</span><span class="nx">可选</span><span class="p">),</span>
+    <span class="s2">&quot;exit&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">dict</span><span class="p">)</span><span class="nx">出口的信息</span><span class="o">&gt;</span><span class="p">(</span><span class="nx">如果穿越不成功</span><span class="p">),</span>
+    <span class="s2">&quot;events&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">list</span><span class="p">)</span><span class="nx">触发的事件</span><span class="o">&gt;</span><span class="p">(</span><span class="nx">可选</span><span class="p">),</span>
+    <span class="s2">&quot;quests&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">list</span><span class="p">)</span><span class="nx">影响的任务</span><span class="o">&gt;</span><span class="p">(</span><span class="nx">可选</span><span class="p">)</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<dl>
+<dt>traversed</dt><dd><p>是否成功穿越了出口。</p>
+</dd>
+<dt>location</dt><dd><p>如果穿越成功会返回目的地的位置。格式为：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;area&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">目的地区域的key</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="s2">&quot;room&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">目的地房间的key</span><span class="o">&gt;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</dd>
+<dt>look_around</dt><dd><p>如果穿越成功会返回目的地的环境。格式为：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;players&quot;</span><span class="o">:</span> <span class="p">[</span>   <span class="c1">// 房间中的其他玩家</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;id&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="kr">int</span><span class="p">)</span><span class="nx">对象id</span><span class="o">&gt;</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">显示的名字</span><span class="o">&gt;</span><span class="p">,</span>
+            <span class="s2">&quot;icon&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">显示的图标</span><span class="o">&gt;</span><span class="p">(</span><span class="nx">可选</span><span class="p">)</span>
+        <span class="p">},</span>
+        <span class="p">...</span>
+    <span class="p">],</span>
+    <span class="s2">&quot;npcs&quot;</span><span class="o">:</span> <span class="p">[</span>      <span class="c1">// 房间中的NPC</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;id&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="kr">int</span><span class="p">)</span><span class="nx">对象id</span><span class="o">&gt;</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">显示的名字</span><span class="o">&gt;</span><span class="p">,</span>
+            <span class="s2">&quot;icon&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">显示的图标</span><span class="o">&gt;</span><span class="p">(</span><span class="nx">可选</span><span class="p">)</span>
+        <span class="p">},</span>
+        <span class="p">...</span>
+    <span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</dd>
+<dt>at_leave</dt><dd><p>如果穿越成功，在离开之前房间时可能有一些信息需要显示给用户。格式为：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">[</span>
+    <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">信息文本</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="p">...</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+</dd>
+<dt>at_arrive</dt><dd><p>如果穿越成功，在进入当前房间时可能有一些信息需要显示给用户。格式为：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">[</span>
+    <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">信息文本</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="p">...</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+</dd>
+<dt>exit</dt><dd><p>如果穿越不成功，会返回出口的信息。格式为：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;key&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">出口的key</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">出口的名字</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="s2">&quot;desc&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">出口的描述信息</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="s2">&quot;icon&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">出口的图标</span><span class="o">&gt;</span><span class="p">(</span><span class="nx">可选</span><span class="p">),</span>
+    <span class="s2">&quot;destination&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">出口目的地的key</span><span class="o">&gt;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>与 <a class="reference external" href="#look-room-obj">look_room_obj</a> 返回的物品信息相同，请参见 <a class="reference external" href="#look-room-obj">look_room_obj</a> 。</p>
+</dd>
+<dt>events</dt><dd><p>如果玩家的行动触发了事件，会返回相关事件的信息。格式为：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">[</span>
+    <span class="p">{</span>
+        <span class="o">&lt;</span><span class="nx">事件动作的id</span><span class="o">&gt;:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">any</span><span class="p">)</span><span class="nx">事件动作的信息</span><span class="o">&gt;</span>
+    <span class="p">}</span>
+    <span class="p">...</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+</dd>
+<dt>quests</dt><dd><p>如果玩家的行动引起任务目标达成，会返回相关的任务信息。格式为：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;accomplished&quot;</span><span class="o">:</span> <span class="p">[</span>   <span class="c1">// 达成的任务</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;key&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">任务的key</span><span class="o">&gt;</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">任务的名字</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="p">},</span>
+        <span class="p">...</span>
+    <span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+<section id="unlock-exit">
+<h3><span class="section-number">7.4.4. </span>unlock_exit<a class="headerlink" href="#unlock-exit" title="永久链接至标题">¶</a></h3>
+<p>解锁出口。如果出口已上锁，符合条件的玩家可以解锁出口。</p>
+<p>命令格式：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;cmd&quot;</span><span class="o">:</span> <span class="s2">&quot;unlock_exit&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;args&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">出口的key</span><span class="o">&gt;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<dl class="simple">
+<dt>args:</dt><dd><p>出口的唯一标志，出口必须和玩家在同一房间内。</p>
+</dd>
+</dl>
+<p>返回 code=0 表示已执行操作，返回 data：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;unlocked&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">bool</span><span class="p">)</span><span class="nx">是否解锁成功</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="s2">&quot;exit&quot;</span><span class="o">:</span> <span class="p">{</span>      <span class="c1">// 解锁后出口的样子</span>
+        <span class="s2">&quot;key&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">出口的key</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">出口的名字</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;level&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="kr">int</span><span class="p">)</span><span class="nx">出口的等级</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;desc&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">出口的描述信息</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;icon&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">出口的图标</span><span class="o">&gt;</span><span class="p">(</span><span class="nx">可选</span><span class="p">),</span>
+        <span class="s2">&quot;cmds&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">list</span><span class="p">)</span><span class="nx">可对出口使用的命令</span><span class="o">&gt;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<dl class="simple">
+<dt>unlocked</dt><dd><p>是否解锁成功</p>
+</dd>
+<dt>exit</dt><dd><p>解锁后出口的样子，格式与 <a class="reference external" href="#look-room-obj">look_room_obj</a> 返回的物品信息相同，请参见 <a class="reference external" href="#look-room-obj">look_room_obj</a> 。</p>
+</dd>
+</dl>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+<section id="inventory">
+<h3><span class="section-number">7.4.5. </span>inventory<a class="headerlink" href="#inventory" title="永久链接至标题">¶</a></h3>
+<p>查询背包的信息。</p>
+<p>命令格式：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;cmd&quot;</span><span class="o">:</span> <span class="s2">&quot;inventory&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>返回 code=0 表示查询成功，返回 data：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">[</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;position&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="kr">int</span><span class="p">)</span><span class="nx">物品在背包中的位置</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;number&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="kr">int</span><span class="p">)</span><span class="nx">物品的数量</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;can_remove&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">bool</span><span class="p">)</span><span class="nx">是否可以删除该物品</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">物品的名字</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;level&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="kr">int</span><span class="p">)</span><span class="nx">物品的等级</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;desc&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">物品的描述信息</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;icon&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">物品的图标</span><span class="o">&gt;</span><span class="p">(</span><span class="nx">可选</span><span class="p">)</span>
+    <span class="p">}</span>
+    <span class="p">...</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+<dl class="simple">
+<dt>position</dt><dd><p>物品在背包中的位置，位置的数字不一定连续，应该按位置的先后次序显示物品。</p>
+</dd>
+<dt>number</dt><dd><p>物品的数量，可以为0。</p>
+</dd>
+<dt>can_remove</dt><dd><p>当物品数量为0时是否可以删除该物品，如果 can_remove 为 false，即使物品数量为 0 也需要显示该物品。</p>
+</dd>
+<dt>name</dt><dd><p>物品的名字。</p>
+</dd>
+<dt>level</dt><dd><p>物品的等级，如果为空表示该物品没有等级变化。</p>
+</dd>
+<dt>desc</dt><dd><p>物品的描述信息。</p>
+</dd>
+<dt>icon</dt><dd><p>物品的图标信息，如图标的名字、路径，如果没有则为空。</p>
+</dd>
+</dl>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+<section id="inventory-obj">
+<h3><span class="section-number">7.4.6. </span>inventory_obj<a class="headerlink" href="#inventory-obj" title="永久链接至标题">¶</a></h3>
+<p>查询背包中物品的信息。</p>
+<p>命令格式：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;cmd&quot;</span><span class="o">:</span> <span class="s2">&quot;inventory_obj&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;args&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="kr">int</span><span class="p">)</span><span class="nx">物品在背包中的位置</span><span class="o">&gt;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<dl class="simple">
+<dt>args</dt><dd><p>物品在背包中的位置，即背包物品的 position。</p>
+</dd>
+</dl>
+<p>返回 code=0 表示查询成功，返回 data：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;key&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">物品的key</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">物品的名字</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="s2">&quot;level&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="kr">int</span><span class="p">)</span><span class="nx">物品的等级</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="s2">&quot;desc&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">物品的描述信息</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="s2">&quot;icon&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">物品的图标</span><span class="o">&gt;</span><span class="p">(</span><span class="nx">可选</span><span class="p">),</span>
+    <span class="s2">&quot;cmds&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">list</span><span class="p">)</span><span class="nx">可对物品使用的命令</span><span class="o">&gt;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>格式与 <a class="reference external" href="#look-room-obj">look_room_obj</a> 返回的物品信息相同，请参见 <a class="reference external" href="#look-room-obj">look_room_obj</a> 。</p>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+<section id="use">
+<h3><span class="section-number">7.4.7. </span>use<a class="headerlink" href="#use" title="永久链接至标题">¶</a></h3>
+<p>使用背包中的物品。</p>
+<p>命令格式：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;cmd&quot;</span><span class="o">:</span> <span class="s2">&quot;use&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;args&quot;</span><span class="o">:</span> <span class="p">{</span>
+        <span class="nx">position</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="kr">int</span><span class="p">)</span><span class="nx">物品在背包中的位置</span><span class="o">&gt;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<dl class="simple">
+<dt>position</dt><dd><p>物品在背包中的位置，即背包物品的 position。</p>
+</dd>
+</dl>
+<p>返回 code=0 表示使用成功，返回 data：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="kc">null</span>
+<span class="nx">或</span>
+<span class="p">{</span>
+    <span class="s2">&quot;msg&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">使用的结果</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="s2">&quot;state&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">dict</span><span class="p">)</span><span class="nx">角色状态</span><span class="o">&gt;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<dl>
+<dt>null</dt><dd><p>表示没有任何效果。</p>
+</dd>
+<dt>msg</dt><dd><p>用文字描述的使用效果。</p>
+</dd>
+<dt>state</dt><dd><p>使用后的角色状态，格式为：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="o">&lt;</span><span class="nx">状态1的名称</span><span class="o">&gt;:</span> <span class="o">&lt;</span><span class="nx">状态1的值</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="o">&lt;</span><span class="nx">状态2的名称</span><span class="o">&gt;:</span> <span class="o">&lt;</span><span class="nx">状态2的值</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="p">...</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>格式与 <a class="reference external" href="#puppet">puppet</a> 返回的 state 相同，请参见 <a class="reference external" href="#puppet">puppet</a> 。</p>
+</dd>
+</dl>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+<section id="discard">
+<h3><span class="section-number">7.4.8. </span>discard<a class="headerlink" href="#discard" title="永久链接至标题">¶</a></h3>
+<p>丢弃背包中的物品。</p>
+<p>命令格式：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;cmd&quot;</span><span class="o">:</span> <span class="s2">&quot;discard&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;args&quot;</span><span class="o">:</span> <span class="p">{</span>
+        <span class="nx">position</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="kr">int</span><span class="p">)</span><span class="nx">物品在背包中的位置</span><span class="o">&gt;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<dl class="simple">
+<dt>position</dt><dd><p>物品在背包中的位置，即背包物品的 position。</p>
+</dd>
+</dl>
+<p>返回 code=0 表示丢弃成功。</p>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+<section id="all-equipments">
+<h3><span class="section-number">7.4.9. </span>all_equipments<a class="headerlink" href="#all-equipments" title="永久链接至标题">¶</a></h3>
+<p>查询已装备的物品。</p>
+<p>命令格式：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;cmd&quot;</span><span class="o">:</span> <span class="s2">&quot;all_equipments&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>返回 code=0 表示查询成功，返回 data：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">装备的位置</span><span class="o">&gt;:</span> <span class="p">{</span>
+        <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">物品的名字</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;level&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="kr">int</span><span class="p">)</span><span class="nx">物品的等级</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;desc&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">物品的描述信息</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;icon&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">物品的图标</span><span class="o">&gt;</span><span class="p">(</span><span class="nx">可选</span><span class="p">)</span>
+    <span class="p">},</span>
+    <span class="p">...</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<dl class="simple">
+<dt>装备的位置</dt><dd><p>即 <a class="reference external" href="#puppet">puppet</a> 中返回的 equipment_pos 玩家角色可以穿着装备位置的 key。</p>
+</dd>
+<dt>name</dt><dd><p>物品的名字。</p>
+</dd>
+<dt>level</dt><dd><p>物品的等级，如果为空表示该物品没有等级变化。</p>
+</dd>
+<dt>desc</dt><dd><p>物品的描述信息。</p>
+</dd>
+<dt>icon</dt><dd><p>物品的图标信息，如图标的名字、路径，如果没有则为空。</p>
+</dd>
+</dl>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+<section id="equipments-obj">
+<h3><span class="section-number">7.4.10. </span>equipments_obj<a class="headerlink" href="#equipments-obj" title="永久链接至标题">¶</a></h3>
+<p>查询已装备物品的信息。</p>
+<p>命令格式：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;cmd&quot;</span><span class="o">:</span> <span class="s2">&quot;equipments_obj&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;args&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">装备的位置</span><span class="o">&gt;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<dl class="simple">
+<dt>args</dt><dd><p>即 <a class="reference external" href="#all-equipments">all_equipments</a> 中返回的装备位置中的一个。</p>
+</dd>
+</dl>
+<p>返回 code=0 表示查询成功，返回 data：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;key&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">物品的key</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">物品的名字</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="s2">&quot;level&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="kr">int</span><span class="p">)</span><span class="nx">物品的等级</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="s2">&quot;desc&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">物品的描述信息</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="s2">&quot;icon&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">物品的图标</span><span class="o">&gt;</span><span class="p">(</span><span class="nx">可选</span><span class="p">),</span>
+    <span class="s2">&quot;cmds&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">list</span><span class="p">)</span><span class="nx">可对物品使用的命令</span><span class="o">&gt;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>格式与 <a class="reference external" href="#look-room-obj">look_room_obj</a> 返回的物品信息相同，请参见 <a class="reference external" href="#look-room-obj">look_room_obj</a> 。</p>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+<section id="equip">
+<h3><span class="section-number">7.4.11. </span>equip<a class="headerlink" href="#equip" title="永久链接至标题">¶</a></h3>
+<p>装备背包中的物品。</p>
+<p>命令格式：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;cmd&quot;</span><span class="o">:</span> <span class="s2">&quot;equip&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;args&quot;</span><span class="o">:</span> <span class="p">{</span>
+        <span class="nx">position</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="kr">int</span><span class="p">)</span><span class="nx">物品在背包中的位置</span><span class="o">&gt;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<dl class="simple">
+<dt>position</dt><dd><p>物品在背包中的位置，即背包物品的 position。</p>
+</dd>
+</dl>
+<p>返回 code=0 表示装备成功，返回 data：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;state&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">dict</span><span class="p">)</span><span class="nx">角色状态</span><span class="o">&gt;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<dl>
+<dt>state</dt><dd><p>装备后的角色状态，格式为：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="o">&lt;</span><span class="nx">状态1的名称</span><span class="o">&gt;:</span> <span class="o">&lt;</span><span class="nx">状态1的值</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="o">&lt;</span><span class="nx">状态2的名称</span><span class="o">&gt;:</span> <span class="o">&lt;</span><span class="nx">状态2的值</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="p">...</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>格式与 <a class="reference external" href="#puppet">puppet</a> 返回的 state 相同，请参见 <a class="reference external" href="#puppet">puppet</a> 。</p>
+</dd>
+</dl>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+<section id="takeoff">
+<h3><span class="section-number">7.4.12. </span>takeoff<a class="headerlink" href="#takeoff" title="永久链接至标题">¶</a></h3>
+<p>卸下已装备的物品。</p>
+<p>命令格式：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;cmd&quot;</span><span class="o">:</span> <span class="s2">&quot;takeoff&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;args&quot;</span><span class="o">:</span> <span class="p">{</span>
+        <span class="nx">position</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">装备的位置</span><span class="o">&gt;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<dl class="simple">
+<dt>position</dt><dd><p>即 <a class="reference external" href="#all-equipments">all_equipments</a> 中返回的装备位置中的一个。</p>
+</dd>
+</dl>
+<p>返回 code=0 表示成功卸下，返回 data：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;state&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">dict</span><span class="p">)</span><span class="nx">角色状态</span><span class="o">&gt;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<dl>
+<dt>state</dt><dd><p>卸下后的角色状态，格式为：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="o">&lt;</span><span class="nx">状态1的名称</span><span class="o">&gt;:</span> <span class="o">&lt;</span><span class="nx">状态1的值</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="o">&lt;</span><span class="nx">状态2的名称</span><span class="o">&gt;:</span> <span class="o">&lt;</span><span class="nx">状态2的值</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="p">...</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>格式与 <a class="reference external" href="#puppet">puppet</a> 返回的 state 相同，请参见 <a class="reference external" href="#puppet">puppet</a> 。</p>
+</dd>
+</dl>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+<section id="loot">
+<h3><span class="section-number">7.4.13. </span>loot<a class="headerlink" href="#loot" title="永久链接至标题">¶</a></h3>
+<p>从对象拾取物品。</p>
+<p>命令格式：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;cmd&quot;</span><span class="o">:</span> <span class="s2">&quot;loot&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;args&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">对象的key</span><span class="o">&gt;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<dl class="simple">
+<dt>args</dt><dd><p>拾取的对象必须和玩家在同一个房间，参数为对象的key。</p>
+</dd>
+</dl>
+<p>返回 code=0 表示拾取成功，返回 data：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;objects&quot;</span><span class="o">:</span> <span class="p">[</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;key&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">获得物品的key</span><span class="o">&gt;</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">获得物品的名字</span><span class="o">&gt;</span><span class="p">,</span>
+            <span class="s2">&quot;icon&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">获得物品的图标</span><span class="o">&gt;</span><span class="p">(</span><span class="nx">可选</span><span class="p">),</span>
+            <span class="s2">&quot;number&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="kr">int</span><span class="p">)</span><span class="nx">获得物品的数量</span><span class="o">&gt;</span><span class="p">,</span>
+            <span class="s2">&quot;reject&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">无法获得物品的原因</span><span class="o">&gt;</span>
+        <span class="p">},</span>
+        <span class="p">...</span>
+    <span class="p">],</span>
+    <span class="s2">&quot;quests&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">list</span><span class="p">)</span><span class="nx">影响的任务</span><span class="o">&gt;</span><span class="p">(</span><span class="nx">可选</span><span class="p">)</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<dl class="simple">
+<dt>key</dt><dd><p>获得物品的key。</p>
+</dd>
+<dt>name</dt><dd><p>获得物品的名字。</p>
+</dd>
+<dt>icon</dt><dd><p>获得物品的图标信息，如图标的名字、路径，如果没有则为空。</p>
+</dd>
+<dt>number</dt><dd><p>获得物品的数量。</p>
+</dd>
+<dt>reject</dt><dd><p>如果无法拾取物品，会返回无法拾取的原因。</p>
+</dd>
+<dt>quests</dt><dd><p>如果玩家拾取物品引起任务目标达成，会返回相关的任务信息。格式与 <a class="reference external" href="#traverse">traverse</a> 返回的 quests 相同，请参见 <a class="reference external" href="#traverse">traverse</a> 。</p>
+</dd>
+</dl>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+<section id="all-skills">
+<h3><span class="section-number">7.4.14. </span>all_skills<a class="headerlink" href="#all-skills" title="永久链接至标题">¶</a></h3>
+<p>查询玩家当前的所有技能。</p>
+<p>命令格式：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;cmd&quot;</span><span class="o">:</span> <span class="s2">&quot;all_skills&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>返回 code=0 表示查询成功，返回 data：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">[</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;key&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">技能的key</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">技能的名字</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;desc&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">技能的描述信息</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;icon&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">技能的图标</span><span class="o">&gt;</span><span class="p">(</span><span class="nx">可选</span><span class="p">),</span>
+        <span class="s2">&quot;cmds&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">list</span><span class="p">)</span><span class="nx">可对技能使用的命令</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;passive&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">bool</span><span class="p">)</span><span class="nx">是否是被动技能</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;cd&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="kr">int</span><span class="p">)</span><span class="nx">技能的CD时间</span><span class="o">&gt;</span>
+    <span class="p">},</span>
+    <span class="p">...</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+<dl class="simple">
+<dt>key、name、desc、icon、cmds</dt><dd><p>格式与 <a class="reference external" href="#look-room-obj">look_room_obj</a> 返回的物品信息相同，请参见 <a class="reference external" href="#look-room-obj">look_room_obj</a> 。</p>
+</dd>
+<dt>passive</dt><dd><p>是否是被动技能，被动技能不能手动施放。</p>
+</dd>
+<dt>cd</dt><dd><p>技能的CD时间，单位为秒。</p>
+</dd>
+</dl>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+<section id="query-skill">
+<h3><span class="section-number">7.4.15. </span>query_skill<a class="headerlink" href="#query-skill" title="永久链接至标题">¶</a></h3>
+<p>查询技能信息。</p>
+<p>命令格式：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;cmd&quot;</span><span class="o">:</span> <span class="s2">&quot;query_skill&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;args&quot;</span><span class="o">:</span> <span class="p">{</span>
+        <span class="s2">&quot;key&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">技能的key</span><span class="o">&gt;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>返回 code=0 表示查询成功，返回 data：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;key&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">技能的key</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">技能的名字</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="s2">&quot;desc&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">技能的描述信息</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="s2">&quot;icon&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">技能的图标</span><span class="o">&gt;</span><span class="p">(</span><span class="nx">可选</span><span class="p">),</span>
+    <span class="s2">&quot;cmds&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">list</span><span class="p">)</span><span class="nx">可对技能使用的命令</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="s2">&quot;passive&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">bool</span><span class="p">)</span><span class="nx">是否是被动技能</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="s2">&quot;cd&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="kr">int</span><span class="p">)</span><span class="nx">技能的CD时间</span><span class="o">&gt;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>格式与 <a class="reference external" href="#all-skills">all_skills</a> 返回列表中单个的任务信息相同，请参见 <a class="reference external" href="#all-skills">all_skills</a> 。</p>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+<section id="cast-skill">
+<h3><span class="section-number">7.4.16. </span>cast_skill<a class="headerlink" href="#cast-skill" title="永久链接至标题">¶</a></h3>
+<p>在非战斗状态下施放技能。</p>
+<p>命令格式：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;cmd&quot;</span><span class="o">:</span> <span class="s2">&quot;cast_skill&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;args&quot;</span><span class="o">:</span><span class="p">{</span>
+        <span class="s2">&quot;skill&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">技能的key</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;target&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="kr">int</span><span class="p">)</span><span class="nx">施放对象</span><span class="o">&gt;</span><span class="p">(</span><span class="nx">可选</span><span class="p">)</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<dl class="simple">
+<dt>skill</dt><dd><p>技能的key</p>
+</dd>
+<dt>target</dt><dd><p>如果对特定对象使用技能，传入施放对象的 id，如果对自己使用技能或者是不需要对象的技能，则不传该参数。</p>
+</dd>
+</dl>
+<p>返回 code=0 表示施放成功，返回 data：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;skill_cd&quot;</span><span class="o">:</span> <span class="p">{</span>      <span class="c1">// 技能CD信息</span>
+        <span class="s2">&quot;skill&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">技能的key</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;cd&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="kr">float</span><span class="p">)</span><span class="nx">技能的CD</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;gcd&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="kr">float</span><span class="p">)</span><span class="nx">公共CD</span><span class="o">&gt;</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;result&quot;</span><span class="o">:</span> <span class="p">{</span>        <span class="c1">// 技能施放结果</span>
+        <span class="s2">&quot;skill&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">技能的key</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;main_type&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">技能的主类型</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;sub_type&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">技能的次类型</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;caller&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="kr">int</span><span class="p">)</span><span class="nx">技能施放者的id</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;target&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="kr">int</span><span class="p">)</span><span class="nx">技能施放目标的id</span><span class="o">&gt;</span><span class="p">(</span><span class="nx">可选</span><span class="p">),</span>
+        <span class="s2">&quot;states&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">dict</span><span class="p">)</span><span class="nx">技能施放后相关对象的状态</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;cast&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">施放技能的文字描述信息</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;result&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">技能施放结果的文字描述信息</span><span class="o">&gt;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<dl>
+<dt>skill</dt><dd><p>技能的唯一标志。</p>
+</dd>
+<dt>cd</dt><dd><p>技能的CD时间，单位为秒。</p>
+</dd>
+<dt>gcd</dt><dd><p>公共CD时间，单位为秒。</p>
+</dd>
+<dt>main_type</dt><dd><p>技能主类型，如攻击、治疗、控制等。</p>
+</dd>
+<dt>main_type</dt><dd><p>技能主类型，如攻击、治疗、控制等，没有则为空。</p>
+</dd>
+<dt>sub_type</dt><dd><p>技能次类型，如攻击、治疗、控制等，没有则为空。</p>
+</dd>
+<dt>caller</dt><dd><p>技能施放者的角色对象id。</p>
+</dd>
+<dt>target</dt><dd><p>技能施放目标的角色对象id，没有则为空。</p>
+</dd>
+<dt>states</dt><dd><p>技能施放后相关对象的状态，格式为：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="o">&lt;</span><span class="nx">角色对象id</span><span class="o">&gt;:</span> <span class="p">{</span>
+        <span class="o">&lt;</span><span class="nx">状态1的名称</span><span class="o">&gt;:</span> <span class="o">&lt;</span><span class="nx">状态1的值</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="o">&lt;</span><span class="nx">状态2的名称</span><span class="o">&gt;:</span> <span class="o">&lt;</span><span class="nx">状态2的值</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="p">...</span>
+    <span class="p">},</span>
+    <span class="p">...</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</dd>
+<dt>cast</dt><dd><p>施放技能的文字描述信息，可以展示给玩家。</p>
+</dd>
+<dt>result</dt><dd><p>技能施放结果的文字描述信息，可以展示给玩家。</p>
+</dd>
+</dl>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+<section id="all-quests">
+<h3><span class="section-number">7.4.17. </span>all_quests<a class="headerlink" href="#all-quests" title="永久链接至标题">¶</a></h3>
+<p>查询玩家当前的所有任务。</p>
+<p>命令格式：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;cmd&quot;</span><span class="o">:</span> <span class="s2">&quot;all_quests&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>返回 code=0 表示查询成功，返回 data：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">[</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;key&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">任务的key</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">任务的名字</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;desc&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">任务的描述信息</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;cmds&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">list</span><span class="p">)</span><span class="nx">可对任务使用的命令</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;icon&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">任务的图标</span><span class="o">&gt;</span><span class="p">(</span><span class="nx">可选</span><span class="p">),</span>
+        <span class="s2">&quot;objectives&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">list</span><span class="p">)</span><span class="o">&gt;</span><span class="nx">任务需要完成的目标</span><span class="o">&gt;</span>
+    <span class="p">},</span>
+    <span class="p">...</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+<dl>
+<dt>key、name、desc、icon、cmds</dt><dd><p>格式与 <a class="reference external" href="#look-room-obj">look_room_obj</a> 返回的物品信息相同，请参见 <a class="reference external" href="#look-room-obj">look_room_obj</a> 。</p>
+</dd>
+<dt>objectives</dt><dd><p>任务需要完成的目标，格式为：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">[</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;target&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">目标达成的方式</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;object&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">目标对象的名字</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;accomplished&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="kr">int</span><span class="p">)</span><span class="nx">已经达成的数量</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;total&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="kr">int</span><span class="p">)</span><span class="nx">总共需要达成的数量</span><span class="o">&gt;</span>
+    <span class="p">},</span>
+    <span class="p">...</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+<section id="query-quest">
+<h3><span class="section-number">7.4.18. </span>query_quest<a class="headerlink" href="#query-quest" title="永久链接至标题">¶</a></h3>
+<p>查询任务信息。</p>
+<p>命令格式：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;cmd&quot;</span><span class="o">:</span> <span class="s2">&quot;query_quest&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;args&quot;</span><span class="o">:</span> <span class="p">{</span>
+        <span class="s2">&quot;key&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">任务的key</span><span class="o">&gt;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>返回 code=0 表示查询成功，返回 data：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;key&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">任务的key</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">任务的名字</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="s2">&quot;desc&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">任务的描述信息</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="s2">&quot;cmds&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">list</span><span class="p">)</span><span class="nx">可对任务使用的命令</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="s2">&quot;icon&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">任务的图标</span><span class="o">&gt;</span><span class="p">(</span><span class="nx">可选</span><span class="p">),</span>
+    <span class="s2">&quot;objectives&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">list</span><span class="p">)</span><span class="o">&gt;</span><span class="nx">任务需要完成的目标</span><span class="o">&gt;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>格式与 <a class="reference external" href="#all-quests">all_quests</a> 返回列表中单个的任务信息相同，请参见 <a class="reference external" href="#all-quests">all_quests</a> 。</p>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+<section id="give-up-quest">
+<h3><span class="section-number">7.4.19. </span>give_up_quest<a class="headerlink" href="#give-up-quest" title="永久链接至标题">¶</a></h3>
+<p>放弃任务。</p>
+<p>命令格式：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;cmd&quot;</span><span class="o">:</span> <span class="s2">&quot;give_up_quest&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;args&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">任务的key</span><span class="o">&gt;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<dl class="simple">
+<dt>args</dt><dd><p>任务的唯一标志。</p>
+</dd>
+</dl>
+<p>返回 code=0 表示放弃成功，返回 data：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;key&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">任务的key</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">任务的名字</span><span class="o">&gt;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<dl class="simple">
+<dt>key</dt><dd><p>任务的唯一标志。</p>
+</dd>
+<dt>name</dt><dd><p>任务显示的名字。</p>
+</dd>
+</dl>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+<section id="talk">
+<h3><span class="section-number">7.4.20. </span>talk<a class="headerlink" href="#talk" title="永久链接至标题">¶</a></h3>
+<p>和NPC对话。</p>
+<p>命令格式：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;cmd&quot;</span><span class="o">:</span> <span class="s2">&quot;talk&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;args&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="kr">int</span><span class="p">)</span><span class="nx">NPC对象的id</span><span class="o">&gt;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<dl class="simple">
+<dt>args</dt><dd><p>对话NPC对象的id，NPC必须和玩家在同一个房间内。</p>
+</dd>
+</dl>
+<p>返回 code=0 表示对话成功，返回 data：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;target&quot;</span><span class="o">:</span> <span class="p">{</span>        <span class="c1">// 对话的对象</span>
+        <span class="s2">&quot;id&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="kr">int</span><span class="p">)</span><span class="nx">对象id</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">显示的名字</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;icon&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">显示的图标</span><span class="o">&gt;</span><span class="p">(</span><span class="nx">可选</span><span class="p">)</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;dialogues&quot;</span><span class="o">:</span> <span class="p">[</span>     <span class="c1">// 对话</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;key&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">对话的key</span><span class="o">&gt;</span><span class="p">,</span>
+            <span class="s2">&quot;content&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">对话的内容</span><span class="o">&gt;</span>
+        <span class="p">},</span>
+        <span class="p">...</span>
+    <span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<dl class="simple">
+<dt>id</dt><dd><p>对话NPC对象的id。</p>
+</dd>
+<dt>name</dt><dd><p>对话NPC对象的名字。</p>
+</dd>
+<dt>icon</dt><dd><p>对话NPC对象的图标信息，如图标的名字、路径，如果没有则为空。</p>
+</dd>
+<dt>key</dt><dd><p>对话的唯一标志。</p>
+</dd>
+<dt>content</dt><dd><p>对话的文本内容。</p>
+</dd>
+</dl>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+<section id="finish-dialogue">
+<h3><span class="section-number">7.4.21. </span>finish_dialogue<a class="headerlink" href="#finish-dialogue" title="永久链接至标题">¶</a></h3>
+<p>完成当前的对话。</p>
+<p>命令格式：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;cmd&quot;</span><span class="o">:</span> <span class="s2">&quot;finish_dialogue&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;args&quot;</span><span class="o">:</span> <span class="p">{</span>
+        <span class="s2">&quot;dialogue&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">对话的key</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;npc&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="kr">int</span><span class="p">)</span><span class="nx">NPC对象的id</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<dl class="simple">
+<dt>dialogue</dt><dd><p>当前正在进行的对话的key。</p>
+</dd>
+<dt>npc</dt><dd><p>当前正在对话的NPC对象的id。</p>
+</dd>
+</dl>
+<p>返回 code=0 表示成功，返回 data：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;dialogue&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">dict</span><span class="p">)</span><span class="nx">后续对话</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="s2">&quot;events&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">list</span><span class="p">)</span><span class="nx">触发的事件</span><span class="o">&gt;</span><span class="p">(</span><span class="nx">可选</span><span class="p">),</span>
+    <span class="s2">&quot;quests&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">list</span><span class="p">)</span><span class="nx">影响的任务</span><span class="o">&gt;</span><span class="p">(</span><span class="nx">可选</span><span class="p">)</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<dl class="simple">
+<dt>dialogue</dt><dd><p>如果结束当前对话后还有后续对话，返回后续的对话内容。格式与 <a class="reference external" href="#talk">talk</a> 返回的信息相同，请参见 <a class="reference external" href="#talk">talk</a> 。</p>
+</dd>
+<dt>events</dt><dd><p>如果玩家的对话触发了事件，会返回相关事件的信息。格式与 <a class="reference external" href="#traverse">traverse</a> 返回的 events 相同，请参见 <a class="reference external" href="#traverse">traverse</a> 。</p>
+</dd>
+<dt>quests</dt><dd><p>如果玩家的对话引起任务目标达成，会返回相关的任务信息。格式与 <a class="reference external" href="#traverse">traverse</a> 返回的 quests 相同，请参见 <a class="reference external" href="#traverse">traverse</a> 。</p>
+</dd>
+</dl>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+<section id="say">
+<h3><span class="section-number">7.4.22. </span>say<a class="headerlink" href="#say" title="永久链接至标题">¶</a></h3>
+<p>对目标说话。</p>
+<p>命令格式：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;cmd&quot;</span><span class="o">:</span> <span class="s2">&quot;say&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;args&quot;</span><span class="o">:</span> <span class="p">{</span>
+        <span class="s2">&quot;type&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">目标类型</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;target&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">any</span><span class="p">)</span><span class="nx">目标的id</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;msg&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">说话的内容</span><span class="o">&gt;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<dl>
+<dt>type</dt><dd><p>目标的类型。</p>
+</dd>
+<dt>target</dt><dd><p>目标的id。</p>
+</dd>
+<dt>msg</dt><dd><p>说话的内容，为一串文本。</p>
+</dd>
+<dt>支持的目标有以下几种：</dt><dd><table class="docutils align-default">
+<colgroup>
+<col style="width: 23%" />
+<col style="width: 38%" />
+<col style="width: 40%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>type</p></th>
+<th class="head"><p>target</p></th>
+<th class="head"></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>PRIVATE</p></td>
+<td><p>(int)玩家角色id</p></td>
+<td><p>向指定的玩家私聊</p></td>
+</tr>
+<tr class="row-odd"><td><p>LOCAL</p></td>
+<td><p>(str)房间的key</p></td>
+<td><p>在当前房间内说话</p></td>
+</tr>
+<tr class="row-even"><td><p>CHANNEL</p></td>
+<td><p>(str)频道的key</p></td>
+<td><p>在指定频道内说话</p></td>
+</tr>
+</tbody>
+</table>
+</dd>
+</dl>
+<p>返回 code=0 表示成功。</p>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+<section id="shopping">
+<h3><span class="section-number">7.4.23. </span>shopping<a class="headerlink" href="#shopping" title="永久链接至标题">¶</a></h3>
+<p>打开商店。</p>
+<p>命令格式：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;cmd&quot;</span><span class="o">:</span> <span class="s2">&quot;shopping&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;args&quot;</span><span class="o">:</span> <span class="p">{</span>
+        <span class="s2">&quot;npc&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="kr">int</span><span class="p">)</span><span class="nx">NPC对象的id</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;shop&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">商店的key</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<dl class="simple">
+<dt>npc</dt><dd><p>NPC对象的id，NPC必须和玩家在同一房间内。</p>
+</dd>
+<dt>shop</dt><dd><p>商店的key，必须是NPC拥有的商店。</p>
+</dd>
+</dl>
+<p>返回 code=0 表示执行成功，返回 data：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;key&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">商店的key</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">商店的名字</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="s2">&quot;level&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="kr">int</span><span class="p">)</span><span class="nx">商店的等级</span><span class="o">&gt;</span><span class="p">(</span><span class="nx">可选</span><span class="p">),</span>
+    <span class="s2">&quot;desc&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">商店的描述信息</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="s2">&quot;icon&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">商店的图标</span><span class="o">&gt;</span><span class="p">(</span><span class="nx">可选</span><span class="p">),</span>
+    <span class="s2">&quot;cmds&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">list</span><span class="p">)</span><span class="nx">可对物品使用的命令</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="s2">&quot;npc&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="kr">int</span><span class="p">)</span><span class="nx">商店所属NPC对象的id</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="s2">&quot;goods&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">list</span><span class="p">)</span><span class="nx">商品列表</span><span class="o">&gt;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<dl>
+<dt>key、name、level、desc、icon、cmds</dt><dd><p>格式与 <a class="reference external" href="#look-room-obj">look_room_obj</a> 返回的物品信息相同，请参见 <a class="reference external" href="#look-room-obj">look_room_obj</a> 。</p>
+</dd>
+<dt>npc</dt><dd><p>商店所属NPC对象的id。</p>
+</dd>
+<dt>goods</dt><dd><p>商店中售卖的商品列表，格式为：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">[</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;index&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="kr">int</span><span class="p">)</span><span class="nx">商品的序号</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;obj&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">商品的key</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;level&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="kr">int</span><span class="p">)</span><span class="nx">商品的等级</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">商品的名字</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;desc&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">商品的描述信息</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;number&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="kr">int</span><span class="p">)</span><span class="nx">商品的数量</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;price&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="kr">int</span><span class="p">)</span><span class="nx">商品的价格</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;unit&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">商品的计价单位</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;icon&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">商品的图标</span><span class="o">&gt;</span><span class="p">(</span><span class="nx">可选</span><span class="p">),</span>
+    <span class="p">},</span>
+    <span class="p">...</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+</dd>
+<dt>index</dt><dd><p>商品的序号。</p>
+</dd>
+<dt>obj</dt><dd><p>商品的唯一标志。</p>
+</dd>
+<dt>level</dt><dd><p>商品的等级。</p>
+</dd>
+<dt>name</dt><dd><p>商品的名字。</p>
+</dd>
+<dt>desc</dt><dd><p>商品的描述信息。</p>
+</dd>
+<dt>number</dt><dd><p>购买一次可以得到的商品数量。</p>
+</dd>
+<dt>price</dt><dd><p>商品的价格。商品是用其他物品计价的，商品的价格即扣除其他物品的数量，购买一个单位的商品就会扣除相应数量的其他物品。</p>
+</dd>
+<dt>unit</dt><dd><p>商品的计价单位。商品是用其他物品计价的，商品的计价单位即其他物品，购买一个单位的商品就会扣除相应数量的其他物品。</p>
+</dd>
+<dt>icon</dt><dd><p>商品的图标信息，如图标的名字、路径，如果没有则为空。</p>
+</dd>
+</dl>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+<section id="buy">
+<h3><span class="section-number">7.4.24. </span>buy<a class="headerlink" href="#buy" title="永久链接至标题">¶</a></h3>
+<p>从商店购买商品。</p>
+<p>命令格式：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;cmd&quot;</span><span class="o">:</span> <span class="s2">&quot;buy&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;args&quot;</span><span class="o">:</span> <span class="p">{</span>
+        <span class="s2">&quot;npc&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="kr">int</span><span class="p">)</span><span class="nx">NPC对象的id</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;shop&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">商店的key</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;goods&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="kr">int</span><span class="p">)</span><span class="nx">商品的序号</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<dl class="simple">
+<dt>npc</dt><dd><p>NPC对象的id，NPC必须和玩家在同一房间内。</p>
+</dd>
+<dt>shop</dt><dd><p>商店的key，必须是NPC拥有的商店。</p>
+</dd>
+<dt>goods</dt><dd><p>商品的序号，即 <a class="reference external" href="#shopping">shopping</a> 命令返回的商品序号。</p>
+</dd>
+</dl>
+<p>返回 code=0 表示购买成功，返回 data：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;use&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">list</span><span class="p">)</span><span class="nx">使用的物品</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="s2">&quot;get&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">list</span><span class="p">)</span><span class="nx">收到的物品</span><span class="o">&gt;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<dl>
+<dt>use</dt><dd><p>购买商品所使用的物品列表，格式为：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">[</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;object&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">使用物品的key</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;number&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="kr">int</span><span class="p">)</span><span class="nx">使用物品的数量</span><span class="o">&gt;</span>
+    <span class="p">},</span>
+    <span class="p">...</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+</dd>
+<dt>get</dt><dd><p>购买的到的商品列表，格式与 <a class="reference external" href="#loot">loot</a> 返回的数据相同，请参见 <a class="reference external" href="#loot">loot</a> 。</p>
+</dd>
+</dl>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+<section id="get-revealed-maps">
+<h3><span class="section-number">7.4.25. </span>get_revealed_maps<a class="headerlink" href="#get-revealed-maps" title="永久链接至标题">¶</a></h3>
+<p>查询玩家已开启的地图。</p>
+<p>命令格式：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;cmd&quot;</span><span class="o">:</span> <span class="s2">&quot;get_revealed_maps&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>返回 code=0 表示查询成功，返回 data：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">地图区域1的key</span><span class="o">&gt;:</span> <span class="kc">true</span><span class="p">,</span>
+    <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">地图区域2的key</span><span class="o">&gt;:</span> <span class="kc">true</span><span class="p">,</span>
+    <span class="p">...</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>格式与 <a class="reference external" href="#puppet">puppet</a> 返回的 revealed_maps 相同，可参见 <a class="reference external" href="#puppet">puppet</a> 。</p>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+</section>
+<section id="id55">
+<h2><span class="section-number">7.5. </span>战斗命令<a class="headerlink" href="#id55" title="永久链接至标题">¶</a></h2>
+<p>和战斗相关的命令。</p>
+<section id="attack">
+<h3><span class="section-number">7.5.1. </span>attack<a class="headerlink" href="#attack" title="永久链接至标题">¶</a></h3>
+<p>攻击某个角色。</p>
+<p>命令格式：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;cmd&quot;</span><span class="o">:</span> <span class="s2">&quot;attack&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;args&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="kr">int</span><span class="p">)</span><span class="nx">角色对象的id</span><span class="o">&gt;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<dl class="simple">
+<dt>args:</dt><dd><p>角色对象的id。</p>
+</dd>
+</dl>
+<p>返回 code=0 表示攻击成功，返回 data：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;from&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">攻击发起者的名字</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="s2">&quot;target&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">被攻击者的名字</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="s2">&quot;combat_info&quot;</span><span class="o">:</span> <span class="p">{</span>       <span class="c1">// 战斗的基本信息</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;desc&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">战斗的描述信息</span><span class="o">&gt;</span><span class="p">,</span>
+            <span class="s2">&quot;timeout&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="kr">int</span><span class="p">)</span><span class="nx">战斗的最长时间</span><span class="o">&gt;</span><span class="p">,</span>
+            <span class="s2">&quot;characters&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">list</span><span class="p">)</span><span class="nx">参与战斗的所有角色</span><span class="o">&gt;</span>
+        <span class="p">}</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;combat_commands&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">list</span><span class="p">)</span><span class="nx">该角色可在战斗中使用的技能</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="s2">&quot;combat_states&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">dict</span><span class="p">)</span><span class="nx">战斗相关所有角色的状态</span><span class="o">&gt;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<dl>
+<dt>from</dt><dd><p>发起攻击的角色的名字。</p>
+</dd>
+<dt>target</dt><dd><p>被攻击的角色的名字。</p>
+</dd>
+<dt>desc</dt><dd><p>战斗的描述信息。</p>
+</dd>
+<dt>timeout</dt><dd><p>战斗的最长时间，单位为秒。如果设定了最长时间，到时间结束还未分出胜负，战斗会强制结束并判为平局。如果没有时间或时间为0，表示没有最长战斗时间的限制。</p>
+</dd>
+<dt>characters</dt><dd><p>参与战斗的所有角色，格式为：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">[</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;id&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="kr">int</span><span class="p">)</span><span class="nx">对象id</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;key&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">对象的key</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">对象的名称</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;desc&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">角色的描述信息</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;icon&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">角色的图标</span><span class="o">&gt;</span><span class="p">(</span><span class="nx">可选</span><span class="p">),</span>
+        <span class="s2">&quot;team&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="kr">int</span><span class="p">)</span><span class="nx">对象所属队伍的id</span><span class="o">&gt;</span>
+    <span class="p">},</span>
+    <span class="p">...</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+<dl class="simple">
+<dt>id</dt><dd><p>角色对象的id。</p>
+</dd>
+<dt>key</dt><dd><p>物品的标志，同类物品据有相同的key。</p>
+</dd>
+<dt>name</dt><dd><p>物品的名字。</p>
+</dd>
+<dt>level</dt><dd><p>物品的等级，如果为空表示该物品没有等级变化。</p>
+</dd>
+<dt>desc</dt><dd><p>物品的描述信息。</p>
+</dd>
+<dt>icon</dt><dd><p>物品的图标信息，如图标的名字、路径，如果没有则为空。</p>
+</dd>
+<dt>team</dt><dd><p>角色对象所属的队伍编号，队伍编号相同的角色属于同一支队伍。</p>
+</dd>
+</dl>
+</dd>
+<dt>combat_commands</dt><dd><p>玩家角色在战斗中可以使用的技能信息。格式为：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">[</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;key&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">技能的key</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">技能的名称</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;cd&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="kr">int</span><span class="p">)</span><span class="nx">技能的CD时间</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;icon&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">技能的图标</span><span class="o">&gt;</span><span class="p">(</span><span class="nx">可选</span><span class="p">)</span>
+    <span class="p">},</span>
+    <span class="p">...</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+</dd>
+<dt>combat_states</dt><dd><p>战斗中所有相关角色的状态信息。格式为：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="o">&lt;</span><span class="p">(</span><span class="kr">int</span><span class="p">)</span><span class="nx">对象id</span><span class="o">&gt;:</span> <span class="p">{</span>
+        <span class="s2">&quot;id&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="kr">int</span><span class="p">)</span><span class="nx">对象id</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="o">&lt;</span><span class="nx">属性1的key</span><span class="o">&gt;:</span> <span class="o">&lt;</span><span class="nx">属性1的值</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="o">&lt;</span><span class="nx">属性2的key</span><span class="o">&gt;:</span> <span class="o">&lt;</span><span class="nx">属性2的值</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="p">...</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+<section id="cast-combat-skill">
+<h3><span class="section-number">7.5.2. </span>cast_combat_skill<a class="headerlink" href="#cast-combat-skill" title="永久链接至标题">¶</a></h3>
+<p>在战斗状态下施放技能。</p>
+<p>命令格式：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;cmd&quot;</span><span class="o">:</span> <span class="s2">&quot;cast_combat_skill&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;args&quot;</span><span class="o">:</span> <span class="p">{</span>
+        <span class="s2">&quot;skill&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">技能的key</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;target&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="kr">int</span><span class="p">)</span><span class="nx">施放对象</span><span class="o">&gt;</span><span class="p">(</span><span class="nx">可选</span><span class="p">)</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<dl class="simple">
+<dt>skill</dt><dd><p>技能的key</p>
+</dd>
+<dt>target</dt><dd><p>如果对特定对象使用技能，传入施放对象的 id，如果对自己使用技能或者是不需要对象的技能，则不传该参数。</p>
+</dd>
+</dl>
+<p>返回 code=0 表示施放成功。考虑到战斗的平衡性及网络延迟，技能的施放结果通过专门的 combat_skill_cast 消息发送给所有的战斗相关方。
+该命令只在 data 中返回技能CD的信息：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;skill_cd&quot;</span><span class="o">:</span> <span class="p">{</span>      <span class="c1">// 技能CD信息</span>
+        <span class="s2">&quot;skill&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">技能的key</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;cd&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="kr">float</span><span class="p">)</span><span class="nx">技能的CD</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;gcd&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="kr">float</span><span class="p">)</span><span class="nx">公共CD</span><span class="o">&gt;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<dl class="simple">
+<dt>skill</dt><dd><p>技能的唯一标志。</p>
+</dd>
+<dt>cd</dt><dd><p>技能的CD时间，单位为秒。</p>
+</dd>
+<dt>gcd</dt><dd><p>公共CD时间，单位为秒。</p>
+</dd>
+</dl>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+<section id="leave-combat">
+<h3><span class="section-number">7.5.3. </span>leave_combat<a class="headerlink" href="#leave-combat" title="永久链接至标题">¶</a></h3>
+<p>当玩家角色处于战斗状态时，脱离战斗状态。</p>
+<p>命令格式：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;cmd&quot;</span><span class="o">:</span> <span class="s2">&quot;leave_combat&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>返回 code=0 表示脱离成功，返回 data：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;state&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">dict</span><span class="p">)</span><span class="nx">角色状态</span><span class="o">&gt;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<dl>
+<dt>state</dt><dd><p>脱离战斗后的角色状态，格式为：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="o">&lt;</span><span class="nx">状态1的名称</span><span class="o">&gt;:</span> <span class="o">&lt;</span><span class="nx">状态1的值</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="o">&lt;</span><span class="nx">状态2的名称</span><span class="o">&gt;:</span> <span class="o">&lt;</span><span class="nx">状态2的值</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="p">...</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>格式与 <a class="reference external" href="#puppet">puppet</a> 返回的 state 相同，请参见 <a class="reference external" href="#puppet">puppet</a> 。</p>
+</dd>
+</dl>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+<section id="query-rankings">
+<h3><span class="section-number">7.5.4. </span>query_rankings<a class="headerlink" href="#query-rankings" title="永久链接至标题">¶</a></h3>
+<p>查询荣誉战斗排名，默认会返回排名最高的玩家以及和自己排名相近的玩家的情况。可以在游戏编辑器中设置返回玩家的数量。</p>
+<p>命令格式：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;cmd&quot;</span><span class="o">:</span> <span class="s2">&quot;query_rankings&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>返回 code=0 表示查询成功，返回 data：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">[</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="nx">玩家角色的名字</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;id&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="kr">int</span><span class="p">)</span><span class="nx">玩家角色的id</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;ranking&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="kr">int</span><span class="p">)</span><span class="nx">玩家角色的排名</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;honour&quot;</span><span class="o">:</span> <span class="o">&lt;</span><span class="p">(</span><span class="kr">int</span><span class="p">)</span><span class="nx">玩家角色的荣誉值</span><span class="o">&gt;</span>
+    <span class="p">},</span>
+    <span class="p">...</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+<dl class="simple">
+<dt>name</dt><dd><p>玩家角色显示的名字。</p>
+</dd>
+<dt>id</dt><dd><p>玩家角色的id</p>
+</dd>
+<dt>ranking</dt><dd><p>玩家角色的排名。</p>
+</dd>
+<dt>honour</dt><dd><p>玩家角色的荣誉值。</p>
+</dd>
+</dl>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+<section id="queue-up-combat">
+<h3><span class="section-number">7.5.5. </span>queue_up_combat<a class="headerlink" href="#queue-up-combat" title="永久链接至标题">¶</a></h3>
+<p>排队参加荣誉战斗，匹配对手。</p>
+<p>命令格式：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;cmd&quot;</span><span class="o">:</span> <span class="s2">&quot;queue_up_combat&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>返回 code=0 表示加入排队。</p>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+<section id="quit-combat-queue">
+<h3><span class="section-number">7.5.6. </span>quit_combat_queue<a class="headerlink" href="#quit-combat-queue" title="永久链接至标题">¶</a></h3>
+<p>取消参加荣誉战斗的排队，当玩家角色已进入排队并且没有匹配到对手时可以取消排队。</p>
+<p>命令格式：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;cmd&quot;</span><span class="o">:</span> <span class="s2">&quot;quit_combat_queue&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>返回 code=0 表示取消成功。</p>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+<section id="confirm-combat">
+<h3><span class="section-number">7.5.7. </span>confirm_combat<a class="headerlink" href="#confirm-combat" title="永久链接至标题">¶</a></h3>
+<p>荣誉战斗匹配到对手后，确认加入战斗。</p>
+<p>命令格式：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;cmd&quot;</span><span class="o">:</span> <span class="s2">&quot;confirm_combat&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>返回 code=0 表示确认成功。</p>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+<section id="reject-combat">
+<h3><span class="section-number">7.5.8. </span>reject_combat<a class="headerlink" href="#reject-combat" title="永久链接至标题">¶</a></h3>
+<p>荣誉战斗匹配到对手后，拒绝加入战斗。</p>
+<p>命令格式：</p>
+<div class="highlight-Javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;cmd&quot;</span><span class="o">:</span> <span class="s2">&quot;reject_combat&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>返回 code=0 表示拒绝成功。</p>
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">Muddery</a></h1>
+
+
+
+
+
+
+
+
+<h3>导航</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html">1. 系统简介</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting_started.html">2. 安装启动</a></li>
+<li class="toctree-l1"><a class="reference internal" href="upgrade_system.html">3. 系统更新</a></li>
+<li class="toctree-l1"><a class="reference internal" href="command_line.html">4. 命令行操作</a></li>
+<li class="toctree-l1"><a class="reference internal" href="server_structure.html">5. 系统架构</a></li>
+<li class="toctree-l1"><a class="reference internal" href="world_framework.html">6. 游戏世界架构</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">7. 客户端命令</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#id2">7.1. 消息格式</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id3">7.2. 未登录命令</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id4">7.3. 账号命令</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id11">7.4. 角色命令</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id55">7.5. 战斗命令</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="server_msg.html">8. 服务端消息</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">9. 演示游戏</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../update_log.html">10. 更新日志</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="world_framework.html" title="上一章"><span class="section-number">6. </span>游戏世界架构</a></li>
+      <li>Next: <a href="server_msg.html" title="下一章"><span class="section-number">8. </span>服务端消息</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">快速搜索</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="转向" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, Lu Yijun.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.4.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

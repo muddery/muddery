@@ -1,0 +1,330 @@
+
+<!DOCTYPE html>
+
+<html lang="zh_CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>2. 安装启动 &#8212; Muddery 0.8.0 文档</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/style.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/translations.js"></script>
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="搜索" href="../search.html" />
+    <link rel="next" title="3. 系统更新" href="upgrade_system.html" />
+    <link rel="prev" title="1. 系统简介" href="../introduction.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="id1">
+<h1><span class="section-number">2. </span>安装启动<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h1>
+<p>这篇文章将教你如何从头开始下载、安装、启动 Muddery。</p>
+<section id="id2">
+<h2><span class="section-number">2.1. </span>快速安装<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
+<p>以下是安装、运行 Muddery 的主要步骤：</p>
+<ol class="arabic simple">
+<li><p>下载并安装 Python3.9 和 GIT，打开终端</p></li>
+<li><p>cd 进入你的开发目录</p></li>
+<li><p>git clone <a class="reference external" href="https://github.com/muddery/muddery">https://github.com/muddery/muddery</a></p></li>
+</ol>
+<blockquote>
+<div><div class="line-block">
+<div class="line">国内连接 github 较慢可以从 gitee 同步代码：</div>
+<div class="line">git clone <a class="reference external" href="https://gitee.com/muddery/muddery">https://gitee.com/muddery/muddery</a></div>
+</div>
+</div></blockquote>
+<ol class="arabic simple" start="4">
+<li><p>python -m venv env （如果机器上同时存在 Python2 和 Python3，请使用 python3 安装虚拟环境）</p></li>
+<li><p>source env/bin/activate （Linux, Mac） 或 env\Scripts\activate （Windows）</p></li>
+<li><p>pip install -e muddery</p></li>
+<li><p>muddery init mygame</p></li>
+<li><p>cd mygame</p></li>
+<li><p>muddery setup</p></li>
+<li><p>muddery start</p></li>
+</ol>
+<p>Muddery 现在应该正常运行了，你可以通过网页浏览器打开游戏主页： <a class="reference external" href="http://localhost:8000">http://localhost:8000</a></p>
+<p>在网页浏览器中还可以打开游戏编辑器： <a class="reference external" href="http://localhost:8002">http://localhost:8002</a></p>
+<p>详细的安装步骤参见下文。</p>
+</section>
+<section id="id3">
+<h2><span class="section-number">2.2. </span>详细步骤<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h2>
+<section id="id4">
+<h3><span class="section-number">2.2.1. </span>一、所需软件<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h3>
+<section id="id5">
+<h4><span class="section-number">2.2.1.1. </span>操作系统<a class="headerlink" href="#id5" title="永久链接至标题">¶</a></h4>
+<p>不论什么操作系统，只要能支持 Python 就行。</p>
+<ul class="simple">
+<li><p>Linux/Unix</p></li>
+<li><p>Windows (Win7, Win8, Win10, Win11等)</p></li>
+<li><p>Mac OSX (建议&gt;=10.5)</p></li>
+</ul>
+</section>
+<section id="id6">
+<h4><span class="section-number">2.2.1.2. </span>软件工具<a class="headerlink" href="#id6" title="永久链接至标题">¶</a></h4>
+<ul class="simple">
+<li><p>安装 Python 3.8.10 或以上版本。（下载地址： <a class="reference external" href="http://www.python.org">http://www.python.org</a> ）</p></li>
+<li><p>安装 Git 可用来获取、更新 Muddery。（下载地址： <a class="reference external" href="http://git-scm.com">http://git-scm.com</a> ）</p></li>
+</ul>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+</section>
+<section id="id7">
+<h3><span class="section-number">2.2.2. </span>二、安装系统<a class="headerlink" href="#id7" title="永久链接至标题">¶</a></h3>
+<section id="windows">
+<h4><span class="section-number">2.2.2.1. </span>Windows 环境<a class="headerlink" href="#windows" title="永久链接至标题">¶</a></h4>
+<p>Windows 用户首先需要知道 Muddery 服务器是在命令行中运行的。在 Windows 开始菜单中找到 <code class="docutils literal notranslate"><span class="pre">所有程序</span> <span class="pre">&gt;</span> <span class="pre">附件</span> <span class="pre">&gt;</span> <span class="pre">命令提示符</span></code> （Win7）或 <code class="docutils literal notranslate"><span class="pre">所有应用</span> <span class="pre">&gt;</span> <span class="pre">Windows系统</span> <span class="pre">&gt;</span> <span class="pre">命令提示符</span></code> （Win10）并运行，你就可以见到 Windows 的命令行界面了。</p>
+<p>从Python 官网 <a class="reference external" href="https://www.python.org/downloads/windows/">https://www.python.org/downloads/windows/</a> 下载最新的 Python 安装包（高于 3.8.10版）。你需要 Windows 的管理员权限来安装它。安装时要注意勾选所有的安装选项，特别是把 Python 添加到 path 中的那一项（这可以让你在任何终端窗口中使用 Python，而不需要找到 Python 程序在你硬盘上的实际安装位置）。</p>
+<p>你还需要下载并安装 GIT。你可以使用默认的安装选项，但当你被问及 “Adjust your PATH environment” 时，你需要选择第二个选项 “Use Git from the Windows Command Prompt”，这样使用程序的地点可以更加灵活。</p>
+<p>如果之后你在安装 Muddery 时还有问题，你可能需要安装 pypiwin32 （ <a class="reference external" href="https://pypi.python.org/pypi/pypiwin32">https://pypi.python.org/pypi/pypiwin32</a> ），没遇到问题就不要装了。</p>
+<p>相关软件都安装完毕后，打开命令行程序，cd 进入你想要放置 Python 开发环境的文件夹。</p>
+<p>然后下载 muddery 的代码：</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>git clone https://github.com/muddery/muddery.git
+</pre></div>
+</div>
+<p>国内连接 github 较慢可以从 gitee 同步代码：</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>git clone https://gitee.com/muddery/muddery.git
+</pre></div>
+</div>
+<p>这会创建一个名为 muddery 的文件夹，Muddery 的源码都在这个文件夹中。</p>
+<p>接下来安装虚拟环境，先执行 <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">--version</span></code> 查看 Python 的版本，如果显示的不是 Python3.8.10 或以上版本，请使用其他的 python 解释器，如 python3 或 python3.8。使用 3.8 版本的 Python 解释器安装虚拟环境：</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>python -m venv env
+或
+python3 -m venv env
+或
+python3.8 -m venv env
+</pre></div>
+</div>
+<p>安装完成后会在当前目录中生成一个新的目录 env。激活虚拟环境：</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>env\Scripts\activate
+</pre></div>
+</div>
+<p>如果命令提示符变成 <code class="docutils literal notranslate"><span class="pre">（env）</span></code> ,说明虚拟环境已经激活了（之后如果需要的话，你还可以使用 deactivate 命令来关闭它）。只有激活了虚拟环境，我们才能正常使用 Muddery，每次打开新的命令行程序都需要激活一下。</p>
+<p>现在我们可以安装 Muddery 了：</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>pip install -e muddery
+</pre></div>
+</div>
+<p>-e 表示通以链接的方式安装 Muddery，这样你每次通过 GIT 更新 Muddery 的代码，软件包也会立即更新。</p>
+<p>Muddery 以及它所依赖的软件现在都安装好了。</p>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+<section id="linux">
+<h4><span class="section-number">2.2.2.2. </span>Linux 环境<a class="headerlink" href="#linux" title="永久链接至标题">¶</a></h4>
+<p>首先安装 Python3。</p>
+<p>以 Ubuntu 20.04 为例：</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>sudo apt-get update
+sudo apt-get install python3.8 python3.8-dev python3-setuptools python3.8-venv gcc
+</pre></div>
+</div>
+<p>然后创建一个文件夹用来做开发：</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>mkdir muddev
+cd muddev
+</pre></div>
+</div>
+<p>下载 muddery 的代码：</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>git clone https://github.com/muddery/muddery.git
+</pre></div>
+</div>
+<p>国内连接 github 较慢可以从 gitee 同步代码：</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>git clone https://gitee.com/muddery/muddery.git
+</pre></div>
+</div>
+<p>这会创建一个名为 muddery 的文件夹，Muddery 的源码都在这个文件夹中。</p>
+<p>接下来安装虚拟环境，先执行 python –version 查看 Python 的版本，如果显示的不是 Python3.8 版本，请使用其他的 python 解释器，如 python3 或 python3.8。使用 3.8 版本的 Python 解释器安装虚拟环境：</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>python -m venv env
+或
+python3 -m venv env
+或
+python3.8 -m venv env
+</pre></div>
+</div>
+<p>安装完成后会在当前目录中生成一个新的目录 env。激活虚拟环境：</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>source env/bin/activate
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">env</span></code> 的字样会出现在命令提示符边上，表示虚拟环境已经激活了（我们可以使用 deactivate 命令来关闭它）。只有激活了虚拟环境才能正常使用 Muddery。</p>
+<p>现在可以安装 Muddery 了：</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>pip install -e muddery
+</pre></div>
+</div>
+<p>-e 表示通以链接的方式安装 Muddery，这样你每次通过 GIT 更新 Muddery 的代码，软件包也会立即更新。</p>
+<p>Muddery 以及它所依赖的软件现在都安装好了。</p>
+<p>如果在安装中遇到报错说某些软件包太老了，或缺少某些软件包，可以用 <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">-m</span> <span class="pre">pip</span> <span class="pre">install</span> <span class="pre">--upgrade</span> <span class="pre">pip</span></code> 更新你的环境。然后再执行 <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">-e</span> <span class="pre">muddery</span></code> 。</p>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+<section id="macosx">
+<h4><span class="section-number">2.2.2.3. </span>MacOSX 环境<a class="headerlink" href="#macosx" title="永久链接至标题">¶</a></h4>
+<p>MacOSX 已经预装了 Python，但版本可能过低。Muddery 至少需要 Python 3.8.10 版，可以到Python 官网 <a class="reference external" href="https://www.python.org/downloads/mac-osx/">https://www.python.org/downloads/mac-osx/</a> 下载最新的 Python 安装包（高于 3.8.10版）。</p>
+<p>安装好 Python3.8.10 和 GIT 之后，可按上文 Linux 的方式继续获取 Muddery 源码、安装虚拟环境、安装 Muddery。</p>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+</section>
+<section id="id8">
+<h3><span class="section-number">2.2.3. </span>三、设置游戏<a class="headerlink" href="#id8" title="永久链接至标题">¶</a></h3>
+<p>现在你已经安装好 Muddery 了，只要激活了 Muddery 的虚拟环境，你就可以使用 muddery 命令。现在创建你的游戏的文件夹，你可以将游戏命令为任何你喜欢的名字，在这里我们把它起名为“mygame”。</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>muddery init mygame
+</pre></div>
+</div>
+<p>一个新的 mygame 文件夹会创建出来，你还会看到一些信息文字。mygame 文件夹是一个游戏框架，你可以在这里创建所有与游戏相关东西。</p>
+<p>你的服务器的配置文件为 <code class="docutils literal notranslate"><span class="pre">mygame/server/settings.py</span></code> 。如果你想要自定义Muddery的基本设置，你可以现在就修改。如果你不确定该怎么做，你不用修改任何东西，Muddery 会使用最佳的默认设置。</p>
+<p>如果你要安装中文环境，请执行以下命令创建游戏文件夹：</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>muddery init mygame example_cn
+</pre></div>
+</div>
+<p>这会安装一个很简单的中文游戏示例。命令中的 <code class="docutils literal notranslate"><span class="pre">example_cn</span></code> 是游戏示例模板的名字，本网站的演示游戏 <a class="reference external" href="http://muddery.org/games/example_cn/index.html">http://muddery.org/games/example_cn/index.html</a>” 就是使用这个模板创建的。</p>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+<section id="id9">
+<h3><span class="section-number">2.2.4. </span>四、启动和停止服务器<a class="headerlink" href="#id9" title="永久链接至标题">¶</a></h3>
+<p>要启动服务器，你需要进入 mygame 目录。</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>cd mygame
+</pre></div>
+</div>
+<p>然后执行：</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>muddery setup
+</pre></div>
+</div>
+<p>系统会自动配置数据库和游戏内容，还会让你设置游戏编辑器的用户名和密码。</p>
+<p>然后执行：</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>muddery start
+</pre></div>
+</div>
+<p>游戏服务器将会启动，之后就开始正常运行了。</p>
+<p>要停止Muddery运行，请输入：</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>muddery stop
+</pre></div>
+</div>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<p>启动游戏服务器时，会启动3个独立的服务：游戏后台、游戏网页客户端和游戏编辑器，每个服务都可以单独启动和终止。要单独启停这些服务，可以在游戏根目录中执行以下命令：</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>muddery start -s 或 muddery start --server 启动游戏后台
+muddery start -c 或 muddery start --client 启动游戏网页客户端
+muddery start -e 或 muddery start --editor 启动游戏编辑器
+</pre></div>
+</div>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>muddery stop -s 或 muddery stop --server 关闭游戏后台
+muddery stop -c 或 muddery stop --client 关闭游戏网页客户端
+muddery stop -e 或 muddery stop --editor 关闭游戏编辑器
+</pre></div>
+</div>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+<section id="id10">
+<h3><span class="section-number">2.2.5. </span>五、连接到服务器<a class="headerlink" href="#id10" title="永久链接至标题">¶</a></h3>
+<p>Muddery 服务器现在运行起来了。如果没有改过默认配置，Muddery 会在端口 8000 上启动一个 web 服务器。在浏览器上打开页面  <a class="reference external" href="http://localhost:8000">http://localhost:8000</a> ，你就可以连接到游戏的网页客户端进行游戏。</p>
+<p>在浏览器上打开页面  <a class="reference external" href="http://localhost:8002">http://localhost:8002</a> ，可以连接到游戏的编辑器，你可以自己编辑、修改游戏的内容。编辑器的用户名和密码就是在执行 <code class="docutils literal notranslate"><span class="pre">muddery</span> <span class="pre">setup</span></code> 时设置的用户名和密码。</p>
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">Muddery</a></h1>
+
+
+
+
+
+
+
+
+<h3>导航</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html">1. 系统简介</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">2. 安装启动</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#id2">2.1. 快速安装</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id3">2.2. 详细步骤</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="upgrade_system.html">3. 系统更新</a></li>
+<li class="toctree-l1"><a class="reference internal" href="command_line.html">4. 命令行操作</a></li>
+<li class="toctree-l1"><a class="reference internal" href="server_structure.html">5. 系统架构</a></li>
+<li class="toctree-l1"><a class="reference internal" href="world_framework.html">6. 游戏世界架构</a></li>
+<li class="toctree-l1"><a class="reference internal" href="client_commands.html">7. 客户端命令</a></li>
+<li class="toctree-l1"><a class="reference internal" href="server_msg.html">8. 服务端消息</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">9. 演示游戏</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../update_log.html">10. 更新日志</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="../introduction.html" title="上一章"><span class="section-number">1. </span>系统简介</a></li>
+      <li>Next: <a href="upgrade_system.html" title="下一章"><span class="section-number">3. </span>系统更新</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">快速搜索</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="转向" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, Lu Yijun.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.4.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>
